@@ -1,7 +1,17 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import icon from '../../resources/starburger.png?asset'
+import icon from '../../resources/icon.png?asset'
+import { handlers } from './charter'
+
+function window_max(win: BrowserWindow) {
+  if (win.isMaximized()) {
+    win.restore()
+  } else {
+    win.maximize()
+  }
+  win.webContents.send('window-max-state', win.isMaximized())
+}
 
 function listen(win: BrowserWindow) {
   ipcMain.on('window-close', () => {
@@ -12,12 +22,9 @@ function listen(win: BrowserWindow) {
     win.minimize()
   })
 
-  ipcMain.on('window-max', () => {
-    if (win.isMaximized()) {
-      win.restore()
-    } else {
-      win.maximize()
-    }
+  ipcMain.on('window-max', () => window_max(win))
+  win.on('resize', () => {
+    win.webContents.send('window-max-state', win.isMaximized())
   })
 }
 
@@ -29,9 +36,12 @@ function createWindow(): void {
     show: false,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
+      sandbox: false,
       preload: join(__dirname, '../preload/index.js'),
+      devTools: false
     },
-    frame: true
+    frame: false,
+    icon: icon
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -52,6 +62,9 @@ function createWindow(): void {
   }
 
   listen(mainWindow)
+  handlers()
+  globalShortcut.register('F11', () => window_max(mainWindow))
+  // mainWindow.webContents.openDevTools({ mode: 'right' })
 }
 
 // This method will be called when Electron has finished
@@ -59,7 +72,7 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.electron.vs.charter')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

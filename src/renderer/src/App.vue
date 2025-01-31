@@ -1,31 +1,40 @@
 <script lang="ts" setup>
 import Header from '@renderer/components/header.vue'
-import Charter from "@renderer/components/charter/charter.vue";
-import ui from "@renderer/core/ui";
-const {state} = ui
+import Charter from '@renderer/components/charter/charter.vue'
+import PopupModal from '@renderer/components/modals/popupModal.vue'
+import ui from '@renderer/core/ui'
+import StartUp from '@renderer/components/startUp.vue'
+
+const state = ui.state
 </script>
 
 <template>
-  <Header/>
-  <Charter v-if="state == 'charting'" />
-  <div id="n-c" class="notify-container"/>
-
+  <Header />
+  <StartUp v-if="state == 'startUp'" />
+  <Charter v-if="state == 'charting'"/>
+  <popup-modal />
+  <div id="n-c" class="notify-container" />
 </template>
 
-<style scoped>
-.notify-container {
+<style>
+* {
+  outline: none;
+}
+#n-c {
   position: absolute;
-  margin: 10px;
-  background: #fff;
-  z-index: 2;
-  height: 20px;
-  right: 0;
+  right: 5px;
   top: var(--height-header);
+  z-index: 114514;
+  align-items: end;
+  margin-top: 10px;
 }
 
 .notify-container > div {
   max-width: 350px;
-  padding: 0 5px;
+  padding: 0 15px;
+  line-height: 2em;
+  font-size: 1.2rem;
+  margin: 5px 0;
 }
 
 .notify-box {
@@ -34,7 +43,6 @@ const {state} = ui
   padding: 0.5rem 1.5rem;
   animation-fill-mode: both;
   border: 2px solid;
-
 }
 
 .notify-normal {
@@ -57,21 +65,20 @@ const {state} = ui
 
 .notify-a-enter {
   animation: notify-enter 0.3s ease-in;
-
 }
 
 @keyframes notify-enter {
   0% {
-    transform: translateX(125%)
+    transform: translateX(125%);
   }
   50% {
-    transform: translateX(2rem)
+    transform: translateX(2rem);
   }
   75% {
-    transform: translateX(-1rem)
+    transform: translateX(-1rem);
   }
   100% {
-    transform: translateX(0)
+    transform: translateX(0);
   }
 }
 
@@ -81,13 +88,13 @@ const {state} = ui
 
 @keyframes notify-leave {
   0% {
-    transform: translateX(0)
+    transform: translateX(0);
   }
   50% {
-    transform: translateX(-1rem)
+    transform: translateX(-1rem);
   }
   75% {
-    transform: translateX(2rem)
+    transform: translateX(2rem);
   }
   100% {
     transform: translateX(125%);
@@ -96,8 +103,9 @@ const {state} = ui
 </style>
 
 <style>
-:root, body {
-  background-image: linear-gradient(220.55deg, #34495d 0%, #0E2C5E 100%);
+:root,
+body {
+  background-image: linear-gradient(220.55deg, #34495d 0%, #0e2c5e 100%);
   margin: 0;
   display: flex;
   place-items: center;
@@ -106,11 +114,12 @@ const {state} = ui
   width: 100vw;
   overflow: hidden;
   --common-bgi: linear-gradient(60deg, #0d1418 0%, #11161b 100%);
-  --height-header: 3rem
+  --height-header: 2.5rem;
+  --grey: #3b4652
 }
 
 * {
-  color: #b8dcee
+  color: #b8dcee;
 }
 
 #app {

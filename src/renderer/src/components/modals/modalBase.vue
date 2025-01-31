@@ -42,9 +42,10 @@ onUnmounted(() => {
 <style scoped>
 .modal-wrapper {
   position: absolute;
-  min-width: 15vw;
+  min-width: 35vw;
   max-width: 60vw;
   max-height: 80vh;
+  min-height: 25vh;
   transform: translateY(-50px);
   background-image: var(--common-bgi);
   border: 2px #b8dcee solid;

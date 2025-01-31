@@ -1,26 +1,11 @@
-import { ref, type Ref } from 'vue'
-import { join, dirname, basename } from 'path-browserify'
-import { existsSync, readFileSync, writeFileSync } from 'fs'
-import { BrowserWindow, ipcMain } from 'electron'
-import fs from 'fs'
-import { ChartType, OpenChartReturn } from '../preload/chartType'
-import {dialog} from "electron"
+import { dirname, join } from 'path'
+import fs, { existsSync, readFileSync } from 'fs'
+import { dialog, ipcMain } from 'electron'
+import { ChartType, HandlerReturn } from '../preload/types'
+import { basename } from 'node:path'
+import VsbParser from './vsbParser'
 
-function toSaveData(data: ChartType.ChartData) {
-  return {
-    diffs: data.diffs,
-    save_time: Date.now()
-  }
-}
-
-function new_diff(): { name: string; notes: ChartType.notes_data } {
-  return {
-    name: 'Finale',
-    notes: [[0, 0, 3, 0]]
-  }
-}
-
-export class Charter {
+/*export class Charter {
   notes: Ref<ChartType.notes_data>
   music: HTMLAudioElement
   jsonPath: string
@@ -87,76 +72,76 @@ export class Charter {
       })
     )
   }
-}
+}*/
 
 function readJson(p: string) {
-  return JSON.parse(fs.readFileSync(p, 'utf-8')) as ChartType.save_data
+  return JSON.parse(fs.readFileSync(p, 'utf-8')) as ChartType.Chart
 }
 
-export function handleChart() {
-  ipcMain.handle('open-new-chart', () => {
-    const music = dialog.showOpenDialogSync({
+export function handlers() {
+  ipcMain.handle('ask-path', (_, fName: string, fType: string[]): HandlerReturn.askPath => {
+    const x = dialog.showOpenDialogSync({
       properties: ['openFile'],
-      filters: [{ name: '音乐', extensions: ['mp3', 'wav', 'ogg'] }]
+      filters: [{ name: fName, extensions: fType }]
     })
-    if (music) {
-      const json_path = join(dirname(music[0]), 'vs-chart.json')
-      if (fs.existsSync(json_path)) {
-        const data = readJson(json_path)
-        return {
-          state: 'success',
-          music: music[0],
-          data: data.diffs[0]
-        }
-      } else {
-        fs.writeFileSync(
-          json_path,
-          JSON.stringify({
-            diffs: [new_diff()],
-            save_time: Date.now()
-          })
-        )
-        return {
-          state: 'created',
-          music: music[0],
-          data: new_diff()
-        }
-      }
+    if (!x) return undefined
+    return { path: x[0], name: basename(x[0]) }
+  })
+
+  ipcMain.handle('save-chart', (_, music_path: string, data: string) => {
+    const json_path = join(dirname(music_path), 'vs-chart.json')
+    fs.writeFileSync(json_path, data)
+  })
+
+  ipcMain.handle('get-file-buffer', (_, pa: string): HandlerReturn.OpenBuffer => {
+    if (existsSync(pa)) {
+      return { state: 'success', data: readFileSync(pa) }
     } else {
-      return {
-        state: 'cancel'
-      }
+      return { state: 'failed', msg: '' }
     }
   })
 
-  ipcMain.handle('open-exist-chart', (_, music_path: string): OpenChartReturn => {
-    if (!fs.existsSync(music_path)) return { state: 'missing' }
-    const json_path = join(dirname(music_path), 'vs-chart.json')
-    if (fs.existsSync(json_path)) {
+  ipcMain.handle('open-chart', (_, p: string): HandlerReturn.OpenChart => {
+    if (!existsSync(p)) return { state: 'missing' }
+    const json_path = join(dirname(p), 'vs-chart.json')
+    const buf = readFileSync(p)
+    if (existsSync(json_path)) {
       const data = readJson(json_path)
       return {
         state: 'success',
-        music: music_path,
-        data: data.diffs
+        buf,
+        chart: data
       }
     } else {
-      fs.writeFileSync(
-        json_path,
-        JSON.stringify({
-          diffs: [new_diff()],
-          save_time: Date.now()
-        })
-      )
       return {
-        state: 'new_json',
-        music: music_path,
-        data: [new_diff()]
+        state: 'created',
+        buf
       }
     }
   })
-
-  ipcMain.handle('save-chart', (_, music_path: string, data: ChartType.ChartData) => {
-    const json_path = join(dirname(music_path), 'vs-chart.json')
-    fs.writeFileSync(json_path, JSON.stringify(toSaveData(data)))
+  ipcMain.handle('open-exist-chart', (_, p: string): HandlerReturn.OpenExistChart => {
+    if (!existsSync(p)) return { state: 'missing' }
+    const json_path = join(dirname(p), 'vs-chart.json')
+    if (existsSync(json_path)) {
+      const data = readJson(json_path)
+      return {
+        state: 'success',
+        chart: data,
+        buf: readFileSync(p),
+        path: p,
+        name: basename(p)
+      }
+    } else {
+      return {
+        state: 'created',
+        buf: readFileSync(p),
+        path: p,
+        name: basename(p)
+      }
+    }
+  })
+  ipcMain.handle('read-vsb', (_, p: string): HandlerReturn.readVsb => {
+    const buf = readFileSync(p)
+    return new VsbParser(buf).runToNotes()
   })
 }

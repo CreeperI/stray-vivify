@@ -3,13 +3,8 @@ import * as process from "node:process";
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
-      webSecurity: false,
-    }
+    width: 1000,
+    height: 700,
   })
 
   if (process.argv[2]) {

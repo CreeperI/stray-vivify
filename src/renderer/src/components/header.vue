@@ -1,28 +1,56 @@
 <script lang="ts" setup>
 import ui from '@renderer/core/ui'
-const ipcRenderer = Electron.ipcRenderer
+import settings from '@renderer/core/settings'
+import Translations from '@renderer/core/translations'
+import { modal } from '@renderer/core/modal'
+
+const Language = Translations.current
+
+const ipcRenderer = ui.ipcRenderer
+
+const isMax = ui.isMaximized
+const { state, chart_name } = ui
+const lang = settings.lang
+function readVsb () {
+  if (!ui.chart) return
+  ui.chart.read_vsb()
+}
 </script>
 
 <template>
-  <div class="header-wrapper">
-    <div class="header-top">
+  <div class="header-wrapper" :key="lang">
+    <div  class="header-top">
       <img alt="wug" class="header-wug" src="/wug.jpg" />
       <div class="header-menu-ul">
-        <div class="h-menu-btn h-menu-btn-text">文件</div>
+        <div class="h-menu-btn-text" v-html="Language.header.file.title" />
         <div class="h-menu-btn-i">
-          <div class="h-menu-btn h-menu-btn-text" @click="ui.ask_open()">打开</div>
+          <div class="h-menu-btn-text" @click="ui.ask_open()" v-html="Language.header.file.open" />
+          <div v-if="state == 'charting'" class="h-menu-btn-text" @click="readVsb">读取vsb</div>
         </div>
       </div>
+      <div class="header-menu-ul">
+        <div
+          class="h-menu-btn-text"
+          @click="modal.SettingModal.show({})"
+          v-html="Language.settings.title"
+        />
+      </div>
+      <div v-if="state == 'charting'" class="chart-name">{{ chart_name }}</div>
     </div>
     <div class="header-win-func">
-      <div class="header-max" @click="ipcRenderer.send('window-max')">1</div>
-      <div class="header-min" @click="ipcRenderer.send('window-min')">2</div>
-      <div class="header-close" @click="ipcRenderer.send('window-close')">0</div>
+      <div @click="ipcRenderer.send('window-min')">0</div>
+      <div v-if="isMax" @click="ipcRenderer.send('window-max')">2</div>
+      <div v-else @click="ipcRenderer.send('window-max')">1</div>
+      <div class="header-close" @click="ipcRenderer.send('window-close')">r</div>
     </div>
   </div>
 </template>
 
 <style scoped>
+div {
+  user-select: none;
+}
+
 .header-wrapper {
   width: 100%;
   position: sticky;
@@ -43,6 +71,7 @@ const ipcRenderer = Electron.ipcRenderer
   align-items: center;
   -webkit-app-region: drag;
   flex-grow: 1;
+  pointer-events: all;
 }
 
 .header-wug {
@@ -52,6 +81,14 @@ const ipcRenderer = Electron.ipcRenderer
   border: 2px solid transparent;
 }
 
+.chart-name {
+  text-align: left;
+  padding-left: 50px;
+  border-left: #8d8d8d 2px solid;
+  overflow: hidden;
+  text-wrap: nowrap;
+}
+
 .header-menu-ul {
   position: relative;
   align-items: center;
@@ -59,7 +96,6 @@ const ipcRenderer = Electron.ipcRenderer
   display: flex;
   flex-direction: column;
   height: 100%;
-  overflow: hidden;
 }
 
 .h-menu-btn-text {
@@ -70,7 +106,7 @@ const ipcRenderer = Electron.ipcRenderer
   transition: all 0.2s ease;
   background: transparent;
   padding: 0 5px;
-  text-align: center;
+  text-align: left;
   cursor: pointer;
   border-radius: 5px;
   border: 1px solid transparent;
@@ -90,6 +126,9 @@ const ipcRenderer = Electron.ipcRenderer
   pointer-events: none;
   user-select: none;
   border-radius: 0 0 5px 5px;
+  position: absolute;
+  top: var(--height-header);
+  left: 0;
 }
 
 .header-menu-ul:hover .h-menu-btn-i {
@@ -98,27 +137,26 @@ const ipcRenderer = Electron.ipcRenderer
   user-select: all;
 }
 
-.header-menu-ul:hover {
-  overflow: visible;
-}
-
 .header-win-func {
   height: 100%;
   -webkit-app-region: no-drag;
   font-family: Webdings, sans-serif;
+  display: flex;
+  position: absolute;
+  right: 0;
+  background-color: rgb(32, 33, 70);
+  z-index: 114514;
 }
 
-.header-close {
-  background-color: transparent;
-  color: #b8dcee;
-  height: 100%;
-  line-height: var(--height-header);
+.header-win-func > div {
   width: 4rem;
   text-align: center;
   transition: all 0.2s linear;
-  user-select: all;
   box-sizing: border-box;
   cursor: pointer;
+  color: #b8dcee;
+  height: 100%;
+  line-height: var(--height-header);
 }
 
 .header-close:hover {

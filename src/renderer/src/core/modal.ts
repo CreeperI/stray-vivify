@@ -1,11 +1,14 @@
 import {ComponentProps} from "vue-component-type-helpers";
 import {Ref, ref} from "vue";
+import SettingsModal from '@renderer/components/modals/settingsModal.vue'
 
 let nextModalID = 0
 
 const queue: modal[] = []
 
 export class modal<T = any> {
+
+  static SettingModal = new modal(SettingsModal)
 
   // static current: modal | undefined = undefined
   // static currentRef = ref(false)

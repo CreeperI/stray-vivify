@@ -7,7 +7,7 @@ export const notify = (function () {
   const leaveAnimation = 'notify-a-leave'
 
   function showNotify(message: string, duration: number, elClass = 'notify-normal') {
-    const container = document.getElementById('notifyContainer')
+    const container = document.getElementById('n-c')
     if (!container) return
 
     const element = notifyElement.cloneNode() as HTMLDivElement
@@ -52,7 +52,7 @@ export const notify = (function () {
     enter()
     setTimeout(stopEnter, 300)
     setTimeout(leave, 300 + duration)
-    setTimeout(stopLeave, 600 + duration)
+    setTimeout(stopLeave, 500 + duration)
   }
 
   return {
