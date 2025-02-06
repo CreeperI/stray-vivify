@@ -14,31 +14,7 @@ export namespace ChartType {
    *   type8 sbumper
    *
    */
-  /** @deprecated*/
-  export type note_data =
-    | [number, number, number]
-    | [number, number, 2, number]
-    | [number, number, 3, number]
-  export type notes_data = note_data[]
-  /** @deprecated*/
-  export type save_data = {
-    diffs: diffs_data
-    save_time: number
-  }
-  /** @deprecated*/
-  export type diffs_data = { name: string; notes: notes_data; hard: string; bpm_base: number }[]
 
-  /** @deprecated*/
-  export interface ChartData {
-    music: string
-    diffs: diffs_data
-  }
-
-  /** @deprecated*/
-  export type saveData = {
-    diffs: diffs_data
-    save_time: number
-  }
   export type Bpm_part = {
     bpm: number
     time: number
@@ -130,15 +106,15 @@ export namespace HandlerReturn {
     | {
         state: 'success'
         chart: ChartType.Chart
-        buf: buffer,
-    path: string,
-    name:string
+        buf: buffer
+        path: string
+        name: string
       }
     | {
         state: 'created'
         buf: buffer
-    path: string,
-    name:string
+        path: string
+        name: string
       }
 }
 
@@ -148,5 +124,5 @@ export type Invoker = {
   (msg: 'ask-path', fName: string, fType: string[]): Promise<HandlerReturn.askPath>
   (msg: 'open-chart', p: string): Promise<HandlerReturn.OpenChart>
   (msg: 'read-vsb', p: string): Promise<HandlerReturn.readVsb>
-  (msg: 'open-exist-chart', p:string): Promise<HandlerReturn.OpenExistChart>
+  (msg: 'open-exist-chart', p: string): Promise<HandlerReturn.OpenExistChart>
 }

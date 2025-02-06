@@ -37,8 +37,7 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       sandbox: false,
-      preload: join(__dirname, '../preload/index.js'),
-      devTools: false
+      preload: join(__dirname, '../preload/index.js')
     },
     frame: false,
     icon: icon
@@ -63,8 +62,10 @@ function createWindow(): void {
 
   listen(mainWindow)
   handlers()
-  globalShortcut.register('F11', () => window_max(mainWindow))
-  // mainWindow.webContents.openDevTools({ mode: 'right' })
+  // globalShortcut.register('F11', () => window_max(mainWindow))
+  globalShortcut.register('Alt+F12', () => {
+    mainWindow.webContents.openDevTools({ mode: 'right' })
+  })
 }
 
 // This method will be called when Electron has finished
@@ -72,7 +73,7 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron.vs.charter')
+  electronApp.setAppUserModelId('com.vschart.terminalflow')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

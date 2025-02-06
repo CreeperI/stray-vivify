@@ -6,15 +6,16 @@ import Settings from '@renderer/core/settings'
 
 const ipcRenderer = window.electron.ipcRenderer
 const invoker: Invoker = ipcRenderer.invoke
-export const Buffer = window.api.buf
 
 const settings = Settings
+const CURRENT_BUILD = 3
 
 function calc_mul() {
   return settings.scale.value * 200 + 100
 }
 
 const ui = {
+  CURRENT_BUILD,
   state: ref('startUp' as 'startUp' | 'charting' | 'cache'),
   path: ref<string>(),
   ask_open() {
@@ -48,6 +49,7 @@ const ui = {
     else type.value = val
   },
   windowHeight: ref(window.outerHeight),
+  windowWidth: ref(window.outerWidth),
   ask_state: false,
   set_state(v: boolean) {
     this.ask_state = v
@@ -59,7 +61,6 @@ const ui = {
 
 ipcRenderer.on('window-max-state', (_, state: boolean) => {
   ui.isMaximized.value = state
-  ui.windowHeight.value = window.outerHeight
 })
 
 export default ui

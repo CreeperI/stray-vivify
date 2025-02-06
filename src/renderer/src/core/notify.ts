@@ -1,5 +1,3 @@
-
-
 export const notify = (function () {
   const notifyElement = document.createElement('div')
   notifyElement.classList.add('notify-box')

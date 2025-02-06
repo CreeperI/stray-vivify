@@ -21,7 +21,7 @@ export default {
         scale: Settings.scale.value,
         meter: Settings.meter.value,
         middle: Settings.middle.value,
-        lang: settings.lang
+        lang: settings.lang.value
       })
     )
   },
@@ -55,6 +55,5 @@ export default {
     this.proj_state.value = this.projects
       .map((pj) => pj.path + pj.name)
       .reduce((a, b) => a + b).length
-
   }
 }

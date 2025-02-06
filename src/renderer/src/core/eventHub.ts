@@ -1,8 +1,4 @@
-export const Events = [
-  'update',
-  'save-diff',
-  'save-chart'
-] as const
+export const Events = ['update', 'save-diff', 'save-chart'] as const
 export type Events = (typeof Events)[number]
 
 interface EventHub {

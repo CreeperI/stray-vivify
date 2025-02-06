@@ -5,8 +5,9 @@ import ui from '@renderer/core/ui'
 import { EventHub } from '@renderer/core/eventHub'
 import Storage from '@renderer/core/storage'
 
+import { createModal } from '@kolirt/vue-modal'
+
 Storage.read()
-createApp(App).mount('#app')
 ui.ipcRenderer.on('notify', (_, msg, duration, t) => {
   if (!t) t = 'normal'
   if (t in notify) {
@@ -17,12 +18,13 @@ ui.ipcRenderer.on('notify', (_, msg, duration, t) => {
 })
 
 function listen(e: KeyboardEvent) {
+  if (e.code == 'F12') {
+    e.preventDefault()
+    return
+  }
   // check if user's inputting sth
   if (document.activeElement instanceof HTMLInputElement) return
   const chart = ui.chart
-  if (e.code == 'F8') {
-    debugger
-  }
   if (e.code == 'Space') {
     if (!chart) return
     e.preventDefault()
@@ -49,9 +51,10 @@ document.addEventListener('keydown', listen)
 
 EventHub.on('update', () => {
   if (ui.chart) {
-    ui.chart.update_current()
-    ui.chart.play_rate_ref.value = ui.chart.playRate
+    ui.chart.on_update()
   }
+  ui.windowHeight.value = window.innerHeight
+  ui.windowWidth.value = window.innerWidth
 })
 
 setInterval(() => {
@@ -62,4 +65,19 @@ setInterval(() => {
 }, 5000)
 setInterval(() => {
   EventHub.emit('update')
-}, 16)
+}, 10)
+
+createApp(App)
+  .use(
+    createModal({
+      transitionTime: 200,
+      animationType: 'slideUp',
+      modalStyle: {
+        padding: '2rem 1rem'
+      },
+      overlayStyle: {
+        'background-color': 'rgba(0,0,0,.3)'
+      }
+    })
+  )
+  .mount('#app')

@@ -1,62 +1,33 @@
-import {ComponentProps} from "vue-component-type-helpers";
-import {Ref, ref} from "vue";
-import SettingsModal from '@renderer/components/modals/settingsModal.vue'
+import { ComponentProps } from 'vue-component-type-helpers'
+import { Component } from 'vue'
+import SettingsModal from '@renderer/components/modals/settings-modal.vue'
+import ConfirmModal from '@renderer/components/modals/confirm-modal.vue'
+import { openModal } from '@kolirt/vue-modal'
+import VersionsModal from '@renderer/components/modals/versions-modal.vue'
 
-let nextModalID = 0
-
-const queue: modal[] = []
-
-export class modal<T = any> {
-
+export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal)
+  static ConfirmModal = new modal(ConfirmModal)
+  static ShowInformationModal = new modal(ConfirmModal)
+  static VersionsModal = new modal(VersionsModal)
 
-  // static current: modal | undefined = undefined
-  // static currentRef = ref(false)
-  static _current : modal | undefined = undefined
-  static get current() {
-    return this._current
-  }
-  static set current(val) {
-    this._current = val
-    this.current_ref.value = val
-  }
-  static current_ref: Ref<undefined| modal> = ref(undefined)
-  component: T;
-  priority: number;
+  component: T
+  priority: number
   props: ComponentProps<T> | undefined
-  uniqueID: number
 
   constructor(component: T, priority = 0) {
-    this.component = component;
+    this.component = component
     this.props = undefined
     this.priority = priority
-    this.uniqueID = -1
-  }
-
-  static hide() {
-    queue.shift()
-    this.sortModalQueue()
-  }
-
-  static sortModalQueue() {
-    const modalQueue = queue
-    modalQueue.sort((x, y) => y.priority - x.priority)
-    const singleQueue = [...new Set(modalQueue)]
-    while (queue.length > 0) {
-      queue.shift()
-    }
-    queue.push(...singleQueue)
-    this.current = queue[0]
   }
 
   show(props: ComponentProps<T>) {
-    this.uniqueID = nextModalID++
     this.props = Object.assign({}, props)
-
-    queue.unshift(this)
-    modal.sortModalQueue()
+    if (!this.props) throw new Error()
+    return openModal(this.component, this.props).catch(() => {})
   }
 }
+
 declare global {
   interface Window {
     modal: typeof modal

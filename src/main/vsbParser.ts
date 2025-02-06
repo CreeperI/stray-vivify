@@ -625,10 +625,10 @@ class VsbParser {
   runToNotes(): ChartType.note[] {
     const n: ChartType.note[] = []
     this.run().notes.forEach((x) => {
-      if (x.type ==4 || x.type ==5) return
+      if (x.type == 4 || x.type == 5) return
       if (x.extra.length > 0 && (x.type == 2 || x.type == 3)) {
         if (x.type == 2)
-           n.push({
+          n.push({
             n: 'h',
             t: x.time,
             l: x.lane,

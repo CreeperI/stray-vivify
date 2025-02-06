@@ -5,6 +5,7 @@ import { computed, ComputedRef, ref, Ref, watch, WritableComputedRef } from 'vue
 import { utils } from '@renderer/core/utils'
 import Translations from '@renderer/core/translations'
 import Storage from '@renderer/core/storage'
+import { modal } from '@renderer/core/modal'
 
 export type Bpm_part = ChartType.Bpm_part
 
@@ -12,6 +13,23 @@ function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
   return ['b', 's', 'mb'].includes(n.n)
 }
+function sort_diff(diff: ChartType.Diff): void {
+  diff.notes.sort((a, b) => {
+    if (a.t !== b.t) {
+      return a.t - b.t; // 按时间排序
+    } else {
+      // 如果时间相同，将 bpm_note 放在前面
+      if (a.n === 'p' && b.n !== 'p') {
+        return -1;
+      } else if (a.n !== 'p' && b.n === 'p') {
+        return 1;
+      } else {
+        return 0; // 如果两者都是 bpm_note 或都不是，保持原顺序
+      }
+    }
+  });
+}
+
 
 /*
 // l: second
@@ -77,12 +95,13 @@ export class Chart implements ChartType.Chart {
   name: string
   diff_index: Ref<number>
   diff_flag: Ref<number>
-  play_rate_ref: Ref<number>
+  play_rate_ref: WritableComputedRef<number>
   currentBpm: WritableComputedRef<number>
   currentTimeRef: WritableComputedRef<number>
   bpm_list: ComputedRef<Bpm_part[]>
   visibleTiming: ComputedRef<[number, number]>
-  private _current_time: Ref<number>
+  private current_time: Ref<number>
+  private play_rate: Ref<number>
   private readonly chart: ChartType.Chart
 
   constructor(musicPath: string, musicURL: string, chart: ChartType.Chart, name: string) {
@@ -97,16 +116,24 @@ export class Chart implements ChartType.Chart {
     this.diff_index = ref(0)
     this.diff = ref(this.chart.diffs[this.diff_index.value])
     this.diff_flag = ref(0)
-    this._current_time = ref(0)
-    this.play_rate_ref = ref(1)
+    this.current_time = ref(0)
+    this.play_rate_ref = computed({
+      get() {
+        return me.play_rate.value
+      },
+      set(v) {
+        me.play_back_rate = v
+      }
+    })
+    this.play_rate = ref(1)
     this.bpm_list = computed(() => [{ time: 0, bpm: 0, len: 0 }])
     this.visibleTiming = computed(() => [
-      this._current_time.value * 1000 - 2000,
-      this._current_time.value * 1000 + ui.windowHeight.value / ui.charter.mul.value + 2000
+      this.current_time.value * 1000 - 2000,
+      this.current_time.value * 1000 + ui.windowHeight.value / ui.charter.mul.value + 2000
     ])
     this.currentTimeRef = computed({
       get() {
-        return me._current_time.value
+        return me.current_time.value
       },
       set(val) {
         me.currentTime = val
@@ -115,11 +142,11 @@ export class Chart implements ChartType.Chart {
 
     this.currentBpm = computed({
       get() {
-        return me.bpm_of_time(me._current_time.value * 1000)
+        return me.bpm_of_time(me.current_time.value * 1000)
       },
       set(v: number) {
         const a = me.diff.value.notes.findLast((x) => {
-          return x.n == 'p' ? x.t <= me._current_time.value * 1000 : false
+          return x.n == 'p' ? x.t <= me.current_time.value * 1000 : false
         }) as ChartType.bpm_note | undefined
         if (a) a.v = v
       }
@@ -130,7 +157,7 @@ export class Chart implements ChartType.Chart {
       const length = me.audio.duration * 1000
       me.length = length
       me.bpm_list = computed(() => {
-        const notes = me.diff.value.notes.filter((x) => x.n == 'p')
+        const notes = me.diff.value.notes.filter((x) => x.n == 'p').sort((a, b) => a.t - b.t)
         const x: Bpm_part[] = []
         for (let i = 0; i < notes.length; i++) {
           const pt: Bpm_part = {
@@ -171,12 +198,13 @@ export class Chart implements ChartType.Chart {
     this.audio.currentTime = Math.max(0, v)
   }
 
-  get playRate() {
+  get play_back_rate() {
     return this.audio.playbackRate
   }
 
-  set playRate(v: number) {
+  set play_back_rate(v: number) {
     this.audio.playbackRate = v
+    this.play_rate.value = v
   }
 
   get song() {
@@ -185,14 +213,6 @@ export class Chart implements ChartType.Chart {
 
   get diffs() {
     return this.chart.diffs
-  }
-
-  get meter() {
-    return ui.charter.settings.meter
-  }
-
-  get scale() {
-    return ui.charter.settings.scale
   }
 
   static createChart(n = ''): ChartType.Chart {
@@ -238,6 +258,7 @@ export class Chart implements ChartType.Chart {
   }
 
   save() {
+    sort_diff(this.diff.value)
     ui.invoke('save-chart', this.fp, JSON.stringify(this.chart))
     Storage.add_proj(this.fp, this.song.name)
   }
@@ -249,7 +270,7 @@ export class Chart implements ChartType.Chart {
 
   deleteDiff() {
     if (this.chart.diffs.length == 1) return
-    if (confirm(Translations.current.confirm.del_diff)) this.diffs.splice(this.diff_index.value, 1)
+    if (confirm(Translations.confirm.del_diff)) this.diffs.splice(this.diff_index.value, 1)
     this.diff_index.value = Math.max(0, this.diff_index.value - 1)
   }
 
@@ -263,8 +284,9 @@ export class Chart implements ChartType.Chart {
       if (!r) return
       ui.invoke('read-vsb', r.path).then((r1) => {
         if (!r) return
-        if (!confirm(Translations.current.confirm.vsb)) return
-        this.diff.value.notes = r1
+        modal.ConfirmModal.show({ msg: Translations.confirm.vsb }).then(() => {
+          this.diff.value.notes = r1
+        })
       })
     })
   }
@@ -274,6 +296,7 @@ export class Chart implements ChartType.Chart {
     if (pending.l < 0 || pending.l > 3) return false
     return (
       this.diff.value.notes.find((note) => {
+        // for bpm notes, simply check if their time are same
         if (note.n == 'p' && pending.n == 'p') {
           return note.t == pending.t
         }
@@ -284,7 +307,7 @@ export class Chart implements ChartType.Chart {
           if (note.t == pending.t) return true
           // 1 check if they're hold and fuck their length (start->end) to assure no overlapping
           if (note.n == 'h') return utils.between(pending.t, [note.t, note.t + note.l])
-          if (pending.n == 'h') return utils.between(note.t, [pending.t, pending.t + pending.l])
+          if (pending.n == 'h') return utils.between(note.t, [pending.t, pending.t + pending.h])
         }
         if (note.t == pending.t) {
           // 2 check for bumper's overlap
@@ -305,8 +328,9 @@ export class Chart implements ChartType.Chart {
     throw new Error('null Bpm-part.')
   }
 
-  update_current() {
-    this._current_time.value = this.audio.currentTime
+  on_update() {
+    this.current_time.value = this.audio.currentTime
+    this.play_rate.value = this.audio.playbackRate
   }
 }
 
@@ -315,7 +339,7 @@ const send = {
     function cb(file: HandlerReturn.askPath, ch: HandlerReturn.OpenChart) {
       if (!file) return
       if (ch.state == 'missing') {
-        notify.error(Translations.current.notify.music_error)
+        notify.error(Translations.notify.music_error)
         Storage.remove_proj(file.path)
         return
       }
@@ -340,7 +364,7 @@ const send = {
     else {
       ui.invoke('open-exist-chart', fp).then((r) => {
         if (r.state == 'missing') {
-          notify.error(Translations.current.notify.music_error)
+          notify.error(Translations.notify.music_error)
           Storage.remove_proj(fp)
           return
         }

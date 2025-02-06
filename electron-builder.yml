@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: vs-charter-ev
+appId: com.vschart.terminalflow
+productName: vs-CharTer
 directories:
   buildResources: build
 files:
@@ -11,13 +11,13 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+  - src/renderer/public/**
 win:
-  executableName: vs-charter-ev
+  executableName: vs-CharTer
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  artifactName: ${productName}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
-  createDesktopShortcut: always
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:

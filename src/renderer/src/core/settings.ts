@@ -3,16 +3,11 @@ import { ref } from 'vue'
 import { ChartType } from '@preload/types'
 
 export default {
-  lang: '简中' as Languages,
-  get language() {
-    return this.lang
-  },
-  set language(v: Languages) {
-    this.lang = v
-  },
-  note_type: ref<ChartType.note['n'] | ''>(''),
+  lang: ref('简中' as Languages),
+  note_type: ref<ChartType.note['n'] | ''>('n'),
   scale: ref(10),
   /* 拍号 分音 */
   meter: ref(4),
-  middle: ref(false)
+  middle: ref(false),
+  charter_layout: ref("auto" as  "auto" | "middle" | "left")
 }

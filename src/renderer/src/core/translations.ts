@@ -1,4 +1,6 @@
 import settings from '@renderer/core/settings'
+import { utils } from '@renderer/core/utils'
+import { reactive, watch } from 'vue'
 
 interface Translations {
   fp: {
@@ -40,7 +42,14 @@ interface Translations {
   settings: {
     language: string
     title: string
-    after_reboot: string
+    after_reboot: string,
+    layout: {
+      auto: string
+      middle: string
+      left : string
+      layout: string
+
+    }
   }
   confirm: {
     vsb: string
@@ -49,7 +58,8 @@ interface Translations {
   notify: {
     move_error: string
     music_error: string
-  },
+    note_error: string
+  }
   start: {
     recent: string
   }
@@ -62,8 +72,8 @@ export const Languages = [
 
 export type Languages = (typeof Languages)[number]
 
-const LangInf: Record<Languages, Translations> = {
-  简中: {
+const LangInf: { 简中: Translations } & Record<Languages, Partial<Translations>> = {
+  "简中": {
     fp: {
       scale: '缩放',
       meter: '分音',
@@ -103,7 +113,13 @@ const LangInf: Record<Languages, Translations> = {
     settings: {
       language: '语言',
       title: '设置',
-      after_reboot: '（保存&重启后生效）'
+      after_reboot: '（保存&重启后生效）',
+      layout: {
+        auto: '自动',
+        middle: '居中',
+        left : '左侧',
+        layout: "轨道位置",
+      }
     },
     confirm: {
       vsb: '确定要读取vsb吗？此操作会*替换*当前谱面且不可撤销哦。',
@@ -111,10 +127,11 @@ const LangInf: Record<Languages, Translations> = {
     },
     notify: {
       move_error: '不能将note挪到这里哦。',
-      music_error: '音频文件不存在。'
+      music_error: '音频文件不存在。',
+      note_error: '不能放在这里哦。'
     },
     start: {
-      recent: "最近项目"
+      recent: '最近项目'
     }
   }
   /* "？？？？？": {
@@ -164,8 +181,9 @@ const LangInf: Record<Languages, Translations> = {
    }*/
 }
 
-export default {
-  get current(): (typeof LangInf)[Languages] {
-    return LangInf[settings.language]
-  }
-}
+const base = reactive(utils.deepCopy(LangInf['简中']))
+
+export default base
+watch(settings.lang, (v) => {
+  utils.assign(base, LangInf[v])
+})

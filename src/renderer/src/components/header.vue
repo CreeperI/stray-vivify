@@ -4,22 +4,22 @@ import settings from '@renderer/core/settings'
 import Translations from '@renderer/core/translations'
 import { modal } from '@renderer/core/modal'
 
-const Language = Translations.current
+const Language = Translations
 
 const ipcRenderer = ui.ipcRenderer
 
 const isMax = ui.isMaximized
 const { state, chart_name } = ui
 const lang = settings.lang
-function readVsb () {
+function readVsb() {
   if (!ui.chart) return
   ui.chart.read_vsb()
 }
 </script>
 
 <template>
-  <div class="header-wrapper" :key="lang">
-    <div  class="header-top">
+  <div :key="lang" class="header-wrapper">
+    <div class="header-top">
       <img alt="wug" class="header-wug" src="/wug.jpg" />
       <div class="header-menu-ul">
         <div class="h-menu-btn-text" v-html="Language.header.file.title" />
@@ -58,7 +58,7 @@ div {
   flex-direction: row;
   flex-wrap: wrap;
   background: rgb(32, 33, 70);
-  background: linear-gradient(90deg, rgba(32, 33, 70, 1) 0%, rgba(37, 49, 50, 1) 100%);
+  background: var(--purple-bgi);
   box-shadow: #0d1418 0 0 5px;
   font-size: 1.25em;
   z-index: 9;
@@ -145,7 +145,7 @@ div {
   position: absolute;
   right: 0;
   background-color: rgb(32, 33, 70);
-  z-index: 114514;
+  z-index: var(--z-highest);
 }
 
 .header-win-func > div {

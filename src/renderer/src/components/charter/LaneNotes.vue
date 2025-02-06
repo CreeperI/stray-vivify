@@ -9,14 +9,14 @@ import { EventHub } from '@renderer/core/eventHub'
 import Translations from '@renderer/core/translations'
 import { utils } from '@renderer/core/utils'
 
-const Language = Translations.current
+const Language = Translations
 
 const chart = ui.chart as Chart
 if (!chart) throw new Error('ui.charter is not defined')
 const { meter, scale, note_type, middle } = ui.charter.settings
 const { mul, mul_sec } = ui.charter
 
-const { diff,  bpm_list, currentBpm, visibleTiming, currentTimeRef } = chart
+const { diff, bpm_list, currentBpm, visibleTiming, currentTimeRef } = chart
 
 const bpmBgi = computed(() => (4 / meter.value) * mul_sec.value)
 
@@ -217,14 +217,16 @@ function pendingNoteUpdate(e: MouseEvent, p: Bpm_part) {
 
   if (n.isBpm) HoldData.clean()
 
-  pending.value.display = chart.valid_check(pending_note.value)
   if (HoldData.place.value.flag) {
     n.lane = HoldData.place.value.lane
-    pending.value.time = HoldData.place.value.start
     pending.value.len = n.time - HoldData.place.value.start
+    pending.value.time = HoldData.place.value.start
+    pending.value.display = chart.valid_check(pending_note.value, true)
     pending.value.bottom = HoldData.place.value.start * mul.value - 23
     return
-  } else if (pending.value.type == 'note') {
+  }
+  pending.value.display = chart.valid_check(pending_note.value)
+  if (pending.value.type == 'note') {
     // check valid
     pending.value.lane = n.lane as 0 | 1 | 2 | 3
     pending.value.bottom = n.time * mul.value - 23
@@ -252,6 +254,7 @@ function noteAdd(part: Bpm_part, e: MouseEvent) {
       HoldData.clear()
       return // here returned for the hold-end should not be added as normal-note
     } else {
+      if (!chart.valid_check(note_d)) return
       HoldData.place.value.flag = true
       watch(note_type, () => HoldData.clean(), { once: true })
       HoldData.place.value.start = note_d.t
@@ -263,12 +266,11 @@ function noteAdd(part: Bpm_part, e: MouseEvent) {
           }) as ChartType.hold_note
           if (h && chart.valid_check({ l: h.l, t: h.t, n: 'h', h: len }, true)) {
             h.h = len
-
             return
           }
         }
         delNote(note_d)
-        notify.error('暂不支持倒着拉长条。\n会做的。）')
+        notify.error(Translations.notify.note_error)
       }
       HoldData.cleanUp = () => {
         delNote(note_d)
@@ -307,6 +309,7 @@ function addBpmPart(part: Bpm_part, e: MouseEvent) {
 }
 
 function delBpmPart(part: Bpm_part) {
+  console.log(114514)
   HoldData.clean()
   const part_note = diff.value.notes.find((x) => {
     return x.n == 'p' ? x.t == part.time && x.v == part.bpm : false
@@ -340,7 +343,7 @@ function noteDragStart(note: ChartType.note, e: DragEvent) {
 }
 
 function bpmPartDrop(part: Bpm_part, e: DragEvent) {
-  if (!dragFlag) return
+  if (!dragFlag.value) return
   const note = dragCache.note_data as ChartType.note
   const nest = nearest(e.offsetX, (e.target as HTMLDivElement).clientHeight - e.offsetY, part)
   const new_note = { ...note }
@@ -368,6 +371,9 @@ function isVisible(n: ChartType.note): boolean {
     return utils.between(n.t + n.h, visibleTiming.value)
   }
   return utils.between(n.t, visibleTiming.value)
+}
+function isVisibleBpm(t: number) {
+  return utils.between(t, visibleTiming.value)
 }
 </script>
 
@@ -421,28 +427,32 @@ function isVisible(n: ChartType.note): boolean {
         @mousemove="(e) => pendingNoteUpdate(e, part)"
         @dragover.prevent
       >
-        <input
-          :value="part.bpm"
-          class="lane-bpm-ticker bpm-ticker"
-          type="text"
-          @change="(e) => setPartBpm(e, part)"
-          @contextmenu="delBpmPart(part)"
-        />
       </div>
     </div>
-    <div class="note-div">
-      <template v-for="n in diff.notes">
-        <Note
-          v-if="isVisible(n)"
-          :note="n"
-          :style="{ bottom: calcBottom(n.t, n.n == 'h' ? n.h : 0) }"
-          draggable="true"
-          style="position: absolute; transform: translateY(50%)"
-          @contextmenu="delNote(n)"
-          @dragstart="(e) => noteDragStart(n, e)"
-        />
-      </template>
-    </div>
+  </div>
+  <div class="note-div">
+    <template v-for="n in diff.notes">
+      <Note
+        v-if="isVisible(n)"
+        :note="n"
+        :style="{ bottom: calcBottom(n.t, n.n == 'h' ? n.h : 0) }"
+        draggable="true"
+        style="position: absolute; transform: translateY(50%)"
+        @contextmenu="delNote(n)"
+        @dragstart="(e) => noteDragStart(n, e)"
+      />
+    </template>
+    <template v-for="part in bpm_list">
+      <input
+        :value="part.bpm"
+        class="bpm-ticker"
+        type="text"
+        @change="(e) => setPartBpm(e, part)"
+        @contextmenu="delBpmPart(part)"
+        :style="{bottom: calcBottom(part.time)}"
+        v-if="isVisibleBpm(part.time)"
+      >
+    </template>
   </div>
   <input :value="currentBpm" class="current-bpm bpm-ticker" @change="(e) => setCurrentBpm(e)" />
 </template>
@@ -479,10 +489,12 @@ function isVisible(n: ChartType.note): boolean {
   line-height: 100%;
   font-size: 1.05rem;
   font-weight: bolder;
+  pointer-events: all;
 }
 
 .current-bpm {
   bottom: var(--h-l-b);
+  z-index: 114514;
 }
 
 .lane-bpm-listed {
@@ -507,6 +519,7 @@ function isVisible(n: ChartType.note): boolean {
   flex-direction: column-reverse;
   border-bottom: transparent solid;
   border-bottom-width: calc(var(--h-l-b));
+  background-color: transparent;
 }
 
 .notes-wrapper {
@@ -515,6 +528,7 @@ function isVisible(n: ChartType.note): boolean {
   top: 0;
   overflow: auto;
   width: 100%;
+  z-index: 10;
 }
 
 ::-webkit-scrollbar {
@@ -522,11 +536,13 @@ function isVisible(n: ChartType.note): boolean {
 }
 
 .note-div {
-  position: fixed;
+  position: absolute;
   height: calc(100% - var(--h-l-b));
   top: 0;
-  left: 30px;
-  z-index: 1;
+  left: 0;
+  z-index: 101;
   background-color: transparent;
+  width: 100%;
+  pointer-events: none;
 }
 </style>

@@ -3,6 +3,18 @@ import ui from '@renderer/core/ui'
 import LaneNotes from '@renderer/components/charter/LaneNotes.vue'
 
 const state = ui.state
+const meter = ui.charter.settings.meter
+if (!ui.chart) throw new Error('fuck!')
+const chart = ui.chart
+const { currentBpm, currentTimeRef } = chart
+
+function fuckWheel(e: WheelEvent) {
+  chart.audio.pause()
+  if (!e.target) return
+  e.preventDefault()
+  const scr = (4 / meter.value) * (60 / currentBpm.value) * Math.sign(e.deltaY)
+  currentTimeRef.value -= scr
+}
 
 /**
  * 0: 0px
@@ -14,20 +26,39 @@ const state = ui.state
 </script>
 
 <template>
-  <div class="lane-wrapper">
-    <div class="lane-sline" style="background-color: #ffffff; left: 0" />
-    <div class="lane-sline" style="background-color: #ffffff; left: 548px" />
-    <div class="lane-line" style="background-color: #003b63; left: 137px" />
-    <div class="lane-line" style="background-color: #45337c; left: 274px" />
-    <div class="lane-line" style="background-color: #60003a; left: 411px" />
-    <div class="lane-bg" style="background-color: #001523; left: 5px" />
-    <div class="lane-bg" style="background-color: #270017; left: 279px" />
-    <div class="lane-bottom" />
-    <lane-notes v-if="state == 'charting'" />
+  <div class="lane-wrapper" @wheel="fuckWheel">
+    <div class="lane-inner">
+      <div class="lane-sline" style="background-color: #ffffff; left: 0" />
+      <div class="lane-sline" style="background-color: #ffffff; left: 548px" />
+      <div class="lane-line" style="background-color: #003b63; left: 137px" />
+      <div class="lane-line" style="background-color: #45337c; left: 274px" />
+      <div class="lane-line" style="background-color: #60003a; left: 411px" />
+      <div class="lane-bg" style="background-color: #001523; left: 5px" />
+      <div class="lane-bg" style="background-color: #270017; left: 279px" />
+      <div class="lane-bottom" />
+      <lane-notes v-if="state == 'charting'" />
+    </div>
   </div>
 </template>
 
 <style scoped>
+.lane-wrapper {
+  width: 702px;
+  box-shadow: black 0 0 15px;
+  flex-basis: 702px;
+  padding: 0 40px;
+  background: var(--dark-bgi);
+}
+
+.lane-inner {
+  width: 622px;
+  height: 100%;
+  position: relative;
+  padding: 0;
+  overflow: hidden;
+  border-right: 2px solid #8d8d8d;
+}
+
 .lane-bottom {
   position: relative;
   top: calc(100% - var(--h-l-b));
@@ -36,19 +67,7 @@ const state = ui.state
   border: 6px solid #ffffff;
   background-color: #272727;
   height: var(--h-l-b);
-  z-index: -2;
-}
-
-.lane-wrapper {
-  --h-l-b: 80px;
-  width: 622px;
-  height: 100%;
-
-  position: absolute;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-  border-right: 2px solid #8d8d8d;
+  z-index: 114514;
 }
 
 .lane-line,
@@ -58,21 +77,20 @@ const state = ui.state
   border: 0;
   padding: 0;
   margin: 0;
-  z-index: -3;
   position: absolute;
   top: 0;
+  z-index: 1;
   user-select: none;
   pointer-events: none;
 }
 
 .lane-sline {
-  z-index: 999;
+  z-index: var(--z-highest);
 }
 
 .lane-bg {
   width: 271px;
   height: 100%;
-  z-index: -4;
   position: absolute;
   top: 0;
 }

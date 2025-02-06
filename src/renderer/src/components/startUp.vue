@@ -31,17 +31,22 @@ function toDate(time: number): string {
 <template>
   <div class="start-up">
     <div class="start-projects">
-      <div class="start-projects-title" v-html="Translations.current.start.recent" />
-      <div v-for="p in proj" class="start-projects-proj" @click="open_proj(p.path)">
+      <div class="start-projects-title" v-html="Translations.start.recent" />
+      <div
+        v-for="p in proj"
+        :key="p.last_open"
+        class="start-projects-proj"
+        @click="open_proj(p.path)"
+      >
         <div class="proj-name" v-html="p.name" />
-        <div style="display: flex;flex-wrap: nowrap">
+        <div style="display: flex; flex-wrap: nowrap">
           <span class="proj-date" v-html="toDate(p.last_open)" />
           <span class="proj-path" v-html="p.path" />
         </div>
       </div>
     </div>
     <div class="start-right">
-      Welcome
+      <div>点击右下角build以查看更新记录！</div>
     </div>
   </div>
 </template>
@@ -55,7 +60,7 @@ function toDate(time: number): string {
   top: 15%;
   height: calc(60% - 120px);
   box-shadow: #001b1b 0 0 55px;
-  background-image: var(--common-bgi);
+  background-image: var(--dark-bgi);
   border-radius: 65px;
   display: grid;
   grid-template-columns: 3fr 1fr;
@@ -73,15 +78,27 @@ function toDate(time: number): string {
 
 .start-projects-proj {
   cursor: pointer;
-
+  transition: all 0.2s linear;
+  border: transparent 2px solid;
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 4px;
 }
+
+.start-projects-proj:hover {
+  border-left: #b8dcee 2px solid;
+  padding-left: 10px;
+}
+
 .proj-date {
   min-width: 3rem;
 }
+
 .proj-name {
   font-size: 1.4rem;
   line-height: 1.2em;
 }
+
 .proj-path {
   text-wrap: nowrap;
   opacity: 0.7;
@@ -95,6 +112,7 @@ function toDate(time: number): string {
   font-weight: bolder;
   margin-bottom: 20px;
 }
+
 .start-right {
   padding-left: 20px;
   display: flex;
