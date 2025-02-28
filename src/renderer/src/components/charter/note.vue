@@ -5,7 +5,7 @@ import ui from '@renderer/core/ui'
 const { note } = defineProps<{
   note: ChartType.note
 }>()
-const mul = ui.charter.mul
+const mul = ui.mul
 
 const note_style = '.'
 
@@ -58,6 +58,5 @@ span {
   z-index: var(--z-highest);
   user-select: none;
   background-size: 100% 100%;
-  pointer-events: all;
 }
 </style>

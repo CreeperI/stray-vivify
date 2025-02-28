@@ -5,16 +5,23 @@ import FnSong from '@renderer/components/charter/func/fn-song.vue'
 import FnCharter from '@renderer/components/charter/func/fn-charter.vue'
 import ui from '@renderer/core/ui'
 import settings from '@renderer/core/settings'
+import { computed } from 'vue'
 
 const charter_layout = settings.charter_layout
 
 const w = ui.windowWidth
+const should_left = computed(( ) => {
+  if (charter_layout.value == 'auto') {
+    return w.value <= 1600;
+  }
+  return charter_layout.value == 'left'
+})
 </script>
 
 <template>
   <div class="charter-wrapper">
     <div
-      v-if="(charter_layout == 'auto' && w > 1600) || charter_layout == 'middle'"
+      v-if="should_left"
       class="fp-wrapper"
     >
       <fn-charter />
@@ -22,7 +29,7 @@ const w = ui.windowWidth
     </div>
     <Lane />
     <div class="fp-wrapper">
-      <template v-if="(charter_layout == 'auto' && w < 1600) || charter_layout == 'left'">
+      <template v-if="!should_left">
         <fn-charter />
         <fn-notes />
       </template>

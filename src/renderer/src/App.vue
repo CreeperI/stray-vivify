@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import Header from '@renderer/components/header.vue'
-import Charter from '@renderer/components/charter/charter.vue'
+import ChartLine from '@renderer/components/charter/chart-line.vue'
 import ui from '@renderer/core/ui'
 import StartUp from '@renderer/components/startUp.vue'
 import { ModalTarget } from '@kolirt/vue-modal'
@@ -13,7 +13,7 @@ const state = ui.state
 <template>
   <Header />
   <StartUp v-if="state == 'startUp'" />
-  <Charter v-if="state == 'charting'" />
+  <ChartLine v-if="state == 'charting'" />
   <!--  <popup-modal />-->
   <div id="n-c" class="notify-container" />
   <ModalTarget />

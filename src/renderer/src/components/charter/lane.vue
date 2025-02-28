@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import ui from '@renderer/core/ui'
 import LaneNotes from '@renderer/components/charter/LaneNotes.vue'
+import settings from '@renderer/core/settings'
 
 const state = ui.state
-const meter = ui.charter.settings.meter
+const meter = settings.meter
 if (!ui.chart) throw new Error('fuck!')
 const chart = ui.chart
 const { currentBpm, currentTimeRef } = chart

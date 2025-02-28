@@ -2,12 +2,14 @@
 import Storage from '@renderer/core/storage'
 import ui from '@renderer/core/ui'
 import Translations from '@renderer/core/translations'
+import { Charter } from '@renderer/core/charter'
 
 const proj = Storage.projects
 
 function open_proj(p: string) {
   ui.open_chart(p)
 }
+const flag = Charter.update.flag
 
 function toDate(time: number): string {
   const dt = new Date(time * 1000) // JavaScript 的 Date 构造函数使用毫秒，所以需要乘以 1000
@@ -30,7 +32,7 @@ function toDate(time: number): string {
 
 <template>
   <div class="start-up">
-    <div class="start-projects">
+    <div class="start-projects" :key="flag">
       <div class="start-projects-title" v-html="Translations.start.recent" />
       <div
         v-for="p in proj"
@@ -58,7 +60,7 @@ function toDate(time: number): string {
   position: relative;
   padding: 60px;
   top: 15%;
-  height: calc(60% - 120px);
+  height: calc(70% - 120px);
   box-shadow: #001b1b 0 0 55px;
   background-image: var(--dark-bgi);
   border-radius: 65px;

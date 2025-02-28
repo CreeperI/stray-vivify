@@ -1,20 +1,21 @@
 <script lang="ts" setup>
 import { computed, ComputedRef, ref, toRaw, watch } from 'vue'
 import ui from '@renderer/core/ui'
-import { Bpm_part, Chart } from '@renderer/core/charter'
+import { Bpm_part, Chart } from '@renderer/core/chart'
 import Note from '@renderer/components/charter/note.vue'
 import { ChartType } from '@preload/types'
 import { notify } from '@renderer/core/notify'
 import { EventHub } from '@renderer/core/eventHub'
 import Translations from '@renderer/core/translations'
 import { utils } from '@renderer/core/utils'
+import settings from '@renderer/core/settings'
+import { Charter } from '@renderer/core/charter'
 
 const Language = Translations
 
-const chart = ui.chart as Chart
-if (!chart) throw new Error('ui.charter is not defined')
-const { meter, scale, note_type, middle } = ui.charter.settings
-const { mul, mul_sec } = ui.charter
+const chart = Charter.get_chart()
+const { meter, scale, note_type, middle, reverse_scroll } = settings
+const { mul, mul_sec } = ui
 
 const { diff, bpm_list, currentBpm, visibleTiming, currentTimeRef } = chart
 
@@ -58,7 +59,9 @@ function fuckWheel(e: WheelEvent) {
   if (!e.target) return
   e.preventDefault()
   const scr = (4 / meter.value) * (60 / currentBpm.value) * Math.sign(e.deltaY)
-  currentTimeRef.value -= scr
+
+  if (reverse_scroll.value) currentTimeRef.value += scr
+  else currentTimeRef.value -= scr
 }
 
 function validBpm(v: any) {
@@ -153,12 +156,12 @@ function nearest(x: number, y: number, part: ChartType.Bpm_part) {
     isBpm: false
   }
   const lineHeight = (60 / part.bpm) * (4 / meter.value) * mul_sec.value
-
   if (x >= 554) {
     n.isBpm = true
     n.lane = 0
     n.time = (Math.floor(y / lineHeight) * lineHeight) / mul.value + part.time
   } else {
+    n.isBpm = false
     if (Chart.isBumper(note_type.value)) {
       if (middle.value) n.lane = Math.min(Math.floor(x / 137), 2)
       else n.lane = x < 278 ? 0 : 2
@@ -275,11 +278,9 @@ function noteAdd(part: Bpm_part, e: MouseEvent) {
       HoldData.cleanUp = () => {
         delNote(note_d)
       }
-      return note_d
     }
   }
-  if (chart.valid_check(note_d)) return note_d
-  return
+  if (chart.valid_check(note_d)) diff.value.notes.push(note_d)
 }
 
 function delNote(n: ChartType.note) {
@@ -368,10 +369,11 @@ function calcBottom(t: number, h = 0) {
 function isVisible(n: ChartType.note): boolean {
   if (n.n == 'h') {
     if (utils.between(n.t, visibleTiming.value)) return true
-    return utils.between(n.t + n.h, visibleTiming.value)
+    return n.t + n.h < visibleTiming.value[1]
   }
   return utils.between(n.t, visibleTiming.value)
 }
+
 function isVisibleBpm(t: number) {
   return utils.between(t, visibleTiming.value)
 }
@@ -396,16 +398,18 @@ function isVisibleBpm(t: number) {
         v-if="note_type != '' && pending.display && pending.type == 'note'"
         :note="pending_note"
         :style="{ bottom: pending.bottom + 'px' }"
+        :title="pending.time"
         class="pending-note"
         draggable="false"
       />
       <input
         v-if="pending.type == 'bpm' && pending.display"
-        :style="{ bottom: pending.bottom + 'px' }"
+        :style="{ bottom: pending.bottom + diff.offset * mul + 'px' }"
         :value="pending.bpm"
         class="pending-bpm bpm-ticker"
         disabled
       />
+      <div :style="{ height: diff.offset * mul + 'px' }" class="lane-bpm-listed"></div>
       <div
         v-for="part in bpm_list"
         :style="{
@@ -426,8 +430,7 @@ function isVisibleBpm(t: number) {
         @drop="(e) => bpmPartDrop(part, e)"
         @mousemove="(e) => pendingNoteUpdate(e, part)"
         @dragover.prevent
-      >
-      </div>
+      ></div>
     </div>
   </div>
   <div class="note-div">
@@ -435,23 +438,24 @@ function isVisibleBpm(t: number) {
       <Note
         v-if="isVisible(n)"
         :note="n"
-        :style="{ bottom: calcBottom(n.t, n.n == 'h' ? n.h : 0) }"
+        :style="{ bottom: calcBottom(n.t + diff.offset, n.n == 'h' ? n.h : 0) }"
+        :title="JSON.stringify(n)"
         draggable="true"
-        style="position: absolute; transform: translateY(50%)"
+        style="position: absolute; transform: translateY(50%); pointer-events: all"
         @contextmenu="delNote(n)"
         @dragstart="(e) => noteDragStart(n, e)"
       />
     </template>
     <template v-for="part in bpm_list">
       <input
+        v-if="isVisibleBpm(part.time)"
+        :style="{ bottom: calcBottom(part.time + diff.offset) }"
         :value="part.bpm"
         class="bpm-ticker"
         type="text"
         @change="(e) => setPartBpm(e, part)"
         @contextmenu="delBpmPart(part)"
-        :style="{bottom: calcBottom(part.time)}"
-        v-if="isVisibleBpm(part.time)"
-      >
+      />
     </template>
   </div>
   <input :value="currentBpm" class="current-bpm bpm-ticker" @change="(e) => setCurrentBpm(e)" />

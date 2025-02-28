@@ -1,13 +1,20 @@
 import type { Languages } from '@renderer/core/translations'
-import { ref } from 'vue'
+import { reactive, toRefs } from 'vue'
 import { ChartType } from '@preload/types'
 
-export default {
-  lang: ref('简中' as Languages),
-  note_type: ref<ChartType.note['n'] | ''>('n'),
-  scale: ref(10),
+export const storage_settings = reactive({
+  lang: '简中' as Languages,
+  note_type: 'n' as ChartType.note['n'] | '',
+  scale: 10,
   /* 拍号 分音 */
-  meter: ref(4),
-  middle: ref(false),
-  charter_layout: ref("auto" as  "auto" | "middle" | "left")
-}
+  meter: 4,
+  middle: false,
+  charter_layout: 'auto' as 'auto' | 'middle' | 'left',
+  volume: 80,
+  overlap_minimum: 20,
+  reverse_scroll: false
+})
+
+const settings = toRefs(storage_settings)
+
+export default settings

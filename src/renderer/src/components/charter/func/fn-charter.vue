@@ -4,8 +4,9 @@ import { watch } from 'vue'
 import Translations from '@renderer/core/translations'
 import ARange from '@renderer/components/a-elements/a-range.vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
+import settings from '@renderer/core/settings'
 
-const setting = ui.charter.settings
+const setting = settings
 const { scale, meter } = setting
 const Language = Translations
 

@@ -57,6 +57,7 @@ export namespace ChartType {
     h: number
   }
   export type note = normal_note | hold_note | bpm_note
+  export type note_type = note["n"]
 
   export interface Song {
     name: string
@@ -74,6 +75,7 @@ export namespace ChartType {
     hard: string
     notes: note[]
     charter: string
+    offset: number
   }
 }
 export namespace HandlerReturn {
@@ -121,8 +123,10 @@ export namespace HandlerReturn {
 export type Invoker = {
   (msg: 'get-file-buffer', p: string): Promise<HandlerReturn.OpenBuffer>
   (msg: 'save-chart', p: string, data: string): Promise<void>
-  (msg: 'ask-path', fName: string, fType: string[]): Promise<HandlerReturn.askPath>
   (msg: 'open-chart', p: string): Promise<HandlerReturn.OpenChart>
   (msg: 'read-vsb', p: string): Promise<HandlerReturn.readVsb>
   (msg: 'open-exist-chart', p: string): Promise<HandlerReturn.OpenExistChart>
+  (msg: "ask-song"): Promise<HandlerReturn.askPath>
+  (msg: "ask-vsb"): Promise<HandlerReturn.askPath>
+  (msg: 'dev-tools'): Promise<void>
 }

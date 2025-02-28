@@ -1,6 +1,6 @@
-import settings from '@renderer/core/settings'
-import Settings from '@renderer/core/settings'
-import { ref } from 'vue'
+import { ref, toRaw } from 'vue'
+import { ShortCuts } from '@renderer/core/shortcut'
+import { Charter } from '@renderer/core/charter'
 
 const local_key = 'vs-charter'
 
@@ -8,6 +8,11 @@ type proj = {
   name: string
   path: string
   last_open: number
+}
+
+function or<T, K>(val: T, other: K) {
+  if (val === undefined) return other
+  return val
 }
 
 export default {
@@ -18,21 +23,23 @@ export default {
       local_key,
       JSON.stringify({
         proj: this.projects,
-        scale: Settings.scale.value,
-        meter: Settings.meter.value,
-        middle: Settings.middle.value,
-        lang: settings.lang.value
+        shortcuts: ShortCuts.toJson(),
+        ...toRaw(Charter.settings)
       })
     )
   },
   read() {
-    const data = localStorage.getItem(local_key)
-    if (!data) return
-    const { proj, scale, meter, middle } = JSON.parse(data)
-    this.projects = (proj as proj[]).toSorted((a, b) => b.last_open - a.last_open)
-    Settings.scale.value = scale
-    Settings.meter.value = meter
-    Settings.middle.value = middle
+    const s = localStorage.getItem(local_key)
+    if (!s) return
+    const data = JSON.parse(s)
+    this.projects = or(data.proj, []).toSorted((a, b) => b.last_open - a.last_open)
+    const settings = Charter.settings
+    settings.scale(data.scale)
+    settings.meter(data.meter)
+    settings.middle(data.middle)
+    settings.note_type(data.note_type)
+    settings.overlap_minimum(data.overlap_minimum)
+    settings.reverse_scroll(data.reverse_scroll)
   },
   add_proj(p: string, n: string) {
     const existed = this.projects.find((x) => x.path == p)

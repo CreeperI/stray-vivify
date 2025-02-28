@@ -2,9 +2,10 @@
 import ui from '@renderer/core/ui'
 import { watch } from 'vue'
 import Translations from '@renderer/core/translations'
+import settings from '@renderer/core/settings'
+import { ShortCuts } from '../../../core/shortcut'
 
-const setting = ui.charter.settings
-const { note_type, scale, meter, middle } = setting
+const { note_type, scale, meter, middle } = settings
 const Language = Translations
 
 watch(scale, (v) => {
@@ -31,42 +32,42 @@ const { note_choice } = ui
       <div :class="note_type == 'n' ? 'note-chosen' : ''" @click="note_choice('n')">
         <img alt="Note.png" src="/noteL.png" />
         <div>
-          <div>(1)</div>
+          <div>{{ShortCuts.$fun('note').parse()}}</div>
           <div v-html="Language.fp.note.chip" />
         </div>
       </div>
       <div :class="note_type == 'b' ? 'note-chosen' : ''" @click="note_choice('b')">
         <img alt="Bumper.png" src="/bL.png" />
         <div>
-          <div>(2)</div>
+          <div>{{ShortCuts.$fun('bumper').parse()}}</div>
           <div v-html="Language.fp.note.bumper" />
         </div>
       </div>
       <div :class="note_type == 'm' ? 'note-chosen' : ''" @click="note_choice('m')">
         <img alt="Note.mine.png" src="/bomb.png" />
         <div>
-          <div>(3)</div>
+          <div>{{ShortCuts.$fun('mine').parse()}}</div>
           <div v-html="Language.fp.note.mine" />
         </div>
       </div>
       <div :class="note_type == 'mb' ? 'note-chosen' : ''" @click="note_choice('mb')">
         <img alt="Bumper.mine.png" src="/bB.png" />
         <div>
-          <div>(4)</div>
+          <div>{{ShortCuts.$fun('mine-bumper').parse()}}</div>
           <div v-html="Language.fp.note.mb" />
         </div>
       </div>
       <div :class="note_type == 'h' ? 'note-chosen' : ''" @click="note_choice('h')">
         <img alt="Note.png" src="/noteL.png" />
         <div>
-          <div>(5)</div>
+          <div>{{ShortCuts.$fun('hold').parse()}}</div>
           <div v-html="Language.fp.note.hold" />
         </div>
       </div>
       <div :class="note_type == 's' ? 'note-chosen' : ''" @click="note_choice('s')">
         <img alt="Bumper.png" src="/sbL.png" />
         <div>
-          <div>(6)</div>
+          <div>{{ShortCuts.$fun('s-bumper').parse()}}</div>
           <div v-html="Language.fp.note.sb" />
         </div>
       </div>

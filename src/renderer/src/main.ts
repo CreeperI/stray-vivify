@@ -6,6 +6,7 @@ import { EventHub } from '@renderer/core/eventHub'
 import Storage from '@renderer/core/storage'
 
 import { createModal } from '@kolirt/vue-modal'
+import { ShortCuts } from '@renderer/core/shortcut'
 
 Storage.read()
 ui.ipcRenderer.on('notify', (_, msg, duration, t) => {
@@ -17,37 +18,7 @@ ui.ipcRenderer.on('notify', (_, msg, duration, t) => {
   }
 })
 
-function listen(e: KeyboardEvent) {
-  if (e.code == 'F12') {
-    e.preventDefault()
-    return
-  }
-  // check if user's inputting sth
-  if (document.activeElement instanceof HTMLInputElement) return
-  const chart = ui.chart
-  if (e.code == 'Space') {
-    if (!chart) return
-    e.preventDefault()
-    chart.audio.paused ? chart.audio.play() : chart.audio.pause()
-  } else if (e.code == 'KeyS' && e.ctrlKey) {
-    e.preventDefault()
-    ui.chart?.save()
-  } else if (e.code == 'Numpad1' || e.code == 'Digit1') {
-    ui.note_choice('n')
-  } else if (e.code == 'Numpad2' || e.code == 'Digit2') {
-    ui.note_choice('b')
-  } else if (e.code == 'Numpad3' || e.code == 'Digit3') {
-    ui.note_choice('m')
-  } else if (e.code == 'Numpad4' || e.code == 'Digit4') {
-    ui.note_choice('mb')
-  } else if (e.code == 'Numpad5' || e.code == 'Digit5') {
-    ui.note_choice('h')
-  } else if (e.code == 'Numpad6' || e.code == 'Digit6') {
-    ui.note_choice('s')
-  }
-}
-
-document.addEventListener('keydown', listen)
+document.addEventListener('keydown', ShortCuts.handle)
 
 EventHub.on('update', () => {
   if (ui.chart) {

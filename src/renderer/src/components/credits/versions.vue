@@ -48,6 +48,11 @@ import Build from '@renderer/components/credits/build.vue'
         </span>
       </template>
     </Build>
+    <Build build="4" y="1" m="1" d="4">
+      <template #bugs>
+        <div>修复了撞尾bug。</div>
+      </template>
+    </Build>
   </div>
 </template>
 

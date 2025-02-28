@@ -79,10 +79,27 @@ function readJson(p: string) {
 }
 
 export function handlers() {
-  ipcMain.handle('ask-path', (_, fName: string, fType: string[]): HandlerReturn.askPath => {
+  /*ipcMain.handle('ask-path', (_, fName: string, fType: string[]): HandlerReturn.askPath => {
     const x = dialog.showOpenDialogSync({
       properties: ['openFile'],
       filters: [{ name: fName, extensions: fType }]
+    })
+    if (!x) return undefined
+    return { path: x[0], name: basename(x[0]) }
+  })*/
+  ipcMain.handle('ask-song', (): HandlerReturn.askPath => {
+    const x = dialog.showOpenDialogSync({
+      properties: ['openFile'],
+      filters: [{ name: 'Music Files', extensions: ['mp3', 'wav', 'ogg'] }]
+    })
+    if (!x) return undefined
+    return { path: x[0], name: basename(x[0]) }
+  })
+
+  ipcMain.handle('ask-vsb', (): HandlerReturn.askPath => {
+    const x = dialog.showOpenDialogSync({
+      properties: ['openFile'],
+      filters: [{ name: 'VSB', extensions: ['vsb'] }]
     })
     if (!x) return undefined
     return { path: x[0], name: basename(x[0]) }

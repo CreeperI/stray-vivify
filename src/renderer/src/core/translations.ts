@@ -3,10 +3,12 @@ import { utils } from '@renderer/core/utils'
 import { reactive, watch } from 'vue'
 
 interface Translations {
+  name: string
   fp: {
     charter: string
     scale: string
     meter: string
+    volume: string
     note: {
       title: string
       chip: string
@@ -25,6 +27,7 @@ interface Translations {
       create: string
       title: string
       del: string
+      offset: string
     }
     song: {
       name: string
@@ -48,8 +51,9 @@ interface Translations {
       middle: string
       left : string
       layout: string
-
-    }
+    },
+    reverse_scroll: string
+    overlap_minimum: string
   }
   confirm: {
     vsb: string
@@ -66,18 +70,20 @@ interface Translations {
 }
 
 export const Languages = [
-  '简中'
+  'zh_cn'
   // "？？？？？"
 ] as const
 
 export type Languages = (typeof Languages)[number]
 
-const LangInf: { 简中: Translations } & Record<Languages, Partial<Translations>> = {
-  "简中": {
+export const LanguageData: { "zh_cn": Translations } & Record<Languages, Partial<Translations>> = {
+  zh_cn: {
+    name:"中文",
     fp: {
       scale: '缩放',
       meter: '分音',
       charter: '制谱器设置',
+      volume:"音量",
       note: {
         chip: '键',
         bumper: 'Bumper',
@@ -95,7 +101,8 @@ const LangInf: { 简中: Translations } & Record<Languages, Partial<Translations
         rate: '播放速度',
         create: '新增难度',
         title: '谱面设置',
-        del: '删除谱面'
+        del: '删除谱面',
+        offset: "偏移",
       },
       song: {
         name: '歌曲名',
@@ -119,7 +126,9 @@ const LangInf: { 简中: Translations } & Record<Languages, Partial<Translations
         middle: '居中',
         left : '左侧',
         layout: "轨道位置",
-      }
+      },
+      reverse_scroll: '鼠标反转',
+      overlap_minimum: '物件最小间隔时间'
     },
     confirm: {
       vsb: '确定要读取vsb吗？此操作会*替换*当前谱面且不可撤销哦。',
@@ -181,9 +190,9 @@ const LangInf: { 简中: Translations } & Record<Languages, Partial<Translations
    }*/
 }
 
-const base = reactive(utils.deepCopy(LangInf['简中']))
+const base = reactive(utils.deepCopy(LanguageData['简中']))
 
 export default base
 watch(settings.lang, (v) => {
-  utils.assign(base, LangInf[v])
+  utils.assign(base, LanguageData[v])
 })

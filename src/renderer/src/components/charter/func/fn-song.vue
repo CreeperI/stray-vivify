@@ -6,9 +6,10 @@ import ASelect from '@renderer/components/a-elements/a-select.vue'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import ARange from '@renderer/components/a-elements/a-range.vue'
+import settings from '@renderer/core/settings'
+import { Charter } from '@renderer/core/charter'
 
-const setting = ui.charter.settings
-const { scale, meter } = setting
+const { scale, meter, volume } = settings
 const Language = Translations
 
 watch(scale, (v) => {
@@ -25,9 +26,11 @@ watch(meter, (v) => {
   } else meter.value = 4
 })
 
-if (!ui.chart) throw new Error('')
-const chart = ui.chart
-const { diff, diff_flag, diff_index, currentTimeRef, play_rate_ref } = ui.chart
+const chart = Charter.get_chart()
+const { diff, diff_index, currentTimeRef, play_rate_ref } = chart
+
+
+const {update_flag} = ui
 
 function toTimeStr(seconds: number) {
   const minutes = Math.floor(seconds / 60)
@@ -41,18 +44,18 @@ function toTimeStr(seconds: number) {
     <div class="fp-title" v-html="Language.fp.chart.title"></div>
     <div class="chart-settings">
       <label v-html="Language.fp.song.composer"></label>
-      <a-text-input v-model="chart.song.composer" @change="chart.refresh()" />
+      <a-text-input v-model="chart.song.composer" @change="ui.refresh()" />
       <label v-html="Language.fp.song.name"></label>
-      <a-text-input v-model="chart.song.name" @change="chart.refresh()" />
+      <a-text-input v-model="chart.song.name" @change="ui.refresh()" />
       <label v-html="Language.fp.chart.name"></label>
-      <a-text-input v-model="diff.name" type="text" @input="chart.refresh()" />
+      <a-text-input v-model="diff.name" type="text" @input="ui.refresh()" />
       <label v-html="Language.fp.chart.level" />
       <a-text-input v-model="diff.hard" type="text" />
       <label v-html="Language.fp.song.bpm" />
       <a-number-input v-model="chart.song.bpm" min="0" step="0.01" />
       <label v-html="Language.fp.chart.choose" />
       <a-select
-        :key="diff_flag"
+        :key="update_flag"
         v-model="diff_index"
         :options="
           chart.diffs.map((v, i) => {
@@ -63,7 +66,11 @@ function toTimeStr(seconds: number) {
       <label>{{ toTimeStr(currentTimeRef) }}/{{ toTimeStr(chart.length / 1000) }}</label>
       <a-range v-model="currentTimeRef" :max="chart.length / 1000" min="0" step="0.1" />
       <label v-html="Language.fp.chart.rate + ':' + play_rate_ref + 'x'" />
-      <a-range v-model="play_rate_ref" max="2" min="0.5" step="0.1" type="range" />
+      <a-range v-model="play_rate_ref" max="2" min="0.5" step="0.1"/>
+      <label v-html="Language.fp.volume+ ':' + volume" />
+      <a-range min="0" max="100" v-model.number="volume" />
+      <label v-html="Language.fp.chart.offset + ':' + diff.offset" />
+      <a-number-input v-model="diff.offset"/>
     </div>
     <div class="chart-other">
       <div class="add-diff-btn" @click="chart.createDiff" v-html="Language.fp.chart.create" />
