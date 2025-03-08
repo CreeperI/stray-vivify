@@ -1,11 +1,10 @@
-<script setup lang="ts">
-import ui from '@renderer/core/ui'
+<script lang="ts" setup>
 import { watch } from 'vue'
 import Translations from '@renderer/core/translations'
-import settings from '@renderer/core/settings'
 import { ShortCuts } from '../../../core/shortcut'
+import { Charter } from '@renderer/core/charter'
 
-const { note_type, scale, meter, middle } = settings
+const { note_type, scale, meter, middle } = Charter.settings.to_refs
 const Language = Translations
 
 watch(scale, (v) => {
@@ -22,60 +21,60 @@ watch(meter, (v) => {
   } else meter.value = 4
 })
 
-const { note_choice } = ui
+const { note_choice } = Charter.note
 </script>
 
 <template>
   <div class="fp-unit">
-    <div class="fp-title" v-html="Language.fp.note.title" />
+    <div class="fp-title" v-html="Language.charter_func.note.title" />
     <div class="notes">
       <div :class="note_type == 'n' ? 'note-chosen' : ''" @click="note_choice('n')">
         <img alt="Note.png" src="/noteL.png" />
         <div>
-          <div>{{ShortCuts.$fun('note').parse()}}</div>
-          <div v-html="Language.fp.note.chip" />
+          <div>{{ ShortCuts.$fun('note').parse() }}</div>
+          <div v-html="Language.charter_func.note.chip" />
         </div>
       </div>
       <div :class="note_type == 'b' ? 'note-chosen' : ''" @click="note_choice('b')">
         <img alt="Bumper.png" src="/bL.png" />
         <div>
-          <div>{{ShortCuts.$fun('bumper').parse()}}</div>
-          <div v-html="Language.fp.note.bumper" />
+          <div>{{ ShortCuts.$fun('bumper').parse() }}</div>
+          <div v-html="Language.charter_func.note.bumper" />
         </div>
       </div>
       <div :class="note_type == 'm' ? 'note-chosen' : ''" @click="note_choice('m')">
         <img alt="Note.mine.png" src="/bomb.png" />
         <div>
-          <div>{{ShortCuts.$fun('mine').parse()}}</div>
-          <div v-html="Language.fp.note.mine" />
+          <div>{{ ShortCuts.$fun('mine').parse() }}</div>
+          <div v-html="Language.charter_func.note.mine" />
         </div>
       </div>
       <div :class="note_type == 'mb' ? 'note-chosen' : ''" @click="note_choice('mb')">
         <img alt="Bumper.mine.png" src="/bB.png" />
         <div>
-          <div>{{ShortCuts.$fun('mine-bumper').parse()}}</div>
-          <div v-html="Language.fp.note.mb" />
+          <div>{{ ShortCuts.$fun('mine-bumper').parse() }}</div>
+          <div v-html="Language.charter_func.note.mb" />
         </div>
       </div>
       <div :class="note_type == 'h' ? 'note-chosen' : ''" @click="note_choice('h')">
         <img alt="Note.png" src="/noteL.png" />
         <div>
-          <div>{{ShortCuts.$fun('hold').parse()}}</div>
-          <div v-html="Language.fp.note.hold" />
+          <div>{{ ShortCuts.$fun('hold').parse() }}</div>
+          <div v-html="Language.charter_func.note.hold" />
         </div>
       </div>
       <div :class="note_type == 's' ? 'note-chosen' : ''" @click="note_choice('s')">
         <img alt="Bumper.png" src="/sbL.png" />
         <div>
-          <div>{{ShortCuts.$fun('s-bumper').parse()}}</div>
-          <div v-html="Language.fp.note.sb" />
+          <div>{{ ShortCuts.$fun('s-bumper').parse() }}</div>
+          <div v-html="Language.charter_func.note.sb" />
         </div>
       </div>
     </div>
     <div class="note-setting">
       <label for="middle">
         <input id="middle" v-model="middle" type="checkbox" />
-        <span v-html="Language.fp.note.middle" />
+        <span v-html="Language.charter_func.note.middle" />
       </label>
     </div>
   </div>

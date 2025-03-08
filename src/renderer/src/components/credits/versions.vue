@@ -48,9 +48,23 @@ import Build from '@renderer/components/credits/build.vue'
         </span>
       </template>
     </Build>
-    <Build build="4" y="1" m="1" d="4">
+    <Build build="4" y="2025" m="3" d="8">
       <template #bugs>
         <div>修复了撞尾bug。</div>
+      </template>
+      <template #header>
+        <div>stray/vivify</div>
+      </template>
+      <template>
+        <div>
+          新增了纯享模式。该模式下，你可以撇掉别的乱七八糟的东西。
+        </div>
+        <div>增加了撤销、重做功能。快捷键为Ctrl+Z和Ctrl+Y，这方面的自定义还在路上（悲</div>
+        <div>重写了部分底层逻辑，修改了小节线的显示方式，添加了小节数显示。</div>
+        <div>优化了轨道在左侧时的功能选项的显示方式。</div>
+        <div>新增了Credits。请在设置中打开！</div>
+        <div>移除了note重叠的检测，现在只不允许放在同一个位置（这意味着你大概可以把单键放在hold里面……</div>
+        <div>为制谱器起了个名字。</div>
       </template>
     </Build>
   </div>

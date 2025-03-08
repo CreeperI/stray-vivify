@@ -4,6 +4,7 @@ import { dialog, ipcMain } from 'electron'
 import { ChartType, HandlerReturn } from '../preload/types'
 import { basename } from 'node:path'
 import VsbParser from './vsbParser'
+import * as electron from 'electron'
 
 /*export class Charter {
   notes: Ref<ChartType.notes_data>
@@ -79,18 +80,10 @@ function readJson(p: string) {
 }
 
 export function handlers() {
-  /*ipcMain.handle('ask-path', (_, fName: string, fType: string[]): HandlerReturn.askPath => {
-    const x = dialog.showOpenDialogSync({
-      properties: ['openFile'],
-      filters: [{ name: fName, extensions: fType }]
-    })
-    if (!x) return undefined
-    return { path: x[0], name: basename(x[0]) }
-  })*/
   ipcMain.handle('ask-song', (): HandlerReturn.askPath => {
     const x = dialog.showOpenDialogSync({
       properties: ['openFile'],
-      filters: [{ name: 'Music Files', extensions: ['mp3', 'wav', 'ogg'] }]
+      filters: [{ name: 'Music Files', extensions: ['mp3', 'wav', 'ogg','m4a'] }]
     })
     if (!x) return undefined
     return { path: x[0], name: basename(x[0]) }
@@ -127,12 +120,14 @@ export function handlers() {
       return {
         state: 'success',
         buf,
-        chart: data
+        chart: data,
+        name: basename(p)
       }
     } else {
       return {
         state: 'created',
-        buf
+        buf,
+        name: basename(p)
       }
     }
   })
@@ -158,7 +153,11 @@ export function handlers() {
     }
   })
   ipcMain.handle('read-vsb', (_, p: string): HandlerReturn.readVsb => {
+    if (!existsSync(p)) return
     const buf = readFileSync(p)
     return new VsbParser(buf).runToNotes()
+  })
+  ipcMain.handle("open-url",(_, p:string):void => {
+    electron.shell.openExternal(p)
   })
 }

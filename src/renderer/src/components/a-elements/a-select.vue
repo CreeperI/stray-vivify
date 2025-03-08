@@ -3,23 +3,23 @@ import { computed } from 'vue'
 
 const props = defineProps<{
   // cb: (n: T) => void
-  options: { val: T; key: string }[]
+  options: { val: T; display: string }[]
 }>()
 const model = defineModel<T>()
 
-const option: { val: T; key: string }[] = (() => {
+const option: { val: T; display: string }[] = (() => {
   if (props.options.length == 0) return []
   if (typeof props.options[0] == 'object') {
     return props.options
   } else {
     return props.options.map((v) => {
-      return { val: v, key: v }
+      return { val: v, display: v }
     })
   }
-})() as { val: T; key: string }[]
+})() as { val: T; display: string }[]
 
 const val = computed(() => {
-  return option.find((v) => v.val == model.value)?.key
+  return option.find((v) => v.val == model.value)?.display
 })
 
 const on_click = (val: T) => {
@@ -31,7 +31,7 @@ const on_click = (val: T) => {
   <div class="a-select">
     <div class="a-select-value" v-html="val" />
     <div class="a-option-wrapper">
-      <div v-for="o in option" class="a-option" @click="() => on_click(o.val)" v-html="o.key" />
+      <div v-for="o in option" class="a-option" @click="() => on_click(o.val)" v-html="o.display" />
     </div>
   </div>
 </template>

@@ -2,7 +2,7 @@ import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron'
 import { join } from 'path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { handlers } from './charter'
+import { handlers } from './handlers'
 
 function window_max(win: BrowserWindow) {
   if (win.isMaximized()) {

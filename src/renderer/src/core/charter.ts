@@ -1,9 +1,10 @@
 import { ChartType, Invoker } from '@preload/types'
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, reactive, ref, toRefs, watch } from 'vue'
 import Translations, { LanguageData, Languages } from '@renderer/core/translations'
 import { utils } from '@renderer/core/utils'
 import { notify } from '@renderer/core/notify'
-import { Chart } from '@renderer/core/chart'
+import { _chart } from '@renderer/core/chart'
+import { modal } from '@renderer/core/modal'
 
 const ipcRenderer = window.electron.ipcRenderer
 const _invoke: Invoker = ipcRenderer.invoke
@@ -32,7 +33,10 @@ const Invoke = {
   },
   open_chart(path: string) {
     return _invoke('open-chart', path)
-  }
+  },
+  open_url(url: string) {
+    return _invoke('open-url', url)
+  },
 }
 
 const settings_function = (() => {
@@ -50,6 +54,7 @@ const settings_function = (() => {
   })
   const fn = () => data
   fn.data = data
+  fn.to_refs = toRefs(data)
 
   fn.lang = (lang: any) => {
     if (lang in Languages) data.lang = lang
@@ -57,7 +62,7 @@ const settings_function = (() => {
   }
   fn.note_type = (nt: any) => {
     if (['n', 'h', 's', 'mb', 'm', 'b'].includes(nt)) data.note_type = nt
-    else data.note_type = nt
+    else data.note_type = ''
   }
   fn.scale = (scale: any) => {
     if (0 < scale && scale < 20) data.scale = scale
@@ -87,40 +92,99 @@ const settings_function = (() => {
     if (typeof rs == 'boolean') data.reverse_scroll = rs
     else data.reverse_scroll = false
   }
+  watch(
+    () => data.lang,
+    (v) => {
+      utils.assign(Translations, LanguageData['zh_cn'])
+      utils.assign(Translations, LanguageData[v])
+    }
+  )
+  watch(
+    () => data.volume,
+    (v) => {
+      if (_chart.current) _chart.current.audio.volume = v / 100
+    }
+  )
   return fn
 })()
 
-const refs = {
-  window: {
-    height: ref(window.outerHeight),
-    width: ref(window.outerWidth),
-  },
-  mul: computed(() => settings_function.data.scale * 200 + 100)
+const ref_window = {
+  height: ref(window.outerHeight),
+  width: ref(window.outerWidth),
+  isMaximized: ref(false)
 }
-const update = {
-  flag: ref(114),
-  update() {
-    update.flag.value = Math.random()
+const refs = {
+  window: ref_window,
+  /* pixel/ms */
+  mul: computed(() => (settings_function.data.scale * 200 + 100) / 1000),
+  state: ref('startUp' as 'startUp' | 'charting' | 'cache'),
+  visible: computed(() => Math.round(ref_window.height.value / refs.mul.value)),
+  current_name: ref('')
+}
+const note = {
+  type: settings_function.to_refs.note_type,
+  note_choice(val: ChartType.note['n']) {
+    const type = settings_function.to_refs.note_type
+    if (type.value == val) type.value = ''
+    else type.value = val
   }
 }
+
+const update = (() => {
+  const flag = ref(114)
+  const update = () => {
+    flag.value = Math.random()
+  }
+  update.flag = flag
+  return update
+})()
+const refresh = (() => {
+  const flag = ref(true)
+  const refresh = () => {
+    flag.value = !flag.value
+    setTimeout(() => (flag.value = true), 10)
+  }
+  refresh.flag = flag
+  return refresh
+})()
+
+const record = {
+  mode: ref(false),
+  show_bar_line: ref(false),
+  show_bar_count: ref(false),
+  show_bpm: ref(false)
+}
+
+const CURRENT_BUILD = 4
 
 export const Charter = {
   invoke: Invoke,
+  ipcRenderer,
   settings: settings_function,
   notify: notify,
   refs,
+  note,
   update,
+  refresh,
+  record,
+  CURRENT_BUILD,
+  get state() {
+    return refs.state
+  },
   get_chart() {
-    if (Chart.current) return Chart.current
+    if (_chart.current) return _chart.current
     throw new Error('No chart loaded.')
-  }
-
+  },
+  if_current() {
+    return _chart.current
+  },
+  load_state: false,
+  modal
 }
 
-watch(
-  () => settings_function.data.lang,
-  (v) => {
-    utils.assign(Translations, LanguageData['zh_cn'])
-    utils.assign(Translations, LanguageData[v])
-  }
-)
+ipcRenderer.on('window-max-state', (_, state: boolean) => {
+  Charter.refs.window.isMaximized.value = state
+})
+
+// @ts-ignore
+window.charter = Charter

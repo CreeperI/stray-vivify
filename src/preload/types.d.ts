@@ -15,6 +15,7 @@ export namespace ChartType {
    *
    */
 
+  /** @deprecated*/
   export type Bpm_part = {
     bpm: number
     time: number
@@ -57,12 +58,12 @@ export namespace ChartType {
     h: number
   }
   export type note = normal_note | hold_note | bpm_note
-  export type note_type = note["n"]
+  export type note_type = note['n']
 
   export interface Song {
     name: string
     composer: string
-    bpm: number
+    bpm: string
   }
 
   export interface Chart {
@@ -77,6 +78,10 @@ export namespace ChartType {
     charter: string
     offset: number
   }
+  export type bpm_part = {
+    time: number
+    bpm: number
+  }
 }
 export namespace HandlerReturn {
   export type OpenChart =
@@ -87,10 +92,12 @@ export namespace HandlerReturn {
         state: 'success'
         chart: ChartType.Chart
         buf: buffer
+    name: string
       }
     | {
         state: 'created'
         buf: buffer
+        name: string
       }
 
   export type OpenBuffer =
@@ -100,7 +107,7 @@ export namespace HandlerReturn {
       }
     | { state: 'failed'; msg: string }
   export type askPath = { path: string; name: string } | undefined
-  export type readVsb = ChartType.note[]
+  export type readVsb = ChartType.note[] | undefined
   export type OpenExistChart =
     | {
         state: 'missing'
@@ -126,7 +133,8 @@ export type Invoker = {
   (msg: 'open-chart', p: string): Promise<HandlerReturn.OpenChart>
   (msg: 'read-vsb', p: string): Promise<HandlerReturn.readVsb>
   (msg: 'open-exist-chart', p: string): Promise<HandlerReturn.OpenExistChart>
-  (msg: "ask-song"): Promise<HandlerReturn.askPath>
-  (msg: "ask-vsb"): Promise<HandlerReturn.askPath>
+  (msg: 'ask-song'): Promise<HandlerReturn.askPath>
+  (msg: 'ask-vsb'): Promise<HandlerReturn.askPath>
   (msg: 'dev-tools'): Promise<void>
+  (msg: 'open-url', url: string): Promise<void>
 }

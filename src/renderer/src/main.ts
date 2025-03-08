@@ -1,15 +1,16 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+import "@renderer/styles.css"
 import { notify } from '@renderer/core/notify'
-import ui from '@renderer/core/ui'
 import { EventHub } from '@renderer/core/eventHub'
 import Storage from '@renderer/core/storage'
 
 import { createModal } from '@kolirt/vue-modal'
 import { ShortCuts } from '@renderer/core/shortcut'
+import { Charter } from '@renderer/core/charter'
 
 Storage.read()
-ui.ipcRenderer.on('notify', (_, msg, duration, t) => {
+Charter.ipcRenderer.on('notify', (_, msg, duration, t) => {
   if (!t) t = 'normal'
   if (t in notify) {
     notify[t as keyof typeof notify](msg, duration)
@@ -21,17 +22,14 @@ ui.ipcRenderer.on('notify', (_, msg, duration, t) => {
 document.addEventListener('keydown', ShortCuts.handle)
 
 EventHub.on('update', () => {
-  if (ui.chart) {
-    ui.chart.on_update()
-  }
-  ui.windowHeight.value = window.innerHeight
-  ui.windowWidth.value = window.innerWidth
+  Charter.refs.window.height.value = window.innerHeight
+  Charter.refs.window.width.value = window.innerWidth
+
+  Charter.if_current()?.on_update()
 })
 
 setInterval(() => {
-  if (ui.chart) {
-    ui.chart.save()
-  }
+  Charter.if_current()?.save()
   Storage.save()
 }, 5000)
 setInterval(() => {

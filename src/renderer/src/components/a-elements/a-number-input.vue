@@ -15,6 +15,7 @@ input {
   line-height: 1rem;
   text-align: center;
   border-bottom: 1px solid transparent;
+  box-sizing: border-box;
 }
 input:focus {
   border-bottom: 1px solid var(--grey);

@@ -4,12 +4,16 @@ import SettingsModal from '@renderer/components/modals/settings-modal.vue'
 import ConfirmModal from '@renderer/components/modals/confirm-modal.vue'
 import { openModal } from '@kolirt/vue-modal'
 import VersionsModal from '@renderer/components/modals/versions-modal.vue'
+import CreditsModal from '@renderer/components/modals/credits-modal.vue'
+import RecordModal from '@renderer/components/modals/record-modal.vue'
 
 export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal)
   static ConfirmModal = new modal(ConfirmModal)
   static ShowInformationModal = new modal(ConfirmModal)
   static VersionsModal = new modal(VersionsModal)
+  static CreditsModal = new modal(CreditsModal)
+  static RecordModal = new modal(RecordModal)
 
   component: T
   priority: number
@@ -24,7 +28,7 @@ export class modal<T extends Component> {
   show(props: ComponentProps<T>) {
     this.props = Object.assign({}, props)
     if (!this.props) throw new Error()
-    return openModal(this.component, this.props).catch(() => {})
+    return openModal(this.component, this.props).catch(() =>{})
   }
 }
 

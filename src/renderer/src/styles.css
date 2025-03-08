@@ -1,0 +1,42 @@
+.fp-wrapper {
+  width: calc(100% - 40px);
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.fp-unit {
+  width: calc(100% - 40px);
+  margin: 10px;
+  box-shadow: #0d1418 0 0 10px;
+  background: var(--dark-bgi);
+  padding: 10px;
+
+  * {
+    user-select: none;
+  }
+
+  .fp-title {
+    line-height: 2rem;
+    font-size: 1.3rem;
+    width: 100%;
+    border-bottom: 2px solid #8d8d8d;
+    margin-bottom: 10px;
+  }
+}
+
+@keyframes rainbow-border {
+  0% {     color: red; }
+  14.28% { color: orange; }
+  28.56% { color: yellow; }
+  42.84% { color: green; }
+  57.12% { color: blue; }
+  71.4% {  color: indigo; }
+  85.68% { color: violet; }
+  100% {   color: red; }
+}
+
+.rainbow-text {
+  border: 5px solid;
+  animation: rainbow-border 5s linear infinite;
+}

@@ -24,7 +24,7 @@ export default {
       JSON.stringify({
         proj: this.projects,
         shortcuts: ShortCuts.toJson(),
-        ...toRaw(Charter.settings)
+        ...toRaw(Charter.settings.data)
       })
     )
   },
@@ -62,5 +62,6 @@ export default {
     this.proj_state.value = this.projects
       .map((pj) => pj.path + pj.name)
       .reduce((a, b) => a + b).length
-  }
+  },
+  stored_charts: [],
 }

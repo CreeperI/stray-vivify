@@ -1,21 +1,26 @@
 <script lang="ts" setup>
-import ui from '@renderer/core/ui'
 import LaneNotes from '@renderer/components/charter/LaneNotes.vue'
-import settings from '@renderer/core/settings'
+import { Charter } from '@renderer/core/charter'
 
-const state = ui.state
-const meter = settings.meter
-if (!ui.chart) throw new Error('fuck!')
-const chart = ui.chart
-const { currentBpm, currentTimeRef } = chart
+const chart = Charter.get_chart()
+
+const { meter, reverse_scroll } = Charter.settings.to_refs
+
+const { current_bpm } = chart
+const { writable_current_second, writable_current_ms } = chart.audio.refs
 
 function fuckWheel(e: WheelEvent) {
   chart.audio.pause()
   if (!e.target) return
-  e.preventDefault()
-  const scr = (4 / meter.value) * (60 / currentBpm.value) * Math.sign(e.deltaY)
-  currentTimeRef.value -= scr
+  chart.audio.current_time = chart.diff.nearest(writable_current_ms.value)
+  const scr = (4 / meter.value) * (60 / current_bpm.value) * Math.sign(e.deltaY)
+  if (reverse_scroll.value) {
+    writable_current_second.value += scr
+  } else {
+    writable_current_second.value -= scr
+  }
 }
+const refresh = Charter.refresh.flag
 
 /**
  * 0: 0px
@@ -27,28 +32,29 @@ function fuckWheel(e: WheelEvent) {
 </script>
 
 <template>
-  <div class="lane-wrapper" @wheel="fuckWheel">
+  <div class="lane-wrapper" @wheel.passive="fuckWheel" v-if="refresh">
+    <canvas id="charter-canvas" class="charter-canvas" height="1080" width="624"/>
     <div class="lane-inner">
-      <div class="lane-sline" style="background-color: #ffffff; left: 0" />
-      <div class="lane-sline" style="background-color: #ffffff; left: 548px" />
+      <div class="lane-line" style="background-color: #ffffff; left: 0" />
+      <div class="lane-line" style="background-color: #ffffff; left: 548px" />
       <div class="lane-line" style="background-color: #003b63; left: 137px" />
       <div class="lane-line" style="background-color: #45337c; left: 274px" />
       <div class="lane-line" style="background-color: #60003a; left: 411px" />
       <div class="lane-bg" style="background-color: #001523; left: 5px" />
       <div class="lane-bg" style="background-color: #270017; left: 279px" />
       <div class="lane-bottom" />
-      <lane-notes v-if="state == 'charting'" />
+      <lane-notes/>
     </div>
   </div>
 </template>
 
 <style scoped>
 .lane-wrapper {
-  width: 702px;
   box-shadow: black 0 0 15px;
-  flex-basis: 702px;
+  flex-basis: 662px;
   padding: 0 40px;
   background: var(--dark-bgi);
+  position: relative;
 }
 
 .lane-inner {
@@ -56,7 +62,6 @@ function fuckWheel(e: WheelEvent) {
   height: 100%;
   position: relative;
   padding: 0;
-  overflow: hidden;
   border-right: 2px solid #8d8d8d;
 }
 
@@ -68,11 +73,10 @@ function fuckWheel(e: WheelEvent) {
   border: 6px solid #ffffff;
   background-color: #272727;
   height: var(--h-l-b);
-  z-index: 114514;
+  z-index: var(--z-lane-bottom);
 }
 
-.lane-line,
-.lane-sline {
+.lane-line {
   width: 6px;
   height: 100%;
   border: 0;
@@ -80,13 +84,9 @@ function fuckWheel(e: WheelEvent) {
   margin: 0;
   position: absolute;
   top: 0;
-  z-index: 1;
+  z-index: var(--z-lane-line);
   user-select: none;
   pointer-events: none;
-}
-
-.lane-sline {
-  z-index: var(--z-highest);
 }
 
 .lane-bg {
@@ -94,9 +94,20 @@ function fuckWheel(e: WheelEvent) {
   height: 100%;
   position: absolute;
   top: 0;
+  z-index: var(--z-lane-bg);
 }
-
+.charter-canvas {
+  height: calc(100% - var(--h-l-b));
+  width: 664px;
+  z-index: var(--z-lane-canvas);
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  user-select: none;
+}
 .lane-bar-line {
   background-image: linear-gradient(to bottom, #ffffff 4px, transparent 4px);
 }
+
 </style>

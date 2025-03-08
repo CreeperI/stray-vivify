@@ -1,14 +1,17 @@
 <script lang="ts" setup>
 import Storage from '@renderer/core/storage'
-import ui from '@renderer/core/ui'
 import Translations from '@renderer/core/translations'
 import { Charter } from '@renderer/core/charter'
+import { _chart } from '@renderer/core/chart'
 
 const proj = Storage.projects
 
 function open_proj(p: string) {
-  ui.open_chart(p)
+  _chart.open_chart(p).catch(() => {
+    Charter.state.value = 'startUp'
+  })
 }
+
 const flag = Charter.update.flag
 
 function toDate(time: number): string {
@@ -48,6 +51,7 @@ function toDate(time: number): string {
       </div>
     </div>
     <div class="start-right">
+      <div>点击顶部栏的文件-打开以开始写谱。</div>
       <div>点击右下角build以查看更新记录！</div>
     </div>
   </div>

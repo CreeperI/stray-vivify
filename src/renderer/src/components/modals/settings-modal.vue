@@ -1,19 +1,20 @@
 <script lang="ts" setup>
-import settings from '@renderer/core/settings'
-import Translations, { Languages } from '@renderer/core/translations'
+import Translations, { LanguageData, Languages } from '@renderer/core/translations'
 import ASelect from '@renderer/components/a-elements/a-select.vue'
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import ALabel from '@renderer/components/a-elements/a-label.vue'
 import { computed, ref } from 'vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
+import { Charter } from '@renderer/core/charter'
+import AButton from '@renderer/components/a-elements/a-button.vue'
 
 const Language = Translations
-const { lang, charter_layout, overlap_minimum, reverse_scroll } = settings
+const { lang, charter_layout, overlap_minimum, reverse_scroll } = Charter.settings.to_refs
 const pos_options = [
-  { key: Language.settings.layout.auto, val: 'auto' },
-  { key: Language.settings.layout.middle, val: 'middle' },
-  { key: Language.settings.layout.left, val: 'left' }
+  { display: Language.settings.layout.auto, val: 'auto' },
+  { display: Language.settings.layout.middle, val: 'middle' },
+  { display: Language.settings.layout.left, val: 'left' }
 ]
 const active = ref(0)
 const ia = (n: number) => computed(() => active.value == n ? 'active-tab' : '')
@@ -23,8 +24,8 @@ const ia = (n: number) => computed(() => active.value == n ? 'active-tab' : '')
   <SimpleModal :title="Language.settings.title" size="sm">
     <div class="settings-wrapper">
       <div class="setting-list">
-        <div @click="active = 0" :class="ia(0).value">111</div>
-        <div @click="active = 1" :class="ia(1).value">222</div>
+        <div @click="active = 0" :class="ia(0).value">1</div>
+        <div @click="active = 1" :class="ia(1).value">2</div>
       </div>
       <div class="contain" v-if="active == 0">
         <a-label :label="Language.settings.language + Language.settings.after_reboot">
@@ -32,7 +33,7 @@ const ia = (n: number) => computed(() => active.value == n ? 'active-tab' : '')
             v-model="lang"
             :options="
               Languages.map((x) => {
-                return { key: x, val: x }
+                return { display: LanguageData[x].name, val: x }
               })
             "
           />
@@ -50,7 +51,7 @@ const ia = (n: number) => computed(() => active.value == n ? 'active-tab' : '')
         </a-label>
       </div>
     </div>
-    <template #footer> /a b30</template>
+    <template #footer><a-button msg="Credits" @click="Charter.modal.CreditsModal.show({})"/></template>
   </SimpleModal>
 </template>
 

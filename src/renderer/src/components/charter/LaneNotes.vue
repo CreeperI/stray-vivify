@@ -1,68 +1,25 @@
 <script lang="ts" setup>
 import { computed, ComputedRef, ref, toRaw, watch } from 'vue'
-import ui from '@renderer/core/ui'
-import { Bpm_part, Chart } from '@renderer/core/chart'
+import { _chart } from '@renderer/core/chart'
 import Note from '@renderer/components/charter/note.vue'
 import { ChartType } from '@preload/types'
 import { notify } from '@renderer/core/notify'
-import { EventHub } from '@renderer/core/eventHub'
 import Translations from '@renderer/core/translations'
 import { utils } from '@renderer/core/utils'
-import settings from '@renderer/core/settings'
 import { Charter } from '@renderer/core/charter'
 
-const Language = Translations
-
 const chart = Charter.get_chart()
-const { meter, scale, note_type, middle, reverse_scroll } = settings
-const { mul, mul_sec } = ui
+const { meter, note_type, middle, scale } = Charter.settings.to_refs
+const { mul } = Charter.refs
+const diff = chart.ref.diff
 
-const { diff, bpm_list, currentBpm, visibleTiming, currentTimeRef } = chart
-
-const bpmBgi = computed(() => (4 / meter.value) * mul_sec.value)
+const { current_bpm, visible_timing } = chart
+const { current_ms } = chart.audio.refs
+const record_mode = Charter.record.mode
+const show_current_bpm = Charter.record.show_bpm
+const bpm_list = () => chart.diff.bpm_list()
 
 // ----
-const wrapper = ref<HTMLDivElement>()
-
-function initScroll() {
-  if (!wrapper.value) {
-    setTimeout(initScroll, 10)
-    return
-  }
-  const ele = wrapper.value
-  ele.scrollTo(0, wrapper.value.scrollHeight)
-  ele.style.opacity = '1'
-  EventHub.on('update', () => {
-    ele.scrollTo({
-      top: ele.scrollHeight - currentTimeRef.value * mul_sec.value - ele.offsetHeight
-    })
-  })
-
-  watch(
-    scale,
-    () => {
-      const totalHeight = 1000 * mul.value * chart.length
-      // relatively this is rather inaccurate, so i fucked this
-      // const totalHeight = ele.scrollHeight
-      const yAt = currentTimeRef.value * mul.value
-
-      ele.scrollTo({ top: totalHeight - yAt })
-    },
-    { flush: 'post' }
-  )
-}
-
-initScroll()
-
-function fuckWheel(e: WheelEvent) {
-  chart.audio.pause()
-  if (!e.target) return
-  e.preventDefault()
-  const scr = (4 / meter.value) * (60 / currentBpm.value) * Math.sign(e.deltaY)
-
-  if (reverse_scroll.value) currentTimeRef.value += scr
-  else currentTimeRef.value -= scr
-}
 
 function validBpm(v: any) {
   return isFinite(Number(v)) && Number(v) > 0
@@ -76,10 +33,10 @@ function bpmGuard(e: Event, init: number) {
 }
 
 function setCurrentBpm(e: Event) {
-  currentBpm.value = bpmGuard(e, currentBpm.value)
+  current_bpm.value = bpmGuard(e, current_bpm.value)
 }
 
-function setPartBpm(e: Event, part: Bpm_part) {
+function setPartBpm(e: Event, part: ChartType.bpm_part) {
   const bpmValue = bpmGuard(e, part.bpm)
   const n = diff.value.notes.find((x) => {
     return x.n == 'p' ? x.t == part.time : false
@@ -92,7 +49,7 @@ const pending = ref({
   lane: 0 as 0 | 1 | 2 | 3,
   display: true,
   type: 'note' as 'note' | 'bpm',
-  bpm: currentBpm.value,
+  bpm: current_bpm.value,
   time: 0,
   bottom: 0,
   len: 0
@@ -148,38 +105,37 @@ const HoldData = {
   }
 }
 
-function nearest(x: number, y: number, part: ChartType.Bpm_part) {
+function nearest(x: number, y: number) {
   const n = {
     lane: 0,
     // millisecond
     time: 0,
     isBpm: false
   }
-  const lineHeight = (60 / part.bpm) * (4 / meter.value) * mul_sec.value
   if (x >= 554) {
     n.isBpm = true
     n.lane = 0
-    n.time = (Math.floor(y / lineHeight) * lineHeight) / mul.value + part.time
+    n.time = chart.diff.nearest(y / mul.value + current_ms.value, false)
   } else {
     n.isBpm = false
-    if (Chart.isBumper(note_type.value)) {
+    if (_chart.isBumper(note_type.value)) {
       if (middle.value) n.lane = Math.min(Math.floor(x / 137), 2)
       else n.lane = x < 278 ? 0 : 2
     } else {
       n.lane = Math.min(Math.floor(x / 137), 3)
     }
-    n.time = (Math.round(y / lineHeight) * lineHeight) / mul.value + part.time
+    n.time = chart.diff.nearest(y / mul.value + current_ms.value)
   }
   return n
 }
 
-function nearest_note(x: number, y: number, part: Bpm_part): ChartType.note {
-  const n = nearest(x, y, part)
+function nearest_note(x: number, y: number): ChartType.note {
+  const n = nearest(x, y)
   if (note_type.value == '') throw new Error()
   if (n.isBpm) {
     return {
       n: 'p',
-      v: chart.bpm_of_time(n.time),
+      v: chart.bpm_of_time(n.time)?.bpm ?? 120,
       l: 0,
       t: n.time
     }
@@ -200,9 +156,17 @@ function nearest_note(x: number, y: number, part: Bpm_part): ChartType.note {
     }
 }
 
-function pendingNoteUpdate(e: MouseEvent, p: Bpm_part) {
+function pendingNoteUpdate(e: MouseEvent) {
   if (!e.target) return
   if (!(e.target instanceof HTMLDivElement)) {
+    pending.value.display = false
+    return
+  }
+  if (chart.audio.paused == false) {
+    pending.value.display = false
+    return
+  }
+  if (Charter.record.mode.value) {
     pending.value.display = false
     return
   }
@@ -213,10 +177,11 @@ function pendingNoteUpdate(e: MouseEvent, p: Bpm_part) {
 
   // target's bottom pos = target.offsetTop + target.scrollHeight
   // here for "n" is the relative value for this certain bpm-box
-  const n = nearest(x, y, p)
+  const n = nearest(x, y)
 
   pending.value.type = n.isBpm ? 'bpm' : 'note'
   pending.value.time = n.time
+  pending.value.display = true
 
   if (n.isBpm) HoldData.clean()
 
@@ -224,11 +189,9 @@ function pendingNoteUpdate(e: MouseEvent, p: Bpm_part) {
     n.lane = HoldData.place.value.lane
     pending.value.len = n.time - HoldData.place.value.start
     pending.value.time = HoldData.place.value.start
-    pending.value.display = chart.valid_check(pending_note.value, true)
     pending.value.bottom = HoldData.place.value.start * mul.value - 23
     return
   }
-  pending.value.display = chart.valid_check(pending_note.value)
   if (pending.value.type == 'note') {
     // check valid
     pending.value.lane = n.lane as 0 | 1 | 2 | 3
@@ -240,7 +203,7 @@ function pendingNoteUpdate(e: MouseEvent, p: Bpm_part) {
   // 42 might refer 1.5rem?
 }
 
-function noteAdd(part: Bpm_part, e: MouseEvent) {
+function noteAdd(e: MouseEvent) {
   if (!e.target) return
   if (!(e.target instanceof HTMLDivElement)) return
 
@@ -248,7 +211,7 @@ function noteAdd(part: Bpm_part, e: MouseEvent) {
   if (t == '') return
   const target = e.target as HTMLDivElement
 
-  const note_d: ChartType.note = nearest_note(e.offsetX, target.clientHeight - e.offsetY, part)
+  const note_d: ChartType.note = nearest_note(e.offsetX, target.clientHeight - e.offsetY)
 
   if (t == 'h') {
     if (HoldData.place.value.flag) {
@@ -257,7 +220,6 @@ function noteAdd(part: Bpm_part, e: MouseEvent) {
       HoldData.clear()
       return // here returned for the hold-end should not be added as normal-note
     } else {
-      if (!chart.valid_check(note_d)) return
       HoldData.place.value.flag = true
       watch(note_type, () => HoldData.clean(), { once: true })
       HoldData.place.value.start = note_d.t
@@ -267,7 +229,7 @@ function noteAdd(part: Bpm_part, e: MouseEvent) {
           const h = diff.value.notes.find((x) => {
             return x.n == 'h' ? x.l == note_d.l && x.t == note_d.t : false
           }) as ChartType.hold_note
-          if (h && chart.valid_check({ l: h.l, t: h.t, n: 'h', h: len }, true)) {
+          if (h) {
             h.h = len
             return
           }
@@ -280,7 +242,7 @@ function noteAdd(part: Bpm_part, e: MouseEvent) {
       }
     }
   }
-  if (chart.valid_check(note_d)) diff.value.notes.push(note_d)
+  chart.diff.add_note(note_d)
 }
 
 function delNote(n: ChartType.note) {
@@ -289,40 +251,22 @@ function delNote(n: ChartType.note) {
     HoldData.clean()
     return
   }
-  diff.value.notes.splice(diff.value.notes.indexOf(n), 1)
+  chart.diff.remove_note(n)
 }
 
-function addBpmPart(part: Bpm_part, e: MouseEvent) {
-  if (!e.target) return
-  if (!(e.target instanceof HTMLDivElement)) return
-  const x = e.offsetX,
-    y = e.target.clientHeight - e.offsetY
-  const n = nearest(x, y, part)
-
-  const new_part: ChartType.note = {
-    t: n.time,
-    v: part.bpm,
-    n: 'p',
-    l: 0
-  }
-  if (chart.valid_check(new_part)) diff.value.notes.push(new_part)
-  return
-}
-
-function delBpmPart(part: Bpm_part) {
-  console.log(114514)
+function delBpmPart(part: ChartType.bpm_part) {
   HoldData.clean()
   const part_note = diff.value.notes.find((x) => {
     return x.n == 'p' ? x.t == part.time && x.v == part.bpm : false
   })
   if (!part_note) return
-  const index = bpm_list.value.indexOf(part)
+  const index = bpm_list().indexOf(part)
   if (index == 0) {
     notify.error('第一个不能删哦。')
     return
   }
 
-  diff.value.notes.splice(diff.value.notes.indexOf(part_note), 1)
+  chart.diff.remove_note(part_note)
 }
 
 // -----
@@ -339,51 +283,58 @@ function noteDragStart(note: ChartType.note, e: DragEvent) {
   dragCache.note_data = toRaw(note)
   dragCache.clear = () => {
     // part.notes.splice(part.notes.indexOf(note), 1)
-    diff.value.notes.splice(diff.value.notes.indexOf(note), 1)
+    chart.diff.remove_note(note)
   }
 }
 
-function bpmPartDrop(part: Bpm_part, e: DragEvent) {
+function drop(e: DragEvent) {
   if (!dragFlag.value) return
   const note = dragCache.note_data as ChartType.note
-  const nest = nearest(e.offsetX, (e.target as HTMLDivElement).clientHeight - e.offsetY, part)
+  const nest = nearest(e.offsetX, (e.target as HTMLDivElement).clientHeight - e.offsetY)
   const new_note = { ...note }
   new_note.t = nest.time
   new_note.l = nest.lane
-  if (chart.valid_check(new_note)) {
-    dragCache.clear()
-    diff.value.notes.push(new_note)
-  } else {
-    notify.error(Language.notify.move_error)
-  }
+  dragCache.clear()
+  chart.diff.add_note(new_note)
+
   dragCache.clear = () => {}
   dragCache.note_data = undefined
   dragFlag.value = false
 }
 
-function calcBottom(t: number, h = 0) {
-  if (h) return (t + h / 2 - currentTimeRef.value * 1000) * mul.value + 'px'
-  return (t - currentTimeRef.value * 1000) * mul.value + 'px'
+function calcBottom(t: number, current: number, h = 0) {
+  if (h) return (t + h / 2 - current) * mul.value + 'px'
+  return (t - current) * mul.value + 'px'
 }
 
-function isVisible(n: ChartType.note): boolean {
+function isVisible(n: ChartType.note, visible: [number, number]): boolean {
   if (n.n == 'h') {
-    if (utils.between(n.t, visibleTiming.value)) return true
-    return n.t + n.h < visibleTiming.value[1]
+    if (utils.between(n.t, visible)) return true
+    return n.t + n.h < visible[1]
   }
-  return utils.between(n.t, visibleTiming.value)
+  return utils.between(n.t, visible)
 }
 
-function isVisibleBpm(t: number) {
-  return utils.between(t, visibleTiming.value)
+function isVisibleBpm(t: number, visible: [number, number]) {
+  return utils.between(t, visible)
 }
+
+function drawCanvas() {
+  chart.drawCanvas()
+}
+
+watch(current_ms, drawCanvas)
+watch(meter, drawCanvas)
+watch(scale, drawCanvas)
+const update_flag = Charter.update.flag
 </script>
 
 <template>
   <div
-    ref="wrapper"
-    class="notes-wrapper"
-    style="opacity: 0"
+    :key="update_flag + Math.random()"
+    class="note-div"
+    @click="(e) => noteAdd(e)"
+    @drop="drop"
     @mouseenter="pending.display = true"
     @mouseleave="
       (_) => {
@@ -391,65 +342,47 @@ function isVisibleBpm(t: number) {
         pending.display = false
       }
     "
-    @wheel="fuckWheel"
+    @mousemove="(e) => pendingNoteUpdate(e)"
+    @dragover.prevent
   >
-    <div class="lane-notes">
-      <Note
-        v-if="note_type != '' && pending.display && pending.type == 'note'"
-        :note="pending_note"
-        :style="{ bottom: pending.bottom + 'px' }"
-        :title="pending.time"
-        class="pending-note"
-        draggable="false"
-      />
-      <input
-        v-if="pending.type == 'bpm' && pending.display"
-        :style="{ bottom: pending.bottom + diff.offset * mul + 'px' }"
-        :value="pending.bpm"
-        class="pending-bpm bpm-ticker"
-        disabled
-      />
-      <div :style="{ height: diff.offset * mul + 'px' }" class="lane-bpm-listed"></div>
-      <div
-        v-for="part in bpm_list"
-        :style="{
-          height: mul * part.len + 'px',
-          'background-size': `100% ${(bpmBgi * 60) / part.bpm}px `
-        }"
-        class="lane-bpm-listed"
-        @click="
-          (e) => {
-            if (pending.type == 'note') {
-              const d = noteAdd(part, e)
-              if (d) diff.notes.push(d)
-            } else {
-              addBpmPart(part, e)
-            }
-          }
-        "
-        @drop="(e) => bpmPartDrop(part, e)"
-        @mousemove="(e) => pendingNoteUpdate(e, part)"
-        @dragover.prevent
-      ></div>
-    </div>
-  </div>
-  <div class="note-div">
+    <Note
+      v-if="note_type != '' && pending.type == 'note'"
+      :note="pending_note"
+      :style="{
+        bottom: calcBottom(
+          pending_note.t + diff.offset,
+          current_ms,
+          pending_note.n == 'h' ? pending_note.h : 0
+        )
+      }"
+      :title="pending.time"
+      class="pending-note"
+      draggable="false"
+    />
+    <input
+      v-if="pending.type == 'bpm'"
+      :style="{ bottom: calcBottom(pending_note.t + diff.offset, current_ms) }"
+      :value="pending.bpm"
+      class="pending-bpm bpm-ticker"
+      disabled
+    />
     <template v-for="n in diff.notes">
       <Note
-        v-if="isVisible(n)"
+        v-if="isVisible(n, visible_timing)"
         :note="n"
-        :style="{ bottom: calcBottom(n.t + diff.offset, n.n == 'h' ? n.h : 0) }"
-        :title="JSON.stringify(n)"
+        :style="{ bottom: calcBottom(n.t + diff.offset, current_ms, n.n == 'h' ? n.h : 0) }"
+        :title="n.t"
+        class="normal-note"
         draggable="true"
-        style="position: absolute; transform: translateY(50%); pointer-events: all"
+        @click="(e) => noteAdd(e)"
         @contextmenu="delNote(n)"
         @dragstart="(e) => noteDragStart(n, e)"
       />
     </template>
-    <template v-for="part in bpm_list">
+    <template v-for="part in bpm_list()">
       <input
-        v-if="isVisibleBpm(part.time)"
-        :style="{ bottom: calcBottom(part.time + diff.offset) }"
+        v-if="isVisibleBpm(part.time, visible_timing)"
+        :style="{ bottom: calcBottom(part.time + diff.offset, current_ms) }"
         :value="part.bpm"
         class="bpm-ticker"
         type="text"
@@ -458,21 +391,33 @@ function isVisibleBpm(t: number) {
       />
     </template>
   </div>
-  <input :value="currentBpm" class="current-bpm bpm-ticker" @change="(e) => setCurrentBpm(e)" />
+  <input
+    :value="current_bpm" class="current-bpm bpm-ticker"
+    v-if="record_mode && show_current_bpm"
+    @change="(e) => setCurrentBpm(e)" />
 </template>
 <style scoped>
+.normal-note {
+  position: absolute;
+  transform: translateY(50%);
+
+  pointer-events: all;
+}
+
 .pending-note {
   position: absolute;
   pointer-events: none;
   user-select: none;
   opacity: 0.6;
+  z-index: var(--z-lane-note-higher);
+  transform: translateY(50%);
 }
 
 .pending-bpm {
-  z-index: 1;
+  z-index: var(--z-lane-note-higher);
   user-select: none;
   pointer-events: none;
-  transform: unset !important;
+  transform: translateY(50%);
 }
 
 .bpm-ticker {
@@ -494,45 +439,12 @@ function isVisibleBpm(t: number) {
   font-size: 1.05rem;
   font-weight: bolder;
   pointer-events: all;
+  color: white;
 }
 
 .current-bpm {
   bottom: var(--h-l-b);
-  z-index: 114514;
-}
-
-.lane-bpm-listed {
-  width: 100%;
-  background-position: bottom;
-  background-repeat: repeat-y;
-  position: relative;
-  bottom: 0;
-  background-image: linear-gradient(to top, #8d8d8d 3px, transparent 3px);
-}
-
-.lane-bpm-ticker {
-  bottom: 0;
-}
-
-.lane-notes {
-  position: relative;
-  top: 0;
-  z-index: 0;
-  width: 100%;
-  display: flex;
-  flex-direction: column-reverse;
-  border-bottom: transparent solid;
-  border-bottom-width: calc(var(--h-l-b));
-  background-color: transparent;
-}
-
-.notes-wrapper {
-  height: calc(100%);
-  position: absolute;
-  top: 0;
-  overflow: auto;
-  width: 100%;
-  z-index: 10;
+  z-index: var(--z-lane-bottom);
 }
 
 ::-webkit-scrollbar {
@@ -544,9 +456,8 @@ function isVisibleBpm(t: number) {
   height: calc(100% - var(--h-l-b));
   top: 0;
   left: 0;
-  z-index: 101;
+  z-index: var(--z-lane-note);
   background-color: transparent;
   width: 100%;
-  pointer-events: none;
 }
 </style>

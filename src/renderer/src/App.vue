@@ -1,13 +1,12 @@
 <script lang="ts" setup>
 import Header from '@renderer/components/header.vue'
-import ChartLine from '@renderer/components/charter/chart-line.vue'
-import ui from '@renderer/core/ui'
+import ChartLine from '@renderer/components/charter/chart-lines/chart-line.vue'
 import StartUp from '@renderer/components/startUp.vue'
 import { ModalTarget } from '@kolirt/vue-modal'
 import AButton from '@renderer/components/a-elements/a-button.vue'
-import { modal } from '@renderer/core/modal'
+import { Charter } from '@renderer/core/charter'
 
-const state = ui.state
+const state = Charter.state
 </script>
 
 <template>
@@ -17,7 +16,12 @@ const state = ui.state
   <!--  <popup-modal />-->
   <div id="n-c" class="notify-container" />
   <ModalTarget />
-  <a-button :msg="'Build: ' + ui.CURRENT_BUILD" class="--build" @click="modal.VersionsModal.show({})"/>
+  <a-button
+    :msg="'Build: ' + Charter.CURRENT_BUILD"
+    class="--build"
+    @click="Charter.modal.VersionsModal.show({})"
+    v-if="state != 'charting'"
+  />
 </template>
 <style scoped>
 .--build {
@@ -135,6 +139,13 @@ body {
   --grey: #3b4652;
   --z-highest: 100;
   --h-l-b: 80px;
+
+  --z-lane-bg: 1;
+  --z-lane-line: 2;
+  --z-lane-canvas: 3;
+  --z-lane-bottom: 10;
+  --z-lane-note: 4;
+  --z-lane-note-higher: 5;
 }
 
 * {
@@ -149,5 +160,8 @@ body {
 code {
   line-height: 1em;
   font-size: 1rem;
+}
+::-webkit-scrollbar {
+  display: none;
 }
 </style>

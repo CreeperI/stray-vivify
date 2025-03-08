@@ -1,3 +1,5 @@
+import { ChartType } from '@preload/types'
+
 export namespace utils {
   /** return whether a value is between the given states */
   export function between(val: number, vs: [number, number]): boolean {
@@ -74,5 +76,30 @@ export namespace utils {
     }
 
     return to
+  }
+
+  export function guard<T>(val:any, ini: T): T {
+    if (typeof val != typeof ini) return ini
+    else return val
+  }
+  export function clear_arr(arr:any[]) {
+    while (arr.length) arr.pop()
+  }
+  export function sort_notes(a:ChartType.note, b:ChartType.note) {
+    if (a.t !== b.t) {
+      return a.t - b.t // 按时间排序
+    } else {
+      // 如果时间相同，将 bpm_note 放在前面
+      if (a.n === 'p' && b.n !== 'p') {
+        return -1
+      } else if (a.n !== 'p' && b.n === 'p') {
+        return 1
+      } else {
+        return 0 // 如果两者都是 bpm_note 或都不是，保持原顺序
+      }
+    }
+  }
+  export function around(v1: number, v2:number, gap=20) {
+    return Math.abs(v1 - v2) <= gap
   }
 }

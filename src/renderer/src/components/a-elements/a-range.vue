@@ -7,7 +7,7 @@ const model = defineModel<number>()
 </script>
 
 <template>
-  <input v-model="model" :max="max" :min="min" :step="step" type="range" />
+  <input v-model.number="model" :max= "max" :min="min" :step="step" type="range" />
 </template>
 
 <style scoped>

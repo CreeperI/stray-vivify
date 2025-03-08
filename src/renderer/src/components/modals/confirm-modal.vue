@@ -9,12 +9,11 @@ const { msg } = defineProps<{
 </script>
 
 <template>
-  <SimpleModal size="sm" :show-close="false">
+  <SimpleModal :show-close="false" size="sm">
     {{ msg }}
     <template #footer>
-      <button class="btn btn-primary" @click="confirmModal()">确定</button>
-      <a-button msg="!" @click="confirmModal()" />
-      <a-button class="btn btn-secondary" msg="!!" @click="closeModal()" />
+      <a-button class="btn btn-primary" msg="确定" @click="confirmModal()" />
+      <a-button class="btn btn-secondary" msg="no" @click="closeModal()" />
     </template>
   </SimpleModal>
 </template>

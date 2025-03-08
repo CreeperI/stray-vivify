@@ -1,10 +1,9 @@
-import settings from '@renderer/core/settings'
 import { utils } from '@renderer/core/utils'
-import { reactive, watch } from 'vue'
+import { reactive } from 'vue'
 
 interface Translations {
   name: string
-  fp: {
+  charter_func: {
     charter: string
     scale: string
     meter: string
@@ -28,12 +27,24 @@ interface Translations {
       title: string
       del: string
       offset: string
+      charter: string
     }
     song: {
       name: string
       bpm: string
       composer: string
     }
+    count: {
+      title: string
+      bpm: string
+      avg_density: string
+    }
+    left_header: {
+      chart: string
+      song: string
+    }
+    undo: string
+    redo: string
   }
   header: {
     file: {
@@ -41,19 +52,30 @@ interface Translations {
       open: string
       vsb: string
     }
+    record: {
+      open: string
+      exit: string
+      setting: string
+    }
   }
   settings: {
     language: string
     title: string
-    after_reboot: string,
+    after_reboot: string
     layout: {
       auto: string
       middle: string
-      left : string
+      left: string
       layout: string
-    },
+    }
     reverse_scroll: string
     overlap_minimum: string
+
+    record: {
+      show_bar_line: string,
+      show_bar_count: string
+      show_bpm: string
+    }
   }
   confirm: {
     vsb: string
@@ -76,14 +98,14 @@ export const Languages = [
 
 export type Languages = (typeof Languages)[number]
 
-export const LanguageData: { "zh_cn": Translations } & Record<Languages, Partial<Translations>> = {
+export const LanguageData: { zh_cn: Translations } & Record<Languages, Partial<Translations>> = {
   zh_cn: {
-    name:"中文",
-    fp: {
+    name: '中文',
+    charter_func: {
       scale: '缩放',
       meter: '分音',
       charter: '制谱器设置',
-      volume:"音量",
+      volume: '音量',
       note: {
         chip: '键',
         bumper: 'Bumper',
@@ -102,20 +124,33 @@ export const LanguageData: { "zh_cn": Translations } & Record<Languages, Partial
         create: '新增难度',
         title: '谱面设置',
         del: '删除谱面',
-        offset: "偏移",
+        offset: '偏移',
+        charter: "谱师",
       },
       song: {
         name: '歌曲名',
         bpm: '基础BPM',
         composer: '曲师'
-      }
+      },
+      count: {
+        title: '物件统计',
+        bpm: '变奏数',
+        avg_density: '平均note密度'
+      },
+      left_header: {
+        chart: '制谱器设置',
+        song: '歌曲信息'
+      },
+      undo: '撤销',
+      redo: '重做'
     },
     header: {
       file: {
         title: '文件',
         open: '打开',
         vsb: '读取vsb'
-      }
+      },
+      record: { open: '启动纯享模式', exit: '退出纯享模式',setting:"功能设置" }
     },
     settings: {
       language: '语言',
@@ -124,11 +159,16 @@ export const LanguageData: { "zh_cn": Translations } & Record<Languages, Partial
       layout: {
         auto: '自动',
         middle: '居中',
-        left : '左侧',
-        layout: "轨道位置",
+        left: '左侧',
+        layout: '轨道位置'
       },
       reverse_scroll: '鼠标反转',
-      overlap_minimum: '物件最小间隔时间'
+      overlap_minimum: '物件最小间隔时间',
+      record: {
+        show_bar_line: "显示小节线",
+        show_bar_count: "显示小节数",
+        show_bpm: "显示当前bpm",
+      }
     },
     confirm: {
       vsb: '确定要读取vsb吗？此操作会*替换*当前谱面且不可撤销哦。',
@@ -190,9 +230,6 @@ export const LanguageData: { "zh_cn": Translations } & Record<Languages, Partial
    }*/
 }
 
-const base = reactive(utils.deepCopy(LanguageData['简中']))
+const base = reactive(utils.deepCopy(LanguageData['zh_cn']))
 
 export default base
-watch(settings.lang, (v) => {
-  utils.assign(base, LanguageData[v])
-})

@@ -1,19 +1,36 @@
 <script lang="ts" setup>
-import ui from '@renderer/core/ui'
-import settings from '@renderer/core/settings'
 import Translations from '@renderer/core/translations'
-import { modal } from '@renderer/core/modal'
+import { Charter } from '@renderer/core/charter'
+import { _chart } from '@renderer/core/chart'
 
 const Language = Translations
 
-const ipcRenderer = ui.ipcRenderer
+const ipcRenderer = Charter.ipcRenderer
 
-const isMax = ui.isMaximized
-const { state, chart_name } = ui
-const lang = settings.lang
+const isMax = Charter.refs.window.isMaximized
+const { state } = Charter
+const { lang } = Charter.settings.to_refs
+const song_name = Charter.refs.current_name
+const record_mode = Charter.record.mode
+
 function readVsb() {
-  if (!ui.chart) return
-  ui.chart.read_vsb()
+  Charter.invoke
+    .ask_vsb()
+    .then((r1) => {
+      if (!r1) return
+      return Charter.invoke.read_vsb(r1.path)
+    })
+    .then((r) => {
+      if (_chart.current) {
+        _chart.current.load_vsb(r)
+      }
+    })
+}
+
+function open_chart() {
+  _chart.open_chart().catch(() => {
+    Charter.state.value = 'startUp'
+  })
 }
 </script>
 
@@ -22,20 +39,48 @@ function readVsb() {
     <div class="header-top">
       <img alt="wug" class="header-wug" src="/wug.jpg" />
       <div class="header-menu-ul">
-        <div class="h-menu-btn-text" v-html="Language.header.file.title" />
+        <div class="h-menu-btn-text"
+             :class="state == 'startUp' ? 'rainbow-text' :''"
+             v-html="Language.header.file.title" />
         <div class="h-menu-btn-i">
-          <div class="h-menu-btn-text" @click="ui.ask_open()" v-html="Language.header.file.open" />
+          <div class="h-menu-btn-text" @click="open_chart()" v-html="Language.header.file.open" />
           <div v-if="state == 'charting'" class="h-menu-btn-text" @click="readVsb">读取vsb</div>
         </div>
       </div>
       <div class="header-menu-ul">
         <div
           class="h-menu-btn-text"
-          @click="modal.SettingModal.show({})"
+          @click="Charter.modal.SettingModal.show({})"
           v-html="Language.settings.title"
         />
       </div>
-      <div v-if="state == 'charting'" class="chart-name">{{ chart_name }}</div>
+      <div v-if="state == 'charting'" class="header-menu-ul">
+        <div
+          v-if="record_mode == false"
+          class="h-menu-btn-text"
+          @click="
+            () => {
+              record_mode = true
+              Charter.settings.meter(1)
+            }
+          "
+          v-html="Language.header.record.open"
+        />
+        <div
+          v-if="record_mode == true"
+          class="h-menu-btn-text"
+          @click="record_mode = false"
+          v-html="Language.header.record.exit"
+        />
+        <div class="h-menu-btn-i">
+          <div
+            class="h-menu-btn-text"
+            @click="Charter.modal.RecordModal.show({})"
+            v-html="Language.header.record.setting"
+          />
+        </div>
+      </div>
+      <div v-if="state == 'charting'" class="chart-name">{{ song_name }}</div>
     </div>
     <div class="header-win-func">
       <div @click="ipcRenderer.send('window-min')">0</div>
