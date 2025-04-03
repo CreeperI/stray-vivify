@@ -1,5 +1,5 @@
-appId: com.vschart.terminalflow
-productName: vs-CharTer
+appId: com.stray-vivify.terminalflow
+productName: stray-vivify
 directories:
   buildResources: build
 files:
@@ -13,7 +13,7 @@ asarUnpack:
   - resources/**
   - src/renderer/public/**
 win:
-  executableName: vs-CharTer
+  executableName: stray-vivify
 nsis:
   artifactName: ${productName}-${version}-setup.${ext}
   shortcutName: ${productName}

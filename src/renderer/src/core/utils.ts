@@ -7,6 +7,9 @@ export namespace utils {
     if (v1 > v2) [v1, v2] = [v2, v1] // Ensure v1 < v2
     return val >= v1 && val <= v2
   }
+  export function remove<T>(arr:T[], v: T) {
+    arr.splice(arr.indexOf(v), 1)
+  }
 
   export function round(val: number, digit = 0) {
     return Math.round(val * 10 ** digit) / 10 ** digit
@@ -101,5 +104,33 @@ export namespace utils {
   }
   export function around(v1: number, v2:number, gap=20) {
     return Math.abs(v1 - v2) <= gap
+  }
+  export function random<T>(arr:T[]) {
+    return arr[Math.floor(Math.random() * arr.length)]
+  }
+}
+
+export class Lazy<T = any> {
+  _value: T | undefined
+  getter: () => T
+
+  static all:Lazy[] = []
+  constructor(_value:(() => T)) {
+    this._value = undefined
+    this.getter = _value
+    Lazy.all.push(this)
+  }
+
+  get value() {
+    if (!this._value) this._value = this.getter()
+    return this._value
+  }
+
+  invalidate() {
+    this._value = undefined
+  }
+
+  static invalidateAll() {
+    Lazy.all.forEach(l => l.invalidate())
   }
 }

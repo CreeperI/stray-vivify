@@ -1,8 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import "@renderer/styles.css"
+import '@renderer/styles.css'
 import { notify } from '@renderer/core/notify'
-import { EventHub } from '@renderer/core/eventHub'
 import Storage from '@renderer/core/storage'
 
 import { createModal } from '@kolirt/vue-modal'
@@ -21,21 +20,10 @@ Charter.ipcRenderer.on('notify', (_, msg, duration, t) => {
 
 document.addEventListener('keydown', ShortCuts.handle)
 
-EventHub.on('update', () => {
-  Charter.refs.window.height.value = window.innerHeight
-  Charter.refs.window.width.value = window.innerWidth
-
-  Charter.if_current()?.on_update()
-})
-
 setInterval(() => {
   Charter.if_current()?.save()
   Storage.save()
 }, 5000)
-setInterval(() => {
-  EventHub.emit('update')
-}, 10)
-
 createApp(App)
   .use(
     createModal({
@@ -50,3 +38,13 @@ createApp(App)
     })
   )
   .mount('#app')
+
+function update_per_frame() {
+  Charter.refs.window.height.value = window.innerHeight
+  Charter.refs.window.width.value = window.innerWidth
+
+  Charter.if_current()?.on_update()
+  requestAnimationFrame(update_per_frame)
+}
+
+requestAnimationFrame(update_per_frame)

@@ -4,7 +4,7 @@ import { computed, ComputedRef, ref, Ref, ToRefs, watch, WritableComputedRef } f
 import Translations from '@renderer/core/translations'
 import Storage from '@renderer/core/storage'
 import { Charter } from '@renderer/core/charter'
-import { utils } from '@renderer/core/utils'
+import { Lazy, utils } from '@renderer/core/utils'
 
 function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
@@ -14,280 +14,8 @@ function isBumper(n: ChartType.note | string) {
 type ms = number
 type second = number
 
-/*
-export class Chart {
-  static isBumper = isBumper
-  static current: Chart | undefined = undefined
-  diff: Ref<ChartType.Diff>
-  audio: HTMLAudioElement
-  fp: string
-  // milli
-  length: number
-  name: string
-  diff_index: Ref<number>
-  play_rate_ref: WritableComputedRef<number>
-  currentBpm: WritableComputedRef<number>
-  currentTimeRef: WritableComputedRef<number>
-  bpm_list: ComputedRef<Bpm_part[]>
-  visibleTiming: ComputedRef<[number, number]>
-
-  private current_time: Ref<number>
-  private play_rate: Ref<number>
-  private readonly chart: ChartType.Chart
-
-  constructor(musicPath: string, musicURL: string, name: string) {
-    const me = this
-    this.chart = Chart.createChart(name)
-    this.audio = new Audio(musicURL)
-    this.audio.volume = Charter.settings.data.volume / 100
-    this.length = 0
-    this.fp = musicPath
-    this.name = name
-    document.title = name
-    this.diff_index = ref(0)
-    this.diff = ref(this.chart.diffs[this.diff_index.value])
-    this.current_time = ref(0)
-    this.play_rate_ref = computed({
-      get() {
-        return me.play_rate.value
-      },
-      set(v) {
-        me.play_back_rate = v
-      }
-    })
-    this.play_rate = ref(1)
-    this.bpm_list = computed(() => [{ time: 0, bpm: 0, len: 0 }])
-    this.visibleTiming = computed(() => [
-      this.current_time.value * 1000 - 2000,
-      this.current_time.value * 1000 + ui.windowHeight.value / ui.mul.value + 2000
-    ])
-    this.currentTimeRef = computed({
-      get() {
-        return me.current_time.value
-      },
-      set(val) {
-        me.currentTime = val
-      }
-    })
-
-    this.currentBpm = computed({
-      get() {
-        return me.bpm_of_time(me.current_time.value * 1000)
-      },
-      set(v: number) {
-        const a = me.diff.value.notes.findLast((x) => {
-          return x.n == 'p' ? x.t <= me.current_time.value * 1000 : false
-        }) as ChartType.bpm_note | undefined
-        if (a) a.v = v
-      }
-    })
-
-    this.audio.addEventListener('ended', () => {
-      this.currentTime = 0
-    })
-  }
-
-  static get send() {
-    return send
-  }
-
-  get currentTime() {
-    return this.audio.currentTime
-  }
-
-  set currentTime(v: number) {
-    this.audio.currentTime = Math.max(0, v)
-  }
-
-  get play_back_rate() {
-    return this.audio.playbackRate
-  }
-
-  set play_back_rate(v: number) {
-    this.audio.playbackRate = v
-    this.play_rate.value = v
-  }
-
-  get song() {
-    return this.chart.song
-  }
-
-  get diffs() {
-    return this.chart.diffs
-  }
-
-  // n: name
-  static createChart(n = ''): ChartType.Chart {
-    return {
-      song: {
-        name: n,
-        composer: '/a b30',
-        bpm: 120
-      },
-      diffs: [this.createDiff()]
-    }
-  }
-
-  static createDiff(): ChartType.Diff {
-    return {
-      name: 'Finale',
-      hard: '14+',
-      notes: [{ n: 'p', t: 0, l: 0, v: 120 }],
-      charter: 'Terminal Flow',
-      offset: 0
-    }
-  }
-
-  static part_to_note(p: Bpm_part): ChartType.bpm_note {
-    return {
-      n: 'p',
-      t: p.time,
-      l: 0,
-      v: p.bpm
-    }
-  }
-
-
-  post_define() {
-    const length = this.audio.duration * 1000
-    this.length = length
-    this.bpm_list = computed(() => {
-      const notes = this.diff.value.notes.filter((x) => x.n == 'p').sort((a, b) => a.t - b.t)
-      const x: Bpm_part[] = []
-      for (let i = 0; i < notes.length; i++) {
-        const pt: Bpm_part = {
-          time: notes[i].t,
-          bpm: notes[i].v,
-          len: length - notes[i].t
-        }
-        if (x[i - 1]) x[i - 1].len = pt.time - x[i - 1].time
-        x.push(pt)
-      }
-      return x
-    })
-    this.watchers()
-    // me.diff.value = data2notes(me.chart[me.diff_index.value].notes, me.length)
-    // watch(me.diff_index, (v) => {
-    //   me.diff.value = data2notes(me.chart[v].notes, me.length)
-    // })
-  }
-
-  watchers() {
-    watch(
-      this.diff,
-      () => {
-        this.chart[this.diff_index.value] = this.diff.value
-      },
-      { deep: true }
-    )
-    watch(this.diff_index, (v) => {
-      this.diff.value = this.chart.diffs[v]
-    })
-  }
-
-  save() {
-    sort_diff(this.diff.value)
-    ui.invoke('save-chart', this.fp, JSON.stringify(this.chart))
-    Storage.add_proj(this.fp, this.song.name)
-  }
-
-  createDiff() {
-    this.chart.diffs.push(Chart.createDiff())
-    this.diff_index.value += 1
-    ui.refresh()
-  }
-
-  deleteDiff() {
-    if (this.chart.diffs.length == 1) return
-    if (confirm(Translations.confirm.del_diff)) this.diffs.splice(this.diff_index.value, 1)
-    this.diff_index.value = Math.max(0, this.diff_index.value - 1)
-    ui.refresh()
-  }
-
-  read_vsb() {
-    ui.invoke('ask-vsb')
-      .then((r) => {
-        if (!r) return
-        return ui.invoke('read-vsb', r.path)
-      })
-      .then((r) => {
-        if (!r) return
-        modal.ConfirmModal.show({ msg: Translations.confirm.vsb }).then(() => {
-          this.diff.value.notes = r
-        })
-      })
-  }
-
-  // true if valid
-  valid_check(pending: ChartType.note, unset_hold: boolean = false) {
-    if (pending.l < 0 || pending.l > 3) return false
-    const minimum = Charter.settings.data.overlap_minimum
-    return (
-      this.diff.value.notes.find((note) => {
-        // for bpm notes, simply check if their time are same
-        if (note.n == 'p' && pending.n == 'p') {
-          return note.t == pending.t
-        }
-        if (note.n == 'p' || pending.n == 'p') return false
-        if (note.l == pending.l) {
-          // specially, when setting a newborn hold, t and l are the same
-          if (note.n == 'h' && pending.n == 'h' && unset_hold) return false
-          if (note.t == pending.t) return true
-          if (Math.abs(note.t - pending.t) < minimum) return true
-
-          // 1 check if they're hold and fuck their length (start->end) to assure no overlapping
-          if (isBumper(pending)) {
-            return false
-          }
-          if (note.n == 'h')
-            return utils.between(pending.t, [note.t - minimum, note.t + note.h + minimum])
-          if (pending.n == 'h')
-            return utils.between(note.t, [pending.t - minimum, pending.t + pending.h + minimum])
-          // check if in certain ms
-        }
-        if (note.t == pending.t) {
-          // 2 check for bumper's overlap
-          if (isBumper(note)) return pending.l == note.l || pending.l == note.l + 1
-          if (isBumper(pending)) return note.l == pending.l || note.l == pending.l + 1
-        }
-
-        return false
-      }) == undefined
-    )
-  }
-
-  bpm_of_time(t: number) {
-    const bpm_list = this.bpm_list.value
-    for (let i = bpm_list.length - 1; i >= 0; i--) {
-      if (t >= bpm_list[i].time) return bpm_list[i].bpm
-    }
-    throw new Error('null Bpm-part.')
-  }
-
-  on_update() {
-    this.current_time.value = this.audio.currentTime
-    this.play_rate.value = this.audio.playbackRate
-  }
-
-  set_chart(ch: ChartType.Chart) {
-    utils.assign(this.chart.song, ch.song)
-    this.chart.diffs = []
-    for (let i = 0; i < ch.diffs.length; i++) {
-      const diff = ch.diffs[i]
-      this.chart.diffs.push({
-        name: diff.name ?? 'Finale',
-        hard: diff.hard ?? '14+',
-        notes: diff.notes ?? [{ n: 'p', t: 0, l: 0, v: 120 }],
-        charter: diff.charter ?? '',
-        offset: diff.offset ?? 0
-      })
-    }
-    this.diff_index.value = 0
-    this.diff.value = this.chart.diffs[0]
-  }
-}*/
-
 class Chart_audio {
+  chart: Chart
   file_path: string | undefined
   url: string | undefined
   ele: undefined | HTMLAudioElement
@@ -299,7 +27,8 @@ class Chart_audio {
     writable_current_second: WritableComputedRef<second>
   }
 
-  constructor(file_path?: string, url?: string) {
+  constructor(ch: Chart, file_path?: string, url?: string) {
+    this.chart = ch
     this.file_path = file_path
     this.url = url
     this._volume = Charter.settings.data.volume
@@ -388,15 +117,13 @@ class Chart_audio {
     this.refs.current_ms.value = v
   }
 
-  on_can_play_through(cb: () => void) {
-    if (this.ele) this.ele.addEventListener('canplaythrough', cb)
+  on_can_play_through(cb: () => void, options?: AddEventListenerOptions) {
+    if (this.ele) this.ele.addEventListener('canplaythrough', cb, options)
     else console.warn('Trying to setting can-play-through callback on a empty audio!')
   }
 
   load_url(url: string) {
     this.ele = new Audio(url)
-    this.current_time = 0
-    this.play_rate = 1
   }
 
   pause() {
@@ -493,6 +220,7 @@ class Chart_song {
 
 class Chart_diff {
   bound: Ref<ChartType.Diff>
+  chart: Chart
   counts: Ref<{
     chip: number
     bpm: number
@@ -506,9 +234,14 @@ class Chart_diff {
   }>
   undo: (() => void)[]
   redo: (() => void)[]
+  shown: Ref<ChartType.note[]>
+  last_update: number
+  bpm_list: Lazy<ChartType.bpm_part[]>
+  bar_list: Lazy<ms[]>
 
-  constructor(chart: _chart) {
+  constructor(chart: Chart) {
     this.bound = chart.ref.diff
+    this.chart = chart
     this.counts = ref({
       chip: 0,
       bpm: 0,
@@ -520,19 +253,45 @@ class Chart_diff {
       total: 0,
       avg_density: 0
     })
-    watch(this.bound, (v) => {
-      this.counts.value.chip = v.notes.filter((x) => x.n == 'n').length
-      this.counts.value.bpm = v.notes.filter((x) => x.n == 'p').length - 1
-      this.counts.value.hold = v.notes.filter((x) => x.n == 'h').length
-      this.counts.value.bomb = v.notes.filter((x) => x.n == 'm').length
-      this.counts.value.sBumper = v.notes.filter((x) => x.n == 's').length
-      this.counts.value.bBumper = v.notes.filter((x) => x.n == 'mb').length
-      this.counts.value.bumper = v.notes.filter((x) => x.n == 'b').length
-      this.counts.value.total = v.notes.length - this.counts.value.bpm - 1
-      this.counts.value.avg_density = this.counts.value.total / (chart.length / 1000)
-    })
+    watch(this.bound, () => this.update_diff_counts())
     this.undo = []
     this.redo = []
+    this.shown = ref([])
+    this.last_update = 0
+    this.bpm_list = new Lazy(() => {
+      return this.notes
+        .filter((x) => x.n == 'p')
+        .toSorted((a, b) => a.t - b.t)
+        .map((x) => {
+          return {
+            time: x.t,
+            bpm: x.v
+          }
+        })
+    })
+    this.bar_list = new Lazy(() => {
+      const bpm_list = this.bpm_list.value
+      const times: ms[] = []
+      let time = 0
+      for (let i = 0; i < bpm_list.length; i++) {
+        const part = bpm_list[i]
+        const time_per_bar = (60 / part.bpm) * 4 * 1000
+        if (i == bpm_list.length - 1) {
+          const part_end = Math.min(chart.length, 114514)
+          for (let j = 0; time < part_end; j++) {
+            times.push(time)
+            time += time_per_bar
+          }
+        } else {
+          const part_end = bpm_list[i + 1].time
+          for (let j = 0; time < part_end; j++) {
+            times.push(time)
+            time += time_per_bar
+          }
+        }
+      }
+      return times
+    })
   }
 
   get notes() {
@@ -585,16 +344,17 @@ class Chart_diff {
     }
   }
 
-  bpm_list(): ChartType.bpm_part[] {
-    return this.notes
-      .filter((x) => x.n == 'p')
-      .toSorted((a, b) => a.t - b.t)
-      .map((x) => {
-        return {
-          time: x.t,
-          bpm: x.v
-        }
-      })
+  update_diff_counts() {
+    const v = this.bound.value
+    this.counts.value.chip = v.notes.filter((x) => x.n == 'n').length
+    this.counts.value.bpm = v.notes.filter((x) => x.n == 'p').length - 1
+    this.counts.value.hold = v.notes.filter((x) => x.n == 'h').length
+    this.counts.value.bomb = v.notes.filter((x) => x.n == 'm').length
+    this.counts.value.sBumper = v.notes.filter((x) => x.n == 's').length
+    this.counts.value.bBumper = v.notes.filter((x) => x.n == 'mb').length
+    this.counts.value.bumper = v.notes.filter((x) => x.n == 'b').length
+    this.counts.value.total = v.notes.length - this.counts.value.bpm - 1
+    this.counts.value.avg_density = this.counts.value.total / (this.chart.length / 1000)
   }
 
   set_notes(v: ChartType.note[]) {
@@ -637,6 +397,22 @@ class Chart_diff {
 
   to_sorted() {
     return this.notes.toSorted(utils.sort_notes)
+  }
+
+  add_bpm(v: ChartType.note) {
+    const r = this.add_note_no_undo(v)
+    this.bpm_change()
+    return r
+  }
+
+  bpm_change() {
+    this.bpm_list.invalidate()
+  }
+
+  remove_bpm(v: ChartType.note) {
+    const r = this.remove_note_no_undo(v)
+    this.bpm_change()
+    return r
   }
 
   add_note(v: ChartType.note) {
@@ -682,17 +458,24 @@ class Chart_diff {
   remove_note_no_undo(v: ChartType.note) {
     if (!this.notes.includes(v)) return false
     this.notes.splice(this.notes.indexOf(v), 1)
+    utils.remove(this.shown.value, v)
     Charter.update()
     return true
   }
 
   add_note_no_undo(v: ChartType.note) {
     v.t = Math.floor(v.t)
-    const same = this.notes.find(
-      (x) => utils.around(x.t, v.t, Charter.settings.data.overlap_minimum) && x.l == v.l
-    )
-    if (same) return false
+    const overlap = Charter.settings.data.overlap_minimum
+    const wrapped = this.shown.value.find((x) => {
+      if (x.n == 'h') {
+        if (x.l != v.l) return false
+        else return utils.between(v.t, [x.t - overlap, x.t + x.h + overlap])
+      }
+      return utils.around(x.t, v.t, overlap) && x.l == v.l
+    })
+    if (wrapped) return false
     this.notes.push(v)
+    this.shown.value.push(v)
     Charter.update()
     return true
   }
@@ -702,6 +485,7 @@ class Chart_diff {
   }
 
   nearest(t: ms, round = true): ms {
+    if (t <= 0) t = 0
     const bpm = this.bpm_of_time(t)
     if (!bpm) throw new Error('No bpm found???')
     const passed = t - bpm.time
@@ -711,36 +495,18 @@ class Chart_diff {
   }
 
   bpm_of_time(time: ms) {
-    return this.bpm_list().findLast((v) => v.time <= time)
+    if (time <= 0) time = 0
+    return this.bpm_list.value.findLast((v) => v.time <= time)
   }
 
-  time_per_beat(bpm: number) {
+  bpm_of_list(time: ms, list: ChartType.bpm_part[]) {
+    if (time <= 0) time = 0
+    return list.findLast((v) => v.time <= time)
+  }
+
+  time_per_beat(bpm: number): ms {
     const meter = Charter.settings.data.meter
     return (60 / bpm) * (4 / meter) * 1000
-  }
-
-  bar_list(end?: ms) {
-    const bpm_list = this.bpm_list()
-    const times: ms[] = []
-    let time = 0
-    for (let i = 0; i < bpm_list.length; i++) {
-      const part = bpm_list[i]
-      const time_per_bar = (60 / part.bpm) * 4 * 1000
-      if (i == bpm_list.length - 1) {
-        const part_end = end ?? part.time + 10000
-        for (let j = 0; time < part_end; j++) {
-          times.push(time)
-          time += time_per_bar
-        }
-      } else {
-        const part_end = bpm_list[i + 1].time
-        for (let j = 0; time < part_end; j++) {
-          times.push(time)
-          time += time_per_bar
-        }
-      }
-    }
-    return times
   }
 
   push_undo(fn: () => void) {
@@ -766,10 +532,27 @@ class Chart_diff {
   floor_time() {
     this.notes.forEach((x) => (x.t = Math.floor(x.t)))
   }
+
+  fuck_shown(t: number, force = false) {
+    if (force ? false : Math.abs(t - this.last_update) < 2500) return
+    Charter.timer.timer('fuck_shown')
+    this.shown.value = this.notes.filter((x) => {
+      return this.isVisible(x, [t - 3000 - this.offset, t + 3000])
+    })
+    this.last_update = t
+  }
+
+  isVisible(n: ChartType.note, visible: [number, number]): boolean {
+    if (n.n == 'h') {
+      if (utils.between(n.t, visible)) return true
+      return n.t + n.h < visible[1]
+    }
+    return utils.between(n.t, visible)
+  }
 }
 
-export class _chart {
-  static current: _chart | undefined = undefined
+export class Chart {
+  static current: Chart | undefined = undefined
   static isBumper = isBumper
   song: Chart_song
   diffs: ChartType.Diff[]
@@ -777,23 +560,30 @@ export class _chart {
   audio: Chart_audio
   diff: Chart_diff
   length: number
-  visible_timing: ComputedRef<[ms, ms]>
+  shown_timing: ComputedRef<[ms, ms]>
   current_bpm: WritableComputedRef<number>
   ref: {
     diff_index: Ref<number>
     diff: Ref<ChartType.Diff>
+    chart_current_time: Ref<number>
+  }
+  canvas_data: {
+    height: number
   }
 
   constructor() {
     this.song = new Chart_song()
     this.diffs = [Chart_diff.createDiff()]
     this._diff_index = 0
-    this.audio = new Chart_audio()
+    this.audio = new Chart_audio(this)
     this.path = ''
     this.length = -1
-    this.visible_timing = computed(() => [
-      this.audio.refs.current_ms.value - 1000,
-      this.audio.refs.current_ms.value + 2000 + Charter.refs.visible.value
+    this.canvas_data = {
+      height: 0
+    }
+    this.shown_timing = computed(() => [
+      this.audio.refs.current_ms.value - this.diff.offset - 3000,
+      this.audio.refs.current_ms.value - this.diff.offset + 3000 + Charter.refs.visible.value
     ])
     const me = this
     this.current_bpm = computed({
@@ -809,19 +599,10 @@ export class _chart {
     })
     this.ref = {
       diff_index: ref(0),
-      diff: ref(this.diffs[0])
+      diff: ref(this.diffs[0]),
+      chart_current_time: ref(0)
     }
     this.diff = new Chart_diff(this)
-    watch(
-      this.ref.diff,
-      () => {
-        this.diffs[this.ref.diff_index.value] = this.ref.diff.value
-      },
-      { deep: true }
-    )
-    watch(this.ref.diff_index, () => {
-      this.ref.diff.value = this.diffs[this.ref.diff_index.value]
-    })
   }
 
   _diff_index: number
@@ -837,6 +618,14 @@ export class _chart {
     Charter.update()
   }
 
+  get visible_timing() {
+    return this.chart_time + Charter.refs.visible.value
+  }
+
+  get chart_time() {
+    return this.audio.current_time - this.diff.offset
+  }
+
   static createChart(n = ''): ChartType.Chart {
     return {
       song: {
@@ -848,21 +637,24 @@ export class _chart {
     }
   }
 
-  static create(musicPath: string, musicURL: string, name: string): Promise<_chart> {
-    const chart = new _chart()
+  static create(musicPath: string, musicURL: string, name: string): Promise<Chart> {
+    const chart = new Chart()
     chart.audio.load_url(musicURL)
     chart.set_path(musicPath)
     chart.set_name(name)
     return new Promise((resolve) => {
-      chart.audio.on_can_play_through(() => {
-        chart.post_define()
-        resolve(chart)
-      })
+      chart.audio.on_can_play_through(
+        () => {
+          chart.post_define()
+          resolve(chart)
+        },
+        { once: true }
+      )
     })
   }
 
-  static create_vsb(vsb_path: string): Promise<_chart> {
-    const chart = new _chart()
+  static create_vsb(vsb_path: string): Promise<Chart> {
+    const chart = new Chart()
     chart.set_path(vsb_path)
     return new Promise((resolve, reject) => {
       Charter.invoke.read_vsb(vsb_path).then((r) => {
@@ -876,57 +668,25 @@ export class _chart {
     })
   }
 
-  /*static async open_chart(fp?: string) {
-    function cb(file: HandlerReturn.askPath, ch: HandlerReturn.OpenChart) {
-      if (!file) return
-      if (ch.state == 'missing') {
-        notify.error(Translations.notify.music_error)
-        Storage.remove_proj(file.path)
-        return
-      }
-      const blob = new Blob([ch.buf], { type: 'audio/!*' })
-      const url = URL.createObjectURL(blob)
-
-      _chart.create(file.path, url, file.name).then((chart) => {
-        _chart.current = chart
-        if (ch.state == 'success') chart.set_chart(ch.chart)
-        Charter.state.value = 'charting'
-      })
-    }
-
-    if (!fp)
-      Charter.invoke.ask_song().then((file) => {
-        if (!file) return
-        Charter.invoke.open_chart(file.path).then((ch) => {
-          cb(file, ch)
-        })
-      })
-    else {
-      Charter.invoke.open_exist_chart(fp).then((r) => {
-        debugger
-        if (r.state == 'missing') {
-          notify.error(Translations.notify.music_error)
-          Storage.remove_proj(fp)
-          return
-        }
-        cb(r, r)
-      })
-    }
-  }*/
-
   static async open_chart(fp?: string) {
     Charter.record.mode.value = false
     Charter.state.value = 'cache'
+    Charter.load_state.clear()
     if (!fp) {
       const path = await Charter.invoke.ask_song()
-      if (!path) throw new Error('rejected asking')
+      if (!path) {
+        Charter.load_state.data.value.asked_path = 'failed'
+        throw new Error('rejected asking')
+      }
       return this.open_chart_with_fp(path.path)
     }
+    Charter.load_state.data.value.asked_path = 'success'
     return this.open_chart_with_fp(fp)
   }
 
   static async open_chart_with_fp(fp: string) {
     const file = await Charter.invoke.open_chart(fp)
+    Charter.load_state.data.value.load_music_from_backend = 'success'
     if (file.state == 'missing') {
       notify.error(Translations.notify.music_error)
       Storage.remove_proj(fp)
@@ -935,17 +695,32 @@ export class _chart {
     }
     const blob = new Blob([file.buf], { type: 'audio/*' })
     const url = URL.createObjectURL(blob)
+    Charter.load_state.data.value.create_music_blob = 'success'
     const chart = await this.create(fp, url, file.name)
+    Charter.load_state.data.value.waiting_can_play = 'success'
     if (file.state == 'success') chart.set_chart(file.chart)
     this.current = chart
     Charter.state.value = 'charting'
+    watch(
+      Charter.refs.state,
+      () => {
+        chart.audio.pause()
+      },
+      { once: true }
+    )
   }
 
   load_vsb(r: HandlerReturn.readVsb) {
     if (!r) return
     Charter.modal.ConfirmModal.show({ msg: Translations.confirm.vsb }).then(() => {
       this.diff.set_notes(r)
+      this.fuck_shown(true)
+      this.diff.update_diff_counts()
     })
+  }
+
+  fuck_shown(force = false) {
+    this.diff.fuck_shown(this.chart_time, force)
   }
 
   set_path(p: string) {
@@ -959,6 +734,28 @@ export class _chart {
   post_define() {
     this.length = (this.audio.ele?.duration ?? -1) * 1000
     Charter.refs.current_name.value = this.song.name
+    watch(
+      this.ref.diff,
+      () => {
+        this.diffs[this.ref.diff_index.value] = this.ref.diff.value
+      },
+      { deep: true }
+    )
+    watch(
+      () => this.ref.diff.value.offset,
+      () => this.drawCanvas()
+    )
+    watch(this.ref.diff_index, () => {
+      this.ref.diff.value = this.diffs[this.ref.diff_index.value]
+      this.fuck_shown()
+    })
+    watch(this.audio.refs.current_ms, () => {
+      this.fuck_shown()
+      this.ref.chart_current_time.value = this.audio.refs.current_ms.value - this.diff.offset
+    })
+    setTimeout(() => {
+      this.fuck_shown(true)
+    }, 500)
   }
 
   create_diff() {
@@ -1009,22 +806,34 @@ export class _chart {
     if (canvas == undefined) {
       return
     }
-    canvas.height = canvas.clientHeight
     const context = canvas.getContext('2d')
     if (!context) return
+    if (this.canvas_data.height == 0) {
+      this.canvas_data.height = canvas.height = canvas.clientHeight
+      context.textAlign = 'right'
+      context.font = 25 + 'px Arial'
+      context.textBaseline = 'bottom'
+    }
+
+    const height = this.canvas_data.height
     context.clearRect(0, 0, canvas.width, canvas.height)
-    const processY = (y: number) => canvas.height * (1 - y / canvas.clientHeight)
 
-    const processT = (ms: number) =>
-      Math.floor(processY((ms - this.audio.current_time) * Charter.refs.mul.value))
+    const current_time = this.audio.current_time
+    const offset = this.diff.offset
+    const mul = Charter.refs.mul.value
+    const visible_max = this.visible_timing
+    const processT = (ms: number) => Math.floor(height - (ms - current_time + offset) * mul)
 
-    let time = this.diff.nearest(this.audio.current_time, false)
+    let time = this.diff.nearest(this.audio.current_time - offset, false)
     let bpm = this.diff.bpm_of_time(time)?.bpm
-    if (bpm == undefined) bpm = 120
+    if (bpm == undefined) {
+      bpm = 120
+      context.fillStyle = '#ff0000'
+    }
     let time_per_beat = this.diff.time_per_beat(bpm)
     context.fillStyle = '#8d8d8d'
-    let next_bpm_time =
-      this.diff.bpm_list().find((x) => x.time > time)?.time ?? time + this.visible_timing.value[1]
+    const bpm_list = this.diff.bpm_list.value
+    let next_bpm_time = bpm_list.find((x) => x.time > time)?.time ?? visible_max
     let flag = true
     let times = 0
 
@@ -1035,16 +844,103 @@ export class _chart {
         time += time_per_beat
         times++
       }
-      if (utils.around(time, this.visible_timing.value[1], Charter.settings.data.overlap_minimum)) {
-        flag = false
-        break
-      }
+      if (time > visible_max) break
 
       time = next_bpm_time
-      bpm = this.diff.bpm_of_time(time)?.bpm ?? bpm
+      bpm = this.diff.bpm_of_list(time, bpm_list)?.bpm ?? bpm
       time_per_beat = this.diff.time_per_beat(bpm)
-      next_bpm_time =
-        this.diff.bpm_list().find((x) => x.time > time)?.time ?? this.visible_timing.value[1] + time
+      next_bpm_time = bpm_list.find((x) => x.time > time)?.time ?? visible_max
+    }
+    context.fillStyle = '#b8dcee'
+
+    if (Charter.record.mode.value && !Charter.record.show_bar_count.value) return
+
+    const visible_duration = this.shown_timing.value
+    this.diff.bar_list.value
+      .map((val, idx) => {
+        return {
+          t: val,
+          ix: idx
+        }
+      })
+      .filter((x) => utils.between(x.t, visible_duration))
+      .map((v) => {
+        context.fillText((v.ix + 1).toString(), 36, processT(v.t) + 15, 40)
+        // context.fillRect(0, processT(val) - 5, 40, 6)
+      })
+  }
+
+  /*drawCanvas() {
+    const canvas = document.getElementById('charter-canvas') as HTMLCanvasElement
+    if (canvas == undefined) {
+      return
+    }
+    if (!this.canvas_data.height) {
+      this.canvas_data.height = canvas.height = canvas.clientHeight
+    }
+    const canvas_height = this.canvas_data.height
+    const context = canvas.getContext('2d')
+    if (!context) return
+    context.clearRect(0, 0, canvas.width, canvas.height)
+    const current_time = this.audio.current_time
+    Charter.timer.timer('draw-canvas')
+
+    const processT = (ms: number) => {
+      const y = (ms - current_time) * Charter.refs.mul.value
+      return Math.floor(canvas_height * (1 - y / canvas_height))
+    }
+    Charter.prevent_loop.fuck_timer('draw_canvas')
+
+    const offset = this.diff.offset
+
+    // chart time = audio time - offset, for +offset will push notes later, - for earlier
+    const chart_time = this.chart_time
+
+    const visible_max = this.visible_timing
+
+    let time = this.diff.nearest(chart_time, false)
+    let _bpm = this.diff.bpm_of_time(chart_time)?.bpm
+    context.fillStyle = utils.random(["#114514", "#1ff00f","#ff00ff","#f0ff0f"])
+    if (_bpm == undefined) {
+      _bpm = 120
+      context.fillStyle = '#ff0000'
+    }
+    const data = {
+      // refers to chart time
+      time: chart_time,
+      time_per_beat: 0,
+      next_bpm_time: 0,
+      next_end_time: 0,
+      bpm: _bpm,
+    }
+
+    data.time_per_beat = this.diff.time_per_beat(_bpm)
+    data.next_bpm_time = this.diff.bpm_list().find((x) => x.time > time)?.time ?? -1
+
+    data.next_end_time =
+      data.next_bpm_time == -1
+        ? this.visible_timing_ref.value[1] + time
+        : Math.min(data.next_bpm_time, this.visible_timing_ref.value[1])
+    let flag = true
+    let loops = 0
+
+    if (Charter.record.mode.value && !Charter.record.show_bar_line.value) flag = false
+    while (flag && loops < 200) {
+      while (data.time <= data.next_end_time) {
+        if (data.time >= 0) {
+          context.fillRect(40, processT(data.time), 622, 6)
+        }
+        data.time += data.time_per_beat
+        Charter.prevent_loop.timer("draw_canvas",150)
+      }
+      if (data.time > visible_max) break
+
+      data.bpm = this.diff.bpm_of_time(time)?.bpm ?? _bpm
+      data.time = data.next_end_time
+      data.time_per_beat = this.diff.time_per_beat(_bpm)
+      data.next_bpm_time =
+        this.diff.bpm_list().find((x) => x.time > time)?.time ?? this.visible_timing
+      data.next_end_time = Math.min(data.next_bpm_time, this.visible_timing)
     }
     context.fillStyle = '#b8dcee'
     context.textAlign = 'right'
@@ -1060,13 +956,13 @@ export class _chart {
           ix: idx
         }
       })
-      .filter((x) => utils.between(x.t, this.visible_timing.value))
+      .filter((x) => utils.between(x.t, this.visible_timing_ref.value))
       .map((v) => {
         context.fillText((v.ix + 1).toString(), 36, processT(v.t) + 15, 40)
         // context.fillRect(0, processT(val) - 5, 40, 6)
       })
-  }
+  }*/
 }
 
 // @ts-ignore
-window.chart = _chart
+window.chart = Chart

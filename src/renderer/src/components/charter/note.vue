@@ -68,6 +68,5 @@ span {
   width: min-content;
   user-select: none;
   background-size: 100% 100%;
-  transition: bottom 50ms linear;
 }
 </style>

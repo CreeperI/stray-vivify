@@ -29,6 +29,10 @@ function toDate(y: string | number, m: string | number, d: string | number) {
       <div class="build-content-title">Bug修复</div>
       <slot name="bugs"></slot>
     </div>
+    <div v-if="$slots.bugs" class="build-content pointed-list">
+      <div class="build-content-title">优化</div>
+      <slot name="qol"></slot>
+    </div>
     <div v-if="$slots.default" class="build-content pointed-list">
       <div class="build-content-title">更新内容</div>
       <slot></slot>
@@ -68,7 +72,7 @@ function toDate(y: string | number, m: string | number, d: string | number) {
 }
 
 .build-name {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   text-align: center;
 }
 

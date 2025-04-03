@@ -7,7 +7,7 @@ const chart = Charter.get_chart()
 const { meter, reverse_scroll } = Charter.settings.to_refs
 
 const { current_bpm } = chart
-const { writable_current_second, writable_current_ms } = chart.audio.refs
+const { writable_current_ms } = chart.audio.refs
 
 function fuckWheel(e: WheelEvent) {
   chart.audio.pause()
@@ -15,11 +15,12 @@ function fuckWheel(e: WheelEvent) {
   chart.audio.current_time = chart.diff.nearest(writable_current_ms.value)
   const scr = (4 / meter.value) * (60 / current_bpm.value) * Math.sign(e.deltaY)
   if (reverse_scroll.value) {
-    writable_current_second.value += scr
+    writable_current_ms.value += scr * 1000
   } else {
-    writable_current_second.value -= scr
+    writable_current_ms.value += -scr * 1000
   }
 }
+
 const refresh = Charter.refresh.flag
 
 /**
@@ -32,8 +33,8 @@ const refresh = Charter.refresh.flag
 </script>
 
 <template>
-  <div class="lane-wrapper" @wheel.passive="fuckWheel" v-if="refresh">
-    <canvas id="charter-canvas" class="charter-canvas" height="1080" width="624"/>
+  <div v-if="refresh" class="lane-wrapper" @wheel.passive="fuckWheel">
+    <canvas id="charter-canvas" class="charter-canvas" height="1080" width="624" />
     <div class="lane-inner">
       <div class="lane-line" style="background-color: #ffffff; left: 0" />
       <div class="lane-line" style="background-color: #ffffff; left: 548px" />
@@ -43,7 +44,7 @@ const refresh = Charter.refresh.flag
       <div class="lane-bg" style="background-color: #001523; left: 5px" />
       <div class="lane-bg" style="background-color: #270017; left: 279px" />
       <div class="lane-bottom" />
-      <lane-notes/>
+      <lane-notes />
     </div>
   </div>
 </template>
@@ -96,18 +97,19 @@ const refresh = Charter.refresh.flag
   top: 0;
   z-index: var(--z-lane-bg);
 }
+
 .charter-canvas {
-  height: calc(100% - var(--h-l-b));
+  height: calc(100vh - var(--h-l-b));
   width: 664px;
   z-index: var(--z-lane-canvas);
   position: absolute;
-  top: 0;
+  bottom: var(--h-l-b);
   left: 0;
   pointer-events: none;
   user-select: none;
 }
+
 .lane-bar-line {
   background-image: linear-gradient(to bottom, #ffffff 4px, transparent 4px);
 }
-
 </style>

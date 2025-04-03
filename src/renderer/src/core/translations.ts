@@ -51,6 +51,7 @@ interface Translations {
       title: string
       open: string
       vsb: string
+      close: string
     }
     record: {
       open: string
@@ -88,6 +89,18 @@ interface Translations {
   }
   start: {
     recent: string
+  }
+  load_state: {
+    ask_path: string
+    load_music_from_backend: string
+    create_music_blob: string
+    waiting_can_play: string
+    stuck_at: {
+      ask_path: string
+      load_music_from_backend: string
+      create_music_blob: string
+      waiting_can_play: string
+    }
   }
 }
 
@@ -148,7 +161,8 @@ export const LanguageData: { zh_cn: Translations } & Record<Languages, Partial<T
       file: {
         title: '文件',
         open: '打开',
-        vsb: '读取vsb'
+        vsb: '读取vsb',
+        close: '关闭文件'
       },
       record: { open: '启动纯享模式', exit: '退出纯享模式',setting:"功能设置" }
     },
@@ -181,6 +195,20 @@ export const LanguageData: { zh_cn: Translations } & Record<Languages, Partial<T
     },
     start: {
       recent: '最近项目'
+    },
+    load_state: {
+      ask_path: "获取音频本地路径",
+      load_music_from_backend: "从electron端获得音乐buffer",
+      create_music_blob: "成功创建blob",
+      waiting_can_play: "等待blob加载到audio元素中。",
+      stuck_at: {
+        ask_path: "获取音频路径失败。如果你卡在这个页面，请务必反馈你的操作，以揪出来逻辑漏洞。" +
+          "照理来说不应该啊……但是请务必找我反馈！",
+        load_music_from_backend: "前后端的音频文件数据交互出现问题。" +
+          "请尝试把本程序的文件夹从杀毒软件中排除（我不知道为什么会出这个问题。真的。",
+        create_music_blob: "我不知道为什么会这样……我真的不知道。",
+        waiting_can_play: "大概是音频自身的编码不受支持（拜托这玩意真的什么都不支持……），建议使用格式工厂之类的弄一下"
+      }
     }
   }
   /* "？？？？？": {

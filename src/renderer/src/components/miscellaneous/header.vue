@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import Translations from '@renderer/core/translations'
 import { Charter } from '@renderer/core/charter'
-import { _chart } from '@renderer/core/chart'
+import { Chart } from '@renderer/core/chart'
 
 const Language = Translations
 
@@ -21,30 +21,51 @@ function readVsb() {
       return Charter.invoke.read_vsb(r1.path)
     })
     .then((r) => {
-      if (_chart.current) {
-        _chart.current.load_vsb(r)
+      if (Chart.current) {
+        Chart.current.load_vsb(r)
       }
     })
 }
 
 function open_chart() {
-  _chart.open_chart().catch(() => {
+  Chart.open_chart().catch(() => {
     Charter.state.value = 'startUp'
   })
+}
+
+function close_chart() {
+  if (Chart.current) {
+    Chart.current.save()
+    Charter.state.value = 'startUp'
+    Chart.current = undefined
+  }
 }
 </script>
 
 <template>
   <div :key="lang" class="header-wrapper">
     <div class="header-top">
-      <img alt="wug" class="header-wug" src="/wug.jpg" />
+      <img alt="wug" class="header-wug" src="/zhe-shi-shei-a.jpg" />
       <div class="header-menu-ul">
-        <div class="h-menu-btn-text"
-             :class="state == 'startUp' ? 'rainbow-text' :''"
-             v-html="Language.header.file.title" />
+<!--          :class="state == 'startUp' ? 'rainbow-text' : ''"-->
+        <div
+          class="h-menu-btn-text"
+          v-html="Language.header.file.title"
+        />
         <div class="h-menu-btn-i">
           <div class="h-menu-btn-text" @click="open_chart()" v-html="Language.header.file.open" />
-          <div v-if="state == 'charting'" class="h-menu-btn-text" @click="readVsb">读取vsb</div>
+          <div
+            v-if="state == 'charting'"
+            class="h-menu-btn-text"
+            @click="readVsb"
+            v-html="Translations.header.file.vsb"
+          ></div>
+          <div
+            v-if="state == 'charting'"
+            class="h-menu-btn-text"
+            @click="close_chart"
+            v-html="Translations.header.file.close"
+          ></div>
         </div>
       </div>
       <div class="header-menu-ul">
@@ -61,7 +82,6 @@ function open_chart() {
           @click="
             () => {
               record_mode = true
-              Charter.settings.meter(1)
             }
           "
           v-html="Language.header.record.open"

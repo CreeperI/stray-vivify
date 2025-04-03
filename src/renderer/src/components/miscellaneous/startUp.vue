@@ -2,12 +2,12 @@
 import Storage from '@renderer/core/storage'
 import Translations from '@renderer/core/translations'
 import { Charter } from '@renderer/core/charter'
-import { _chart } from '@renderer/core/chart'
+import { Chart } from '@renderer/core/chart'
 
 const proj = Storage.projects
 
 function open_proj(p: string) {
-  _chart.open_chart(p).catch(() => {
+  Chart.open_chart(p).catch(() => {
     Charter.state.value = 'startUp'
   })
 }
@@ -53,6 +53,7 @@ function toDate(time: number): string {
     <div class="start-right">
       <div>点击顶部栏的文件-打开以开始写谱。</div>
       <div>点击右下角build以查看更新记录！</div>
+      <img src="/wug.jpg">
     </div>
   </div>
 </template>

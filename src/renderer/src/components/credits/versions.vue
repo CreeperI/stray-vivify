@@ -53,18 +53,30 @@ import Build from '@renderer/components/credits/build.vue'
         <div>修复了撞尾bug。</div>
       </template>
       <template #header>
-        <div>stray/vivify</div>
+        <div>- stray/vivify</div>
       </template>
-      <template>
-        <div>
-          新增了纯享模式。该模式下，你可以撇掉别的乱七八糟的东西。
-        </div>
-        <div>增加了撤销、重做功能。快捷键为Ctrl+Z和Ctrl+Y，这方面的自定义还在路上（悲</div>
+        <div>新增了纯享模式。该模式下，你可以撇掉别的乱七八糟的东西。</div>
+        <div>增加了撤销、重做功能。快捷键为Ctrl+Z和Ctrl+Y，这方面（指快捷键）的自定义还在路上（悲</div>
         <div>重写了部分底层逻辑，修改了小节线的显示方式，添加了小节数显示。</div>
         <div>优化了轨道在左侧时的功能选项的显示方式。</div>
         <div>新增了Credits。请在设置中打开！</div>
         <div>移除了note重叠的检测，现在只不允许放在同一个位置（这意味着你大概可以把单键放在hold里面……</div>
         <div>为制谱器起了个名字。</div>
+    </Build>
+    <Build build="5" y="2025" m="4" d="3">
+      <template #bugs>
+        <div>修复了（？）关于谱面offset的一系列问题。现在应该好了吧……</div>
+      </template>
+      <template #qol>
+        <div>现在将谱面渲染逻辑改为分组渲染。drawCanvas（画小节的）效率现在应该提高了2900%（人话：消耗时间从大概58ms->2ms）</div>
+        <div>修改了offset的逻辑。现在应该和音频时间分开独立计算。</div>
+        <span>然而我不知道为什么之前会把这俩玩意混在一起</span>
+        <div>将bpm列表改为懒加载。这可能提升一部分性能。</div>
+      </template>
+      <div>新增了waiting-load界面，现在如果读取的时候卡住了可以帮你分析（？）原因。</div>
+      <div>新增了株洲岛有栖。</div>
+      <template #header>
+        我愚人节呢？？？
       </template>
     </Build>
   </div>

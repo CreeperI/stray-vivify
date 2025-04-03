@@ -65,6 +65,7 @@ export class ShortCuts {
   }
 
   static handle(e: KeyboardEvent) {
+    if (e.target instanceof HTMLInputElement) return
     ShortCuts.all.forEach((x) => {
       x.handle(e)
     })

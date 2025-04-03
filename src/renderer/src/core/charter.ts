@@ -3,12 +3,23 @@ import { computed, reactive, ref, toRefs, watch } from 'vue'
 import Translations, { LanguageData, Languages } from '@renderer/core/translations'
 import { utils } from '@renderer/core/utils'
 import { notify } from '@renderer/core/notify'
-import { _chart } from '@renderer/core/chart'
+import { Chart } from '@renderer/core/chart'
 import { modal } from '@renderer/core/modal'
 
 const ipcRenderer = window.electron.ipcRenderer
 const _invoke: Invoker = ipcRenderer.invoke
-
+const prevent_loop = {
+  data: {} as Record<string, number>,
+  timer(key: string, max: number) {
+    if (!(key in prevent_loop.data)) prevent_loop.data[key] = Date.now()
+    else {
+      if (Date.now() - prevent_loop.data[key] > max) debugger
+    }
+  },
+  fuck_timer(key: string) {
+    if (key in prevent_loop.data) delete prevent_loop.data[key]
+  }
+}
 const Invoke = {
   get_file_buffer(path: string) {
     return _invoke('get-file-buffer', path)
@@ -36,7 +47,18 @@ const Invoke = {
   },
   open_url(url: string) {
     return _invoke('open-url', url)
-  },
+  }
+}
+const timer = {
+  saved: {} as Record<string, number>,
+  timer(key: string, ...val: any) {
+    if (!(key in timer.saved)) timer.saved[key] = Date.now()
+    else {
+      const now = Date.now()
+      console.log(`Timer ${key}:${now - timer.saved[key]}ms`, ...val)
+      timer.saved[key] = now
+    }
+  }
 }
 
 const settings_function = (() => {
@@ -102,7 +124,7 @@ const settings_function = (() => {
   watch(
     () => data.volume,
     (v) => {
-      if (_chart.current) _chart.current.audio.volume = v / 100
+      if (Chart.current) Chart.current.audio.volume = v / 100
     }
   )
   return fn
@@ -154,8 +176,28 @@ const record = {
   show_bar_count: ref(false),
   show_bpm: ref(false)
 }
+type load_state_strings = 'success' | 'failed' | 'pending'
+const load_state = (() => {
+  const data = {
+    asked_path: 'pending' as load_state_strings,
+    load_music_from_backend: 'pending' as load_state_strings,
+    create_music_blob: 'pending' as load_state_strings,
+    waiting_can_play: 'pending' as load_state_strings,
+  }
+  const _ref = ref(data)
+  const clear = () => {
+    _ref.value.asked_path = 'pending'
+    _ref.value.load_music_from_backend = 'pending'
+    _ref.value.create_music_blob = 'pending'
+    _ref.value.waiting_can_play = 'pending'
+  }
+  return {
+    data: _ref,
+    clear,
+  }
+})()
 
-const CURRENT_BUILD = 4
+const CURRENT_BUILD = 5
 
 export const Charter = {
   invoke: Invoke,
@@ -172,14 +214,21 @@ export const Charter = {
     return refs.state
   },
   get_chart() {
-    if (_chart.current) return _chart.current
+    if (Chart.current) return Chart.current
     throw new Error('No chart loaded.')
   },
   if_current() {
-    return _chart.current
+    return Chart.current
   },
-  load_state: false,
-  modal
+  modal,
+  timer,
+  constants: {
+    rem: Number(window.getComputedStyle(document.documentElement).fontSize.replace('px', '')),
+    screenH: window.screen.height,
+    screenW: window.screen.width
+  },
+  prevent_loop: prevent_loop,
+  load_state: load_state,
 }
 
 ipcRenderer.on('window-max-state', (_, state: boolean) => {

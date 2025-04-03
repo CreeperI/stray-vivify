@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ComputedRef, ref, toRaw, watch } from 'vue'
-import { _chart } from '@renderer/core/chart'
+import { Chart } from '@renderer/core/chart'
 import Note from '@renderer/components/charter/note.vue'
 import { ChartType } from '@preload/types'
 import { notify } from '@renderer/core/notify'
@@ -13,11 +13,13 @@ const { meter, note_type, middle, scale } = Charter.settings.to_refs
 const { mul } = Charter.refs
 const diff = chart.ref.diff
 
-const { current_bpm, visible_timing } = chart
+const { current_bpm, shown_timing } = chart
+const { chart_current_time } = chart.ref
 const { current_ms } = chart.audio.refs
 const record_mode = Charter.record.mode
 const show_current_bpm = Charter.record.show_bpm
-const bpm_list = () => chart.diff.bpm_list()
+const shown_part = chart.diff.shown
+const bpm_list = () => chart.diff.bpm_list.value
 
 // ----
 
@@ -89,7 +91,7 @@ const HoldData = {
     lane: 0
   }),
   setter: ((_) => {}) as (l: number) => void,
-  // use for not placing a note, cleanup the data. After placing, use ``clear()`` instead
+  // Use for not placing a note, clean up the data. After placing, use ``clear()`` instead
   clean() {
     this.place.value.flag = false
     this.place.value.start = 0
@@ -115,16 +117,16 @@ function nearest(x: number, y: number) {
   if (x >= 554) {
     n.isBpm = true
     n.lane = 0
-    n.time = chart.diff.nearest(y / mul.value + current_ms.value, false)
+    n.time = chart.diff.nearest(y / mul.value + chart_current_time.value, false)
   } else {
     n.isBpm = false
-    if (_chart.isBumper(note_type.value)) {
+    if (Chart.isBumper(note_type.value)) {
       if (middle.value) n.lane = Math.min(Math.floor(x / 137), 2)
       else n.lane = x < 278 ? 0 : 2
     } else {
       n.lane = Math.min(Math.floor(x / 137), 3)
     }
-    n.time = chart.diff.nearest(y / mul.value + current_ms.value)
+    n.time = chart.diff.nearest(y / mul.value + chart_current_time.value)
   }
   return n
 }
@@ -242,6 +244,10 @@ function noteAdd(e: MouseEvent) {
       }
     }
   }
+  if (t == 'p') {
+    chart.diff.add_bpm(note_d)
+    return
+  }
   chart.diff.add_note(note_d)
 }
 
@@ -266,7 +272,7 @@ function delBpmPart(part: ChartType.bpm_part) {
     return
   }
 
-  chart.diff.remove_note(part_note)
+  chart.diff.remove_bpm(part_note)
 }
 
 // -----
@@ -307,13 +313,13 @@ function calcBottom(t: number, current: number, h = 0) {
   return (t - current) * mul.value + 'px'
 }
 
-function isVisible(n: ChartType.note, visible: [number, number]): boolean {
+/*function isVisible(n: ChartType.note, visible: [number, number]): boolean {
   if (n.n == 'h') {
     if (utils.between(n.t, visible)) return true
     return n.t + n.h < visible[1]
   }
   return utils.between(n.t, visible)
-}
+}*/
 
 function isVisibleBpm(t: number, visible: [number, number]) {
   return utils.between(t, visible)
@@ -326,12 +332,10 @@ function drawCanvas() {
 watch(current_ms, drawCanvas)
 watch(meter, drawCanvas)
 watch(scale, drawCanvas)
-const update_flag = Charter.update.flag
 </script>
 
 <template>
   <div
-    :key="update_flag + Math.random()"
     class="note-div"
     @click="(e) => noteAdd(e)"
     @drop="drop"
@@ -346,14 +350,10 @@ const update_flag = Charter.update.flag
     @dragover.prevent
   >
     <Note
-      v-if="note_type != '' && pending.type == 'note'"
+      v-if="note_type != '' && pending.type == 'note' && pending.display"
       :note="pending_note"
       :style="{
-        bottom: calcBottom(
-          pending_note.t + diff.offset,
-          current_ms,
-          pending_note.n == 'h' ? pending_note.h : 0
-        )
+        bottom: calcBottom(pending_note.t, chart_current_time, pending_note.n == 'h' ? pending_note.h : 0)
       }"
       :title="pending.time"
       class="pending-note"
@@ -361,28 +361,28 @@ const update_flag = Charter.update.flag
     />
     <input
       v-if="pending.type == 'bpm'"
-      :style="{ bottom: calcBottom(pending_note.t + diff.offset, current_ms) }"
+      :style="{ bottom: calcBottom(pending_note.t, chart_current_time) }"
       :value="pending.bpm"
       class="pending-bpm bpm-ticker"
       disabled
     />
-    <template v-for="n in diff.notes">
+    <template v-for="n in shown_part">
       <Note
-        v-if="isVisible(n, visible_timing)"
         :note="n"
-        :style="{ bottom: calcBottom(n.t + diff.offset, current_ms, n.n == 'h' ? n.h : 0) }"
+        :style="{ bottom: calcBottom(n.t, chart_current_time, n.n == 'h' ? n.h : 0) }"
         :title="n.t"
         class="normal-note"
         draggable="true"
         @click="(e) => noteAdd(e)"
         @contextmenu="delNote(n)"
         @dragstart="(e) => noteDragStart(n, e)"
+
       />
     </template>
     <template v-for="part in bpm_list()">
       <input
-        v-if="isVisibleBpm(part.time, visible_timing)"
-        :style="{ bottom: calcBottom(part.time + diff.offset, current_ms) }"
+        v-if="isVisibleBpm(part.time, shown_timing)"
+        :style="{ bottom: calcBottom(part.time, chart_current_time) }"
         :value="part.bpm"
         class="bpm-ticker"
         type="text"
@@ -392,9 +392,11 @@ const update_flag = Charter.update.flag
     </template>
   </div>
   <input
-    :value="current_bpm" class="current-bpm bpm-ticker"
-    v-if="record_mode && show_current_bpm"
-    @change="(e) => setCurrentBpm(e)" />
+    v-if="record_mode ? show_current_bpm : true"
+    :value="current_bpm"
+    class="current-bpm bpm-ticker"
+    @change="(e) => setCurrentBpm(e)"
+  />
 </template>
 <style scoped>
 .normal-note {

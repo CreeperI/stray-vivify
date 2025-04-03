@@ -1,10 +1,11 @@
 <script lang="ts" setup>
-import Header from '@renderer/components/header.vue'
+import Header from '@renderer/components/miscellaneous/header.vue'
 import ChartLine from '@renderer/components/charter/chart-lines/chart-line.vue'
-import StartUp from '@renderer/components/startUp.vue'
+import StartUp from '@renderer/components/miscellaneous/startUp.vue'
 import { ModalTarget } from '@kolirt/vue-modal'
 import AButton from '@renderer/components/a-elements/a-button.vue'
 import { Charter } from '@renderer/core/charter'
+import WaitingLoad from '@renderer/components/miscellaneous/waiting-load.vue'
 
 const state = Charter.state
 </script>
@@ -13,6 +14,7 @@ const state = Charter.state
   <Header />
   <StartUp v-if="state == 'startUp'" />
   <ChartLine v-if="state == 'charting'" />
+  <WaitingLoad v-if="state == 'cache'" />
   <!--  <popup-modal />-->
   <div id="n-c" class="notify-container" />
   <ModalTarget />
