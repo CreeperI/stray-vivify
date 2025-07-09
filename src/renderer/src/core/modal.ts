@@ -6,6 +6,8 @@ import { openModal } from '@kolirt/vue-modal'
 import VersionsModal from '@renderer/components/modals/versions-modal.vue'
 import CreditsModal from '@renderer/components/modals/credits-modal.vue'
 import RecordModal from '@renderer/components/modals/record-modal.vue'
+import AskIdModal from '@renderer/components/modals/ask-id-modal.vue'
+import ShortcutModal from '@renderer/components/modals/shortcut-modal.vue'
 
 export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal)
@@ -14,6 +16,8 @@ export class modal<T extends Component> {
   static VersionsModal = new modal(VersionsModal)
   static CreditsModal = new modal(CreditsModal)
   static RecordModal = new modal(RecordModal)
+  static AskIdModal = new modal(AskIdModal)
+  static ShortcutModal = new modal(ShortcutModal)
 
   component: T
   priority: number

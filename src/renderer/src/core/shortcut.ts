@@ -100,6 +100,14 @@ export class ShortCuts {
     x.set_key(data.key, data.alt, data.ctrl, data.shift)
   }
 
+  static async load_from_storage() {
+    const data = await Charter.invoke('get-shortcut-data')
+    if (!data) return
+    (JSON.parse(data) as SC_save[]).forEach((x) => {
+      ShortCuts.fromJson(x)
+    })
+  }
+
   set_key(k: string, alt = false, ctrl = false, shift = false) {
     if (ShortCuts.exists(k, alt, ctrl, shift)) {
     }
@@ -127,6 +135,22 @@ export class ShortCuts {
     if (this._shift) l.push('Shift')
     l.push(this.key)
     return l.join('+')
+  }
+
+  get data() {
+    return {
+      name: this.name,
+      key: this.key,
+      alt: this._alt,
+      ctrl: this._ctrl,
+      shift: this._shift
+    }
+  }
+
+  set_data(data:SC_save) {
+    this.name = data.name
+    this.set_key(data.key, data.alt, data.ctrl, data.shift)
+    Charter.update()
   }
 }
 

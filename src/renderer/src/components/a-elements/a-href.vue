@@ -4,7 +4,7 @@ import { Charter } from '@renderer/core/charter'
 const { href } = defineProps<{ href: string }>()
 
 function handle() {
-  Charter.invoke.open_url(href)
+  Charter.invoke('open-url', href)
 }
 </script>
 

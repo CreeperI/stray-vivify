@@ -3,7 +3,6 @@ import { computed, watch } from 'vue'
 import Translations from '@renderer/core/translations'
 import ASelect from '@renderer/components/a-elements/a-select.vue'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
-import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import ARange from '@renderer/components/a-elements/a-range.vue'
 import { Charter } from '@renderer/core/charter'
 
@@ -31,9 +30,16 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
 const update_flag = Charter.update.flag
 
 function toTimeStr(seconds: number) {
-  const minutes = Math.floor(seconds / 60)
-  const secs = (seconds % 60).toFixed(3)
-  return minutes + ':' + (parseFloat(secs) < 10 ? '0' : '') + secs
+  const isNegative = seconds < 0;
+  const absSeconds = Math.abs(seconds);
+  const minutes = Math.floor(absSeconds / 60);
+  let secs = (absSeconds % 60).toFixed(3);
+
+  // 处理秒数部分补零逻辑
+  secs = parseFloat(secs) < 10 ? '0' + secs : secs;
+
+  // 添加负号标识
+  return (isNegative ? '-' : '') + minutes + ':' + secs;
 }
 
 const diff_index = computed({
@@ -61,7 +67,7 @@ const diff_index = computed({
       <label v-html="Language.charter_func.chart.charter" />
       <a-text-input v-model="diff.charter" @change="Charter.update()" />
       <label v-html="Language.charter_func.song.bpm" />
-      <a-text-input v-model="chart.song.bpm"/>
+      <a-text-input v-model="chart.song.bpm" />
       <label v-html="Language.charter_func.chart.choose" />
       <a-select
         :key="update_flag + Math.random()"
@@ -78,8 +84,6 @@ const diff_index = computed({
       <a-range v-model="writable_play_rate" max="2" min="0.5" step="0.1" />
       <label v-html="Language.charter_func.volume + ':' + volume" />
       <a-range v-model.number="volume" max="100" min="0" />
-      <label v-html="Language.charter_func.chart.offset + ':' + diff.offset" />
-      <a-number-input v-model="diff.offset" />
     </div>
     <div class="chart-other">
       <div

@@ -22,6 +22,8 @@ watch(meter, (v) => {
 })
 
 const { note_choice } = Charter.note
+
+const style_prefix = "stray:/__skin__/"
 </script>
 
 <template>
@@ -29,42 +31,42 @@ const { note_choice } = Charter.note
     <div class="fp-title" v-html="Language.charter_func.note.title" />
     <div class="notes">
       <div :class="note_type == 'n' ? 'note-chosen' : ''" @click="note_choice('n')">
-        <img alt="Note.png" src="/noteL.png" />
+        <img alt="Note.png" :src="style_prefix + 'noteL.png'" />
         <div>
           <div>{{ ShortCuts.$fun('note').parse() }}</div>
           <div v-html="Language.charter_func.note.chip" />
         </div>
       </div>
       <div :class="note_type == 'b' ? 'note-chosen' : ''" @click="note_choice('b')">
-        <img alt="Bumper.png" src="/bL.png" />
+        <img alt="Bumper.png" :src="style_prefix + 'bL.png'" />
         <div>
           <div>{{ ShortCuts.$fun('bumper').parse() }}</div>
           <div v-html="Language.charter_func.note.bumper" />
         </div>
       </div>
       <div :class="note_type == 'm' ? 'note-chosen' : ''" @click="note_choice('m')">
-        <img alt="Note.mine.png" src="/bomb.png" />
+        <img alt="Note.mine.png" :src="style_prefix + 'bomb.png'" />
         <div>
           <div>{{ ShortCuts.$fun('mine').parse() }}</div>
           <div v-html="Language.charter_func.note.mine" />
         </div>
       </div>
       <div :class="note_type == 'mb' ? 'note-chosen' : ''" @click="note_choice('mb')">
-        <img alt="Bumper.mine.png" src="/bB.png" />
+        <img alt="Bumper.mine.png" :src="style_prefix + 'bB.png'" />
         <div>
           <div>{{ ShortCuts.$fun('mine-bumper').parse() }}</div>
           <div v-html="Language.charter_func.note.mb" />
         </div>
       </div>
       <div :class="note_type == 'h' ? 'note-chosen' : ''" @click="note_choice('h')">
-        <img alt="Note.png" src="/noteL.png" />
+        <img alt="Note.png" :src="style_prefix + 'noteL.png'" />
         <div>
           <div>{{ ShortCuts.$fun('hold').parse() }}</div>
           <div v-html="Language.charter_func.note.hold" />
         </div>
       </div>
       <div :class="note_type == 's' ? 'note-chosen' : ''" @click="note_choice('s')">
-        <img alt="Bumper.png" src="/sbL.png" />
+        <img alt="Bumper.png" :src="style_prefix + 'sbL.png'" />
         <div>
           <div>{{ ShortCuts.$fun('s-bumper').parse() }}</div>
           <div v-html="Language.charter_func.note.sb" />

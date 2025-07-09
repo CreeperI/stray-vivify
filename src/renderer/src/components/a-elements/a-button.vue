@@ -19,7 +19,7 @@ const {msg} = defineProps<{
   border: 2px solid transparent;
   box-shadow: black 0 0 5px;
   transition: all 0.1s linear;
-  padding: 2px;
+  padding: 2px 5px;
   z-index: var(--z-highest);
 }
 .a-button:hover {

@@ -12,7 +12,7 @@ const { writable_current_ms } = chart.audio.refs
 function fuckWheel(e: WheelEvent) {
   chart.audio.pause()
   if (!e.target) return
-  chart.audio.current_time = chart.diff.nearest(writable_current_ms.value)
+  chart.audio.set_current_time(chart.diff.nearest(writable_current_ms.value))
   const scr = (4 / meter.value) * (60 / current_bpm.value) * Math.sign(e.deltaY)
   if (reverse_scroll.value) {
     writable_current_ms.value += scr * 1000
@@ -25,11 +25,13 @@ const refresh = Charter.refresh.flag
 
 /**
  * 0: 0px
- * 1: 131 + 6
- * 2: 131*2 + 6*2
- * 3: 131*3 + 6*3
- * 4: 131*4 + 6*4
+ * 1: (lane-width 131) + 6 137
+ * 2: (lane-width 131)*2 + 6*2 274
+ * 3: (lane-width 131)*3 + 6*3 411
+ * 4: (lane-width 131)*4 + 6*4 548
  * */
+
+// const lane_width = computed(() => Settings.value.lane_width)
 </script>
 
 <template>
@@ -100,7 +102,7 @@ const refresh = Charter.refresh.flag
 
 .charter-canvas {
   height: calc(100vh - var(--h-l-b));
-  width: 664px;
+  width: 100%;
   z-index: var(--z-lane-canvas);
   position: absolute;
   bottom: var(--h-l-b);

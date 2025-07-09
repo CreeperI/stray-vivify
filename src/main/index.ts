@@ -1,8 +1,12 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, shell } from 'electron'
-import { join } from 'path'
+import { app, BrowserWindow, dialog, globalShortcut, ipcMain, protocol, shell } from 'electron'
+import { join, dirname} from 'path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { handlers } from './handlers'
+import { load_storage_handler, MainStorage } from './store'
+import fs from 'fs'
+import { basename } from 'node:path'
+import { load_ipc_handlers } from './ipc'
+import Store from 'electron-store'
 
 function window_max(win: BrowserWindow) {
   if (win.isMaximized()) {
@@ -11,6 +15,52 @@ function window_max(win: BrowserWindow) {
     win.maximize()
   }
   win.webContents.send('window-max-state', win.isMaximized())
+}
+
+function check_skin_path() {
+  const sp = get_skin_path()
+  if (!fs.existsSync(sp)) {
+    dialog.showErrorBox(
+      'Errorrrrrr!',
+      'Cannot find skin folder. \n' + 'Please check if the /skin folder exists.\nPending:' + sp
+    )
+    app.quit()
+  }
+}
+
+function get_skin_path() {
+  if (process.env.NODE_ENV === 'development') {
+    return join(__dirname, '../../resources')
+  } else if (process.platform === 'darwin') {
+    return join(dirname(app.getPath('module')), 'skin')
+  } else {
+    return join(dirname(app.getPath('module')), 'skin')
+  }
+}
+
+// https://github.com/xieerduos/electron-custom-protocol-local-resource-example
+// yes i want to change something like how to read files... then
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'stray',
+    privileges: {
+      secure: true,
+      stream: true,
+      standard: true,
+      bypassCSP: true,
+      supportFetchAPI: true
+    }
+  }
+])
+
+function convertPath(originalPath: string) {
+  const match = originalPath.match(/^\/([a-zA-Z])\/(.*)$/)
+  if (match) {
+    // fuck for windows
+    return `${match[1]}:/${match[2]}`
+  } else {
+    return originalPath
+  }
 }
 
 function listen(win: BrowserWindow) {
@@ -61,7 +111,8 @@ function createWindow(): void {
   }
 
   listen(mainWindow)
-  handlers()
+  load_ipc_handlers(MainStorage.store, mainWindow)
+  load_storage_handler()
   // globalShortcut.register('F11', () => window_max(mainWindow))
   globalShortcut.register('Alt+F12', () => {
     mainWindow.webContents.openDevTools({ mode: 'right' })
@@ -72,8 +123,11 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.vschart.terminalflow')
+  electronApp.setAppUserModelId('com.stray.vivify')
+
+  check_skin_path()
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -89,6 +143,23 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+
+  const skin_path = get_skin_path()
+
+  process.title = 'stray/vivify'
+  protocol.handle('stray', (request) => {
+    const decodedUrl = decodeURIComponent(request.url.replace(new RegExp(`^stray:/`, 'i'), ''))
+
+    const fullPath = process.platform === 'win32' ? convertPath(decodedUrl) : decodedUrl
+    if (decodedUrl.includes('__skin__')) {
+      return new Response(fs.readFileSync(join(skin_path, basename(fullPath))))
+    }
+
+    const data = fs.readFileSync(fullPath)
+    return new Response(data)
+  })
+
+  Store.initRenderer()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

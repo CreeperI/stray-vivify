@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import Storage from '@renderer/core/storage'
 import Translations from '@renderer/core/translations'
 import { Charter } from '@renderer/core/charter'
-import { Chart } from '@renderer/core/chart'
+import { Chart } from '@renderer/core/chart/chart'
+import { GlobalStat } from '@renderer/core/globalStat'
 
-const proj = Storage.projects
+const proj = GlobalStat.all_chart
 
 function open_proj(p: string) {
   Chart.open_chart(p).catch(() => {
@@ -41,19 +41,19 @@ function toDate(time: number): string {
         v-for="p in proj"
         :key="p.last_open"
         class="start-projects-proj"
-        @click="open_proj(p.path)"
+        @click="open_proj(p.id)"
       >
         <div class="proj-name" v-html="p.name" />
         <div style="display: flex; flex-wrap: nowrap">
           <span class="proj-date" v-html="toDate(p.last_open)" />
-          <span class="proj-path" v-html="p.path" />
+          <span class="proj-path" v-html="p.id" />
         </div>
       </div>
     </div>
     <div class="start-right">
       <div>点击顶部栏的文件-打开以开始写谱。</div>
       <div>点击右下角build以查看更新记录！</div>
-      <img src="/wug.jpg">
+      <img src="/resources/wug.jpg" />
     </div>
   </div>
 </template>
@@ -77,7 +77,7 @@ function toDate(time: number): string {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  overflow: hidden;
+  overflow: scroll;
   padding-right: 20px;
 
   border-right: #8d8d8d 1px solid;

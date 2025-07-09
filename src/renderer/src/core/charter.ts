@@ -1,13 +1,13 @@
-import { ChartType, Invoker } from '@preload/types'
+import { ChartType, IpcHandlers } from '@preload/types'
 import { computed, reactive, ref, toRefs, watch } from 'vue'
 import Translations, { LanguageData, Languages } from '@renderer/core/translations'
 import { utils } from '@renderer/core/utils'
 import { notify } from '@renderer/core/notify'
-import { Chart } from '@renderer/core/chart'
+import { Chart } from '@renderer/core/chart/chart'
 import { modal } from '@renderer/core/modal'
 
 const ipcRenderer = window.electron.ipcRenderer
-const _invoke: Invoker = ipcRenderer.invoke
+const _invoke: IpcHandlers.invoke.invoke = ipcRenderer.invoke
 const prevent_loop = {
   data: {} as Record<string, number>,
   timer(key: string, max: number) {
@@ -20,35 +20,7 @@ const prevent_loop = {
     if (key in prevent_loop.data) delete prevent_loop.data[key]
   }
 }
-const Invoke = {
-  get_file_buffer(path: string) {
-    return _invoke('get-file-buffer', path)
-  },
-  read_vsb(path: string) {
-    return _invoke('read-vsb', path)
-  },
-  ask_vsb() {
-    return _invoke('ask-vsb')
-  },
-  save_chart(ch: ChartType.Chart, path: string) {
-    return _invoke('save-chart', path, JSON.stringify(ch))
-  },
-  ask_song() {
-    return _invoke('ask-song')
-  },
-  open_exist_chart(path: string) {
-    return _invoke('open-exist-chart', path)
-  },
-  dev_tools() {
-    return _invoke('dev-tools')
-  },
-  open_chart(path: string) {
-    return _invoke('open-chart', path)
-  },
-  open_url(url: string) {
-    return _invoke('open-url', url)
-  }
-}
+const Invoke = _invoke
 const timer = {
   saved: {} as Record<string, number>,
   timer(key: string, ...val: any) {
@@ -72,7 +44,8 @@ const settings_function = (() => {
     charter_layout: 'auto' as 'auto' | 'middle' | 'left',
     volume: 80,
     overlap_minimum: 20,
-    reverse_scroll: false
+    reverse_scroll: false,
+    lane_width: 140
   })
   const fn = () => data
   fn.data = data
@@ -182,7 +155,7 @@ const load_state = (() => {
     asked_path: 'pending' as load_state_strings,
     load_music_from_backend: 'pending' as load_state_strings,
     create_music_blob: 'pending' as load_state_strings,
-    waiting_can_play: 'pending' as load_state_strings,
+    waiting_can_play: 'pending' as load_state_strings
   }
   const _ref = ref(data)
   const clear = () => {
@@ -193,7 +166,7 @@ const load_state = (() => {
   }
   return {
     data: _ref,
-    clear,
+    clear
   }
 })()
 
@@ -228,7 +201,7 @@ export const Charter = {
     screenW: window.screen.width
   },
   prevent_loop: prevent_loop,
-  load_state: load_state,
+  load_state: load_state
 }
 
 ipcRenderer.on('window-max-state', (_, state: boolean) => {

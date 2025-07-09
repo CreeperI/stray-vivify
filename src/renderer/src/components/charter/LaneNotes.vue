@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed, ComputedRef, ref, toRaw, watch } from 'vue'
-import { Chart } from '@renderer/core/chart'
+import { Chart } from '@renderer/core/chart/chart'
 import Note from '@renderer/components/charter/note.vue'
 import { ChartType } from '@preload/types'
 import { notify } from '@renderer/core/notify'
@@ -164,7 +164,7 @@ function pendingNoteUpdate(e: MouseEvent) {
     pending.value.display = false
     return
   }
-  if (chart.audio.paused == false) {
+  if (!chart.audio.paused) {
     pending.value.display = false
     return
   }
@@ -183,7 +183,7 @@ function pendingNoteUpdate(e: MouseEvent) {
 
   pending.value.type = n.isBpm ? 'bpm' : 'note'
   pending.value.time = n.time
-  pending.value.display = true
+  pending.value.display = n.time >= 0
 
   if (n.isBpm) HoldData.clean()
 
@@ -214,6 +214,7 @@ function noteAdd(e: MouseEvent) {
   const target = e.target as HTMLDivElement
 
   const note_d: ChartType.note = nearest_note(e.offsetX, target.clientHeight - e.offsetY)
+  if (note_d.t < 0) return
 
   if (t == 'h') {
     if (HoldData.place.value.flag) {
@@ -353,7 +354,7 @@ watch(scale, drawCanvas)
       v-if="note_type != '' && pending.type == 'note' && pending.display"
       :note="pending_note"
       :style="{
-        bottom: calcBottom(pending_note.t, chart_current_time, pending_note.n == 'h' ? pending_note.h : 0)
+        bottom: calcBottom(pending_note.t, current_ms, pending_note.n == 'h' ? pending_note.h : 0)
       }"
       :title="pending.time"
       class="pending-note"
@@ -361,7 +362,7 @@ watch(scale, drawCanvas)
     />
     <input
       v-if="pending.type == 'bpm'"
-      :style="{ bottom: calcBottom(pending_note.t, chart_current_time) }"
+      :style="{ bottom: calcBottom(pending_note.t, current_ms) }"
       :value="pending.bpm"
       class="pending-bpm bpm-ticker"
       disabled
@@ -369,20 +370,19 @@ watch(scale, drawCanvas)
     <template v-for="n in shown_part">
       <Note
         :note="n"
-        :style="{ bottom: calcBottom(n.t, chart_current_time, n.n == 'h' ? n.h : 0) }"
+        :style="{ bottom: calcBottom(n.t, current_ms, n.n == 'h' ? n.h : 0) }"
         :title="n.t"
         class="normal-note"
         draggable="true"
         @click="(e) => noteAdd(e)"
         @contextmenu="delNote(n)"
         @dragstart="(e) => noteDragStart(n, e)"
-
       />
     </template>
     <template v-for="part in bpm_list()">
       <input
         v-if="isVisibleBpm(part.time, shown_timing)"
-        :style="{ bottom: calcBottom(part.time, chart_current_time) }"
+        :style="{ bottom: calcBottom(part.time, current_ms) }"
         :value="part.bpm"
         class="bpm-ticker"
         type="text"

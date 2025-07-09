@@ -1,4 +1,5 @@
 import { Buffer } from 'buffer'
+import storage_scheme = storages.storage_scheme
 
 export namespace ChartType {
   /**
@@ -60,14 +61,14 @@ export namespace ChartType {
   export type note = normal_note | hold_note | bpm_note
   export type note_type = note['n']
 
-  export interface Song {
+  export interface song {
     name: string
     composer: string
     bpm: string
   }
 
   export interface Chart {
-    song: Song
+    song: song
     diffs: Diff[]
   }
 
@@ -76,7 +77,6 @@ export namespace ChartType {
     hard: string
     notes: note[]
     charter: string
-    offset: number
   }
   export type bpm_part = {
     time: number
@@ -92,7 +92,7 @@ export namespace HandlerReturn {
         state: 'success'
         chart: ChartType.Chart
         buf: buffer
-    name: string
+        name: string
       }
     | {
         state: 'created'
@@ -127,14 +127,184 @@ export namespace HandlerReturn {
       }
 }
 
-export type Invoker = {
-  (msg: 'get-file-buffer', p: string): Promise<HandlerReturn.OpenBuffer>
-  (msg: 'save-chart', p: string, data: string): Promise<void>
-  (msg: 'open-chart', p: string): Promise<HandlerReturn.OpenChart>
-  (msg: 'read-vsb', p: string): Promise<HandlerReturn.readVsb>
-  (msg: 'open-exist-chart', p: string): Promise<HandlerReturn.OpenExistChart>
-  (msg: 'ask-song'): Promise<HandlerReturn.askPath>
-  (msg: 'ask-vsb'): Promise<HandlerReturn.askPath>
-  (msg: 'dev-tools'): Promise<void>
-  (msg: 'open-url', url: string): Promise<void>
+export type Invoke = {
+  'get-file-buffer': {
+    arg: {
+      fp: string
+    }
+    r:
+      | {
+          state: 'success'
+          data: Buffer
+        }
+      | { state: 'failed'; msg: string }
+  }
+  'save-chart': {
+    arg: {
+      fp: string
+      data: string
+    }
+    r: void
+  }
+  'read-vsb': {
+    arg: {
+      fp: string
+    }
+    r: ChartType.note[] | undefined
+  }
+  'ask-song': {
+    arg: {}
+    r: { path: string; name: string } | undefined
+  }
+  'ask-vsb': {
+    arg: {}
+    r: { path: string; name: string } | undefined
+  }
+  'open-url': {
+    arg: {
+      url: string
+    }
+    r: void
+  }
+  'set-storage': {
+    arg: {
+      data: storages.settings
+    }
+    r: void
+  }
+  'write-vsc': {
+    arg: {
+      id: string
+      data: string
+      name: string
+    }
+    r: void
+  }
+  'import-song': {
+    arg: {
+      path: string
+      id: string
+    }
+    r: Promise<
+      | {
+          state: 'success'
+          folder: string
+          json: string
+        }
+      | {
+          state: 'existed'
+        }
+      | {
+          state: 'failed'
+          reason: string
+        }
+      | {
+          state: 'cancelled'
+        }
+    >
+  }
+  'open-song': {
+    arg: {
+      id: string
+    }
+    r: {
+      data: ChartType.Chart
+      path: string
+    } | void
+  }
+  'get-charts-data': {
+    arg: {}
+    r: charts_data
+  }
+  'update-chart-data': {
+    arg: {
+      id: string
+      // parse first
+      data: string
+    },
+    r: void
+  },
+  'get-shortcut-data':{
+    arg:{},
+    r: string | undefined
+  },
+  'get-settings-data': {
+    arg: {},
+    r: storages.settings
+  }
 }
+
+export type Send = {
+  'notify-normal': {
+    arg: {
+      msg: string
+      dur: number
+    }
+    r: void
+  }
+  'ask-id': {
+    arg: {
+      ids: string[]
+    }
+    r: Promise<string | 0>
+  }
+}
+type dic2arr<T> = T extends { [K in keyof T]: T[K] } ? { [K in keyof T]: T[K] }[keyof T][] : never
+
+export namespace IpcHandlers {
+  export namespace invoke {
+    export type invoke = <T extends keyof Invoke>(
+      msg: T,
+      ...arg: dic2arr<Invoke[T]['arg']>
+    ) => Promise<Invoke[T]['r']>
+
+    export type handler = {
+      [T in keyof Invoke]: (
+        _: Electron.IpcMainInvokeEvent,
+        ...arg: dic2arr<Invoke[T]['arg']>
+      ) => Invoke[T]['r']
+    }
+  }
+  export namespace send {
+    export type send = <T extends keyof Send>(
+      msg: T,
+      ...arg: dic2arr<Send[T]['arg']>
+    ) => Promise<Send[T]['r']>
+
+    export type handler = {
+      [T in keyof Send]: (
+        _: Electron.IpcRendererEvent,
+        ...arg: dic2arr<Send[T]['arg']>
+      ) => Send[T]['r']
+    }
+  }
+}
+export namespace storages {
+  export interface settings {
+    scale: number
+    lang: string
+    meter: number
+    middle: boolean
+    note_type: ChartTypeV2.note['type'] | ''
+    overlap_minimum: number
+    reverse_scroll: boolean
+    volume: number
+    lane_width: number
+    language: Languages
+  }
+
+  export interface storage_scheme {
+    settings: settings
+    version: number
+    shortcut: string
+  }
+}
+export type charts_data = {
+  last_open: number
+  id: string
+  name: string
+  composer: string
+  bpm: string
+  ext: string
+  diffs: string[]
+}[]

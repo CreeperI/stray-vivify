@@ -7,7 +7,7 @@ const { note } = defineProps<{
 }>()
 const mul = Charter.refs.mul
 
-const note_style = '.'
+const note_style = 'stray:/__skin__'
 
 function getSrc(): string {
   if (note.n == 'n' || note.n == 'h') {
@@ -23,7 +23,8 @@ function getSrc(): string {
     if (note.l == 1) return '/sbM.png'
     else return '/sbR.png'
   }
-  return ''
+  // it would only be triggered when "p" comes but its only fucking mind to happen
+  throw new Error(JSON.stringify(note))
 }
 
 function cover_add() {

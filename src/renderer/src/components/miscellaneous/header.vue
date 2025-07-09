@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import Translations from '@renderer/core/translations'
 import { Charter } from '@renderer/core/charter'
-import { Chart } from '@renderer/core/chart'
+import { Chart } from '@renderer/core/chart/chart'
+import { notify } from '@renderer/core/notify'
 
 const Language = Translations
 
@@ -13,32 +14,29 @@ const { lang } = Charter.settings.to_refs
 const song_name = Charter.refs.current_name
 const record_mode = Charter.record.mode
 
-function readVsb() {
-  Charter.invoke
-    .ask_vsb()
-    .then((r1) => {
-      if (!r1) return
-      return Charter.invoke.read_vsb(r1.path)
-    })
-    .then((r) => {
-      if (Chart.current) {
-        Chart.current.load_vsb(r)
-      }
-    })
-}
-
-function open_chart() {
-  Chart.open_chart().catch(() => {
-    Charter.state.value = 'startUp'
-  })
-}
-
 function close_chart() {
   if (Chart.current) {
     Chart.current.save()
+    Chart.current.audio.pause()
     Charter.state.value = 'startUp'
     Chart.current = undefined
   }
+}
+
+async function read_vsb() {
+  const r1 = await Charter.invoke('ask-vsb')
+  if (!r1) {
+    notify.error('读取vsb失败……')
+    return
+  }
+  const chart = Chart.current as Chart
+  chart.load_vsb(await Charter.invoke('read-vsb', r1.path))
+}
+
+async function write_vsc() {
+  const chart = Chart.current
+  if (!chart) throw new Error('?????')
+  chart.write_current_vsc()
 }
 </script>
 
@@ -47,25 +45,13 @@ function close_chart() {
     <div class="header-top">
       <img alt="wug" class="header-wug" src="/zhe-shi-shei-a.jpg" />
       <div class="header-menu-ul">
-<!--          :class="state == 'startUp' ? 'rainbow-text' : ''"-->
-        <div
-          class="h-menu-btn-text"
-          v-html="Language.header.file.title"
-        />
+        <div class="h-menu-btn-text">文件</div>
         <div class="h-menu-btn-i">
-          <div class="h-menu-btn-text" @click="open_chart()" v-html="Language.header.file.open" />
-          <div
-            v-if="state == 'charting'"
-            class="h-menu-btn-text"
-            @click="readVsb"
-            v-html="Translations.header.file.vsb"
-          ></div>
-          <div
-            v-if="state == 'charting'"
-            class="h-menu-btn-text"
-            @click="close_chart"
-            v-html="Translations.header.file.close"
-          ></div>
+          <div v-if="state == 'charting'" class="h-menu-btn-text" @click="read_vsb">打开vsb</div>
+          <div v-if="state == 'charting'" class="h-menu-btn-text" @click="close_chart">
+            关闭文件
+          </div>
+          <div v-if="state == 'charting'" class="h-menu-btn-text" @click="write_vsc">写入vsc</div>
         </div>
       </div>
       <div class="header-menu-ul">

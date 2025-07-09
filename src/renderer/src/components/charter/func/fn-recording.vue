@@ -3,6 +3,7 @@ import { Charter } from '@renderer/core/charter'
 import Translations from '../../../core/translations'
 
 function toTimeStr(seconds: number) {
+  seconds = Math.max(0, seconds)
   const minutes = Math.floor(seconds / 60)
   const secs = (seconds % 60).toFixed(3)
   return minutes + ':' + (parseFloat(secs) < 10 ? '0' : '') + secs

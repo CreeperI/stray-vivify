@@ -1,57 +1,58 @@
 <script lang="ts" setup>
-import Translations, { LanguageData, Languages } from '@renderer/core/translations'
+import Translations from '@renderer/core/translations'
 import ASelect from '@renderer/components/a-elements/a-select.vue'
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import ALabel from '@renderer/components/a-elements/a-label.vue'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import { Charter } from '@renderer/core/charter'
 import AButton from '@renderer/components/a-elements/a-button.vue'
 
 const Language = Translations
-const { lang, charter_layout, overlap_minimum, reverse_scroll } = Charter.settings.to_refs
+const { charter_layout, overlap_minimum, reverse_scroll } = Charter.settings.to_refs
 const pos_options = [
   { display: Language.settings.layout.auto, val: 'auto' },
   { display: Language.settings.layout.middle, val: 'middle' },
   { display: Language.settings.layout.left, val: 'left' }
 ]
 const active = ref(0)
-const ia = (n: number) => computed(() => active.value == n ? 'active-tab' : '')
+// const ia = (n: number) => computed(() => (active.value == n ? 'active-tab' : ''))
 </script>
 
 <template>
   <SimpleModal :title="Language.settings.title" size="sm">
     <div class="settings-wrapper">
-      <div class="setting-list">
-        <div @click="active = 0" :class="ia(0).value">1</div>
-        <div @click="active = 1" :class="ia(1).value">2</div>
-      </div>
-      <div class="contain" v-if="active == 0">
-        <a-label :label="Language.settings.language + Language.settings.after_reboot">
-          <a-select
-            v-model="lang"
-            :options="
-              Languages.map((x) => {
-                return { display: LanguageData[x].name, val: x }
-              })
-            "
-          />
-        </a-label>
+      <!--      <div class="setting-list">-->
+      <!--        <div :class="ia(0).value" @click="active = 0">1</div>-->
+      <!--        <div :class="ia(1).value" @click="active = 1">2</div>-->
+      <!--      </div>-->
+      <div v-if="active == 0" class="contain">
+        <!--        <a-label :label="Language.settings.language + Language.settings.after_reboot">-->
+        <!--          <a-select-->
+        <!--            v-model="lang"-->
+        <!--            :options="-->
+        <!--              Language_keys.map((x) => {-->
+        <!--                return { display: LanguageData[x].name, val: x }-->
+        <!--              })-->
+        <!--            "-->
+        <!--          />-->
+        <!--        </a-label>-->
         <a-label :label="Language.settings.layout.layout">
           <a-select v-model="charter_layout" :options="pos_options"></a-select>
         </a-label>
-      </div>
-      <div class="contain" v-if="active == 1">
         <a-label :label="Language.settings.reverse_scroll">
-          <a-checkbox v-model="reverse_scroll"/>
+          <a-checkbox v-model="reverse_scroll" />
         </a-label>
         <a-label :label="Language.settings.overlap_minimum">
           <a-number-input v-model="overlap_minimum" />
         </a-label>
       </div>
     </div>
-    <template #footer><a-button msg="Credits" @click="Charter.modal.CreditsModal.show({})"/></template>
+    <template #footer>
+      <a-button msg="快捷键设置" @click="Charter.modal.ShortcutModal.show({})" />
+      <a-button msg="Credits" @click="Charter.modal.CreditsModal.show({})" />
+    </template>
   </SimpleModal>
 </template>
 

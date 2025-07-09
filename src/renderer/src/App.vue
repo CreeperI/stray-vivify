@@ -1,18 +1,18 @@
 <script lang="ts" setup>
 import Header from '@renderer/components/miscellaneous/header.vue'
 import ChartLine from '@renderer/components/charter/chart-lines/chart-line.vue'
-import StartUp from '@renderer/components/miscellaneous/startUp.vue'
 import { ModalTarget } from '@kolirt/vue-modal'
 import AButton from '@renderer/components/a-elements/a-button.vue'
 import { Charter } from '@renderer/core/charter'
 import WaitingLoad from '@renderer/components/miscellaneous/waiting-load.vue'
+import ChartList from '@renderer/components/miscellaneous/chart-list.vue'
 
 const state = Charter.state
 </script>
 
 <template>
   <Header />
-  <StartUp v-if="state == 'startUp'" />
+  <ChartList v-if="state == 'startUp'" />
   <ChartLine v-if="state == 'charting'" />
   <WaitingLoad v-if="state == 'cache'" />
   <!--  <popup-modal />-->
@@ -131,7 +131,7 @@ body {
   display: flex;
   place-items: center;
   min-width: 320px;
-  height: 100vh;
+  height: 100%;
   width: 100vw;
   overflow: hidden;
   --dark-bgi: linear-gradient(60deg, #0d1418 0%, #11161b 100%);
@@ -163,6 +163,7 @@ code {
   line-height: 1em;
   font-size: 1rem;
 }
+
 ::-webkit-scrollbar {
   display: none;
 }
