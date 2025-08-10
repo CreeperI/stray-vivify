@@ -1,12 +1,10 @@
 import { app, BrowserWindow, dialog, globalShortcut, ipcMain, protocol, shell } from 'electron'
-import { join, dirname} from 'path'
+import { dirname, join } from 'path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { load_storage_handler, MainStorage } from './store'
 import fs from 'fs'
-import { basename } from 'node:path'
+import { basename, extname } from 'node:path'
 import { load_ipc_handlers } from './ipc'
-import Store from 'electron-store'
 
 function window_max(win: BrowserWindow) {
   if (win.isMaximized()) {
@@ -35,6 +33,16 @@ function get_skin_path() {
     return join(dirname(app.getPath('module')), 'skin')
   } else {
     return join(dirname(app.getPath('module')), 'skin')
+  }
+}
+
+function get_config_path() {
+  if (process.env.NODE_ENV === 'development') {
+    return join(__dirname, '../../config.json')
+  } else if (process.platform === 'darwin') {
+    return join(dirname(app.getPath('module')), 'config.json')
+  } else {
+    return join(dirname(app.getPath('module')), 'config.json')
   }
 }
 
@@ -74,8 +82,10 @@ function listen(win: BrowserWindow) {
 
   ipcMain.on('window-max', () => window_max(win))
   win.on('resize', () => {
-    win.webContents.send('window-max-state', win.isMaximized())
+    win.webContents.send('window-resize', win.isMaximized())
   })
+
+  ipcMain.handle('window-max-state', () => win.isMaximized())
 }
 
 function createWindow(): void {
@@ -111,8 +121,7 @@ function createWindow(): void {
   }
 
   listen(mainWindow)
-  load_ipc_handlers(MainStorage.store, mainWindow)
-  load_storage_handler()
+  load_ipc_handlers(mainWindow, get_config_path())
   // globalShortcut.register('F11', () => window_max(mainWindow))
   globalShortcut.register('Alt+F12', () => {
     mainWindow.webContents.openDevTools({ mode: 'right' })
@@ -123,7 +132,6 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.stray.vivify')
 
@@ -149,17 +157,25 @@ app.whenReady().then(() => {
   process.title = 'stray/vivify'
   protocol.handle('stray', (request) => {
     const decodedUrl = decodeURIComponent(request.url.replace(new RegExp(`^stray:/`, 'i'), ''))
-
+    console.log(decodedUrl)
     const fullPath = process.platform === 'win32' ? convertPath(decodedUrl) : decodedUrl
     if (decodedUrl.includes('__skin__')) {
       return new Response(fs.readFileSync(join(skin_path, basename(fullPath))))
     }
 
+    if (decodedUrl.includes('__song__')) {
+      const song_path = decodedUrl.replace('/__song__/', '')
+      return new Response(fs.readFileSync(song_path), {
+        headers: {
+          'Content-Type': 'audio/' + extname(song_path).replace('.', ''),
+          'Content-Disposition': 'inline'
+        }
+      })
+    }
+
     const data = fs.readFileSync(fullPath)
     return new Response(data)
   })
-
-  Store.initRenderer()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -171,5 +187,5 @@ app.on('window-all-closed', () => {
   }
 })
 
-// In this file you can include the rest of your app"s specific main process
+// In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.

@@ -1,4 +1,5 @@
 import { Charter } from '@renderer/core/charter'
+import { Settings } from '@renderer/core/Settings'
 
 const functions = [
   'redo',
@@ -14,7 +15,8 @@ const functions = [
   'mine',
   'mine-bumper',
   'dev',
-  'pause'
+  'pause',
+  'f-key'
 ] as const
 
 type SC_save = {
@@ -54,6 +56,16 @@ export class ShortCuts {
 
   get key() {
     return this._key
+  }
+
+  get data() {
+    return {
+      name: this.name,
+      key: this.key,
+      alt: this._alt,
+      ctrl: this._ctrl,
+      shift: this._shift
+    }
   }
 
   static exists(k: string, alt = false, ctrl = false, shift = false) {
@@ -103,7 +115,9 @@ export class ShortCuts {
   static async load_from_storage() {
     const data = await Charter.invoke('get-shortcut-data')
     if (!data) return
-    (JSON.parse(data) as SC_save[]).forEach((x) => {
+    const parsed = JSON.parse(data) as SC_save[]
+    if (!parsed) return
+    parsed.forEach((x) => {
       ShortCuts.fromJson(x)
     })
   }
@@ -137,17 +151,7 @@ export class ShortCuts {
     return l.join('+')
   }
 
-  get data() {
-    return {
-      name: this.name,
-      key: this.key,
-      alt: this._alt,
-      ctrl: this._ctrl,
-      shift: this._shift
-    }
-  }
-
-  set_data(data:SC_save) {
+  set_data(data: SC_save) {
     this.name = data.name
     this.set_key(data.key, data.alt, data.ctrl, data.shift)
     Charter.update()
@@ -157,10 +161,11 @@ export class ShortCuts {
 new ShortCuts('redo', 'Y', () => Charter.if_current()?.diff.execute_redo(), false, true)
 new ShortCuts('undo', 'Z', () => Charter.if_current()?.diff.execute_undo(), false, true)
 
-new ShortCuts('note', '1', () => Charter.note.note_choice('n'))
-new ShortCuts('bumper', '2', () => Charter.note.note_choice('b'))
-new ShortCuts('mine', '3', () => Charter.note.note_choice('m'))
-new ShortCuts('mine-bumper', '4', () => Charter.note.note_choice('mb'))
-new ShortCuts('hold', '5', () => Charter.note.note_choice('h'))
-new ShortCuts('s-bumper', '6', () => Charter.note.note_choice('s'))
+new ShortCuts('note', '1', () => Settings.note_choice('n'))
+new ShortCuts('bumper', '2', () => Settings.note_choice('b'))
+new ShortCuts('mine', '3', () => Settings.note_choice('m'))
+new ShortCuts('mine-bumper', '4', () => Settings.note_choice('mb'))
+new ShortCuts('hold', '5', () => Settings.note_choice('h'))
+new ShortCuts('s-bumper', '6', () => Settings.note_choice('s'))
+new ShortCuts('f-key', '7', () => Settings.note_choice('f'))
 new ShortCuts('pause', ' ', () => Charter.if_current()?.audio.play_pause())

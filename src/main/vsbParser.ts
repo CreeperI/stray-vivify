@@ -1,4 +1,5 @@
 // typings.ts
+// noinspection JSUnusedGlobalSymbols
 
 type json_data = {
   [key: string]: number | string | boolean
@@ -258,7 +259,7 @@ enum GlobalModType {
 
 export { Mod, PerFrame, ModData, NoteExtra, Note, Mods, VividStasisChart, EaseType, GlobalModType }
 import { Buffer } from 'buffer'
-import { ChartType } from '../preload/types'
+import { ChartTypeV2 } from '../preload/types'
 
 class MessageBuffer {
   private buffer: Uint8Array
@@ -622,8 +623,9 @@ class VsbParser {
     return this.chart
   }
 
-  runToNotes(): ChartType.note[] {
-    const n: ChartType.note[] = []
+  runToNotes(): [ChartTypeV2.note[], ChartTypeV2.timing[]] {
+    const n: ChartTypeV2.note[] = []
+    const timings: ChartTypeV2.timing[] = []
     this.run().notes.forEach((x) => {
       if (x.type == 4 || x.type == 5) return
       if (x.extra.length > 0 && (x.type == 2 || x.type == 3)) {
@@ -635,11 +637,11 @@ class VsbParser {
             h: x.extra[0].value - x.time
           })
         else
-          n.push({
-            n: 'p',
-            t: x.time,
-            l: 0,
-            v: x.extra[0].value
+          timings.push({
+            time: x.time,
+            bpm: x.extra[0].value,
+            num: 4,
+            den: 4
           })
       }
       const n1 = note_t2note_t(x.type)
@@ -650,7 +652,7 @@ class VsbParser {
         l: x.lane
       })
     })
-    return n
+    return [n, timings]
   }
 
   private readNote(): void {

@@ -113,7 +113,9 @@ const refs = {
   /* pixel/ms */
   mul: computed(() => (settings_function.data.scale * 200 + 100) / 1000),
   state: ref('startUp' as 'startUp' | 'charting' | 'cache'),
-  visible: computed(() => Math.round(ref_window.height.value / refs.mul.value)),
+  visible: computed(() => {
+    return Math.round(ref_window.height.value / refs.mul.value)
+  }),
   current_name: ref('')
 }
 const note = {
@@ -175,6 +177,7 @@ const CURRENT_BUILD = 5
 export const Charter = {
   invoke: Invoke,
   ipcRenderer,
+  /** @deprecated */
   settings: settings_function,
   notify: notify,
   refs,
@@ -203,10 +206,6 @@ export const Charter = {
   prevent_loop: prevent_loop,
   load_state: load_state
 }
-
-ipcRenderer.on('window-max-state', (_, state: boolean) => {
-  Charter.refs.window.isMaximized.value = state
-})
 
 // @ts-ignore
 window.charter = Charter

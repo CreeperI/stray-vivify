@@ -1,4 +1,4 @@
-import { ChartType } from '@preload/types'
+import { ChartTypeV2 } from '@preload/types'
 
 export namespace utils {
   /** return whether a value is between the given states */
@@ -7,7 +7,8 @@ export namespace utils {
     if (v1 > v2) [v1, v2] = [v2, v1] // Ensure v1 < v2
     return val >= v1 && val <= v2
   }
-  export function remove<T>(arr:T[], v: T) {
+
+  export function remove<T>(arr: T[], v: T) {
     arr.splice(arr.indexOf(v), 1)
   }
 
@@ -81,56 +82,50 @@ export namespace utils {
     return to
   }
 
-  export function guard<T>(val:any, ini: T): T {
+  export function guard<T>(val: any, ini: T): T {
     if (typeof val != typeof ini) return ini
     else return val
   }
-  export function clear_arr(arr:any[]) {
+
+  export function clear_arr(arr: any[]) {
     while (arr.length) arr.pop()
   }
-  export function sort_notes(a:ChartType.note, b:ChartType.note) {
-    if (a.t !== b.t) {
-      return a.t - b.t // 按时间排序
-    } else {
-      // 如果时间相同，将 bpm_note 放在前面
-      if (a.n === 'p' && b.n !== 'p') {
-        return -1
-      } else if (a.n !== 'p' && b.n === 'p') {
-        return 1
-      } else {
-        return 0 // 如果两者都是 bpm_note 或都不是，保持原顺序
-      }
-    }
+
+  export function sort_notes(a: ChartTypeV2.note, b: ChartTypeV2.note) {
+    return a.t - b.t // 按时间排序
   }
-  export function around(v1: number, v2:number, gap=20) {
+
+  export function around(v1: number, v2: number, gap = 20) {
     return Math.abs(v1 - v2) <= gap
   }
-  export function random<T>(arr:T[]) {
+
+  export function random<T>(arr: T[]) {
     return arr[Math.floor(Math.random() * arr.length)]
   }
 }
 
 export class Lazy<T = any> {
-  _value: T | undefined
+  static all: Lazy[] = []
   getter: () => T
 
-  static all:Lazy[] = []
-  constructor(_value:(() => T)) {
+  constructor(_value: () => T) {
     this._value = undefined
     this.getter = _value
     Lazy.all.push(this)
   }
+
+  _value: T | undefined
 
   get value() {
     if (!this._value) this._value = this.getter()
     return this._value
   }
 
-  invalidate() {
-    this._value = undefined
+  static invalidateAll() {
+    Lazy.all.forEach((l) => l.invalidate())
   }
 
-  static invalidateAll() {
-    Lazy.all.forEach(l => l.invalidate())
+  invalidate() {
+    this._value = undefined
   }
 }

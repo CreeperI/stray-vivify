@@ -1,5 +1,4 @@
 import { Buffer } from 'buffer'
-import storage_scheme = storages.storage_scheme
 
 export namespace ChartType {
   /**
@@ -15,20 +14,6 @@ export namespace ChartType {
    *   type8 sbumper
    *
    */
-
-  /** @deprecated*/
-  export type Bpm_part = {
-    bpm: number
-    time: number
-    len: number
-  }
-  /** @deprecated*/
-  export type Diff_data = Bpm_part[]
-  /**
-   * @property n note's type, for note, bumper, mine, mine-bumper, s-bumper, hold, bpm
-   * @property t time in milliseconds
-   * @property l lane
-   * */
   export type normal_note = {
     n: 'n' | 'b' | 'm' | 'mb' | 's'
     t: number
@@ -59,6 +44,7 @@ export namespace ChartType {
     h: number
   }
   export type note = normal_note | hold_note | bpm_note
+
   export type note_type = note['n']
 
   export interface song {
@@ -67,6 +53,7 @@ export namespace ChartType {
     bpm: string
   }
 
+  // this is what a JSON file looks like finally
   export interface Chart {
     song: song
     diffs: Diff[]
@@ -75,56 +62,84 @@ export namespace ChartType {
   export type Diff = {
     name: string
     hard: string
-    notes: note[]
     charter: string
+    notes: note[]
   }
   export type bpm_part = {
     time: number
     bpm: number
   }
 }
-export namespace HandlerReturn {
-  export type OpenChart =
-    | {
-        state: 'missing'
-      }
-    | {
-        state: 'success'
-        chart: ChartType.Chart
-        buf: buffer
-        name: string
-      }
-    | {
-        state: 'created'
-        buf: buffer
-        name: string
-      }
 
-  export type OpenBuffer =
-    | {
-        state: 'success'
-        data: Buffer
-      }
-    | { state: 'failed'; msg: string }
-  export type askPath = { path: string; name: string } | undefined
-  export type readVsb = ChartType.note[] | undefined
-  export type OpenExistChart =
-    | {
-        state: 'missing'
-      }
-    | {
-        state: 'success'
-        chart: ChartType.Chart
-        buf: buffer
-        path: string
-        name: string
-      }
-    | {
-        state: 'created'
-        buf: buffer
-        path: string
-        name: string
-      }
+export namespace ChartTypeV2 {
+  export type normal_note = {
+    n: 'n' | 'b' | 'm' | 'mb' | 's' | 'f'
+    t: number
+    l: number
+  }
+  /**
+   * @property n note's type, for hold
+   * @property t time in milliseconds
+   * @property l lane
+   * @property h hold's len (ms)
+   * */
+  export type hold_note = {
+    n: 'h'
+    t: number
+    l: number
+    h: number
+  }
+  export type note = normal_note | hold_note
+
+  type bpm_note = {
+    n: 'p'
+    v: number
+    t: number
+    l: 0
+  }
+
+  export type all_things = note | bpm_note
+
+  export type timing = {
+    time: number
+    bpm: number
+    // 每个小节多少拍
+    num: number
+    // 几分音符为一拍
+    den: number
+
+    // im going to review MUSIC THEORY from elementary. wtf.
+  }
+
+  export interface song {
+    name: string
+    name_roman: string
+    composer: string
+    composer_roman: string
+
+    bpm: string
+    source: string
+
+    ref: string
+  }
+
+  export type diff = {
+    notes: note[]
+    timing: timing[]
+    meta: meta
+  }
+  export type meta = {
+    charter: string
+    diff1: string
+    diff2: string
+    diff_name: string
+  }
+
+  export type final = {
+    diffs: diff[]
+    song: song
+    version: number
+  }
 }
 
 export type Invoke = {
@@ -150,7 +165,7 @@ export type Invoke = {
     arg: {
       fp: string
     }
-    r: ChartType.note[] | undefined
+    r: [ChartTypeV2.note[], ChartTypeV2.timing[]] | undefined
   }
   'ask-song': {
     arg: {}
@@ -208,9 +223,9 @@ export type Invoke = {
       id: string
     }
     r: {
-      data: ChartType.Chart
+      data: string | undefined
       path: string
-    } | void
+    }
   }
   'get-charts-data': {
     arg: {}
@@ -221,16 +236,29 @@ export type Invoke = {
       id: string
       // parse first
       data: string
-    },
+    }
     r: void
-  },
-  'get-shortcut-data':{
-    arg:{},
+  }
+  'get-shortcut-data': {
+    arg: {}
     r: string | undefined
-  },
-  'get-settings-data': {
-    arg: {},
-    r: storages.settings
+  }
+  'get-conf': {
+    arg: {}
+    r: string | undefined
+  }
+  'save-conf': {
+    arg: {
+      data: string
+    }
+    r: void
+  }
+  'backup-chart': {
+    arg: {
+      id: string
+      data: string
+    }
+    r: void
   }
 }
 
@@ -282,7 +310,6 @@ export namespace IpcHandlers {
 export namespace storages {
   export interface settings {
     scale: number
-    lang: string
     meter: number
     middle: boolean
     note_type: ChartTypeV2.note['type'] | ''
@@ -308,3 +335,9 @@ export type charts_data = {
   ext: string
   diffs: string[]
 }[]
+
+export type keysOf<T, Parent extends string = ''> = T extends object
+  ? {
+      [K in keyof T]: keysOf<T[K], Parent extends '' ? K & string : `${Parent}.${K & string}`>
+    }[keyof T]
+  : Parent

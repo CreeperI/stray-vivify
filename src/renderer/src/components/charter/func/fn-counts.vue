@@ -11,35 +11,35 @@ const counts = chart.diff.counts
     <div class="fp-title" v-html="Translations.charter_func.count.title" />
     <div class="counts-list">
       <div>
-        <div>{{ Translations.charter_func.note.chip }}:</div>
+        <div>{{ Translations.charter_func.note.chip }}</div>
         <div>{{ counts.chip }}</div>
       </div>
       <div>
-        <div>{{ Translations.charter_func.note.hold }}:</div>
+        <div>{{ Translations.charter_func.note.hold }}</div>
         <div>{{ counts.hold }}</div>
       </div>
       <div>
-        <div>{{ Translations.charter_func.note.bumper }}:</div>
+        <div>{{ Translations.charter_func.note.bumper }}</div>
         <div>{{ counts.bumper }}</div>
       </div>
       <div>
-        <div>{{ Translations.charter_func.note.mine }}:</div>
+        <div>{{ Translations.charter_func.note.mine }}</div>
         <div>{{ counts.bomb }}</div>
       </div>
       <div>
-        <div>{{ Translations.charter_func.note.mb }}:</div>
+        <div>{{ Translations.charter_func.note.mb }}</div>
         <div>{{ counts.bBumper }}</div>
       </div>
       <div>
-        <div>{{ Translations.charter_func.note.sb }}:</div>
+        <div>{{ Translations.charter_func.note.sb }}</div>
         <div>{{ counts.sBumper }}</div>
       </div>
       <div>
-        <div>{{Translations.charter_func.count.bpm}}:</div>
+        <div>{{Translations.charter_func.count.bpm}}</div>
         <div>{{ counts.bpm}}</div>
       </div>
       <div>
-        <div>{{Translations.charter_func.count.avg_density}}:</div>
+        <div>{{Translations.charter_func.count.avg_density}}</div>
         <div>{{ counts.avg_density.toPrecision(5)}}</div>
       </div>
     </div>

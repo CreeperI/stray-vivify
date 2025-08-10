@@ -1,12 +1,13 @@
 <script lang="ts" setup>
-import { ChartType } from '@preload/types'
+import { ChartTypeV2 } from '@preload/types'
 import { Charter } from '@renderer/core/charter'
 import { Settings } from '@renderer/core/Settings'
 
 const { note } = defineProps<{
-  note: ChartType.note
+  note: ChartTypeV2.note
 }>()
 const mul = Charter.refs.mul
+const lane_width = Settings.editor.lane_width
 
 const note_style = 'stray:/__skin__'
 
@@ -23,9 +24,9 @@ function getSrc(): string {
     if (note.l == 0) return '/sbL.png'
     if (note.l == 1) return '/sbM.png'
     else return '/sbR.png'
-  }
-  // it would only be triggered when "p" comes but its only fucking mind to happen
-  throw new Error(JSON.stringify(note))
+  } else if (note.n == 'f') return '/f.png'
+    // it would only be triggered when "p" comes but its only fucking mind to happen
+    throw new Error(JSON.stringify(note))
 }
 
 function cover_add() {
@@ -35,8 +36,9 @@ function cover_add() {
 }
 
 function size() {
-  if (['b', 'mb', 's'].includes(note.n)) return '271px'
-  return '132px'
+  if (['b', 'mb', 's'].includes(note.n)) return lane_width * 2 + 6 + 'px'
+  if (note.n == 'f') return lane_width * 4 + 18 + 'px'
+  return lane_width + 'px'
 }
 
 function urlOf() {

@@ -2,7 +2,7 @@ import path from 'node:path'
 import fs from 'fs'
 import { charts_data, ChartType } from '../preload/types'
 import { dirname, join } from 'path'
-import { app } from 'electron'
+import { app, dialog } from 'electron'
 
 function ChartManager() {
   const charts_folder = (function () {
@@ -51,7 +51,14 @@ function ChartManager() {
   /**
    * ext {string} .mp3
    * */
-  function add_chart(id: string, name: string, composer: string, bpm: string, ext: string, diffs:string[]) {
+  function add_chart(
+    id: string,
+    name: string,
+    composer: string,
+    bpm: string,
+    ext: string,
+    diffs: string[]
+  ) {
     data.push({
       last_open: Date.now(),
       id,
@@ -64,7 +71,7 @@ function ChartManager() {
     write_json()
   }
 
-  function update_chart(id: string, name: string, composer: string, bpm: string, diffs:string[]) {
+  function update_chart(id: string, name: string, composer: string, bpm: string, diffs: string[]) {
     const chart = data.find((v) => v.id === id)
     if (chart) {
       chart.name = name
@@ -141,11 +148,14 @@ function ChartManager() {
     const folder = path.join(charts_folder, id)
     if (fs.existsSync(path.join(folder, 'vs-chart.json'))) {
       return {
-        data: JSON.parse(fs.readFileSync(path.join(folder, 'vs-chart.json'), 'utf-8')),
+        data: fs.readFileSync(path.join(folder, 'vs-chart.json'), 'utf-8'),
         path: path.join(folder, 'song' + ext)
       }
     }
-    return
+    return {
+      data: undefined,
+      path: path.join(folder, 'song' + ext)
+    }
   }
 
   function open_song(id: string) {
@@ -157,20 +167,28 @@ function ChartManager() {
     } else {
       remove_chart(id)
     }
-    return
+    dialog.showErrorBox('Error', `Error opening song id ${id}, check if it exists.`)
+    throw new Error('???')
   }
 
-  function write_chart(id:string, chd:ChartType.Chart) {
-    const chart= data.find((v) => v.id === id)
+  function write_chart(id: string, chd: ChartType.Chart) {
+    const chart = data.find((v) => v.id === id)
     if (chart) {
       fs.writeFileSync(path.join(charts_folder, id, 'vs-chart.json'), JSON.stringify(chd, null, 2))
+    }
+  }
+
+  function backup_chart(id: string, d: string) {
+    const chart = data.find((v) => v.id === id)
+    if (chart) {
+      fs.writeFileSync(path.join(charts_folder, id, 'backup.json'), JSON.stringify(d, null, 2))
     }
   }
 
   function write_vsc(id: string, ch: string, name: string) {
     const chart = data.find((v) => v.id === id)
     if (!chart) return
-    const fp =path.join(charts_folder, id, name + '.vsc')
+    const fp = path.join(charts_folder, id, name + '.vsc')
     fs.writeFileSync(fp, ch)
     return fp
   }
@@ -185,7 +203,8 @@ function ChartManager() {
     open_song,
     write_chart,
     update_chart,
-    write_vsc
+    write_vsc,
+    backup_chart
   }
 }
 

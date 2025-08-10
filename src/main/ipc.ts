@@ -1,28 +1,20 @@
-import { ChartType, Invoke, IpcHandlers, storages } from '../preload/types'
-import { existsSync, readFileSync } from 'fs'
+import { ChartType, Invoke, IpcHandlers } from '../preload/types'
+import fs, { existsSync, readFileSync } from 'fs'
 import VsbParser from './vsbParser'
 import * as electron from 'electron'
 import { dialog, ipcMain, shell } from 'electron'
 import { basename } from 'node:path'
-import { MainStorage } from './store'
-import  ElectronStore  from 'electron-store'
 import ChartManager from './chart_manager'
 
-export function load_ipc_handlers(
-  store: ElectronStore<storages.storage_scheme>,
-  mainWindow: Electron.BrowserWindow
-) {
-  const handler = Handler(store, mainWindow)
+export function load_ipc_handlers(mainWindow: Electron.BrowserWindow, store_path: string) {
+  const handler = Handler(mainWindow, store_path)
   for (const key of Object.keys(handler)) {
     ipcMain.handle(key, handler[key])
   }
   // console.log("loaded song handlers")
 }
 
-const Handler = (
-  store: ElectronStore<storages.storage_scheme>,
-  mw: Electron.BrowserWindow
-): IpcHandlers.invoke.handler => {
+const Handler = (mw: Electron.BrowserWindow, store_path: string): IpcHandlers.invoke.handler => {
   const chart_manager = ChartManager()
   const sender = mw.webContents.send.bind(mw.webContents) as IpcHandlers.send.send
   return {
@@ -60,7 +52,6 @@ const Handler = (
     'save-chart': function (_, id, data) {
       chart_manager.write_chart(id, JSON.parse(data))
     },
-    'set-storage': MainStorage.set,
     // @ts-ignore
     'import-song': async function (_, music_path: string) {
       const id = (await new Promise((resolve) => {
@@ -74,30 +65,44 @@ const Handler = (
       return chart_manager.import_song(music_path, id)
     },
     'open-song': function (_, id: string) {
+      console.log(id)
       if (chart_manager.exists(id)) {
         return chart_manager.open_song(id)
       }
-      return
+      // this wont be triggered bc in open_song it will fuck
+      throw new Error("")
     },
     'get-charts-data': function (_) {
       return chart_manager.chart_list()
     },
-    'update-chart-data': function (_, id:string, data) {
-      const data1 = JSON.parse(data) as {song: ChartType.song, diffs: string[]}
-      chart_manager.update_chart(id, data1.song.name, data1.song.composer, data1.song.bpm, data1.diffs)
+    'update-chart-data': function (_, id: string, data) {
+      const data1 = JSON.parse(data) as { song: ChartType.song; diffs: string[] }
+      chart_manager.update_chart(
+        id,
+        data1.song.name,
+        data1.song.composer,
+        data1.song.bpm,
+        data1.diffs
+      )
     },
-    'get-shortcut-data': function(_) {
+    'get-shortcut-data': function (_) {
       // @ts-ignore
       return store.get('shortcut')
     },
-    'write-vsc': function(_,id, ch, name) {
+    'write-vsc': function (_, id, ch, name) {
       const fp = chart_manager.write_vsc(id, ch, name)
       if (!fp) return
       shell.showItemInFolder(fp)
     },
-    'get-settings-data': function(_) {
-      // @ts-ignore
-      return store.get('settings')
+    'get-conf': function (_) {
+      if (fs.existsSync(store_path)) return fs.readFileSync(store_path, 'utf-8')
+      else return undefined
+    },
+    'save-conf': function(_, data) {
+      fs.writeFileSync(store_path, data, 'utf-8')
+    },
+    'backup-chart': function(_, id, data) {
+      chart_manager.backup_chart(id, data)
     }
   }
 }

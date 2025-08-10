@@ -61,9 +61,9 @@ const diff_index = computed({
       <label v-html="Language.charter_func.song.name"></label>
       <a-text-input v-model="chart.song.name" @change="Charter.update()" />
       <label v-html="Language.charter_func.chart.name"></label>
-      <a-text-input v-model="diff.name" @input="Charter.update()" />
+      <a-text-input v-model="diff.diff1" @input="Charter.update()" />
       <label v-html="Language.charter_func.chart.level" />
-      <a-text-input v-model="diff.hard" />
+      <a-text-input v-model="diff.diff2" />
       <label v-html="Language.charter_func.chart.charter" />
       <a-text-input v-model="diff.charter" @change="Charter.update()" />
       <label v-html="Language.charter_func.song.bpm" />

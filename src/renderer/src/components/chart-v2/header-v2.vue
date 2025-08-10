@@ -1,10 +1,41 @@
 <script lang="ts" setup>
 import { Charter } from '@renderer/core/charter'
+import { Chart } from '@renderer/core/chart/chart'
+import { notify } from '@renderer/core/notify'
+
+const active = defineModel<number>()
 
 const ipcRenderer = Charter.ipcRenderer
 
 const isMax = Charter.refs.window.isMaximized
+
 const { lang } = Charter.settings.to_refs
+const song_name = Charter.refs.current_name
+
+function close_chart() {
+  if (Chart.current) {
+    Chart.current.save()
+    Chart.current.audio.pause()
+    Charter.state.value = 'startUp'
+    Chart.current = undefined
+  }
+}
+
+async function read_vsb() {
+  const r1 = await Charter.invoke('ask-vsb')
+  if (!r1) {
+    notify.error('读取vsb失败……')
+    return
+  }
+  const chart = Chart.current as Chart
+  chart.load_vsb(await Charter.invoke('read-vsb', r1.path))
+}
+
+async function write_vsc() {
+  const chart = Chart.current
+  if (!chart) throw new Error('?????')
+  chart.write_current_vsc()
+}
 </script>
 
 <template>
@@ -12,8 +43,23 @@ const { lang } = Charter.settings.to_refs
     <div class="header-top">
       <img alt="wug" class="header-wug" src="/zhe-shi-shei-a.jpg" />
       <div class="header-menu-ul">
-        <div class="h-menu-btn-text" @click="Charter.modal.SettingModal.show({})">设置</div>
+        <div class="h-menu-btn-text">文件</div>
+        <div class="h-menu-btn-i">
+          <div class="h-menu-btn-text" @click="read_vsb">打开vsb</div>
+          <div class="h-menu-btn-text" @click="close_chart">关闭文件</div>
+          <div class="h-menu-btn-text" @click="write_vsc">写入vsc</div>
+        </div>
       </div>
+      <div class="header-menu-ul" @click="active = 1">
+        <div class="h-menu-btn-text">曲目</div>
+      </div>
+      <div class="header-menu-ul" @click="active = 2">
+        <div class="h-menu-btn-text">编排</div>
+      </div>
+      <div class="header-menu-ul" @click="active = 3">
+        <div class="h-menu-btn-text">时轴</div>
+      </div>
+      <div class="chart-name">{{ song_name }}</div>
     </div>
     <div class="header-win-func">
       <div @click="ipcRenderer.send('window-min')">0</div>
@@ -38,10 +84,10 @@ div {
   background: rgb(32, 33, 70);
   background: var(--purple-bgi);
   box-shadow: #0d1418 0 0 5px;
-  font-size: var(--header-font-size);
+  font-size: 1.2rem;
+  line-height: 2rem;
   z-index: 9;
-  height: var(--header-height);
-  line-height: var(--header-line-height);
+  height: 2rem;
 }
 
 .header-top {
@@ -106,7 +152,7 @@ div {
   user-select: none;
   border-radius: 0 0 5px 5px;
   position: absolute;
-  top: var(--header-height);
+  top: var(--height-header);
   left: 0;
 }
 
@@ -135,7 +181,7 @@ div {
   cursor: pointer;
   color: #b8dcee;
   height: 100%;
-  line-height: var(--header-height);
+  line-height: var(--height-header);
 }
 
 .header-close:hover {

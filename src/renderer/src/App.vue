@@ -1,19 +1,20 @@
 <script lang="ts" setup>
 import Header from '@renderer/components/miscellaneous/header.vue'
-import ChartLine from '@renderer/components/charter/chart-lines/chart-line.vue'
 import { ModalTarget } from '@kolirt/vue-modal'
 import AButton from '@renderer/components/a-elements/a-button.vue'
 import { Charter } from '@renderer/core/charter'
 import WaitingLoad from '@renderer/components/miscellaneous/waiting-load.vue'
 import ChartList from '@renderer/components/miscellaneous/chart-list.vue'
+import ChartV2 from '@renderer/components/chart-v2/chart-v2.vue'
 
 const state = Charter.state
 </script>
 
 <template>
-  <Header />
+  <Header v-if="state != 'charting'" />
   <ChartList v-if="state == 'startUp'" />
-  <ChartLine v-if="state == 'charting'" />
+  <!--  <ChartLine v-if="state == 'charting'" />-->
+  <ChartV2 v-if="state == 'charting'" />
   <WaitingLoad v-if="state == 'cache'" />
   <!--  <popup-modal />-->
   <div id="n-c" class="notify-container" />
@@ -44,7 +45,7 @@ const state = Charter.state
 #n-c {
   position: absolute;
   right: 5px;
-  top: var(--height-header);
+  top: var(--header-height);
   z-index: var(--z-highest);
   align-items: end;
   margin-top: 10px;
@@ -135,7 +136,6 @@ body {
   width: 100vw;
   overflow: hidden;
   --dark-bgi: linear-gradient(60deg, #0d1418 0%, #11161b 100%);
-  --height-header: 2.5rem;
   --blue-bgi: linear-gradient(220.55deg, #34495d 0%, #0e2c5e 100%);
   --purple-bgi: linear-gradient(90deg, rgba(32, 33, 70, 1) 0%, rgba(37, 49, 50, 1) 100%);
   --grey: #3b4652;
@@ -148,6 +148,10 @@ body {
   --z-lane-bottom: 10;
   --z-lane-note: 4;
   --z-lane-note-higher: 5;
+
+  --header-font-size: 1.2rem;
+  --header-line-height: 2rem;
+  --header-height: 2rem;
 }
 
 * {

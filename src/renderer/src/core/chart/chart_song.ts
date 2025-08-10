@@ -1,24 +1,29 @@
 import { ref, ToRefs, watch } from 'vue'
-import { ChartType } from '@preload/types'
+import { ChartTypeV2 } from '@preload/types'
 import { Chart } from '@renderer/core/chart/chart'
 
-
 export class Chart_song {
-  refs: ToRefs<ChartType.song>
+  refs: ToRefs<ChartTypeV2.song>
   chart: Chart
 
-  constructor(ch: Chart, name?: string, composer?: string, bpm?: string) {
+  constructor(ch: Chart) {
     this.chart = ch
     this._name = ''
+    this._name_roman = ''
     this._composer = ''
+    this._composer_roman = ''
     this._bpm = '120'
-    if (name) this._name = name
-    if (composer) this._composer = composer
-    if (bpm) this._bpm = bpm
+    this._source = ''
+    this._ref = ''
+
     this.refs = {
       name: ref(this._name),
+      name_roman: ref(''),
       composer: ref(this._composer),
-      bpm: ref(this._bpm)
+      composer_roman: ref(''),
+      bpm: ref(this._bpm),
+      source: ref(''),
+      ref: ref('')
     }
 
     watch(this.refs.name, (v) => (this.name = v))
@@ -56,25 +61,57 @@ export class Chart_song {
     this._bpm = v
   }
 
-  static createSong(): ChartType.song {
-    return {
-      name: 'Termiant',
-      composer: 'Astella vs Estral.tf',
-      bpm: '114'
-    }
+  _name_roman: string
+  get name_roman() {
+    return this._name_roman
   }
 
-  set_song(v: ChartType.song) {
+  set name_roman(v: string) {
+    this._name_roman = v
+  }
+
+  _composer_roman: string
+  get composer_roman() {
+    return this._composer_roman
+  }
+
+  set composer_roman(v: string) {
+    this._composer_roman = v
+  }
+
+  _ref: string
+  get ref() {
+    return this._ref
+  }
+
+  set ref(v: string) {
+    this._ref = v
+  }
+
+  _source: string
+  get source() {
+    return this._source
+  }
+
+  set source(v: string) {
+    this._source = v
+  }
+
+  set_song(v: ChartTypeV2.song) {
     this.name = v.name
     this.composer = v.composer
     this.bpm = v.bpm
   }
 
-  save(): ChartType.song {
+  save(): ChartTypeV2.song {
     return {
       name: this.name,
       composer: this.composer,
-      bpm: this.bpm
+      bpm: this.bpm,
+      name_roman: this.name_roman,
+      composer_roman: this.composer_roman,
+      ref: this.ref,
+      source: this.source
     }
   }
 }

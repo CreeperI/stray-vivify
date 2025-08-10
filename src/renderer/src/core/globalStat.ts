@@ -28,6 +28,10 @@ export const GlobalStat = {
     for (const arg of args) {
       console.log(JSON.stringify(arg))
     }
+  },
+  window: {
+    height: screen.availHeight,
+    width: screen.availWidth
   }
 }
 

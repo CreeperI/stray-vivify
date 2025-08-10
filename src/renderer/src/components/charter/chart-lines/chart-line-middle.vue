@@ -5,6 +5,7 @@ import FnCharter from '@renderer/components/charter/func/fn-charter.vue'
 import Lane from '@renderer/components/charter/lane.vue'
 import FnSong from '@renderer/components/charter/func/fn-song.vue'
 import FnCounts from '@renderer/components/charter/func/fn-counts.vue'
+import SvgLane from '@renderer/components/chart-v2/svg-lane.vue'
 </script>
 
 <template>
@@ -12,7 +13,8 @@ import FnCounts from '@renderer/components/charter/func/fn-counts.vue'
     <fn-charter />
     <fn-notes />
   </div>
-  <Lane />
+<!--  <Lane />-->
+  <svg-lane/>
   <div class="fp-wrapper">
     <fn-song />
     <fn-counts />

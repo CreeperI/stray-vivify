@@ -9,6 +9,7 @@ import { Charter } from '@renderer/core/charter'
 import { load_ipc_handlers } from '@renderer/core/ipc'
 import { Settings } from '@renderer/core/Settings'
 import { GlobalStat } from '@renderer/core/globalStat'
+import { Listener } from '@renderer/core/listener'
 
 Charter.ipcRenderer.on('notify', (_, msg, duration, t) => {
   if (!t) t = 'normal'
@@ -38,19 +39,30 @@ const app = createApp(App).use(
 )
 
 function update_per_frame() {
-  Charter.refs.window.height.value = window.innerHeight
-  Charter.refs.window.width.value = window.innerWidth
-
   Charter.if_current()?.on_update()
   requestAnimationFrame(update_per_frame)
 }
 
-load_ipc_handlers();
+Charter.ipcRenderer.on('window-resize', (_) => {
+  Listener.trigger('resize')
+})
 
-(async function() {
+document.addEventListener('resize', () => {Listener.trigger('resize')})
+Listener.on('resize', () => {
+  Charter.refs.window.height.value = window.innerHeight
+  Charter.refs.window.width.value = window.innerWidth
+  window.electron.ipcRenderer.invoke('window-max-state').then((r) => {
+    Charter.refs.window.isMaximized.value = r
+  })
+})
+
+async function main() {
   await Settings.set_from_storage()
   await GlobalStat.update_all_chart()
 
   app.mount('#app')
   requestAnimationFrame(update_per_frame)
-})()
+}
+
+load_ipc_handlers()
+main()
