@@ -61,6 +61,7 @@ async function main() {
   await GlobalStat.update_all_chart()
 
   app.mount('#app')
+  Settings.init_invertal()
   requestAnimationFrame(update_per_frame)
 }
 

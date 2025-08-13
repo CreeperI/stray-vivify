@@ -16,6 +16,7 @@ export class Chart_audio {
     writable_current_ms: WritableComputedRef<ms>
     writable_play_rate: WritableComputedRef<number>
     writable_current_second: WritableComputedRef<second>
+    paused: Ref<boolean>
   }
   last: ms
   from_negative: boolean
@@ -62,7 +63,8 @@ export class Chart_audio {
         set(v) {
           me.play_rate = v
         }
-      })
+      }),
+      paused: ref(true)
     }
   }
 
@@ -74,6 +76,7 @@ export class Chart_audio {
 
   set paused(v: boolean) {
     this._paused = v
+    this.refs.paused.value = v
   }
 
   _volume: number
@@ -106,6 +109,14 @@ export class Chart_audio {
   }
 
   set_current_time(v: ms) {
+    v = Math.max(-5000, v)
+    this.ele?.pause()
+    this._current_time = v
+    this.refs.current_ms.value = v
+    if (v < 0) this.from_negative = true
+    if (this.paused) this.set_ele_time(v)
+  }
+  set_current_time_from_updater(v: ms) {
     v = Math.max(-5000, v)
     this._current_time = v
     this.refs.current_ms.value = v
@@ -152,7 +163,7 @@ export class Chart_audio {
   update() {
     if (!this.paused) {
       const now = Date.now()
-      this.set_current_time(this.current_time + (now - this.last) * this.play_rate)
+      this.set_current_time_from_updater(this.current_time + (now - this.last) * this.play_rate)
       this.last = Date.now()
       if (this.from_negative && this.current_time >= 0) {
         this.from_negative = false

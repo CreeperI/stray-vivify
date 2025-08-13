@@ -1,19 +1,11 @@
 import path from 'node:path'
 import fs from 'fs'
 import { charts_data, ChartType } from '../preload/types'
-import { dirname, join } from 'path'
-import { app, dialog } from 'electron'
+import { dialog } from 'electron'
+import { file_paths } from './fp_parser'
 
 function ChartManager() {
-  const charts_folder = (function () {
-    if (process.env.NODE_ENV === 'development') {
-      return join(__dirname, '../../charts/')
-    } else if (process.platform === 'darwin') {
-      return join(dirname(app.getPath('module')), 'charts')
-    } else {
-      return join(dirname(app.getPath('module')), 'charts/')
-    }
-  })()
+  const charts_folder = file_paths.charts
   console.log(charts_folder)
   const data: charts_data = []
   const json_path = path.join(charts_folder, 'charts.json')

@@ -1,6 +1,3 @@
-// typings.ts
-// noinspection JSUnusedGlobalSymbols
-
 type json_data = {
   [key: string]: number | string | boolean
 }
@@ -529,27 +526,20 @@ function getModNameFromByte(mod: number): string {
   return GlobalModType[mod]
 }
 
-function note_t2note_t(t: number) {
-  if (t === 0) {
-    return 'n'
-  } else if (t === 1) {
-    return 'b'
-  } else if (t === 2) {
-    return 'h'
-  } else if (t === 6) {
-    return 'm'
-  } else if (t === 4) {
-    return 's'
-  } else if (t === 5) {
-    return 'h'
-  } else if (t === 3) {
-    return 'p'
-  } else if (t === 7) {
-    return 'mb'
-  } else if (t === 8) {
-    return 's'
+function note2width(t: number) {
+  switch (t) {
+    case 0:
+    case 6:
+    case 2:
+      return 1
+    case 1:
+    case 7:
+    case 8:
+      return 2
+    default:
+      console.log('waht note',t)
+      return 0
   }
-  throw new Error('Unknown Type.' + t)
 }
 
 class VsbParser {
@@ -631,10 +621,11 @@ class VsbParser {
       if (x.extra.length > 0 && (x.type == 2 || x.type == 3)) {
         if (x.type == 2)
           n.push({
-            n: 'h',
-            t: x.time,
-            l: x.lane,
-            h: x.extra[0].value - x.time
+            time: x.time,
+            lane: x.lane,
+            len: x.extra[0].value - x.time,
+            ani: [],
+            width: 1
           })
         else
           timings.push({
@@ -643,13 +634,15 @@ class VsbParser {
             num: 4,
             den: 4
           })
+        return
       }
-      const n1 = note_t2note_t(x.type)
-      if (n1 == 'h' || n1 == 'p') return
+      const w = note2width(x.type)
       n.push({
-        n: n1,
-        t: x.time,
-        l: x.lane
+        width: w,
+        time: x.time,
+        lane: x.lane,
+        ani: [],
+        snm: x.type == 8 ? 2 : x.type == 6 || x.type == 7 ? 1 : 0
       })
     })
     return [n, timings]

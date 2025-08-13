@@ -10,7 +10,7 @@ const { lang } = Charter.settings.to_refs
 <template>
   <div :key="lang" class="header-wrapper">
     <div class="header-top">
-      <img alt="wug" class="header-wug" src="/zhe-shi-shei-a.jpg" />
+      <img alt="wug" class="header-wug" src="/yq.jpg" />
       <div class="header-menu-ul">
         <div class="h-menu-btn-text" @click="Charter.modal.SettingModal.show({})">设置</div>
       </div>

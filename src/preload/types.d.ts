@@ -73,32 +73,25 @@ export namespace ChartType {
 
 export namespace ChartTypeV2 {
   export type normal_note = {
-    n: 'n' | 'b' | 'm' | 'mb' | 's' | 'f'
-    t: number
-    l: number
+    time: number,
+    // this is for the left anchor of the note, which is 0 for 4bumper and 2 for 2br
+    lane: number,
+    width: number,
+    // s or mine, 1 for mine 2 for S 0 for normal ones
+    snm: number
+    ani: []
   }
-  /**
-   * @property n note's type, for hold
-   * @property t time in milliseconds
-   * @property l lane
-   * @property h hold's len (ms)
-   * */
+
   export type hold_note = {
-    n: 'h'
-    t: number
-    l: number
-    h: number
+    time: number,
+    lane: number,
+    width: number,
+    len: number
+    ani: []
   }
   export type note = normal_note | hold_note
 
-  type bpm_note = {
-    n: 'p'
-    v: number
-    t: number
-    l: 0
-  }
-
-  export type all_things = note | bpm_note
+  export type all_things = ChartType.note
 
   export type timing = {
     time: number
@@ -181,12 +174,6 @@ export type Invoke = {
     }
     r: void
   }
-  'set-storage': {
-    arg: {
-      data: storages.settings
-    }
-    r: void
-  }
   'write-vsc': {
     arg: {
       id: string
@@ -259,6 +246,14 @@ export type Invoke = {
       data: string
     }
     r: void
+  },
+  'init-data' : {
+    arg: {},
+    r: {
+      conf: string | undefined,
+      cd: charts_data,
+      skin: string | undefined,
+    }
   }
 }
 
@@ -312,7 +307,6 @@ export namespace storages {
     scale: number
     meter: number
     middle: boolean
-    note_type: ChartTypeV2.note['type'] | ''
     overlap_minimum: number
     reverse_scroll: boolean
     volume: number

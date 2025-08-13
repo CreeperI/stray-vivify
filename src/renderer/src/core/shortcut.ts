@@ -8,15 +8,19 @@ const functions = [
   'copy',
   'paste',
   'cut',
-  'note',
-  'bumper',
-  'hold',
-  's-bumper',
-  'mine',
-  'mine-bumper',
   'dev',
   'pause',
-  'f-key'
+
+  'scale-up',
+  'scale-down',
+
+  'w1',
+  'w2',
+  'w3',
+  'w4',
+  's',
+  'mine',
+  'hold'
 ] as const
 
 type SC_save = {
@@ -139,6 +143,7 @@ export class ShortCuts {
   handle(e: KeyboardEvent) {
     if (this.is(e.key, e.altKey, e.ctrlKey, e.shiftKey)) {
       this.cb(e)
+      console.log(this.name)
     }
   }
 
@@ -158,14 +163,14 @@ export class ShortCuts {
   }
 }
 
-new ShortCuts('redo', 'Y', () => Charter.if_current()?.diff.execute_redo(), false, true)
-new ShortCuts('undo', 'Z', () => Charter.if_current()?.diff.execute_undo(), false, true)
+new ShortCuts('redo', 'y', () => Charter.if_current()?.diff.execute_redo(), false, true)
+new ShortCuts('undo', 'z', () => Charter.if_current()?.diff.execute_undo(), false, true)
 
-new ShortCuts('note', '1', () => Settings.note_choice('n'))
-new ShortCuts('bumper', '2', () => Settings.note_choice('b'))
-new ShortCuts('mine', '3', () => Settings.note_choice('m'))
-new ShortCuts('mine-bumper', '4', () => Settings.note_choice('mb'))
-new ShortCuts('hold', '5', () => Settings.note_choice('h'))
-new ShortCuts('s-bumper', '6', () => Settings.note_choice('s'))
-new ShortCuts('f-key', '7', () => Settings.note_choice('f'))
+new ShortCuts('w1', '1', () => Settings.note.set_width(1))
+new ShortCuts('w2', '2', () => Settings.note.set_width(2))
+new ShortCuts('w3', '3', () => Settings.note.set_width(3))
+new ShortCuts('w4', '4', () => Settings.note.set_width(4))
+new ShortCuts('s', 'q', () => Settings.note.change_s())
+new ShortCuts('mine', 'w', () => Settings.note.change_b())
+new ShortCuts('hold', 'e', () => Settings.note.change_hold())
 new ShortCuts('pause', ' ', () => Charter.if_current()?.audio.play_pause())

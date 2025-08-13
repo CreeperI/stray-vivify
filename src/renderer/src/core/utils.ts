@@ -92,7 +92,7 @@ export namespace utils {
   }
 
   export function sort_notes(a: ChartTypeV2.note, b: ChartTypeV2.note) {
-    return a.t - b.t // 按时间排序
+    return a.time - b.time // 按时间排序
   }
 
   export function around(v1: number, v2: number, gap = 20) {
@@ -101,6 +101,19 @@ export namespace utils {
 
   export function random<T>(arr: T[]) {
     return arr[Math.floor(Math.random() * arr.length)]
+  }
+
+  export function toTimeStr(seconds: number) {
+    const isNegative = seconds < 0;
+    const absSeconds = Math.abs(seconds);
+    const minutes = Math.floor(absSeconds / 60);
+    let secs = (absSeconds % 60).toFixed(3);
+
+    // 处理秒数部分补零逻辑
+    secs = parseFloat(secs) < 10 ? '0' + secs : secs;
+
+    // 添加负号标识
+    return (isNegative ? '-' : '') + minutes + ':' + secs;
   }
 }
 

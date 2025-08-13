@@ -5,7 +5,7 @@ import { Charter } from '../charter'
 import { utils } from '../utils'
 import { Settings } from '@renderer/core/Settings'
 
-function parse_type(v: ChartTypeV2.note['n'] | 'p') {
+function parse_type(v: string) {
   switch (v) {
     case 'n':
       return 0
@@ -34,11 +34,11 @@ export class Chart_diff {
     bpm: number
     hold: number
     bomb: number
-    sBumper: number
-    bBumper: number
+    hold_bumper: number
     bumper: number
     total: number
     avg_density: number
+    s: number
   }>
   undo: (() => void)[]
   redo: (() => void)[]
@@ -57,9 +57,9 @@ export class Chart_diff {
       bpm: 0,
       hold: 0,
       bomb: 0,
-      sBumper: 0,
-      bBumper: 0,
+      hold_bumper: 0,
       bumper: 0,
+      s: 0,
       total: 0,
       avg_density: 0
     })
@@ -127,24 +127,6 @@ export class Chart_diff {
     this.bound.value.timing = v
   }
 
-  get all_things(): ChartTypeV2.all_things[] {
-    return [
-      this.notes,
-      this.timing.map((x) => {
-        return {
-          n: 'p',
-          t: x.time,
-          v: x.bpm,
-          l: 0
-        } as const
-      })
-    ]
-      .flat()
-      .sort((a, b) => {
-        return a.t - b.t
-      })
-  }
-
   get visible(): [number, number] {
     return [
       this.chart.audio.current_time - 1000,
@@ -206,14 +188,40 @@ export class Chart_diff {
 
   update_diff_counts() {
     const v = this.bound.value
-    this.counts.value.chip = v.notes.filter((x) => x.n == 'n').length
+    const count = {
+      chip: 0,
+      bumper: 0,
+      hold: 0,
+      hold_bumper: 0,
+      bomb: 0,
+      s: 0
+    }
+    for (const note of v.notes) {
+      if ('len' in note) {
+        if (note.width == 1) count.hold += 1
+        else count.hold_bumper += 1
+      } else {
+        if (note.snm == 1) {
+          count.bomb += 1
+          continue
+        } else if (note.snm == 2) {
+          count.s += 1
+          count.bumper += 1
+          continue
+        }
+        if (note.width == 1) count.chip += 1
+        else count.bumper += 1
+      }
+    }
+    this.counts.value.chip = count.chip
+    this.counts.value.bumper = count.bumper
+    this.counts.value.hold = count.hold
+    this.counts.value.hold_bumper = count.hold_bumper
+    this.counts.value.bomb = count.bomb
+    this.counts.value.s = count.s
     this.counts.value.bpm = this.timing.length - 1
-    this.counts.value.hold = v.notes.filter((x) => x.n == 'h').length
-    this.counts.value.bomb = v.notes.filter((x) => x.n == 'm').length
-    this.counts.value.sBumper = v.notes.filter((x) => x.n == 's').length
-    this.counts.value.bBumper = v.notes.filter((x) => x.n == 'mb').length
-    this.counts.value.bumper = v.notes.filter((x) => x.n == 'b').length
     this.counts.value.total = v.notes.length
+
     this.counts.value.avg_density = this.counts.value.total / (this.chart.length / 1000)
   }
 
@@ -258,7 +266,7 @@ export class Chart_diff {
 
   sort() {
     this.notes.sort(utils.sort_notes)
-    this.notes.forEach((x) => (x.t = Math.floor(x.t)))
+    this.notes.forEach((x) => (x.time = Math.floor(x.time)))
     return this.notes
   }
 
@@ -315,16 +323,16 @@ export class Chart_diff {
   }
 
   add_note_no_undo(v: ChartTypeV2.note) {
-    v.t = Math.floor(v.t)
-    const overlap = Settings.editor.overlap_minimum
+    v.time = Math.floor(v.time)
+    /*const overlap = Settings.editor.overlap_minimum
     const wrapped = this.shown.value.find((x) => {
       if (x.n == 'h') {
         if (x.l != v.l) return false
-        else return utils.between(v.t, [x.t - overlap, x.t + x.h + overlap])
+        else return utils.between(v.time, [x.time - overlap, x.time + x.h + overlap])
       }
-      return utils.around(x.t, v.t, overlap) && x.l == v.l
+      return utils.around(x.time, v.time, overlap) && x.l == v.l
     })
-    if (wrapped) return false
+    if (wrapped) return false*/
     this.notes.push(v)
     this.shown.value.push(v)
     Charter.update()
@@ -341,7 +349,7 @@ export class Chart_diff {
     const passed = t - bpm.time
     const per_beat = this.time_per_beat(bpm)
     if (round) return Math.round(passed / per_beat) * per_beat + bpm.time
-    else return Math.floor(passed / per_beat) * per_beat + bpm.time
+    else return Math.floor(Math.floor(passed / per_beat) * per_beat + bpm.time)
   }
 
   bpm_of_time(time: ms) {
@@ -386,7 +394,7 @@ export class Chart_diff {
   }
 
   floor_time() {
-    this.notes.forEach((x) => (x.t = Math.floor(x.t)))
+    this.notes.forEach((x) => (x.time = Math.floor(x.time)))
   }
 
   fuck_shown(t: number, force = false) {
@@ -412,26 +420,52 @@ export class Chart_diff {
   }
 
   isVisible(n: ChartTypeV2.note, visible: [number, number]): boolean {
-    if (n.n == 'h') {
-      if (utils.between(n.t, visible)) return true
-      return n.t + n.h < visible[1]
+    if (utils.between(n.time, visible)) return true
+    if ('len' in n) {
+      return n.time + n.len >= visible[0]
     }
-    return utils.between(n.t, visible)
+    return false
   }
 
   to_vsc() {
     const strs: string[] = []
-    const all_things = this.all_things
-    for (const note of all_things) {
-      let str = note.t.toFixed(2)
-      str += ',' + parse_type(note.n as ChartTypeV2.note['n'] | 'p')
-      str += ',' + note.l + ','
-      if (note.n == 'h') {
-        str += (note.h + note.t).toFixed(2)
+    const parsed_notes = this.notes.map((note) => {
+      if ('len' in note) {
+        return {
+          time: note.time,
+          lane: note.lane,
+          len: note.len,
+          n: 'h'
+        }
+      } else {
+        if (note.snm == 2) return { time: note.time, lane: note.lane, n: 's' }
+        else if (note.snm == 1) {
+          if (note.width == 1) return { time: note.time, lane: note.lane, n: 'm' }
+          else return { time: note.time, lane: note.lane, n: 'mb' }
+        } else {
+          if (note.width == 1) return { time: note.time, lane: note.lane, n: 'n' }
+          else return { time: note.time, lane: note.lane, n: 'b' }
+        }
       }
-      // else if (note.n == 'p') {
-      //   str += `b:${note.v}|t:${note.t.toFixed(2)}|v:undefined|s:undefined`
-      // }
+    })
+    const all_the_notes = [
+      parsed_notes,
+      this.timing.map((x) => {
+        return { time: x.time, bpm: x.bpm, n: 'p', lane: 0 }
+      })
+    ]
+      .flat()
+      .toSorted((a, b) => a.time - b.time)
+    for (const note of all_the_notes) {
+      let str = note.time.toFixed(2)
+      str += ',' + parse_type(note.n)
+      str += ',' + note.lane + ','
+      if ('len' in note) {
+        // @ts-expect-error why there's fucking me at *note.len* is number|undef
+        str += (note.len + note.time).toFixed(2)
+      } else if ('bpm' in note) {
+        str += `b:${note.bpm}|t:${note.time.toFixed(2)}|v:undefined|s:undefined`
+      }
       strs.push(str)
     }
     return strs

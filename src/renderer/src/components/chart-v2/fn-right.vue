@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { Settings } from '@renderer/core/Settings'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import { Charter } from '@renderer/core/charter'
+import { utils } from '@renderer/core/utils'
 
 const scale = computed({
   get() {
@@ -29,25 +30,12 @@ const volume = computed({
     Settings.editor.volume = v
   }
 })
-
-function toTimeStr(seconds: number) {
-  const isNegative = seconds < 0;
-  const absSeconds = Math.abs(seconds);
-  const minutes = Math.floor(absSeconds / 60);
-  let secs = (absSeconds % 60).toFixed(3);
-
-  // 处理秒数部分补零逻辑
-  secs = parseFloat(secs) < 10 ? '0' + secs : secs;
-
-  // 添加负号标识
-  return (isNegative ? '-' : '') + minutes + ':' + secs;
-}
 const chart = Charter.get_chart()
 const { current_ms, writable_play_rate, play_rate, writable_current_second } = chart.audio.refs
 </script>
 
 <template>
-  <div class="fn-right">
+  <div class="fn-wrapper">
     <table class="table-set">
       <tbody>
         <tr>
@@ -82,7 +70,7 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
       </tbody>
     </table>
     <div class="fn-right-inner">
-    <label>{{ toTimeStr(current_ms / 1000) }}/{{ toTimeStr(chart.length / 1000) }}</label>
+    <label>{{ utils.toTimeStr(current_ms / 1000) }}/{{ utils.toTimeStr(chart.length / 1000) }}</label>
     <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
       <label>播放速度:{{ play_rate }}x</label>
     <a-range v-model="writable_play_rate" max="2" min="0.5" step="0.1" />
@@ -94,22 +82,6 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
 </template>
 
 <style scoped>
-.fn-right {
-  display: flex;
-  flex: 1 1 320px;
-  flex-direction: column;
-}
-.fn-right > * {
-  width: 90%;
-  left: 5%;
-  position: relative;
-  margin-top: 15px;
-  box-shadow: 0 0 5px black;
-  background: var(--dark-bgi);
-  padding: 5px;
-
-}
-
 .table-set {
   height: min-content;
 }

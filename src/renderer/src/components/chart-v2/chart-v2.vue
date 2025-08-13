@@ -3,21 +3,41 @@ import SvgLane from '@renderer/components/chart-v2/svg-lane.vue'
 import HeaderV2 from '@renderer/components/chart-v2/header-v2.vue'
 import FnLeft from '@renderer/components/chart-v2/fn-left.vue'
 import FnRight from '@renderer/components/chart-v2/fn-right.vue'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import SongInfo from '@renderer/components/chart-v2/song-info.vue'
+import { Charter } from '@renderer/core/charter'
+import { Settings } from '@renderer/core/Settings'
+import ChartTiming from '@renderer/components/chart-v2/chart-timing.vue'
 
 const active = ref(2)
+const fn_shown = computed(
+  () => Charter.refs.window.width.value > 1.5 * (4 * Settings.editor.lane_width + 50 + 12)
+)
+
+const _meters = [1,4,8,12,16,24,32,48,64]
+function fuck_wheel(e: WheelEvent) {
+  if (e.ctrlKey) {
+    Settings.data.value.settings.scale = Number(
+      Math.max(1, Math.min(Settings.editor.scale - 0.001 * e.deltaY, 20)).toFixed(1)
+    )
+  } else if (e.altKey) {
+    const current_meter_left = _meters.findIndex((v) => v >= Settings.editor.meter)
+    if (current_meter_left == -1) return
+    Settings.data.value.settings.meter = _meters[Math.max(current_meter_left - (e.deltaY > 0 ? 1 : -1), 0)] ?? 64
+  }
+}
 </script>
 
 <template>
-  <div class="chart-v2-wrapper">
+  <div class="chart-v2-wrapper" @wheel="fuck_wheel">
     <header-v2 v-model="active" />
-    <song-info v-if="active == 1"/>
-    <div class="chart-main" v-if="active == 2">
-      <fn-left class="chart-fn"/>
+    <song-info v-if="active == 1" />
+    <div class="chart-main" v-else-if="active == 2">
+      <fn-left class="chart-fn" v-if="fn_shown" />
       <svg-lane class="svg-lane" />
-      <fn-right class="chart-fn"/>
+      <fn-right class="chart-fn" v-if="fn_shown" />
     </div>
+    <chart-timing v-if="active == 3"></chart-timing>
   </div>
 </template>
 
@@ -37,12 +57,15 @@ const active = ref(2)
   justify-content: space-around;
   position: relative;
 }
+
 .svg-lane {
   z-index: 2;
 }
+
 .chart-fn {
   z-index: 1;
 }
+
 @media screen and (max-width: 650px) {
   .chart-fn {
     display: none;

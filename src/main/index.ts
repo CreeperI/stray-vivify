@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
 import { basename, extname } from 'node:path'
 import { load_ipc_handlers } from './ipc'
+import { file_paths } from './fp_parser'
 
 function window_max(win: BrowserWindow) {
   if (win.isMaximized()) {
@@ -16,33 +17,13 @@ function window_max(win: BrowserWindow) {
 }
 
 function check_skin_path() {
-  const sp = get_skin_path()
+  const sp = file_paths.skin
   if (!fs.existsSync(sp)) {
     dialog.showErrorBox(
       'Errorrrrrr!',
       'Cannot find skin folder. \n' + 'Please check if the /skin folder exists.\nPending:' + sp
     )
     app.quit()
-  }
-}
-
-function get_skin_path() {
-  if (process.env.NODE_ENV === 'development') {
-    return join(__dirname, '../../resources')
-  } else if (process.platform === 'darwin') {
-    return join(dirname(app.getPath('module')), 'skin')
-  } else {
-    return join(dirname(app.getPath('module')), 'skin')
-  }
-}
-
-function get_config_path() {
-  if (process.env.NODE_ENV === 'development') {
-    return join(__dirname, '../../config.json')
-  } else if (process.platform === 'darwin') {
-    return join(dirname(app.getPath('module')), 'config.json')
-  } else {
-    return join(dirname(app.getPath('module')), 'config.json')
   }
 }
 
@@ -121,7 +102,7 @@ function createWindow(): void {
   }
 
   listen(mainWindow)
-  load_ipc_handlers(mainWindow, get_config_path())
+  load_ipc_handlers(mainWindow)
   // globalShortcut.register('F11', () => window_max(mainWindow))
   globalShortcut.register('Alt+F12', () => {
     mainWindow.webContents.openDevTools({ mode: 'right' })
@@ -152,7 +133,7 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 
-  const skin_path = get_skin_path()
+  const skin_path = file_paths.skin
 
   process.title = 'stray/vivify'
   protocol.handle('stray', (request) => {

@@ -5,16 +5,17 @@ import * as electron from 'electron'
 import { dialog, ipcMain, shell } from 'electron'
 import { basename } from 'node:path'
 import ChartManager from './chart_manager'
+import { file_paths } from './fp_parser'
 
-export function load_ipc_handlers(mainWindow: Electron.BrowserWindow, store_path: string) {
-  const handler = Handler(mainWindow, store_path)
+export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
+  const handler = Handler(mainWindow)
   for (const key of Object.keys(handler)) {
     ipcMain.handle(key, handler[key])
   }
   // console.log("loaded song handlers")
 }
 
-const Handler = (mw: Electron.BrowserWindow, store_path: string): IpcHandlers.invoke.handler => {
+const Handler = (mw: Electron.BrowserWindow) => {
   const chart_manager = ChartManager()
   const sender = mw.webContents.send.bind(mw.webContents) as IpcHandlers.send.send
   return {
@@ -52,7 +53,6 @@ const Handler = (mw: Electron.BrowserWindow, store_path: string): IpcHandlers.in
     'save-chart': function (_, id, data) {
       chart_manager.write_chart(id, JSON.parse(data))
     },
-    // @ts-ignore
     'import-song': async function (_, music_path: string) {
       const id = (await new Promise((resolve) => {
         sender('ask-id', chart_manager.id_list())
@@ -61,7 +61,7 @@ const Handler = (mw: Electron.BrowserWindow, store_path: string): IpcHandlers.in
           else resolve(id)
         })
       })) as string | 0
-      if (id == 0) return { state: 'cancelled' } as const
+      if (id == 0) return { state: 'cancelled' }
       return chart_manager.import_song(music_path, id)
     },
     'open-song': function (_, id: string) {
@@ -70,7 +70,7 @@ const Handler = (mw: Electron.BrowserWindow, store_path: string): IpcHandlers.in
         return chart_manager.open_song(id)
       }
       // this wont be triggered bc in open_song it will fuck
-      throw new Error("")
+      throw new Error('')
     },
     'get-charts-data': function (_) {
       return chart_manager.chart_list()
@@ -95,14 +95,31 @@ const Handler = (mw: Electron.BrowserWindow, store_path: string): IpcHandlers.in
       shell.showItemInFolder(fp)
     },
     'get-conf': function (_) {
-      if (fs.existsSync(store_path)) return fs.readFileSync(store_path, 'utf-8')
-      else return undefined
+      if (fs.existsSync(file_paths.config)) {
+        return fs.readFileSync(file_paths.config, 'utf-8')
+      } else return undefined
     },
-    'save-conf': function(_, data) {
-      fs.writeFileSync(store_path, data, 'utf-8')
+    'save-conf': function (_, data) {
+      fs.writeFileSync(file_paths.config, data, 'utf-8')
     },
-    'backup-chart': function(_, id, data) {
+    'backup-chart': function (_, id, data) {
       chart_manager.backup_chart(id, data)
+    },
+    'init-data': function (_) {
+      const cd = chart_manager.chart_list()
+      let conf: string | undefined = undefined
+      if (fs.existsSync(file_paths.config)) {
+        conf = fs.readFileSync(file_paths.config, 'utf-8')
+      }
+      let skin: string | undefined = undefined
+      if (fs.existsSync(file_paths.skin)) {
+        skin = fs.readFileSync(file_paths.skin, 'utf-8')
+      }
+      return {
+        conf: conf,
+        skin: skin,
+        cd: cd
+      }
     }
-  }
+  } as Required<IpcHandlers.invoke.handler>
 }

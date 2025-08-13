@@ -39,6 +39,7 @@ export class Chart_song {
 
   set name(v: string) {
     this._name = v
+    this.refs.name.value = v
   }
 
   _composer: string
@@ -49,6 +50,7 @@ export class Chart_song {
 
   set composer(v: string) {
     this._composer = v
+    this.refs.composer.value = v
   }
 
   _bpm: string
@@ -59,6 +61,7 @@ export class Chart_song {
 
   set bpm(v: string) {
     this._bpm = v
+    this.refs.bpm.value = v
   }
 
   _name_roman: string
@@ -68,6 +71,7 @@ export class Chart_song {
 
   set name_roman(v: string) {
     this._name_roman = v
+    this.refs.name_roman.value = v
   }
 
   _composer_roman: string
@@ -77,6 +81,7 @@ export class Chart_song {
 
   set composer_roman(v: string) {
     this._composer_roman = v
+    this.refs.composer_roman.value = v
   }
 
   _ref: string
@@ -86,6 +91,7 @@ export class Chart_song {
 
   set ref(v: string) {
     this._ref = v
+    this.refs.ref.value = v
   }
 
   _source: string
@@ -95,12 +101,16 @@ export class Chart_song {
 
   set source(v: string) {
     this._source = v
+    this.refs.source.value = v
   }
 
   set_song(v: ChartTypeV2.song) {
     this.name = v.name
     this.composer = v.composer
     this.bpm = v.bpm
+    this.name_roman = v.name_roman
+    this.composer_roman = v.composer_roman
+    this.ref = v.ref
   }
 
   save(): ChartTypeV2.song {

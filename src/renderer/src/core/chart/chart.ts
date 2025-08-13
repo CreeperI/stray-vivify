@@ -18,6 +18,10 @@ export type ms = number
 
 export class Chart {
   static current: Chart | undefined = undefined
+  static get $current() {
+    if (!this.current) throw new Error("where's my chart!")
+    return this.current
+  }
   static isBumper = isBumper
   song: Chart_song
   diffs: ChartTypeV2.diff[]
@@ -64,7 +68,7 @@ export class Chart {
     this.ref = {
       diff_index: ref(0),
       diff: ref(this.diffs[0]),
-      chart_current_time: ref(0)
+      chart_current_time: ref(0),
     }
     this.diff = new Chart_diff(this)
     this.id = ''
@@ -209,14 +213,72 @@ export class Chart {
     const new_diff = Chart_diff.createDiff()
     new_diff.timing = []
     dif.notes.forEach((note) => {
-      if (note.n == 'p') {
-        new_diff.timing.push({
-          time: note.t,
-          bpm: note.v,
-          num: 4,
-          den: 4
-        })
-      } else new_diff.notes.push(note)
+      switch (note.n) {
+        case 'p':
+          new_diff.timing.push({
+            time: note.t,
+            bpm: note.v,
+            num: 4,
+            den: 4
+          })
+          break
+        case 'h':
+          new_diff.notes.push({
+            time: note.t,
+            lane: note.l,
+            len: note.h,
+            width: 1,
+            ani: []
+          })
+          break
+        case 'n':
+          new_diff.notes.push({
+            time: note.t,
+            lane: note.l,
+            width: 1,
+            ani: [],
+            snm: 0
+          })
+          break
+        case 'b':
+          new_diff.notes.push({
+            time: note.t,
+            lane: note.l,
+            width: 2,
+            ani: [],
+            snm: 0
+          })
+          break
+        case 's':
+          new_diff.notes.push({
+            time: note.t,
+            lane: note.l,
+            width: 1,
+            ani: [],
+            snm: 2
+          })
+          break
+        case 'm':
+          new_diff.notes.push({
+            time: note.t,
+            lane: note.l,
+            width: 1,
+            ani: [],
+            snm: 1
+          })
+          break
+        case 'mb':
+          new_diff.notes.push({
+            time: note.t,
+            lane: note.l,
+            width: 2,
+            ani: [],
+            snm: 1
+          })
+          break
+        default:
+          console.log("waht")
+      }
     })
     new_diff.meta.diff1 = dif.name
     new_diff.meta.diff2 = dif.hard
@@ -248,7 +310,7 @@ export class Chart {
 
   post_define() {
     this.length = (this.audio.ele?.duration ?? -1) * 1000
-    Charter.refs.current_name.value = this.song.name
+    Charter.refs.current_name.value = this.song.name + " - " + this.diff.diff1 + " " + this.diff.diff2
     watch(
       this.ref.diff,
       () => {
@@ -258,6 +320,7 @@ export class Chart {
     )
     watch(this.ref.diff_index, () => {
       this.ref.diff.value = this.diffs[this.ref.diff_index.value]
+      Charter.refs.current_name.value = this.song.name + " - " + this.diff.diff1 + " " + this.diff.diff2
       this.fuck_shown()
     })
     watch(this.audio.refs.current_ms, () => {

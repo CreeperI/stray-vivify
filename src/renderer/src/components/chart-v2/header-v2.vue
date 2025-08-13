@@ -41,7 +41,7 @@ async function write_vsc() {
 <template>
   <div :key="lang" class="header-wrapper">
     <div class="header-top">
-      <img alt="wug" class="header-wug" src="/zhe-shi-shei-a.jpg" />
+      <img alt="wug" class="header-wug" src="/yq.jpg" />
       <div class="header-menu-ul">
         <div class="h-menu-btn-text">文件</div>
         <div class="h-menu-btn-i">
@@ -152,7 +152,7 @@ div {
   user-select: none;
   border-radius: 0 0 5px 5px;
   position: absolute;
-  top: var(--height-header);
+  top: var(--header-height);
   left: 0;
 }
 
@@ -181,7 +181,7 @@ div {
   cursor: pointer;
   color: #b8dcee;
   height: 100%;
-  line-height: var(--height-header);
+  line-height: var(--header-height);
 }
 
 .header-close:hover {

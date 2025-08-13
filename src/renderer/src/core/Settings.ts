@@ -1,8 +1,54 @@
-import { ChartTypeV2, storages } from '@preload/types'
+import { storages } from '@preload/types'
 import { computed, ref, Ref, toRaw, watch } from 'vue'
 import { utils } from '@renderer/core/utils'
 import Translations, { LanguageData } from '@renderer/core/translations'
 import { Charter } from '@renderer/core/charter'
+
+const note = {
+  width: ref(1),
+  s: ref(false),
+  b: ref(false),
+  hold: ref(false),
+  set_width(v: number) {
+    if (v != 1) this.hold.value = false
+    if (v == this.w) this.width.value = 0
+    else this.width.value = v
+  },
+  set_s(v: boolean) {
+    this.s.value = v
+    this.b.value = false
+  },
+  set_b(v: boolean) {
+    this.b.value = v
+    this.s.value = false
+  },
+  set_hold(v: boolean) {
+    this.hold.value = v
+    this.s.value = false
+    this.b.value = false
+    this.set_width(1)
+  },
+  get w() {
+    return this.width.value
+  },
+  get h() {
+    return this.hold.value
+  },
+  get snm() {
+    if (this.s.value) return 2
+    else if (this.b.value) return 1
+    else return 0
+  },
+  change_b() {
+    this.set_b(!this.b.value)
+  },
+  change_s() {
+    this.set_s(!this.s.value)
+  },
+  change_hold() {
+    this.set_hold(!this.hold.value)
+  }
+}
 
 const settings: Ref<storages.storage_scheme> = ref({
   settings: {
@@ -10,7 +56,6 @@ const settings: Ref<storages.storage_scheme> = ref({
     lang: 'zh_cn',
     meter: 4,
     middle: false,
-    note_type: '',
     overlap_minimum: 0,
     reverse_scroll: false,
     volume: 100,
@@ -18,7 +63,7 @@ const settings: Ref<storages.storage_scheme> = ref({
     language: 'zh_cn'
   },
   version: 6,
-  shortcut: ""
+  shortcut: ''
 })
 watch(
   () => settings.value.settings.language,
@@ -45,18 +90,17 @@ export const Settings = {
   },
   save() {
     Charter.invoke('save-conf', JSON.stringify(toRaw(this.data.value))).then(() => {
-      console.log("settings, saved.")
+      console.log('settings, saved.')
     })
   },
   get version() {
     return settings.value.version
   },
-  note_choice(n: ChartTypeV2.note['n']) {
-    if (settings.value.settings.note_type == n) {
-      settings.value.settings.note_type = ''
-    } else settings.value.settings.note_type = n
+  init_invertal() {
+    setInterval(() => {Settings.save()}, 10000)
   },
-  computes: computes
+  computes: computes,
+  note: note
 }
 
 // @ts-ignore

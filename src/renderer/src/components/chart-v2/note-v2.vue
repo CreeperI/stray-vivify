@@ -12,46 +12,38 @@ const lane_width = Settings.editor.lane_width
 const note_style = 'stray:/__skin__'
 
 function getSrc(): string {
-  if (note.n == 'n' || note.n == 'h') {
-    return note.l < 2 ? '/noteL.png' : '/noteR.png'
-  } else if (note.n == 'b') {
-    if (note.l == 0) return '/bL.png'
-    if (note.l == 1) return '/bM.png'
-    else return '/bR.png'
-  } else if (note.n == 'm') return '/bomb.png'
-  else if (note.n == 'mb') return '/bB.png'
-  else if (note.n == 's') {
-    if (note.l == 0) return '/sbL.png'
-    if (note.l == 1) return '/sbM.png'
-    else return '/sbR.png'
-  } else if (note.n == 'f') return '/f.png'
-    // it would only be triggered when "p" comes but its only fucking mind to happen
-    throw new Error(JSON.stringify(note))
-}
-
-function cover_add() {
-  if (note.n == 'h') return 0
-  if (['b', 'mb', 's'].includes(note.n)) return 1
-  else return 2
+  if (note.width == 0) return ''
+  let str = note_style + '/' + note.width
+  if ('snm' in note) {
+    if (note.snm == 1) return str + 'b.png'
+    if (note.snm == 2 && note.width != 1) str += 's'
+  }
+  if (note.width == 2) {
+    str += note.lane == 0 ? 'l' : note.lane == 2 ? 'r' : 'm'
+  } else if (note.width == 3) {
+    str += note.lane == 0 ? 'l' : 'r'
+  }
+  return str + '.png'
 }
 
 function size() {
-  if (['b', 'mb', 's'].includes(note.n)) return lane_width * 2 + 6 + 'px'
-  if (note.n == 'f') return lane_width * 4 + 18 + 'px'
-  return lane_width + 'px'
+  return (lane_width) * note.width + 'px'
 }
 
 function urlOf() {
-  return `${note_style + getSrc()}`
+  return `${getSrc()}`
 }
 
 function left() {
-  return `${note.l * 137 + 6}px`
+  return `${note.lane * lane_width + 6}px`
 }
 
 function borderTop() {
-  if (note.n != 'h') return ''
-  return `border-top: ${note.l < 2 ? '#b3bdff' : '#feb3c7'} solid ${note.h * mul.value}px;`
+  if ('len' in note) {
+    return `border-top: ${note.lane < 2 ? '#b3bdff' : '#feb3c7'} solid ${note.len * mul.value}px;`
+  } else {
+    return ''
+  }
 }
 
 function height() {
@@ -59,15 +51,16 @@ function height() {
 }
 
 function style() {
-  if (note.n != 'h')
-    return `height:${height()};width: ${size()};left: ${left()};z-index: calc(var(--z-highest) + ${cover_add()})`
-  else
-    return `height:${height()};width: ${size()};left: ${left()}; height: 43px; ${borderTop()};z-index: calc(var(--z-highest) + ${cover_add()})`
+  if ('len' in note) {
+    return `height:${height()};width: ${size()};left: ${left()}; height: 43px; ${borderTop()};`
+  } else {
+    return `height:${height()};width: ${size()};left: ${left()})`
+  }
 }
 </script>
 
 <template>
-  <img alt="" :src="urlOf()" :style="style()" />
+  <img alt="" :src="urlOf()" :style="style()"/>
 </template>
 
 <style scoped>

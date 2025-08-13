@@ -152,6 +152,9 @@ body {
   --header-font-size: 1.2rem;
   --header-line-height: 2rem;
   --header-height: 2rem;
+
+  --button-base: #000;
+  --button-hover: #444;
 }
 
 * {
