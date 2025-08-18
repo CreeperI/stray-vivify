@@ -1,9 +1,10 @@
 import { ChartTypeV2 } from '@preload/types'
-import { Ref, ref, watch } from 'vue'
+import { computed, ComputedRef, nextTick, Ref, ref, watch } from 'vue'
 import { Chart, ms } from './chart'
 import { Charter } from '../charter'
 import { utils } from '../utils'
 import { Settings } from '@renderer/core/Settings'
+import { notify } from '@renderer/core/notify'
 
 function parse_type(v: string) {
   switch (v) {
@@ -43,11 +44,14 @@ export class Chart_diff {
   undo: (() => void)[]
   redo: (() => void)[]
   shown: Ref<ChartTypeV2.note[]>
+  update_shown_flag: Ref<boolean>
   last_update: number
   bar_list: Ref<ms[]>
   beat_list: Ref<ms[]>
   // first for bar_list, 2nd beat_list
   shown_bar_beat: Ref<[[ms, number][], ms[]]>
+  shown_timing: Ref<ChartTypeV2.timing[]>
+  current_timing: ComputedRef<number>
 
   constructor(chart: Chart) {
     this.bound = chart.ref.diff
@@ -67,10 +71,18 @@ export class Chart_diff {
     this.undo = []
     this.redo = []
     this.shown = ref([])
+    this.update_shown_flag = ref(false)
     this.last_update = 0
     this.bar_list = ref([])
     this.beat_list = ref([])
     this.shown_bar_beat = ref([[], []])
+    this.shown_timing = ref([])
+    this.current_timing = computed(() =>
+      Math.max(
+        0,
+        this.timing.findLastIndex((v) => v.time <= this.chart.ref.chart_current_time.value)
+      )
+    )
     watch(
       () => this.bound.value.timing,
       () => {
@@ -82,7 +94,7 @@ export class Chart_diff {
       () => Settings.editor.meter,
       () => {
         this.update_beat_list()
-        this._fuck_bb(this.visible)
+        this.update_bar_beat_timing(this.visible)
       }
     )
   }
@@ -93,6 +105,7 @@ export class Chart_diff {
 
   set notes(v: ChartTypeV2.note[]) {
     this.bound.value.notes = v
+    this.update_diff_counts()
   }
 
   get diff1() {
@@ -101,6 +114,7 @@ export class Chart_diff {
 
   set diff1(v: string) {
     this.bound.value.meta.diff1 = v
+    this.chart.set_header_name()
   }
 
   get diff2() {
@@ -109,6 +123,7 @@ export class Chart_diff {
 
   set diff2(v: string) {
     this.bound.value.meta.diff2 = v
+    this.chart.set_header_name()
   }
 
   get charter() {
@@ -124,7 +139,7 @@ export class Chart_diff {
   }
 
   set timing(v: ChartTypeV2.timing[]) {
-    this.bound.value.timing = v
+    this.bound.value.timing = v.toSorted((a,b) => a.time - b.time)
   }
 
   get visible(): [number, number] {
@@ -140,10 +155,11 @@ export class Chart_diff {
       timing: [{ time: 0, bpm: 120, num: 4, den: 4 }],
       meta: {
         diff_name: '',
-        diff1: 'Finale',
-        diff2: '14+',
+        diff1: ['Finale', "Encore", "Backstage", "Terminal"][Math.floor(Math.random() * 4)],
+        diff2: Math.floor(Math.random() * 20) + "+",
         charter: '???'
-      }
+      },
+      ani: []
     }
   }
 
@@ -227,12 +243,10 @@ export class Chart_diff {
 
   set_notes(v: ChartTypeV2.note[]) {
     this.notes = v
-    Charter.update()
   }
 
   set_timing(v: ChartTypeV2.timing[]) {
     this.timing = v
-    Charter.update()
   }
 
   set_diff(v: ChartTypeV2.diff) {
@@ -253,17 +267,10 @@ export class Chart_diff {
         diff2: this.diff2,
         diff_name: ''
       },
-      timing: this.timing
+      timing: this.timing,
+      ani: []
     }
   }
-
-  bind(v: Ref<ChartTypeV2.diff>) {
-    this.bound = v
-    watch(v, (r) => {
-      this.set_diff(r)
-    })
-  }
-
   sort() {
     this.notes.sort(utils.sort_notes)
     this.notes.forEach((x) => (x.time = Math.floor(x.time)))
@@ -317,8 +324,7 @@ export class Chart_diff {
   remove_note_no_undo(v: ChartTypeV2.note) {
     if (!this.notes.includes(v)) return false
     this.notes.splice(this.notes.indexOf(v), 1)
-    utils.remove(this.shown.value, v)
-    Charter.update()
+    this.fuck_shown(this.chart.audio.current_time, true)
     return true
   }
 
@@ -333,6 +339,7 @@ export class Chart_diff {
       return utils.around(x.time, v.time, overlap) && x.l == v.l
     })
     if (wrapped) return false*/
+    if (this.notes.find((x) => x.time == v.time && x.lane == v.lane && x.width == x.width)) return
     this.notes.push(v)
     this.shown.value.push(v)
     Charter.update()
@@ -398,17 +405,18 @@ export class Chart_diff {
   }
 
   fuck_shown(t: number, force = false) {
-    if (force ? false : Math.abs(t - this.last_update) < 2500) return
-    Charter.timer.timer('fuck_shown')
-    const visible = [t - 3000, t + Settings.computes.visible.value + 2500] as [number, number]
+    if (force ? false : Math.abs(t - this.last_update) < 2000) return
+    this.update_shown_flag.value = true
+    const visible = [t - 2000, t + Settings.computes.visible.value + 2500] as [number, number]
     this.shown.value = this.notes.filter((x) => {
       return this.isVisible(x, visible)
     })
-    this._fuck_bb(visible)
+    this.update_bar_beat_timing(visible)
     this.last_update = t
+    nextTick().then(() => (this.update_shown_flag.value = false))
   }
 
-  _fuck_bb(visible: [number, number]) {
+  update_bar_beat_timing(visible: [number, number]) {
     this.shown_bar_beat.value = [
       // why this type-errors i cant understand all-fucking-night
       this.bar_list.value.map((x, dx) => [x, dx]).filter((x) => utils.between(x[0], visible)) as [
@@ -417,12 +425,13 @@ export class Chart_diff {
       ][],
       this.beat_list.value.filter((x) => utils.between(x, visible))
     ]
+    this.shown_timing.value = this.timing.filter((x) => utils.between(x.time, visible))
   }
 
   isVisible(n: ChartTypeV2.note, visible: [number, number]): boolean {
     if (utils.between(n.time, visible)) return true
     if ('len' in n) {
-      return n.time + n.len >= visible[0]
+      return n.time < visible[0] && n.time + n.len > visible[0]
     }
     return false
   }
@@ -469,5 +478,16 @@ export class Chart_diff {
       strs.push(str)
     }
     return strs
+  }
+
+  add_timing(timing: ChartTypeV2.timing) {
+    let same = this.timing.findIndex((tp) => Math.abs(tp.time - timing.time) < 50)
+    if (same != -1) {
+      notify.error("已有相同时间点的timing。")
+      return same
+    }
+    this.timing.push(timing)
+    this.timing.sort((a, b) => a.time - b.time)
+    return -1
   }
 }

@@ -1,52 +1,62 @@
 <script lang="ts" setup>
-import Translations from '@renderer/core/translations'
-import ASelect from '@renderer/components/a-elements/a-select.vue'
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
-import ALabel from '@renderer/components/a-elements/a-label.vue'
-import { ref } from 'vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
-import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import { Charter } from '@renderer/core/charter'
 import AButton from '@renderer/components/a-elements/a-button.vue'
+import { Settings } from '@renderer/core/Settings'
+import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
+import SettingHeader from '@renderer/components/modals/setting-header.vue'
 
-const Language = Translations
-const { charter_layout, overlap_minimum, reverse_scroll } = Charter.settings.to_refs
-const pos_options = [
-  { display: Language.settings.layout.auto, val: 'auto' },
-  { display: Language.settings.layout.middle, val: 'middle' },
-  { display: Language.settings.layout.left, val: 'left' }
-]
-const active = ref(0)
-// const ia = (n: number) => computed(() => (active.value == n ? 'active-tab' : ''))
+const r = Settings.data
 </script>
 
 <template>
-  <SimpleModal :title="Language.settings.title" size="sm">
+  <SimpleModal title="设置" size="sm">
     <div class="settings-wrapper">
-      <!--      <div class="setting-list">-->
-      <!--        <div :class="ia(0).value" @click="active = 0">1</div>-->
-      <!--        <div :class="ia(1).value" @click="active = 1">2</div>-->
-      <!--      </div>-->
-      <div v-if="active == 0" class="contain">
-        <!--        <a-label :label="Language.settings.language + Language.settings.after_reboot">-->
-        <!--          <a-select-->
-        <!--            v-model="lang"-->
-        <!--            :options="-->
-        <!--              Language_keys.map((x) => {-->
-        <!--                return { display: LanguageData[x].name, val: x }-->
-        <!--              })-->
-        <!--            "-->
-        <!--          />-->
-        <!--        </a-label>-->
-        <a-label :label="Language.settings.layout.layout">
-          <a-select v-model="charter_layout" :options="pos_options"></a-select>
-        </a-label>
-        <a-label :label="Language.settings.reverse_scroll">
-          <a-checkbox v-model="reverse_scroll" />
-        </a-label>
-        <a-label :label="Language.settings.overlap_minimum">
-          <a-number-input v-model="overlap_minimum" />
-        </a-label>
+      <div style="width: 100%; text-align:center;">编辑数字可以使用键盘上下和滚轮哦。</div>
+      <div class="contain">
+        <setting-header msg="编辑器" />
+        <div>
+          <div>滚轮反转</div>
+          <a-checkbox v-model="r.settings.reverse_scroll" />
+        </div>
+        <div>
+          <s>显示timing</s>
+          <a-checkbox v-model="r.settings.show_bottom_timing" />
+        </div>
+        <div>
+          <div>显示底部#Timing</div>
+          <a-checkbox v-model="r.settings.show_bpm_bottom" />
+        </div>
+        <div>
+          <div>lane-width</div>
+          <a-number-input class="in" min="1" v-model="r.settings.lane_width" />
+        </div>
+        <div>
+          <div>offset1</div>
+          <a-number-input class="in" v-model="r.settings.offset1" />
+        </div>
+        <setting-header msg="预览模式" />
+        <div>
+          <div>左侧显示小节数</div>
+          <a-checkbox v-model="r.settings.record_field.show_bar_text" />
+        </div>
+        <div>
+          <div>显示小节线</div>
+          <a-checkbox v-model="r.settings.record_field.show_beat_line" />
+        </div>
+        <div>
+          <div>左侧小节线下显示bpm</div>
+          <a-checkbox v-model="r.settings.record_field.show_bpm_left" />
+        </div>
+        <div>
+          <div>底部显示#timing</div>
+          <a-checkbox v-model="r.settings.record_field.show_bpm_bottom" />
+        </div>
+        <div>
+          <div>右侧信息密度</div>
+          <a-number-input min="0" max="5" v-model="r.settings.record_field.detail" />
+        </div>
       </div>
     </div>
     <template #footer>
@@ -81,11 +91,18 @@ const active = ref(0)
   width: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .contain {
+  width: 80%;
+}
+.contain > div {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr 1fr;
+}
+.contain > div > *:first-child {
+  text-align: center;
 }
 
 select {
@@ -100,5 +117,9 @@ select {
 
 option {
   color: black;
+}
+.in ::-webkit-inner-spin-button,
+.in ::-webkit-outer-spin-button {
+  appearance: none;
 }
 </style>

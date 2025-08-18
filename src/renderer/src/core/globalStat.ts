@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { Ref, ref } from 'vue'
 import { charts_data } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
@@ -20,8 +20,9 @@ export const GlobalStat = {
   },
   all_chart: [] as charts_data,
   async update_all_chart() {
-    this.all_chart = await Invoke('get-charts-data')
-    console.log(this.all_chart)
+    this.all_chart =
+      (await Invoke('get-charts-data'))
+        .sort((a, b) => b.last_open - a.last_open)
   },
   window_max_state: ref(false),
   log(...args: any) {
@@ -32,7 +33,14 @@ export const GlobalStat = {
   window: {
     height: screen.availHeight,
     width: screen.availWidth
-  }
+  },
+  refs: {
+    chart_tab: ref(2),
+    header_display: ref(''),
+
+  },
+  // 0 - charting 1 - recording 2 - playing
+  chart_state: ref(0) as Ref<0 | 1 | 2>,
 }
 
 //@ts-ignore

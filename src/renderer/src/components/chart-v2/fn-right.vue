@@ -70,13 +70,14 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
       </tbody>
     </table>
     <div class="fn-right-inner">
-    <label>{{ utils.toTimeStr(current_ms / 1000) }}/{{ utils.toTimeStr(chart.length / 1000) }}</label>
-    <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
+      <label>
+        {{ utils.toTimeStr(current_ms / 1000) }}/{{ utils.toTimeStr(chart.length / 1000) }}
+      </label>
+      <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
       <label>播放速度:{{ play_rate }}x</label>
-    <a-range v-model="writable_play_rate" max="2" min="0.5" step="0.1" />
-      <label>音量:{{volume}}</label>
-    <a-range v-model.number="volume" max="100" min="0" />
-
+      <a-range v-model="writable_play_rate" max="2" min="0.5" step="0.1" />
+      <label>音量:{{ volume }}</label>
+      <a-range v-model.number="volume" max="100" min="0" />
     </div>
   </div>
 </template>

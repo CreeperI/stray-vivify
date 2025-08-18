@@ -12,14 +12,8 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <a-href href="https://space.bilibili.com/517691213">TerminalFlow</a-href>
       <a-href href="https://space.bilibili.com/517691213">Allesta</a-href>
       <a-href href="https://space.bilibili.com/517691213">Ts. Final</a-href>
-      <a-href href="https://space.bilibili.com/517691213">Terminal Society.</a-href>
+      <a-href href="https://space.bilibili.com/517691213">Terminal Society Inc.</a-href>
       <a-href href="https://space.bilibili.com/517691213">CharaX</a-href>
-    </div>
-    <div class="credits-head">
-      Original Inspiration
-    </div>
-    <div class="credits-col">
-      <a-href href="https://store.steampowered.com/app/2093940/vividstasis/">vivid/stasis by Hajimeli</a-href>
     </div>
     <div class="credits-head">
       Pilot Assistants/Contributors
@@ -48,7 +42,9 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <a-href href="https://vitejs.cn/">Vite</a-href>
       <a-href href="https://github.com/kolirt/vue-modal">kolirt (vue-modal)</a-href>
       <a-href href="https://vite.electron.js.cn/">Electron-Vite</a-href>
-      <a-href href="https://arcwiki.mcd.blue/">Arcaea中文维基</a-href>
+      <s>
+        <a-href href="https://arcwiki.mcd.blue/">Arcaea中文维基</a-href>
+      </s>
       <a-href href="https://wiki.rotaeno.cn/">Rotaeno中文维基</a-href>
     </div>
   </div>

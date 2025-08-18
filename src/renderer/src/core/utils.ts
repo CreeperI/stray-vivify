@@ -82,6 +82,53 @@ export namespace utils {
     return to
   }
 
+  // only update value if there is sth accordingly in target
+  export function less_assign<T extends object>(target: T, ...sources: Partial<T>[]): T {
+    if (target == null) {
+      throw new TypeError('Cannot convert undefined or null to object')
+    }
+
+    const to = Object(target)
+
+    for (const source of sources) {
+      if (source != null) {
+        for (const key in source) {
+          if (key in target) {
+            // noinspection DuplicatedCode
+            if (Object.prototype.hasOwnProperty.call(source, key)) {
+              const sourceValue = source[key]
+              const targetValue = to[key]
+
+              if (
+                typeof sourceValue === 'object' &&
+                sourceValue !== null &&
+                !Array.isArray(sourceValue)
+              ) {
+                if (
+                  typeof targetValue === 'object' &&
+                  targetValue !== null &&
+                  !Array.isArray(targetValue)
+                ) {
+                  to[key] = assign(
+                    {} as Record<Extract<keyof T, string>, unknown>,
+                    targetValue,
+                    sourceValue
+                  )
+                } else {
+                  to[key] = assign({} as Record<Extract<keyof T, string>, unknown>, sourceValue)
+                }
+              } else {
+                to[key] = sourceValue
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return to
+  }
+
   export function guard<T>(val: any, ini: T): T {
     if (typeof val != typeof ini) return ini
     else return val
@@ -103,17 +150,21 @@ export namespace utils {
     return arr[Math.floor(Math.random() * arr.length)]
   }
 
-  export function toTimeStr(seconds: number) {
-    const isNegative = seconds < 0;
-    const absSeconds = Math.abs(seconds);
-    const minutes = Math.floor(absSeconds / 60);
-    let secs = (absSeconds % 60).toFixed(3);
+  export function toTimeStr(seconds: number, fix=3) {
+    const isNegative = seconds < 0
+    const absSeconds = Math.abs(seconds)
+    const minutes = Math.floor(absSeconds / 60)
+    let secs = (absSeconds % 60).toFixed(fix)
 
     // 处理秒数部分补零逻辑
-    secs = parseFloat(secs) < 10 ? '0' + secs : secs;
+    secs = parseFloat(secs) < 10 ? '0' + secs : secs
 
     // 添加负号标识
-    return (isNegative ? '-' : '') + minutes + ':' + secs;
+    return (isNegative ? '-' : '') + minutes + ':' + secs
+  }
+
+  export function ms2str(ms: number,fix=3) {
+    return toTimeStr(ms / 1000,fix)
   }
 }
 

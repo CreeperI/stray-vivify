@@ -6,3 +6,5 @@ out
 .idea
 .vscode
 charts/
+skin/
+*.mjs

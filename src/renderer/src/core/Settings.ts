@@ -1,8 +1,12 @@
 import { storages } from '@preload/types'
 import { computed, ref, Ref, toRaw, watch } from 'vue'
 import { utils } from '@renderer/core/utils'
-import Translations, { LanguageData } from '@renderer/core/translations'
 import { Charter } from '@renderer/core/charter'
+
+export const Version = {
+  val: 6,
+  str: "reborn-alpha"
+}
 
 const note = {
   width: ref(1),
@@ -17,16 +21,18 @@ const note = {
   set_s(v: boolean) {
     this.s.value = v
     this.b.value = false
+    this.hold.value = false
   },
   set_b(v: boolean) {
     this.b.value = v
     this.s.value = false
+    this.hold.value = false
   },
   set_hold(v: boolean) {
     this.hold.value = v
     this.s.value = false
     this.b.value = false
-    this.set_width(1)
+    this.width.value = 1
   },
   get w() {
     return this.width.value
@@ -53,25 +59,27 @@ const note = {
 const settings: Ref<storages.storage_scheme> = ref({
   settings: {
     scale: 10,
-    lang: 'zh_cn',
     meter: 4,
-    middle: false,
-    overlap_minimum: 0,
     reverse_scroll: false,
-    volume: 100,
     lane_width: 130,
-    language: 'zh_cn'
+    show_bottom_timing: true,
+    offset1: 0,
+    offset2: 0,
+    record_field: {
+      show_bar_text: true,
+      show_beat_line: true,
+      show_bpm_bottom: true,
+      show_bpm_left: true,
+      detail: 3,
+      sprite: true
+    },
+    show_bpm_bottom: true
   },
   version: 6,
   shortcut: ''
 })
-watch(
-  () => settings.value.settings.language,
-  (v) => {
-    utils.assign(Translations, LanguageData['zh_cn'])
-    utils.assign(Translations, LanguageData[v])
-  }
-)
+
+watch(settings, () => {}, { deep: true })
 const computes = {
   mul: computed(() => (settings.value.settings.scale * 200 + 100) / 1000),
   visible: computed(() => Math.round(Charter.refs.window.height.value / computes.mul.value))
@@ -86,21 +94,23 @@ export const Settings = {
     const data = await Charter.invoke('get-conf')
     if (!data) return
     const parsed = JSON.parse(data) as storages.storage_scheme
-    utils.assign(this.data.value, parsed)
+    utils.less_assign(this.data.value, parsed)
+    this.data.value.version = Version.val
   },
   save() {
-    Charter.invoke('save-conf', JSON.stringify(toRaw(this.data.value))).then(() => {
-      console.log('settings, saved.')
-    })
+    Charter.invoke('save-conf', JSON.stringify(toRaw(this.data.value)))
   },
   get version() {
     return settings.value.version
   },
   init_invertal() {
-    setInterval(() => {Settings.save()}, 10000)
+    setInterval(() => {
+      Settings.save()
+    }, 10000)
   },
   computes: computes,
-  note: note
+  note: note,
+
 }
 
 // @ts-ignore

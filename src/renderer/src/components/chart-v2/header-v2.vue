@@ -2,6 +2,8 @@
 import { Charter } from '@renderer/core/charter'
 import { Chart } from '@renderer/core/chart/chart'
 import { notify } from '@renderer/core/notify'
+import { GlobalStat } from '@renderer/core/globalStat'
+import { modal } from '@renderer/core/modal'
 
 const active = defineModel<number>()
 
@@ -9,16 +11,15 @@ const ipcRenderer = Charter.ipcRenderer
 
 const isMax = Charter.refs.window.isMaximized
 
-const { lang } = Charter.settings.to_refs
-const song_name = Charter.refs.current_name
+const song_name = GlobalStat.refs.header_display
 
 function close_chart() {
   if (Chart.current) {
     Chart.current.save()
     Chart.current.audio.pause()
-    Charter.state.value = 'startUp'
-    Chart.current = undefined
   }
+    Chart.current = undefined
+    GlobalStat.route.change('start')
 }
 
 async function read_vsb() {
@@ -36,18 +37,26 @@ async function write_vsc() {
   if (!chart) throw new Error('?????')
   chart.write_current_vsc()
 }
+async function export_chart() {
+  Chart.$current.export_chart()
+}
 </script>
 
 <template>
-  <div :key="lang" class="header-wrapper">
+  <div class="header-wrapper">
     <div class="header-top">
       <img alt="wug" class="header-wug" src="/yq.jpg" />
       <div class="header-menu-ul">
-        <div class="h-menu-btn-text">文件</div>
+        <div class="h-menu-btn-text">工具</div>
         <div class="h-menu-btn-i">
           <div class="h-menu-btn-text" @click="read_vsb">打开vsb</div>
-          <div class="h-menu-btn-text" @click="close_chart">关闭文件</div>
           <div class="h-menu-btn-text" @click="write_vsc">写入vsc</div>
+          <div class="h-menu-btn-text" @click="export_chart">打包&导出</div>
+          <div class="h-menu-btn-text" @click="GlobalStat.chart_state.value = 1">预览</div>
+          <div class="h-menu-btn-text h-menu-btn-i-sep" @click="modal.SettingModal.show({})">
+            设置
+          </div>
+          <div class="h-menu-btn-text" @click="close_chart">关闭文件</div>
         </div>
       </div>
       <div class="header-menu-ul" @click="active = 1">
@@ -136,7 +145,6 @@ div {
   border-radius: 5px;
   border: 1px solid transparent;
   box-sizing: border-box;
-  height: var(--header-height);
   line-height: var(--header-height);
   user-select: none;
   -webkit-app-region: no-drag;
@@ -146,7 +154,7 @@ div {
   opacity: 0;
   transition: opacity 0.2s linear;
   background: rgb(32, 33, 70);
-  border-top: #b8dcee 2px solid;
+  border-top: #b8dcee 3px solid;
   box-sizing: border-box;
   pointer-events: none;
   user-select: none;
@@ -154,6 +162,24 @@ div {
   position: absolute;
   top: var(--header-height);
   left: 0;
+  width: max-content;
+  padding: 5px 10px;
+}
+
+.h-menu-btn-i > .h-menu-btn-text {
+  transition: background-color 0.2s linear;
+  font-size: 0.95rem;
+  padding: 0 3px;
+  width: 100%;
+  margin: 0;
+}
+.h-menu-btn-i > .h-menu-btn-text:hover {
+  background: #303156;
+}
+.h-menu-btn-i > .h-menu-btn-i-sep {
+  border-top: 1px solid #b8dcee;
+  border-radius: 0 0 5px 5px;
+  margin-top: 3px;
 }
 
 .header-menu-ul:hover .h-menu-btn-i {

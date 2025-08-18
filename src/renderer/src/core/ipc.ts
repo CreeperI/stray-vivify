@@ -9,12 +9,16 @@ const Handler: IpcHandlers.send.handler = {
   'notify-normal': function (_, arg) {
     notify.normal(arg[0], arg[1])
   },
-  'ask-id': async function (_, ids) {
-    const id = await modal.AskIdModal.show({ all: ids }) as undefined | string
+  // @ts-expect-error the arg isnt typed correctly anyway
+  'ask-id': async function (_, ids: string[], def?: string) {
+    const id = await modal.AskIdModal.show({ all: ids, def: def }) as undefined | string
     ipcRenderer.send('return-id', id)
     if (id) return id
     else return 0
   },
+  'notify-error': function (_, arg) {
+    notify.error(arg[0], arg[1])
+  }
 }
 
 export function load_ipc_handlers() {

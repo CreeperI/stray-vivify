@@ -1,10 +1,14 @@
-import { ref, ToRefs, watch } from 'vue'
+import { Ref, ref, watch } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
 import { Chart } from '@renderer/core/chart/chart'
 
+function roman_need(str: string) {
+  return /[^\u0000-\u007F]/u.test(str)
+}
 export class Chart_song {
-  refs: ToRefs<ChartTypeV2.song>
+  refs: Ref<ChartTypeV2.song>
   chart: Chart
+  need_roman: Ref<[boolean, boolean]>
 
   constructor(ch: Chart) {
     this.chart = ch
@@ -15,20 +19,36 @@ export class Chart_song {
     this._bpm = '120'
     this._source = ''
     this._ref = ''
+    this._sprite = ''
+    this.need_roman = ref([false, false])
 
-    this.refs = {
-      name: ref(this._name),
-      name_roman: ref(''),
-      composer: ref(this._composer),
-      composer_roman: ref(''),
-      bpm: ref(this._bpm),
-      source: ref(''),
-      ref: ref('')
-    }
+    this.refs = ref({
+      name: '',
+      name_roman: '',
+      composer: '',
+      composer_roman: '',
+      bpm: '120',
+      source: '',
+      ref: '',
+      sprite: ''
+    })
 
-    watch(this.refs.name, (v) => (this.name = v))
-    watch(this.refs.composer, (v) => (this.composer = v))
-    watch(this.refs.bpm, (v) => (this.bpm = v))
+    watch(
+      this.refs,
+      (v) => {
+        this._name = v.name
+        this._composer = v.composer
+        this._bpm = v.bpm
+        this._source = v.source
+        this._ref = v.ref
+        this._sprite = v.sprite
+        this.need_roman.value = [roman_need(v.name), roman_need(v.composer)]
+        this.name_roman = v.name.replace(/[^\u0000-\u007F]/gu, '')
+        this.composer_roman = v.composer.replace(/[^\u0000-\u007F]/gu, '')
+        ch.set_header_name()
+      },
+      { deep: true, flush: 'sync' },
+    )
   }
 
   _name: string
@@ -39,7 +59,8 @@ export class Chart_song {
 
   set name(v: string) {
     this._name = v
-    this.refs.name.value = v
+    this.refs.value.name = v
+    this.chart.set_header_name()
   }
 
   _composer: string
@@ -50,7 +71,7 @@ export class Chart_song {
 
   set composer(v: string) {
     this._composer = v
-    this.refs.composer.value = v
+    this.refs.value.composer = v
   }
 
   _bpm: string
@@ -61,7 +82,7 @@ export class Chart_song {
 
   set bpm(v: string) {
     this._bpm = v
-    this.refs.bpm.value = v
+    this.refs.value.bpm = v
   }
 
   _name_roman: string
@@ -71,7 +92,7 @@ export class Chart_song {
 
   set name_roman(v: string) {
     this._name_roman = v
-    this.refs.name_roman.value = v
+    this.refs.value.name_roman = v
   }
 
   _composer_roman: string
@@ -81,7 +102,7 @@ export class Chart_song {
 
   set composer_roman(v: string) {
     this._composer_roman = v
-    this.refs.composer_roman.value = v
+    this.refs.value.composer_roman = v
   }
 
   _ref: string
@@ -91,7 +112,7 @@ export class Chart_song {
 
   set ref(v: string) {
     this._ref = v
-    this.refs.ref.value = v
+    this.refs.value.ref = v
   }
 
   _source: string
@@ -101,7 +122,16 @@ export class Chart_song {
 
   set source(v: string) {
     this._source = v
-    this.refs.source.value = v
+    this.refs.value.source = v
+  }
+
+  _sprite: string
+  get sprite() {
+    return this._sprite
+  }
+  set sprite(v: string) {
+    this._sprite = v
+    this.refs.value.sprite = v
   }
 
   set_song(v: ChartTypeV2.song) {
@@ -111,6 +141,7 @@ export class Chart_song {
     this.name_roman = v.name_roman
     this.composer_roman = v.composer_roman
     this.ref = v.ref
+    this.sprite = v.sprite
   }
 
   save(): ChartTypeV2.song {
@@ -121,7 +152,8 @@ export class Chart_song {
       name_roman: this.name_roman,
       composer_roman: this.composer_roman,
       ref: this.ref,
-      source: this.source
+      source: this.source,
+      sprite: this.sprite
     }
   }
 }

@@ -17,14 +17,13 @@
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
+    "force-build:win": "electron-vite build",
     "build:mac": "npm run build && electron-builder --mac",
     "build:linux": "npm run build && electron-builder --linux"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
-    "@electron-toolkit/utils": "^3.0.0",
-    "electron-updater": "^6.1.7",
-    "pnpm": "^10.14.0"
+    "@electron-toolkit/utils": "^3.0.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config": "^1.0.2",
@@ -33,13 +32,14 @@
     "@electron/remote": "^2.1.2",
     "@kolirt/vue-modal": "^1.0.3",
     "@rushstack/eslint-patch": "^1.10.3",
+    "@types/adm-zip": "^0.5.7",
     "@types/node": "^20.14.8",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
+    "adm-zip": "^0.5.16",
     "electron": "^31.0.2",
     "electron-builder": "^25.1.8",
-    "electron-forge": "^5.2.4",
     "electron-vite": "^2.3.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.26.0",

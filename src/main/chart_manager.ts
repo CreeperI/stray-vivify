@@ -1,10 +1,12 @@
 import path from 'node:path'
 import fs from 'fs'
-import { charts_data, ChartType } from '../preload/types'
-import { dialog } from 'electron'
+import { charts_data, ChartType, IpcHandlers } from '../preload/types'
+import { dialog, ipcMain, shell } from 'electron'
 import { file_paths } from './fp_parser'
+import AdmZip from 'adm-zip'
+import { find_png } from './stray'
 
-function ChartManager() {
+function ChartManager(mw: Electron.BrowserWindow) {
   const charts_folder = file_paths.charts
   console.log(charts_folder)
   const data: charts_data = []
@@ -185,6 +187,100 @@ function ChartManager() {
     return fp
   }
 
+  function export_chart(id: string) {
+    const chart = data.find((v) => v.id === id)
+    if (!chart) return
+    const zip = new AdmZip()
+    const chart_folder = path.join(charts_folder, id)
+    zip.addLocalFile(path.join(chart_folder, 'song' + chart.ext))
+    zip.addLocalFile(path.join(chart_folder, 'vs-chart.json'))
+    const sprite = find_png(chart_folder, 'song')
+    if (sprite) zip.addLocalFile(path.join(chart_folder, sprite))
+    const bg = find_png(chart_folder, 'bg')
+    if (bg) zip.addLocalFile(path.join(chart_folder, bg))
+
+    zip.writeZip(path.join(charts_folder, id + '.svc'))
+    shell.showItemInFolder(path.join(charts_folder, id + '.svc'))
+  }
+
+  async function import_chart() {
+    const sender = mw.webContents.send.bind(mw.webContents) as IpcHandlers.send.send
+    const zip_file = dialog.showOpenDialogSync({
+      properties: ['openFile'],
+      filters: [{ name: 'stray-vivify chart', extensions: ['svc', 'zip'] }]
+    })
+    if (!zip_file) return
+    const zip = new AdmZip(zip_file[0])
+    const zip_entry = zip.getEntries()
+    const json = zip_entry.find((v) => v.entryName === 'vs-chart.json')
+    const song = zip_entry.find((v) => {
+      return ['.mp3', '.wav', '.ogg', '.m4a'].includes(path.extname(v.entryName))
+    })
+    const sprite = zip_entry.find((v) => {
+      return (
+        ['.png', '.jpg', '.jpeg', '.gif'].includes(path.extname(v.entryName)) &&
+        v.entryName.includes('song')
+      )
+    })
+    const bg = zip_entry.find((v) => {
+      return (
+        ['.png', '.jpg', '.jpeg', '.gif'].includes(path.extname(v.entryName)) &&
+        v.entryName.includes('bg')
+      )
+    })
+    if (!json || !song) {
+      sender('notify-error', 'zip corrupted', 1000)
+      return
+    }
+    const id = (await new Promise((r) => {
+      sender(
+        'ask-id',
+        id_list(),
+        path
+          .basename(zip_file[0])
+          .replace(path.extname(zip_file[0]), '')
+          .toLowerCase()
+          // this is a white space
+          .replace(' ', '')
+      )
+      ipcMain.once('return-id', (_, id: undefined | string) => {
+        if (!id) r(0)
+        else r(id)
+      })
+    })) as string | 0
+    if (id == 0) {
+      sender('notify-normal', '取消导入。', 1000)
+      return
+    }
+    try {
+      fs.mkdirSync(path.join(charts_folder, id))
+      fs.writeFileSync(
+        path.join(charts_folder, id, 'vs-chart.json'),
+        json.getData().toString('utf-8'), {encoding: "utf-8"}
+      )
+      fs.writeFileSync(path.join(charts_folder, id, path.basename(song.entryName)), song.getData())
+      if (sprite) {
+        fs.writeFileSync(
+          path.join(charts_folder, id, path.basename(sprite.entryName)),
+          sprite.getData()
+        )
+      }
+      if (bg) {
+        fs.writeFileSync(path.join(charts_folder, id, path.basename(bg.entryName)), bg.getData())
+      }
+      add_chart(
+        id,
+        path.basename(song.entryName, path.extname(song.entryName)),
+        'unknown',
+        'unknown',
+        path.extname(song.entryName),
+        []
+      )
+    } catch (e) {
+      sender('notify-error', '导入失败', 1000)
+    }
+  }
+
   read_json()
 
   return {
@@ -196,7 +292,9 @@ function ChartManager() {
     write_chart,
     update_chart,
     write_vsc,
-    backup_chart
+    backup_chart,
+    export_chart,
+    import_chart
   }
 }
 

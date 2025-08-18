@@ -3,7 +3,7 @@ import Build from '@renderer/components/credits/build.vue'
 </script>
 
 <template>
-  <div>
+  <div class="version-wrapper">
     <Build build="1" d="31" m="1" y="2025">
       <div>第一个测试版本。</div>
     </Build>
@@ -79,7 +79,25 @@ import Build from '@renderer/components/credits/build.vue'
         我愚人节呢？？？
       </template>
     </Build>
+    <Build build="7.3" y="2025" m="8" d="17">
+      <template #header>
+        stray-vivify Reborn
+      </template>
+      <div>移除了waiting-load</div>
+      <div>移除了株洲岛有栖，新增了株洲岛有栖（汉堡ver）画师：River</div>
+      <div>修改了lane的渲染方式。从canvas切换到了svg。</div>
+      <div>移除了纯享模式，改为了预览模式，从工具栏进入。按空格以开始。</div>
+      <div>修改了快捷键、设置界面</div>
+      <div>新增了F1界面。点击试试吧！</div>
+      <div>增加了skin。</div>
+      <div>调整了很多界面。</div>
+    </Build>
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.version-wrapper {
+  display: flex;
+  flex-direction: column-reverse;
+}
+</style>

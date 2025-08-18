@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const {label} = defineProps<{
+const { label } = defineProps<{
   label: string
 }>()
 </script>
@@ -17,11 +17,10 @@ const {label} = defineProps<{
   align-items: flex-start;
   width: min-content;
   gap: 0.5rem;
-
-  span {
-    text-wrap: nowrap;
-    text-align: left;
-    vertical-align: center;
-  }
+}
+span {
+  text-wrap: nowrap;
+  text-align: left;
+  vertical-align: center;
 }
 </style>

@@ -5,12 +5,13 @@ import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import { computed, onMounted, ref } from 'vue'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 
-const { all } = defineProps<{
-  all: string[]
+const props = defineProps<{
+  all: string[],
+  def?: string
 }>()
 
-const pending = ref('')
-const valid = computed(() => !all.includes(pending.value) && pending.value.length > 0)
+const pending = ref(props.def ?? "")
+const valid = computed(() => !props.all.includes(pending.value) && pending.value.length > 0)
 
 onMounted(() => {
   setTimeout(() => document.getElementById('id-input-box')?.focus(), 400)
@@ -20,7 +21,8 @@ onMounted(() => {
 <template>
   <SimpleModal :show-close="false" size="sm">
     <div>请输入一个id以识别该曲目</div>
-    <a-text-input v-model="pending" placeholder="这里输入哦" id="id-input-box"></a-text-input>
+    <a-text-input
+      v-model="pending" placeholder="这里输入哦" id="id-input-box"></a-text-input>
     <div>建议：不要使用中文或特殊字符</div>
     <div v-if="all.includes(pending)">该id已存在。请换一个试试。</div>
     <template #footer>

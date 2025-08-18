@@ -4,6 +4,7 @@ import { Settings } from '@renderer/core/Settings'
 import { ChartTypeV2 } from '@preload/types'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
+import FnCounter from '@renderer/components/chart-v2/FnCounter.vue'
 
 const { width, s, hold, b } = Settings.note
 
@@ -32,10 +33,34 @@ const pending_note = computed(() => {
     <div class="notes">
       <div class="note-width">
         <span>note宽</span>
-        <div class="note-width-btn" :class="width == 1? 'chosen' : ''" @click="Settings.note.set_width(1)">1</div>
-        <div class="note-width-btn" :class="width == 2? 'chosen' : ''" @click="Settings.note.set_width(2)">2</div>
-        <div class="note-width-btn" :class="width == 3? 'chosen' : ''" @click="Settings.note.set_width(3)">3</div>
-        <div class="note-width-btn" :class="width == 4? 'chosen' : ''" @click="Settings.note.set_width(4)">4</div>
+        <div
+          class="note-width-btn"
+          :class="width == 1 ? 'chosen' : ''"
+          @click="Settings.note.set_width(1)"
+        >
+          1
+        </div>
+        <div
+          class="note-width-btn"
+          :class="width == 2 ? 'chosen' : ''"
+          @click="Settings.note.set_width(2)"
+        >
+          2
+        </div>
+        <div
+          class="note-width-btn"
+          :class="width == 3 ? 'chosen' : ''"
+          @click="Settings.note.set_width(3)"
+        >
+          3
+        </div>
+        <div
+          class="note-width-btn"
+          :class="width == 4 ? 'chosen' : ''"
+          @click="Settings.note.set_width(4)"
+        >
+          4
+        </div>
       </div>
       <div class="note-snb">
         <s>S/B</s>
@@ -56,6 +81,7 @@ const pending_note = computed(() => {
         <note-v2 :note="pending_note" />
       </div>
     </div>
+    <fn-counter />
   </div>
 </template>
 
@@ -83,7 +109,8 @@ const pending_note = computed(() => {
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.note-width > div:hover, .chosen{
+.note-width > div:hover,
+.chosen {
   background: var(--button-hover);
 }
 .note-snb {
@@ -99,5 +126,12 @@ const pending_note = computed(() => {
 .note-pending > img {
   position: relative;
   max-width: 90%;
+}
+
+.counter-inner div:nth-child(2n + 1) {
+  text-align: right;
+}
+.counter-inner div:nth-child(2n + 2) {
+  text-align: left;
 }
 </style>

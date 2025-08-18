@@ -1,11 +1,11 @@
 import { app, BrowserWindow, dialog, globalShortcut, ipcMain, protocol, shell } from 'electron'
-import { dirname, join } from 'path'
+import { join } from 'path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
-import { basename, extname } from 'node:path'
 import { load_ipc_handlers } from './ipc'
 import { file_paths } from './fp_parser'
+import { stray_handler } from './stray'
 
 function window_max(win: BrowserWindow) {
   if (win.isMaximized()) {
@@ -41,16 +41,6 @@ protocol.registerSchemesAsPrivileged([
     }
   }
 ])
-
-function convertPath(originalPath: string) {
-  const match = originalPath.match(/^\/([a-zA-Z])\/(.*)$/)
-  if (match) {
-    // fuck for windows
-    return `${match[1]}:/${match[2]}`
-  } else {
-    return originalPath
-  }
-}
 
 function listen(win: BrowserWindow) {
   ipcMain.on('window-close', () => {
@@ -97,16 +87,16 @@ function createWindow(): void {
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    // globalShortcut.register('F11', () => window_max(mainWindow))
+    globalShortcut.register('Alt+F12', () => {
+      mainWindow.webContents.openDevTools({ mode: 'right' })
+    })
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
   listen(mainWindow)
   load_ipc_handlers(mainWindow)
-  // globalShortcut.register('F11', () => window_max(mainWindow))
-  globalShortcut.register('Alt+F12', () => {
-    mainWindow.webContents.openDevTools({ mode: 'right' })
-  })
 }
 
 // This method will be called when Electron has finished
@@ -133,30 +123,8 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 
-  const skin_path = file_paths.skin
-
   process.title = 'stray/vivify'
-  protocol.handle('stray', (request) => {
-    const decodedUrl = decodeURIComponent(request.url.replace(new RegExp(`^stray:/`, 'i'), ''))
-    console.log(decodedUrl)
-    const fullPath = process.platform === 'win32' ? convertPath(decodedUrl) : decodedUrl
-    if (decodedUrl.includes('__skin__')) {
-      return new Response(fs.readFileSync(join(skin_path, basename(fullPath))))
-    }
-
-    if (decodedUrl.includes('__song__')) {
-      const song_path = decodedUrl.replace('/__song__/', '')
-      return new Response(fs.readFileSync(song_path), {
-        headers: {
-          'Content-Type': 'audio/' + extname(song_path).replace('.', ''),
-          'Content-Disposition': 'inline'
-        }
-      })
-    }
-
-    const data = fs.readFileSync(fullPath)
-    return new Response(data)
-  })
+  protocol.handle('stray', stray_handler())
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

@@ -8,6 +8,7 @@ import { Chart_song } from '@renderer/core/chart/chart_song'
 import { Chart_diff } from './Chart_diff'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Settings } from '@renderer/core/Settings'
+import { modal } from '@renderer/core/modal'
 
 function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
@@ -18,26 +19,19 @@ export type ms = number
 
 export class Chart {
   static current: Chart | undefined = undefined
-  static get $current() {
-    if (!this.current) throw new Error("where's my chart!")
-    return this.current
-  }
   static isBumper = isBumper
   song: Chart_song
   diffs: ChartTypeV2.diff[]
   path: string
   audio: Chart_audio
   diff: Chart_diff
-  length: number
+  length: ms
   shown_timing: ComputedRef<[ms, ms]>
   current_bpm: WritableComputedRef<number>
   ref: {
     diff_index: Ref<number>
     diff: Ref<ChartTypeV2.diff>
     chart_current_time: Ref<number>
-  }
-  canvas_data: {
-    height: number
   }
   id: string
 
@@ -48,9 +42,6 @@ export class Chart {
     this.audio = new Chart_audio(this)
     this.path = ''
     this.length = -1
-    this.canvas_data = {
-      height: 0
-    }
     this.shown_timing = computed(() => [
       this.audio.refs.current_ms.value,
       this.audio.refs.current_ms.value + Charter.refs.visible.value
@@ -68,10 +59,15 @@ export class Chart {
     this.ref = {
       diff_index: ref(0),
       diff: ref(this.diffs[0]),
-      chart_current_time: ref(0),
+      chart_current_time: ref(0)
     }
     this.diff = new Chart_diff(this)
     this.id = ''
+  }
+
+  static get $current() {
+    if (!this.current) throw new Error("where's my chart!")
+    return this.current
   }
 
   _diff_index: number
@@ -84,7 +80,6 @@ export class Chart {
     this.ref.diff_index.value = v
     this.ref.diff.value = this.diffs[this.ref.diff_index.value]
     this._diff_index = v
-    Charter.update()
   }
 
   get visible_timing() {
@@ -104,22 +99,22 @@ export class Chart {
       song: {
         name: n,
         name_roman: n,
-        composer: '/a b30',
-        composer_roman: '/a b30',
+        composer: '',
+        composer_roman: '',
         bpm: '120',
         source: 'stray-vivify',
-        ref: ''
+        ref: '',
+        sprite: '???'
       },
       diffs: [Chart_diff.createDiff()],
       version: Settings.version
     }
   }
 
-  static create(musicPath: string, musicURL: string, name: string): Promise<Chart> {
+  static create(musicPath: string, musicURL: string): Promise<Chart> {
     const chart = new Chart()
     chart.audio.load_url(musicURL)
     chart.set_path(musicPath)
-    chart.set_name(name)
     return new Promise((resolve) => {
       chart.audio.on_can_play_through(
         () => {
@@ -147,15 +142,9 @@ export class Chart {
   }*/
 
   static async open_chart(id: string) {
-    Charter.record.mode.value = false
-    Charter.state.value = 'cache'
-    Charter.load_state.clear()
-    Charter.load_state.data.value.asked_path = 'success'
-
     const file = await Charter.invoke('open-song', id)
-    Charter.load_state.data.value.load_music_from_backend = 'success'
     const blob_path = URL.createObjectURL(await this.fetch_blob(file.path))
-    const chart = await this.create(id, blob_path, id)
+    const chart = await this.create(id, blob_path)
     if (file.data) {
       const data = this.parse_data(file.data)
       if (data.status == 'converted') {
@@ -165,10 +154,9 @@ export class Chart {
       chart.set_chart(data.data)
       chart.set_name(data.data.song.name)
     }
-    Charter.load_state.data.value.waiting_can_play = 'success'
     chart.id = id
     this.current = chart
-    Charter.state.value = 'charting'
+    GlobalStat.route.change('editor')
     watch(
       Charter.refs.state,
       () => {
@@ -186,9 +174,9 @@ export class Chart {
 
   static parse_data(data: string): { data: ChartTypeV2.final; status: 'converted' | 'loaded' } {
     const parsed = JSON.parse(data) as ChartType.Chart | ChartTypeV2.final
-    if ('version' in parsed) {
+    if (Object.keys(parsed).includes("version")) {
       return {
-        data: parsed,
+        data: parsed as ChartTypeV2.final,
         status: 'loaded'
       }
     } else {
@@ -253,7 +241,7 @@ export class Chart {
           new_diff.notes.push({
             time: note.t,
             lane: note.l,
-            width: 1,
+            width: 2,
             ani: [],
             snm: 2
           })
@@ -277,7 +265,7 @@ export class Chart {
           })
           break
         default:
-          console.log("waht")
+          console.log('waht')
       }
     })
     new_diff.meta.diff1 = dif.name
@@ -288,11 +276,15 @@ export class Chart {
 
   load_vsb(r: Invoke['read-vsb']['r']) {
     if (!r) return
-    Charter.modal.ConfirmModal.show({ msg: Translations.confirm.vsb }).then(() => {
-      this.diff.set_notes(r[0])
-      this.diff.set_timing(r[1])
-      this.fuck_shown(true)
-      this.diff.update_diff_counts()
+    const new_diff = Chart_diff.createDiff()
+    Charter.modal.ConfirmModal.show({ msg: '' }).then(() => {
+      new_diff.notes = r[0]
+      new_diff.timing = r[1]
+      this.add_diff(new_diff)
+      setTimeout(() => {
+        this.diff.fuck_shown(this.audio.current_time, true)
+        this.diff.update_diff_counts()
+      }, 200)
     })
   }
 
@@ -308,9 +300,14 @@ export class Chart {
     this.song.name = n
   }
 
+  set_header_name() {
+    GlobalStat.refs.header_display.value =
+      this.song.name + ' - ' + this.diff.diff1 + ' ' + this.diff.diff2
+  }
+
   post_define() {
     this.length = (this.audio.ele?.duration ?? -1) * 1000
-    Charter.refs.current_name.value = this.song.name + " - " + this.diff.diff1 + " " + this.diff.diff2
+    this.set_header_name()
     watch(
       this.ref.diff,
       () => {
@@ -320,7 +317,7 @@ export class Chart {
     )
     watch(this.ref.diff_index, () => {
       this.ref.diff.value = this.diffs[this.ref.diff_index.value]
-      Charter.refs.current_name.value = this.song.name + " - " + this.diff.diff1 + " " + this.diff.diff2
+      this.set_header_name()
       this.fuck_shown()
     })
     watch(this.audio.refs.current_ms, () => {
@@ -333,15 +330,28 @@ export class Chart {
   }
 
   create_diff() {
-    this.diffs.push(Chart_diff.createDiff())
+    let new_diff = Chart_diff.createDiff()
+    new_diff.timing = this.diff.timing
+    this.diffs.push(new_diff)
+    this.diff_index = this.diffs.length - 1
+  }
+  add_diff(d: ChartTypeV2.diff) {
+    this.diffs.push(d)
     this.diff_index = this.diffs.length - 1
   }
 
   delete_diff() {
-    Charter.modal.ConfirmModal.show({ msg: Translations.confirm.del_diff }).then(() => {
-      this.diffs.splice(this.diff_index, 1)
-      this.diff_index = 0
-    })
+    if (this.diffs.length == 1)
+      modal.ConfirmModal.show({
+        msg: '这是最后一张谱面了。这样做会清空已有的note哦。要继续吗？<br>timing将会保留。'
+      }).then(() => {
+        this.diff.notes = []
+      })
+    else
+      Charter.modal.ConfirmModal.show({ msg: Translations.confirm.del_diff }).then(() => {
+        this.diffs.splice(this.diff_index, 1)
+        this.diff_index = 0
+      })
   }
 
   bpm_of_time(time: ms) {
@@ -350,7 +360,14 @@ export class Chart {
 
   set_chart(v: ChartTypeV2.final) {
     this.song.set_song(v.song)
-    this.diffs = v.diffs
+    this.diffs = v.diffs.map((x) => {
+      let r = Chart_diff.createDiff()
+      if (x.notes) r.notes = x.notes.toSorted((a, b) => a.time - b.time)
+      if (x.timing) r.timing = x.timing.toSorted((a, b) => a.time - b.time)
+      if (x.meta) r.meta = x.meta
+      if (x.ani) r.ani = x.ani
+      return r
+    })
     // this.diff.set_diff(this.diffs[this.diff_index])
     this.diff_index = 0
   }
@@ -363,7 +380,7 @@ export class Chart {
     if (this.audio.ele) {
       this.diff.floor_time()
       Charter.invoke('save-chart', this.id, JSON.stringify(this.chart))
-      Charter.invoke(
+      return Charter.invoke(
         'update-chart-data',
         this.id,
         JSON.stringify({
@@ -371,15 +388,24 @@ export class Chart {
           diffs: this.diffs.map((x) => x.meta.diff1 + ' ' + x.meta.diff2)
         })
       ).then(() => {
-        GlobalStat.update_all_chart()
+        console.log("saved chart!!!!")
+        return GlobalStat.update_all_chart()
       })
     }
+    return
   }
 
   write_current_vsc() {
     Charter.invoke('write-vsc', this.id, this.diff.to_vsc().join('\n'), this.diff.diff1).then(() =>
       notify.success('已导出为vsc!!!!!!!')
     )
+  }
+
+  async export_chart() {
+    const r = this.save()
+    if (!r) return
+    await r
+    await Charter.invoke("export-zip", this.id)
   }
 }
 

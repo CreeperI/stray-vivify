@@ -2,6 +2,8 @@
 import { Chart } from '@renderer/core/chart/chart'
 import TimingSingle from '@renderer/components/chart-v2/timing-single.vue'
 import { computed, provide, ref } from 'vue'
+import { GlobalStat } from '@renderer/core/globalStat'
+import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 
 const chart = Chart.$current
 const diff = chart.diff
@@ -47,6 +49,23 @@ const time = computed({
 function del_timing(ix: number) {
   if (ix == 0) return
   diff.timing.splice(ix, 1)
+  index.value = -1
+}
+function add_timing() {
+  let r = diff.add_timing({
+    bpm: 120,
+    num: 4,
+    den: 4,
+    time: chart.audio.current_time
+  })
+  if (r != -1) {
+    index.value = r
+  }
+}
+
+function switcher(t:number) {
+  chart.audio.set_current_time(t)
+  GlobalStat.refs.chart_tab.value = 2
 }
 </script>
 
@@ -56,7 +75,7 @@ function del_timing(ix: number) {
       <div class="timing-list">
         <div class="timing-header">
           <div>Timing List</div>
-          <div class="timing-add">+new Timing</div>
+          <a-button2 class="timing-add" @click="add_timing" msg="+new Timing" />
         </div>
         <timing-single
           :class="index == idx ? 'chosen' : ''"
@@ -64,6 +83,7 @@ function del_timing(ix: number) {
           :timing="t"
           v-for="(t, idx) in diff.timing"
           @click="index = idx"
+          @click.ctrl.capture="switcher(t.time)"
         />
       </div>
     </div>
@@ -115,7 +135,7 @@ function del_timing(ix: number) {
 .timing-left {
   bottom: 0;
   margin: 50px 50px 0;
-  background: var(--dark-bgi);
+  background: var(--darker-bgi);
   box-shadow: 0 0 10px 10px #000;
   width: 50%;
 }
@@ -144,7 +164,7 @@ function del_timing(ix: number) {
 .timing-right {
   position: absolute;
   right: 0;
-  background: var(--dark-bgi);
+  background: var(--darker-bgi);
   max-width: 35vw;
   width: 30%;
   top: calc(45% - 25vh);

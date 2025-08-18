@@ -8,7 +8,7 @@ const current_time = chart.audio.refs.writable_current_second
 </script>
 
 <template>
-  <div class="footer">
+  <div>
     <div class="left-fn">
       <div class="foot-time">{{utils.toTimeStr(current_time)}}</div>
     </div>
@@ -16,11 +16,12 @@ const current_time = chart.audio.refs.writable_current_second
 </template>
 
 <style scoped>
-.footer {
-  width: 100%;
-  height: 80px;
-  position: relative;
-  border: 0;
-  left: 0;
+
+.left-fn {
+  display: flex;
+  flex-direction: column;
+}
+.foot-time {
+  font-size: 2rem;
 }
 </style>

@@ -1,5 +1,4 @@
 import { computed, ref, Ref, WritableComputedRef } from 'vue'
-import { Charter } from '@renderer/core/charter'
 import { Chart } from '@renderer/core/chart/chart'
 
 type ms = number
@@ -25,7 +24,7 @@ export class Chart_audio {
     this.chart = ch
     this.file_path = file_path
     this.url = url
-    this._volume = Charter.settings.data.volume
+    this._volume = 100
     this.ele = undefined
     if (url) {
       this.ele = new Audio(url)
@@ -109,15 +108,8 @@ export class Chart_audio {
   }
 
   set_current_time(v: ms) {
-    v = Math.max(-5000, v)
-    this.ele?.pause()
-    this._current_time = v
-    this.refs.current_ms.value = v
-    if (v < 0) this.from_negative = true
-    if (this.paused) this.set_ele_time(v)
-  }
-  set_current_time_from_updater(v: ms) {
-    v = Math.max(-5000, v)
+    v = Math.floor(Math.max(-5000, v))
+    this.pause()
     this._current_time = v
     this.refs.current_ms.value = v
     if (v < 0) this.from_negative = true
@@ -170,5 +162,13 @@ export class Chart_audio {
         this.set_and_play()
       }
     }
+  }
+
+  private set_current_time_from_updater(v: ms) {
+    v = Math.floor(Math.max(-5000, v))
+    this._current_time = v
+    this.refs.current_ms.value = v
+    if (v < 0) this.from_negative = true
+    if (this.paused) this.set_ele_time(v)
   }
 }

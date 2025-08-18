@@ -6,24 +6,24 @@ import { Charter } from '@renderer/core/charter'
 import WaitingLoad from '@renderer/components/miscellaneous/waiting-load.vue'
 import ChartList from '@renderer/components/miscellaneous/chart-list.vue'
 import ChartV2 from '@renderer/components/chart-v2/chart-v2.vue'
+import { GlobalStat } from '@renderer/core/globalStat'
+import { Version } from '@renderer/core/Settings'
 
-const state = Charter.state
+const state = GlobalStat.route.route
 </script>
 
 <template>
-  <Header v-if="state != 'charting'" />
-  <ChartList v-if="state == 'startUp'" />
-  <!--  <ChartLine v-if="state == 'charting'" />-->
-  <ChartV2 v-if="state == 'charting'" />
-  <WaitingLoad v-if="state == 'cache'" />
-  <!--  <popup-modal />-->
+  <Header v-if="state != 'editor'" />
+  <ChartList v-if="state == 'start'" />
+  <ChartV2 v-if="state == 'editor'" />
+  <WaitingLoad v-if="state == 'wait'" />
   <div id="n-c" class="notify-container" />
   <ModalTarget />
   <a-button
-    :msg="'Build: ' + Charter.CURRENT_BUILD"
+    :msg="`Version: ${Version.str}`"
     class="--build"
     @click="Charter.modal.VersionsModal.show({})"
-    v-if="state != 'charting'"
+    v-if="state != 'editor'"
   />
 </template>
 <style scoped>
@@ -32,7 +32,7 @@ const state = Charter.state
   right: 0;
   bottom: 0;
   border: 1px solid #b8dcee;
-  background: var(--dark-bgi);
+  background: var(--darker-bgi);
   box-shadow: none;
 }
 </style>
@@ -135,9 +135,13 @@ body {
   height: 100%;
   width: 100vw;
   overflow: hidden;
-  --dark-bgi: linear-gradient(60deg, #0d1418 0%, #11161b 100%);
+
+  --darker-bgi: linear-gradient(60deg, #0d1418 0%, #11161b 100%);
   --blue-bgi: linear-gradient(220.55deg, #34495d 0%, #0e2c5e 100%);
   --purple-bgi: linear-gradient(90deg, rgba(32, 33, 70, 1) 0%, rgba(37, 49, 50, 1) 100%);
+  --green-bgi: linear-gradient(220.55deg, #97E8B5 0%, #5CB67F 100%);
+  --gray-bgi:linear-gradient(220.55deg, #AFCCCB 0%, #616566 100%);
+  --dark-bgi: linear-gradient(1.83rad, #1E1E1ED6 0%,#1F1D1D 14%,#1F1D1D 80%,#171717D6 100%);
   --grey: #3b4652;
   --z-highest: 100;
   --h-l-b: 80px;

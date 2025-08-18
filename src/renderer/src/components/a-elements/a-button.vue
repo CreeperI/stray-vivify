@@ -13,7 +13,7 @@ const {msg} = defineProps<{
   display: inline-block;
   cursor: pointer;
   color: #b8dcee;
-  background: var(--dark-bgi);
+  background: var(--darker-bgi);
   user-select: none;
   border-radius: 5px;
   border: 2px solid transparent;

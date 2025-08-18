@@ -4,11 +4,10 @@ import { Charter } from '@renderer/core/charter'
 const ipcRenderer = Charter.ipcRenderer
 
 const isMax = Charter.refs.window.isMaximized
-const { lang } = Charter.settings.to_refs
 </script>
 
 <template>
-  <div :key="lang" class="header-wrapper">
+  <div class="header-wrapper">
     <div class="header-top">
       <img alt="wug" class="header-wug" src="/yq.jpg" />
       <div class="header-menu-ul">
@@ -60,14 +59,6 @@ div {
   border: 2px solid transparent;
 }
 
-.chart-name {
-  text-align: left;
-  padding-left: 50px;
-  border-left: #8d8d8d 2px solid;
-  overflow: hidden;
-  text-wrap: nowrap;
-}
-
 .header-menu-ul {
   position: relative;
   align-items: center;
@@ -94,26 +85,6 @@ div {
   line-height: var(--header-height);
   user-select: none;
   -webkit-app-region: no-drag;
-}
-
-.h-menu-btn-i {
-  opacity: 0;
-  transition: opacity 0.2s linear;
-  background: rgb(32, 33, 70);
-  border-top: #b8dcee 2px solid;
-  box-sizing: border-box;
-  pointer-events: none;
-  user-select: none;
-  border-radius: 0 0 5px 5px;
-  position: absolute;
-  top: var(--header-height);
-  left: 0;
-}
-
-.header-menu-ul:hover .h-menu-btn-i {
-  opacity: 1;
-  pointer-events: all;
-  user-select: all;
 }
 
 .header-win-func {

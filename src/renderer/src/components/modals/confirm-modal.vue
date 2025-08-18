@@ -10,7 +10,7 @@ const { msg } = defineProps<{
 
 <template>
   <SimpleModal :show-close="false" size="sm">
-    {{ msg }}
+    <span v-html="msg"></span>
     <template #footer>
       <a-button class="btn btn-primary" msg="确定" @click="confirmModal()" />
       <a-button class="btn btn-secondary" msg="no" @click="closeModal()" />

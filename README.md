@@ -22,8 +22,6 @@ For English Version, see below
 ## 关于版权问题
 自然这是一个开源项目，我希望、鼓励大家fork或者pr以让这个东西更加丰富和自由。
 当然，由于我的代码水平比较爆炸，我也不清楚你们能不能忍住恶臭来更改这坨史山。
-我只有一个要求：
->请不要修改Credit中已有的内容。你可以在最前面添加，但是**请**不要修改已有的内容。
 
 ***
 ## English Version
@@ -57,8 +55,7 @@ and *vivid*(?).
 
 Though, my coding skill is sadly bad, hope you wont be annoyed when refracting some of the codes.
 
-I have only one requirement:
-> dont change the existing contents in Credits.
+I still have only one requirement:
 
 You can add anything in anywhere of the Credit (or translates the session title), but
 plz dont change the existing contents.

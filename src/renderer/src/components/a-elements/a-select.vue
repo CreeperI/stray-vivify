@@ -40,12 +40,14 @@ const on_click = (val: T) => {
 .a-select {
   display: inline-block;
   min-width: 120px;
+  width: max-content;
   text-align: left;
   user-select: none;
   position: relative;
   padding-left: 1em;
   border: 1px solid;
   margin: 0 10px;
+  padding-right: 15px;
 }
 
 .a-select-value:after {
@@ -59,7 +61,7 @@ const on_click = (val: T) => {
 }
 
 .a-option-wrapper {
-  background: var(--dark-bgi);
+  background: var(--darker-bgi);
   display: flex;
   flex-direction: column;
   position: absolute;

@@ -27,7 +27,7 @@ function getSrc(): string {
 }
 
 function size() {
-  return (lane_width) * note.width + 'px'
+  return lane_width * note.width + 'px'
 }
 
 function urlOf() {
@@ -39,22 +39,20 @@ function left() {
 }
 
 function borderTop() {
-  if ('len' in note) {
-    return `border-top: ${note.lane < 2 ? '#b3bdff' : '#feb3c7'} solid ${note.len * mul.value}px;`
-  } else {
-    return ''
-  }
+  // @ts-expect-error here the len isnt guaranteed in typing but its only called
+  // when its a ln so dont fuck it.
+  return `border-top: ${note.lane < 2 ? '#b3bdff' : '#feb3c7'} solid ${note.len * mul.value}px`
 }
 
 function height() {
-  return `${43 * (Settings.editor.lane_width / 132)}px`
+  return `${43 * (lane_width / 130)}px`
 }
 
 function style() {
   if ('len' in note) {
-    return `height:${height()};width: ${size()};left: ${left()}; height: 43px; ${borderTop()};`
+    return `height:${height()};width: ${size()}; left: ${left()}; ${borderTop()};`
   } else {
-    return `height:${height()};width: ${size()};left: ${left()})`
+    return `width: ${size()}; left: ${left()}`
   }
 }
 </script>

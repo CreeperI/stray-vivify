@@ -1,5 +1,9 @@
 import { Charter } from '@renderer/core/charter'
 import { Settings } from '@renderer/core/Settings'
+import { ref } from 'vue'
+import { Chart } from '@renderer/core/chart/chart'
+import { GlobalStat } from '@renderer/core/globalStat'
+import { modal } from '@renderer/core/modal'
 
 const functions = [
   'redo',
@@ -13,6 +17,8 @@ const functions = [
 
   'scale-up',
   'scale-down',
+
+  'log',
 
   'w1',
   'w2',
@@ -30,9 +36,10 @@ type SC_save = {
   ctrl: boolean
   shift: boolean
 }
-
+const on_listening = ref(false)
 export class ShortCuts {
   static all: ShortCuts[] = []
+  static on_listening = on_listening
   name: (typeof functions)[number]
   private _alt: boolean
   private _ctrl: boolean
@@ -81,7 +88,11 @@ export class ShortCuts {
   }
 
   static handle(e: KeyboardEvent) {
-    if (e.target instanceof HTMLInputElement) return
+    if (on_listening.value) return
+    if (e.target instanceof HTMLInputElement) {
+      if (e.target.type == 'text' || e.target.type == 'number') return
+      else e.target.blur()
+    }
     ShortCuts.all.forEach((x) => {
       x.handle(e)
     })
@@ -117,7 +128,7 @@ export class ShortCuts {
   }
 
   static async load_from_storage() {
-    const data = await Charter.invoke('get-shortcut-data')
+    const data = Settings.data.value.shortcut
     if (!data) return
     const parsed = JSON.parse(data) as SC_save[]
     if (!parsed) return
@@ -133,7 +144,6 @@ export class ShortCuts {
     this._ctrl = ctrl
     this._alt = alt
     this._shift = shift
-    Charter.update()
   }
 
   is(k: string, alt = false, ctrl = false, shift = false) {
@@ -143,7 +153,6 @@ export class ShortCuts {
   handle(e: KeyboardEvent) {
     if (this.is(e.key, e.altKey, e.ctrlKey, e.shiftKey)) {
       this.cb(e)
-      console.log(this.name)
     }
   }
 
@@ -152,7 +161,7 @@ export class ShortCuts {
     if (this._ctrl) l.push('Ctrl')
     if (this._alt) l.push('Alt')
     if (this._shift) l.push('Shift')
-    l.push(this.key)
+    l.push(this.key.toUpperCase())
     return l.join('+')
   }
 
@@ -173,4 +182,9 @@ new ShortCuts('w4', '4', () => Settings.note.set_width(4))
 new ShortCuts('s', 'q', () => Settings.note.change_s())
 new ShortCuts('mine', 'w', () => Settings.note.change_b())
 new ShortCuts('hold', 'e', () => Settings.note.change_hold())
-new ShortCuts('pause', ' ', () => Charter.if_current()?.audio.play_pause())
+new ShortCuts('pause', ' ', () => {
+  if (GlobalStat.chart_state.value == 1) return
+  Chart.current?.audio.play_pause()
+})
+
+new ShortCuts('log', "F1", () => {modal.LogModal.show({})})

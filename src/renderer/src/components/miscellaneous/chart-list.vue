@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
-import AButton from '@renderer/components/a-elements/a-button.vue'
 import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { charts_data } from '@preload/types'
+import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 
 const shown = ref(GlobalStat.all_chart)
 const search = ref('')
@@ -21,6 +21,12 @@ async function import_chart() {
   if (!song) return
   const r = await Invoke('import-song', song.path)
   console.log(r)
+  await GlobalStat.update_all_chart()
+  shown.value = GlobalStat.all_chart
+}
+
+async function import_svc() {
+  await Invoke("import-zip")
   await GlobalStat.update_all_chart()
   shown.value = GlobalStat.all_chart
 }
@@ -62,7 +68,10 @@ function detail(id: string) {
           <a-text-input v-model="search" placeholder="点击输入文字！" class="charts-input" />
           <div>{{ shown.length }} 结果</div>
         </div>
-        <a-button msg="导入曲目" @click="import_chart" />
+        <div class="importer">
+          <a-button2 msg="导入曲目" @click="import_chart" />
+          <a-button2 msg="导入svc" @click="import_svc" />
+        </div>
       </div>
       <div class="charts-wrapper">
         <TransitionGroup>
@@ -131,7 +140,7 @@ function detail(id: string) {
 }
 
 .charts-func {
-  height: 4rem;
+  height: 5rem;
   border-bottom: 2px solid #b8dcee;
   margin-bottom: 15px;
   display: flex;
@@ -144,7 +153,12 @@ function detail(id: string) {
   flex-grow: 1;
   padding-left: 25px;
 }
-
+.importer {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: 100%;
+}
 .charts-input {
   width: calc(100% - 50px);
   text-align: left;
@@ -182,14 +196,14 @@ function detail(id: string) {
 }
 
 .chart-unit-composer {
-  flex-basis: 75%;
   text-align: left;
 }
 
 .chart-unit-id {
-  flex-basis: 25%;
-  text-align: left;
+  text-align: right;
   opacity: 0.7;
+  flex-grow: 1;
+  padding-right: 10px;
 }
 
 .v-move, /* 对移动中的元素应用的过渡 */

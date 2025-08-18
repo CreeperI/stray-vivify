@@ -1,10 +1,9 @@
-import { ChartType, IpcHandlers } from '@preload/types'
-import { computed, reactive, ref, toRefs, watch } from 'vue'
-import Translations, { LanguageData, Languages } from '@renderer/core/translations'
-import { utils } from '@renderer/core/utils'
+import { IpcHandlers } from '@preload/types'
+import { computed, ref } from 'vue'
 import { notify } from '@renderer/core/notify'
 import { Chart } from '@renderer/core/chart/chart'
 import { modal } from '@renderer/core/modal'
+import { Settings } from '@renderer/core/Settings'
 
 const ipcRenderer = window.electron.ipcRenderer
 const _invoke: IpcHandlers.invoke.invoke = ipcRenderer.invoke
@@ -33,76 +32,6 @@ const timer = {
   }
 }
 
-const settings_function = (() => {
-  const data = reactive({
-    lang: 'zh_cn' as Languages,
-    note_type: 'n' as ChartType.note['n'] | '',
-    scale: 10,
-    /* 拍号 分音 */
-    meter: 4,
-    middle: false,
-    charter_layout: 'auto' as 'auto' | 'middle' | 'left',
-    volume: 80,
-    overlap_minimum: 20,
-    reverse_scroll: false,
-    lane_width: 140
-  })
-  const fn = () => data
-  fn.data = data
-  fn.to_refs = toRefs(data)
-
-  fn.lang = (lang: any) => {
-    if (lang in Languages) data.lang = lang
-    else data.lang = 'zh_cn'
-  }
-  fn.note_type = (nt: any) => {
-    if (['n', 'h', 's', 'mb', 'm', 'b'].includes(nt)) data.note_type = nt
-    else data.note_type = ''
-  }
-  fn.scale = (scale: any) => {
-    if (0 < scale && scale < 20) data.scale = scale
-    else data.scale = 10
-  }
-  fn.meter = (meter: any) => {
-    if (1 <= meter) data.meter = Math.floor(meter)
-    else data.meter = 4
-  }
-  fn.middle = (middle: any) => {
-    if (typeof middle == 'boolean') data.middle = middle
-    else data.middle = false
-  }
-  fn.charter_layout = (layout: any) => {
-    if (['middle', 'left', 'auto'].includes(layout)) data.charter_layout = layout
-    else data.charter_layout = 'auto'
-  }
-  fn.volume = (vol: any) => {
-    if (0 <= vol && vol <= 100) data.volume = vol
-    else data.volume = 80
-  }
-  fn.overlap_minimum = (ov: any) => {
-    if (0 < ov && ov < 100) data.overlap_minimum = ov
-    else data.overlap_minimum = 20
-  }
-  fn.reverse_scroll = (rs: any) => {
-    if (typeof rs == 'boolean') data.reverse_scroll = rs
-    else data.reverse_scroll = false
-  }
-  watch(
-    () => data.lang,
-    (v) => {
-      utils.assign(Translations, LanguageData['zh_cn'])
-      utils.assign(Translations, LanguageData[v])
-    }
-  )
-  watch(
-    () => data.volume,
-    (v) => {
-      if (Chart.current) Chart.current.audio.volume = v / 100
-    }
-  )
-  return fn
-})()
-
 const ref_window = {
   height: ref(window.outerHeight),
   width: ref(window.outerWidth),
@@ -111,22 +40,13 @@ const ref_window = {
 const refs = {
   window: ref_window,
   /* pixel/ms */
-  mul: computed(() => (settings_function.data.scale * 200 + 100) / 1000),
+  mul: computed(() => (Settings.editor.scale * 200 + 100) / 1000),
   state: ref('startUp' as 'startUp' | 'charting' | 'cache'),
   visible: computed(() => {
     return Math.round(ref_window.height.value / refs.mul.value)
   }),
   current_name: ref('')
 }
-const note = {
-  type: settings_function.to_refs.note_type,
-  note_choice(val: ChartType.note['n']) {
-    const type = settings_function.to_refs.note_type
-    if (type.value == val) type.value = ''
-    else type.value = val
-  }
-}
-
 const update = (() => {
   const flag = ref(114)
   const update = () => {
@@ -145,12 +65,6 @@ const refresh = (() => {
   return refresh
 })()
 
-const record = {
-  mode: ref(false),
-  show_bar_line: ref(false),
-  show_bar_count: ref(false),
-  show_bpm: ref(false)
-}
 type load_state_strings = 'success' | 'failed' | 'pending'
 const load_state = (() => {
   const data = {
@@ -177,14 +91,10 @@ const CURRENT_BUILD = 5
 export const Charter = {
   invoke: Invoke,
   ipcRenderer,
-  /** @deprecated */
-  settings: settings_function,
   notify: notify,
   refs,
-  note,
   update,
   refresh,
-  record,
   CURRENT_BUILD,
   get state() {
     return refs.state

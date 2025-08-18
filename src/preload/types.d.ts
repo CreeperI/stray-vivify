@@ -73,19 +73,19 @@ export namespace ChartType {
 
 export namespace ChartTypeV2 {
   export type normal_note = {
-    time: number,
+    time: number
     // this is for the left anchor of the note, which is 0 for 4bumper and 2 for 2br
-    lane: number,
-    width: number,
+    lane: number
+    width: number
     // s or mine, 1 for mine 2 for S 0 for normal ones
     snm: number
     ani: []
   }
 
   export type hold_note = {
-    time: number,
-    lane: number,
-    width: number,
+    time: number
+    lane: number
+    width: number
     len: number
     ani: []
   }
@@ -113,6 +113,8 @@ export namespace ChartTypeV2 {
     bpm: string
     source: string
 
+    sprite: string
+
     ref: string
   }
 
@@ -120,6 +122,7 @@ export namespace ChartTypeV2 {
     notes: note[]
     timing: timing[]
     meta: meta
+    ani: []
   }
   export type meta = {
     charter: string
@@ -226,10 +229,6 @@ export type Invoke = {
     }
     r: void
   }
-  'get-shortcut-data': {
-    arg: {}
-    r: string | undefined
-  }
   'get-conf': {
     arg: {}
     r: string | undefined
@@ -246,14 +245,24 @@ export type Invoke = {
       data: string
     }
     r: void
-  },
-  'init-data' : {
-    arg: {},
+  }
+  'init-data': {
+    arg: {}
     r: {
-      conf: string | undefined,
-      cd: charts_data,
-      skin: string | undefined,
+      conf: string | undefined
+      cd: charts_data
+      skin: string | undefined
     }
+  }
+  'export-zip': {
+    arg: {
+      id: string
+    },
+    r: void
+  }
+  'import-zip': {
+    arg: {},
+    r: Promise<void>
   }
 }
 
@@ -267,9 +276,17 @@ export type Send = {
   }
   'ask-id': {
     arg: {
-      ids: string[]
+      ids: string[],
+      def?: string,
     }
     r: Promise<string | 0>
+  }
+  'notify-error':{
+    arg: {
+      msg: string
+      dur: number
+    }
+    r: void
   }
 }
 type dic2arr<T> = T extends { [K in keyof T]: T[K] } ? { [K in keyof T]: T[K] }[keyof T][] : never
@@ -306,12 +323,22 @@ export namespace storages {
   export interface settings {
     scale: number
     meter: number
-    middle: boolean
-    overlap_minimum: number
     reverse_scroll: boolean
-    volume: number
     lane_width: number
-    language: Languages
+    show_bottom_timing: boolean
+    // for charting
+    offset1: number
+    // for playing
+    offset2: number
+    record_field: {
+      show_bar_text: boolean
+      show_beat_line: boolean
+      show_bpm_left: boolean
+      show_bpm_bottom: boolean
+      detail: number
+      sprite: boolean
+    }
+    show_bpm_bottom: boolean
   }
 
   export interface storage_scheme {

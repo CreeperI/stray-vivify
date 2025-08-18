@@ -16,7 +16,7 @@ export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
 }
 
 const Handler = (mw: Electron.BrowserWindow) => {
-  const chart_manager = ChartManager()
+  const chart_manager = ChartManager(mw)
   const sender = mw.webContents.send.bind(mw.webContents) as IpcHandlers.send.send
   return {
     'ask-song': function (_): Invoke['ask-song']['r'] {
@@ -85,10 +85,6 @@ const Handler = (mw: Electron.BrowserWindow) => {
         data1.diffs
       )
     },
-    'get-shortcut-data': function (_) {
-      // @ts-ignore
-      return store.get('shortcut')
-    },
     'write-vsc': function (_, id, ch, name) {
       const fp = chart_manager.write_vsc(id, ch, name)
       if (!fp) return
@@ -120,6 +116,12 @@ const Handler = (mw: Electron.BrowserWindow) => {
         skin: skin,
         cd: cd
       }
+    },
+    'export-zip':function(_, id){
+      chart_manager.export_chart(id)
+    },
+    'import-zip': function(_) {
+      return chart_manager.import_chart()
     }
   } as Required<IpcHandlers.invoke.handler>
 }

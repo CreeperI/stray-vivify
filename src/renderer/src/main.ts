@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import '@renderer/styles.css'
-import { notify } from '@renderer/core/notify'
 
 import { createModal } from '@kolirt/vue-modal'
 import { ShortCuts } from '@renderer/core/shortcut'
@@ -10,15 +9,7 @@ import { load_ipc_handlers } from '@renderer/core/ipc'
 import { Settings } from '@renderer/core/Settings'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Listener } from '@renderer/core/listener'
-
-Charter.ipcRenderer.on('notify', (_, msg, duration, t) => {
-  if (!t) t = 'normal'
-  if (t in notify) {
-    notify[t as keyof typeof notify](msg, duration)
-  } else {
-    notify.normal(msg, duration)
-  }
-})
+import { Log } from '@renderer/core/log'
 
 document.addEventListener('keydown', ShortCuts.handle)
 
@@ -47,7 +38,9 @@ Charter.ipcRenderer.on('window-resize', (_) => {
   Listener.trigger('resize')
 })
 
-document.addEventListener('resize', () => {Listener.trigger('resize')})
+document.addEventListener('resize', () => {
+  Listener.trigger('resize')
+})
 Listener.on('resize', () => {
   Charter.refs.window.height.value = window.innerHeight
   Charter.refs.window.width.value = window.innerWidth
@@ -62,6 +55,7 @@ async function main() {
 
   app.mount('#app')
   Settings.init_invertal()
+  Log.handle()
   requestAnimationFrame(update_per_frame)
 }
 
