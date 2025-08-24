@@ -6,6 +6,8 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { charts_data } from '@preload/types'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
+import { modal } from '@renderer/core/modal'
+import { Settings } from '@renderer/core/Settings'
 
 const shown = ref(GlobalStat.all_chart)
 const search = ref('')
@@ -26,13 +28,27 @@ async function import_chart() {
 }
 
 async function import_svc() {
-  await Invoke("import-zip")
+  await Invoke('import-zip')
   await GlobalStat.update_all_chart()
   shown.value = GlobalStat.all_chart
 }
 
 function open_proj(id: string) {
   Chart.open_chart(id)
+}
+
+function delete_proj(id: string, name: string) {
+  if (!Settings.settings.value.settings.delete_no_confirm) {
+    modal.ConfirmModal.show({
+      msg: `确定要删除${name} (id: ${id})吗？不可以撤销的哦！<br><small>设置中可以关闭此确认。</small>`
+    }).then(() => {
+      return Invoke('remove-chart', id)
+    }).then(() => {
+      GlobalStat.update_all_chart()
+    })
+  } else {
+    Invoke('remove-chart', id)
+  }
 }
 
 function detail(id: string) {
@@ -81,6 +97,7 @@ function detail(id: string) {
             class="chart-unit"
             @mouseenter="detail(chart.id)"
             @click="open_proj(chart.id)"
+            @contextmenu="delete_proj(chart.id, chart.name)"
           >
             <div class="chart-unit-name">{{ chart.name }}</div>
             <div class="chart-unit-composer">{{ chart.composer }}</div>

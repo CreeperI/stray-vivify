@@ -81,3 +81,20 @@ input:invalid {
   background: #ff000088;
   font-style: italic;
 }
+@keyframes note-particle-ani {
+  0% {
+    scale: 0;
+    opacity: 1;
+  }
+  90% {
+    scale: 1.2;
+    opacity: 1;
+  }
+  100% {
+    scale: 1.3;
+    opacity: 0;
+  }
+}
+#svg-particle > rect {
+  animation: note-particle-ani 0.15s ease-out;
+}

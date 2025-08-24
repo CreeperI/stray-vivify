@@ -9,6 +9,7 @@ import { Charter } from '@renderer/core/charter'
 import { Settings } from '@renderer/core/Settings'
 import ChartTiming from '@renderer/components/chart-v2/chart-timing.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
+import Preview from '@renderer/components/chart-v2/preview.vue'
 import Playfield from '@renderer/components/chart-v2/playfield.vue'
 
 const active = GlobalStat.refs.chart_tab
@@ -42,9 +43,8 @@ const chart_state = GlobalStat.chart_state
 </script>
 
 <template>
-  <div class="chart-v2-wrapper" @wheel="fuck_wheel">
-    <playfield v-if="chart_state == 1" />
-    <template v-else>
+  <div class="chart-v2-wrapper" @wheel="fuck_wheel" :data-cs="chart_state">
+    <template v-if="chart_state == 0">
       <header-v2 v-model="active" />
       <song-info v-if="active == 1" />
       <div class="chart-main" v-else-if="active == 2">
@@ -54,6 +54,8 @@ const chart_state = GlobalStat.chart_state
       </div>
       <chart-timing v-if="active == 3"></chart-timing>
     </template>
+    <preview v-if="chart_state == 1" />
+    <playfield v-if="chart_state == 2"/>
   </div>
 </template>
 

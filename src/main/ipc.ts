@@ -16,7 +16,7 @@ export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
 }
 
 const Handler = (mw: Electron.BrowserWindow) => {
-  const chart_manager = ChartManager(mw)
+  const chart_manager = new ChartManager(mw)
   const sender = mw.webContents.send.bind(mw.webContents) as IpcHandlers.send.send
   return {
     'ask-song': function (_): Invoke['ask-song']['r'] {
@@ -122,6 +122,21 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'import-zip': function(_) {
       return chart_manager.import_chart()
+    },
+    'remove-chart': function(_, id) {
+      chart_manager.remove_chart(id)
+    },
+    'import-sprite': (_, id) => {
+      chart_manager.import_sprite(id)
+    },
+    'import-background': (_, id) => {
+      chart_manager.import_sprite(id)
+    },
+    'enter-fullscreen': () => {
+      mw.setFullScreen(true)
+    },
+    'leave-fullscreen': () => {
+      mw.setFullScreen(false)
     }
   } as Required<IpcHandlers.invoke.handler>
 }

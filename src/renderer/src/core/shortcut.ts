@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { modal } from '@renderer/core/modal'
+import { notify } from '@renderer/core/notify'
 
 const functions = [
   'redo',
@@ -19,6 +20,12 @@ const functions = [
   'scale-down',
 
   'log',
+  'settings',
+
+  '4k1',
+  '4k2',
+  '4k3',
+  '4k4',
 
   'w1',
   'w2',
@@ -44,12 +51,13 @@ export class ShortCuts {
   private _alt: boolean
   private _ctrl: boolean
   private _shift: boolean
-  private readonly cb: (e?: KeyboardEvent) => any
+  private readonly cb: (e: KeyboardEvent) => any
+  private keyup: ((e: KeyboardEvent) => any) | null
 
   constructor(
     name: (typeof functions)[number],
     k: string,
-    cb: (e?: KeyboardEvent) => any,
+    cb: (e: KeyboardEvent) => any,
     alt = false,
     ctrl = false,
     shift = false
@@ -60,6 +68,7 @@ export class ShortCuts {
     this._ctrl = ctrl
     this._shift = shift
     this.cb = cb
+    this.keyup = null
     ShortCuts.all.push(this)
   }
 
@@ -80,21 +89,33 @@ export class ShortCuts {
   }
 
   static exists(k: string, alt = false, ctrl = false, shift = false) {
-    return (
-      ShortCuts.all.find((x) => {
-        return x.is(k, alt, ctrl, shift)
-      }) != undefined
-    )
+    return ShortCuts.all.find((x) => {
+      return x.is(k, alt, ctrl, shift)
+    })
   }
 
-  static handle(e: KeyboardEvent) {
+  static handle() {
+    document.addEventListener('keydown', (e) => {
+      if (on_listening.value) return
+      if (e.target instanceof HTMLInputElement) {
+        if (e.target.type == 'text' || e.target.type == 'number') return
+        else e.target.blur()
+      }
+      ShortCuts.all.forEach((x) => {
+        x.handle(e)
+      })
+    }, true)
+    document.addEventListener("keyup", (e) => this.handle_keyup(e), true)
+  }
+
+  static handle_keyup(e: KeyboardEvent) {
     if (on_listening.value) return
     if (e.target instanceof HTMLInputElement) {
       if (e.target.type == 'text' || e.target.type == 'number') return
       else e.target.blur()
     }
     ShortCuts.all.forEach((x) => {
-      x.handle(e)
+      x.handle_keyup(e)
     })
   }
 
@@ -120,30 +141,41 @@ export class ShortCuts {
     })
   }
 
-  /** @param data {SC_save} */
-  static fromJson(data: any) {
-    const x = ShortCuts.all.find((x) => x.name == data.name)
-    if (!x) return
-    x.set_key(data.key, data.alt, data.ctrl, data.shift)
+  static to_string() {
+    return JSON.stringify(this.toJson())
   }
 
-  static async load_from_storage() {
-    const data = Settings.data.value.shortcut
-    if (!data) return
-    const parsed = JSON.parse(data) as SC_save[]
-    if (!parsed) return
-    parsed.forEach((x) => {
-      ShortCuts.fromJson(x)
-    })
+  static fromJson(data: string) {
+    if (data == '') return
+    const p1 = JSON.parse(data) as SC_save[]
+    for (const p of p1) {
+      const x = ShortCuts.all.find((x) => x.name == p.name)
+      if (!x) return
+      x.set_key(p.key, p.alt, p.ctrl, p.shift)
+    }
+  }
+
+  handle_keyup(e: KeyboardEvent) {
+    if (this.keyup == null) return
+    if (this.is(e.key, e.altKey, e.ctrlKey, e.shiftKey)) {
+      this.keyup(e)
+    }
+  }
+
+  set_keyup(fn: (e?: KeyboardEvent) => any) {
+    this.keyup = fn
   }
 
   set_key(k: string, alt = false, ctrl = false, shift = false) {
-    if (ShortCuts.exists(k, alt, ctrl, shift)) {
+    const same = ShortCuts.exists(k, alt, ctrl, shift)
+    if (same) {
+      notify.error(`有按键(${same.name})重合了哦！`)
     }
     this._key = k
     this._ctrl = ctrl
     this._alt = alt
     this._shift = shift
+    Settings.settings.value.shortcut = ShortCuts.to_string()
   }
 
   is(k: string, alt = false, ctrl = false, shift = false) {
@@ -172,8 +204,8 @@ export class ShortCuts {
   }
 }
 
-new ShortCuts('redo', 'y', () => Charter.if_current()?.diff.execute_redo(), false, true)
-new ShortCuts('undo', 'z', () => Charter.if_current()?.diff.execute_undo(), false, true)
+new ShortCuts('redo', 'y', () => Chart.current?.diff.execute_redo(), false, true)
+new ShortCuts('undo', 'z', () => Chart.current?.diff.execute_undo(), false, true)
 
 new ShortCuts('w1', '1', () => Settings.note.set_width(1))
 new ShortCuts('w2', '2', () => Settings.note.set_width(2))
@@ -183,8 +215,31 @@ new ShortCuts('s', 'q', () => Settings.note.change_s())
 new ShortCuts('mine', 'w', () => Settings.note.change_b())
 new ShortCuts('hold', 'e', () => Settings.note.change_hold())
 new ShortCuts('pause', ' ', () => {
-  if (GlobalStat.chart_state.value == 1) return
+  if (GlobalStat.chart_state.value != 0) return
   Chart.current?.audio.play_pause()
 })
 
-new ShortCuts('log', "F1", () => {modal.LogModal.show({})})
+new ShortCuts('log', 'F1', () => {
+  modal.InspectorModal.show({})
+})
+new ShortCuts('settings', 'F2', () => {
+  modal.SettingModal.show({})
+})
+
+new ShortCuts('4k1', 'd', () => {
+  Chart.current?.handle_key(0)
+})
+new ShortCuts('4k2', 'f', () => {
+  Chart.current?.handle_key(1)
+})
+new ShortCuts('4k3', 'j', () => {
+  Chart.current?.handle_key(2)
+})
+new ShortCuts('4k4', 'k', () => {
+  Chart.current?.handle_key(3)
+})
+
+ShortCuts.$fun('4k1').set_keyup(() => Chart.current?.handle_keyup(0))
+ShortCuts.$fun('4k2').set_keyup(() => Chart.current?.handle_keyup(1))
+ShortCuts.$fun('4k3').set_keyup(() => Chart.current?.handle_keyup(2))
+ShortCuts.$fun('4k4').set_keyup(() => Chart.current?.handle_keyup(3))

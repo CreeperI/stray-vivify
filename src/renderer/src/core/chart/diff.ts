@@ -5,6 +5,7 @@ import { Charter } from '../charter'
 import { utils } from '../utils'
 import { Settings } from '@renderer/core/Settings'
 import { notify } from '@renderer/core/notify'
+import { FrameRate } from '@renderer/core/frame-rates'
 
 function parse_type(v: string) {
   switch (v) {
@@ -139,7 +140,7 @@ export class Chart_diff {
   }
 
   set timing(v: ChartTypeV2.timing[]) {
-    this.bound.value.timing = v.toSorted((a,b) => a.time - b.time)
+    this.bound.value.timing = v.toSorted((a, b) => a.time - b.time)
   }
 
   get visible(): [number, number] {
@@ -155,8 +156,8 @@ export class Chart_diff {
       timing: [{ time: 0, bpm: 120, num: 4, den: 4 }],
       meta: {
         diff_name: '',
-        diff1: ['Finale', "Encore", "Backstage", "Terminal"][Math.floor(Math.random() * 4)],
-        diff2: Math.floor(Math.random() * 20) + "+",
+        diff1: ['Finale', 'Encore', 'Backstage', 'Terminal'][Math.floor(Math.random() * 4)],
+        diff2: Math.floor(Math.random() * 20) + '+',
         charter: '???'
       },
       ani: []
@@ -236,7 +237,7 @@ export class Chart_diff {
     this.counts.value.bomb = count.bomb
     this.counts.value.s = count.s
     this.counts.value.bpm = this.timing.length - 1
-    this.counts.value.total = v.notes.length
+    this.counts.value.total = v.notes.length + count.hold
 
     this.counts.value.avg_density = this.counts.value.total / (this.chart.length / 1000)
   }
@@ -296,7 +297,6 @@ export class Chart_diff {
       this.push_undo(() => {
         this.undo_remove(v)
       })
-    Charter.update()
   }
 
   undo_add(v: ChartTypeV2.note) {
@@ -324,25 +324,15 @@ export class Chart_diff {
   remove_note_no_undo(v: ChartTypeV2.note) {
     if (!this.notes.includes(v)) return false
     this.notes.splice(this.notes.indexOf(v), 1)
-    this.fuck_shown(this.chart.audio.current_time, true)
+    this.shown.value = this.shown.value.filter((x) => x != v)
     return true
   }
 
   add_note_no_undo(v: ChartTypeV2.note) {
     v.time = Math.floor(v.time)
-    /*const overlap = Settings.editor.overlap_minimum
-    const wrapped = this.shown.value.find((x) => {
-      if (x.n == 'h') {
-        if (x.l != v.l) return false
-        else return utils.between(v.time, [x.time - overlap, x.time + x.h + overlap])
-      }
-      return utils.around(x.time, v.time, overlap) && x.l == v.l
-    })
-    if (wrapped) return false*/
     if (this.notes.find((x) => x.time == v.time && x.lane == v.lane && x.width == x.width)) return
     this.notes.push(v)
     this.shown.value.push(v)
-    Charter.update()
     return true
   }
 
@@ -406,6 +396,7 @@ export class Chart_diff {
 
   fuck_shown(t: number, force = false) {
     if (force ? false : Math.abs(t - this.last_update) < 2000) return
+    FrameRate.fuck_shown.start()
     this.update_shown_flag.value = true
     const visible = [t - 2000, t + Settings.computes.visible.value + 2500] as [number, number]
     this.shown.value = this.notes.filter((x) => {
@@ -413,6 +404,7 @@ export class Chart_diff {
     })
     this.update_bar_beat_timing(visible)
     this.last_update = t
+    FrameRate.fuck_shown.end()
     nextTick().then(() => (this.update_shown_flag.value = false))
   }
 
@@ -483,7 +475,7 @@ export class Chart_diff {
   add_timing(timing: ChartTypeV2.timing) {
     let same = this.timing.findIndex((tp) => Math.abs(tp.time - timing.time) < 50)
     if (same != -1) {
-      notify.error("已有相同时间点的timing。")
+      notify.error('已有相同时间点的timing。')
       return same
     }
     this.timing.push(timing)
@@ -491,3 +483,4 @@ export class Chart_diff {
     return -1
   }
 }
+

@@ -19,12 +19,12 @@ export class Chart_audio {
   }
   last: ms
   from_negative: boolean
+  ended: boolean
 
   constructor(ch: Chart, file_path?: string, url?: string) {
     this.chart = ch
     this.file_path = file_path
     this.url = url
-    this._volume = 100
     this.ele = undefined
     if (url) {
       this.ele = new Audio(url)
@@ -34,6 +34,7 @@ export class Chart_audio {
     this.last = 0
     this._paused = true
     this.from_negative = false
+    this.ended = false
 
     const me = this
     this.refs = {
@@ -75,18 +76,8 @@ export class Chart_audio {
 
   set paused(v: boolean) {
     this._paused = v
+    console.log(v)
     this.refs.paused.value = v
-  }
-
-  _volume: number
-
-  get volume() {
-    return this._volume
-  }
-
-  set volume(v: number) {
-    this._volume = v
-    if (this.ele) this.ele.volume = v
   }
 
   _play_rate: number
@@ -107,6 +98,10 @@ export class Chart_audio {
     return this._current_time
   }
 
+  get $ele() {
+    return this.ele as HTMLAudioElement
+  }
+
   set_current_time(v: ms) {
     v = Math.floor(Math.max(-5000, v))
     this.pause()
@@ -120,7 +115,7 @@ export class Chart_audio {
     this.set_ele_time(this.current_time)
     if (!this.from_negative) this.ele?.play()
     this.paused = false
-    this.last = Date.now()
+    this.last = performance.now()
   }
 
   set_ele_time(v: ms) {
@@ -132,6 +127,11 @@ export class Chart_audio {
   on_can_play_through(cb: () => void, options?: AddEventListenerOptions) {
     if (this.ele) this.ele.addEventListener('canplaythrough', cb, options)
     else console.warn('Trying to setting can-play-through callback on a empty audio!')
+  }
+
+  on_end(cb: () => void, options?: AddEventListenerOptions){
+    if (this.ele) this.ele.addEventListener('ended', cb, options)
+    else console.warn('Trying to setting end callback on a empty audio!')
   }
 
   load_url(url: string) {
@@ -148,15 +148,20 @@ export class Chart_audio {
     if (this.ele) {
       if (this.paused) {
         this.set_and_play()
+        this.ended = false
       } else this.pause()
     }
   }
 
   update() {
     if (!this.paused) {
-      const now = Date.now()
+      if (this.current_time <= 0) {
+      const now = performance.now()
       this.set_current_time_from_updater(this.current_time + (now - this.last) * this.play_rate)
-      this.last = Date.now()
+      this.last = performance.now()
+      } else {
+        this.set_current_time_from_updater(this.$ele.currentTime * 1000)
+      }
       if (this.from_negative && this.current_time >= 0) {
         this.from_negative = false
         this.set_and_play()
@@ -165,10 +170,14 @@ export class Chart_audio {
   }
 
   private set_current_time_from_updater(v: ms) {
-    v = Math.floor(Math.max(-5000, v))
+    v = Math.floor(Math.min(this.chart.length, Math.max(-5000, v)))
     this._current_time = v
     this.refs.current_ms.value = v
     if (v < 0) this.from_negative = true
     if (this.paused) this.set_ele_time(v)
+  }
+
+  init_on_end() {
+    this.on_end(() => {this.ended = true})
   }
 }

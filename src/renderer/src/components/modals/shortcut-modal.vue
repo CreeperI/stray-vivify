@@ -24,6 +24,14 @@ import ShortcutModalHeader from '@renderer/components/modals/shortcut-modal-head
         <shortcut-modal-header msg="不知道叫什么" />
         <shortcut-modal-single msg="撤销" :short="ShortCuts.$fun('undo')" />
         <shortcut-modal-single msg="重做" :short="ShortCuts.$fun('redo')" />
+        <shortcut-modal-single msg="Inspector" :short="ShortCuts.$fun('log')"/>
+        <shortcut-modal-single msg="Settings" :short="ShortCuts.$fun('settings')"/>
+
+        <shortcut-modal-header msg="键位" />
+        <shortcut-modal-single msg="4k-1" :short="ShortCuts.$fun('4k1')" />
+        <shortcut-modal-single msg="4k-2" :short="ShortCuts.$fun('4k2')" />
+        <shortcut-modal-single msg="4k-3" :short="ShortCuts.$fun('4k3')" />
+        <shortcut-modal-single msg="4k-4" :short="ShortCuts.$fun('4k4')" />
       </tbody>
     </table>
   </SimpleModal>

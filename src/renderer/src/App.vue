@@ -3,7 +3,6 @@ import Header from '@renderer/components/miscellaneous/header.vue'
 import { ModalTarget } from '@kolirt/vue-modal'
 import AButton from '@renderer/components/a-elements/a-button.vue'
 import { Charter } from '@renderer/core/charter'
-import WaitingLoad from '@renderer/components/miscellaneous/waiting-load.vue'
 import ChartList from '@renderer/components/miscellaneous/chart-list.vue'
 import ChartV2 from '@renderer/components/chart-v2/chart-v2.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
@@ -16,7 +15,6 @@ const state = GlobalStat.route.route
   <Header v-if="state != 'editor'" />
   <ChartList v-if="state == 'start'" />
   <ChartV2 v-if="state == 'editor'" />
-  <WaitingLoad v-if="state == 'wait'" />
   <div id="n-c" class="notify-container" />
   <ModalTarget />
   <a-button

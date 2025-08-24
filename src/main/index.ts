@@ -8,6 +8,7 @@ import { file_paths } from './fp_parser'
 import { stray_handler } from './stray'
 
 function window_max(win: BrowserWindow) {
+  win.setFullScreen(false)
   if (win.isMaximized()) {
     win.restore()
   } else {
@@ -51,7 +52,9 @@ function listen(win: BrowserWindow) {
     win.minimize()
   })
 
-  ipcMain.on('window-max', () => window_max(win))
+  ipcMain.on('window-max', () => {
+    window_max(win)
+  })
   win.on('resize', () => {
     win.webContents.send('window-resize', win.isMaximized())
   })
@@ -68,7 +71,8 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       sandbox: false,
-      preload: join(__dirname, '../preload/index.js')
+      preload: join(__dirname, '../preload/index.js'),
+      backgroundThrottling: false
     },
     frame: false,
     icon: icon

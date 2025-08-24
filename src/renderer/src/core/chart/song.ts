@@ -22,6 +22,7 @@ export class Chart_song {
     this._sprite = ''
     this.need_roman = ref([false, false])
 
+
     this.refs = ref({
       name: '',
       name_roman: '',

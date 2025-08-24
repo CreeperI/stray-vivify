@@ -41,6 +41,9 @@ export const GlobalStat = {
   },
   // 0 - charting 1 - recording 2 - playing
   chart_state: ref(0) as Ref<0 | 1 | 2>,
+  set_state(v: 0 | 1 | 2) {
+    this.chart_state.value = v
+  }
 }
 
 //@ts-ignore

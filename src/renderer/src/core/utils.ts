@@ -166,6 +166,10 @@ export namespace utils {
   export function ms2str(ms: number,fix=3) {
     return toTimeStr(ms / 1000,fix)
   }
+
+  export function average(arr: number[]) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length
+  }
 }
 
 export class Lazy<T = any> {

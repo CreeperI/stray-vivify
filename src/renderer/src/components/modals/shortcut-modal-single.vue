@@ -1,6 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ShortCuts } from '@renderer/core/shortcut'
-import { ref, watchEffect } from 'vue'
+import { ref, watch } from 'vue'
+import { Settings } from '@renderer/core/Settings'
 
 const { short, msg } = defineProps<{
   msg: string
@@ -9,9 +10,11 @@ const { short, msg } = defineProps<{
 
 const data = ref(short.data)
 const parsed = ref(short.parse())
-watchEffect(() => {
-  short.set_data(data.value)
+
+watch(data, (v) => {
+  short.set_data(v)
   parsed.value = short.parse()
+  Settings.save()
 })
 const is_listen = ref(false)
 function listen_keyboard() {
@@ -31,7 +34,6 @@ function listen_keyboard() {
       }
       is_listen.value = false
       ShortCuts.on_listening.value = false
-      console.log(short.parse())
     },
     { once: true }
   )
@@ -40,10 +42,10 @@ function listen_keyboard() {
 
 <template>
   <tr class="shortcut-single-line">
-    <td style="width: 40%; text-align:right;">{{ msg }}</td>
-    <td style="width: 10%;"></td>
-    <td class="shortcut-single-btn" v-if="is_listen">请输入快捷键</td>
-    <td class="shortcut-single-btn" @click="listen_keyboard" v-else>{{ parsed }}</td>
+    <td style="width: 40%; text-align: right">{{ msg }}</td>
+    <td style="width: 10%"></td>
+    <td v-if="is_listen" class="shortcut-single-btn">请输入快捷键</td>
+    <td v-else class="shortcut-single-btn" @click="listen_keyboard">{{ parsed }}</td>
     <td></td>
   </tr>
 </template>
@@ -58,7 +60,7 @@ td {
 .sc-msg {
   width: 30%;
 }
-.shortcut-single-btn{
+.shortcut-single-btn {
   cursor: pointer;
   user-select: none;
   background-color: #00000066;

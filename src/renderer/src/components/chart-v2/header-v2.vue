@@ -18,8 +18,8 @@ function close_chart() {
     Chart.current.save()
     Chart.current.audio.pause()
   }
-    Chart.current = undefined
-    GlobalStat.route.change('start')
+  Chart.current = undefined
+  GlobalStat.route.change('start')
 }
 
 async function read_vsb() {
@@ -40,6 +40,14 @@ async function write_vsc() {
 async function export_chart() {
   Chart.$current.export_chart()
 }
+
+function start_play() {
+  Chart.$current.init_playfield()
+  GlobalStat.chart_state.value = 2
+}
+function start_preview() {
+  GlobalStat.chart_state.value = 1
+}
 </script>
 
 <template>
@@ -52,7 +60,6 @@ async function export_chart() {
           <div class="h-menu-btn-text" @click="read_vsb">打开vsb</div>
           <div class="h-menu-btn-text" @click="write_vsc">写入vsc</div>
           <div class="h-menu-btn-text" @click="export_chart">打包&导出</div>
-          <div class="h-menu-btn-text" @click="GlobalStat.chart_state.value = 1">预览</div>
           <div class="h-menu-btn-text h-menu-btn-i-sep" @click="modal.SettingModal.show({})">
             设置
           </div>
@@ -67,6 +74,12 @@ async function export_chart() {
       </div>
       <div class="header-menu-ul" @click="active = 3">
         <div class="h-menu-btn-text">时轴</div>
+      </div>
+      <div class="header-menu-ul" @click="start_preview">
+        <div class="h-menu-btn-text">预览</div>
+      </div>
+      <div class="header-menu-ul" @click="start_play">
+        <div class="h-menu-btn-text">试玩</div>
       </div>
       <div class="chart-name">{{ song_name }}</div>
     </div>

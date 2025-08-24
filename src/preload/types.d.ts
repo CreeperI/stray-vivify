@@ -136,6 +136,20 @@ export namespace ChartTypeV2 {
     song: song
     version: number
   }
+
+  export type note_judgement = {
+    time: number
+    delta: number
+    /*
+    * 0 for perfect+
+    * 1 for perfect late
+    * 2 for great late
+    * 3 for good late
+    * 4 for miss late
+    * 5 for boooomb!
+    *  */
+    lvl: number
+  }
 }
 
 export type Invoke = {
@@ -264,6 +278,32 @@ export type Invoke = {
     arg: {},
     r: Promise<void>
   }
+  'remove-chart': {
+    arg: {
+      id: string
+    }
+    r: void
+  },
+  'import-sprite': {
+    arg: {
+      id: string
+    },
+    r: void
+  },
+  'import-background' : {
+    arg: {
+      id: string
+    }
+    r: void
+  }
+  'enter-fullscreen': {
+    arg: {}
+    r: void
+  }
+  'leave-fullscreen': {
+    arg: {}
+    r: void
+  }
 }
 
 export type Send = {
@@ -330,6 +370,7 @@ export namespace storages {
     offset1: number
     // for playing
     offset2: number
+    offset3: number
     record_field: {
       show_bar_text: boolean
       show_beat_line: boolean
@@ -339,6 +380,28 @@ export namespace storages {
       sprite: boolean
     }
     show_bpm_bottom: boolean
+
+    sprites: {
+      bar_length: number
+      bar_color: string
+      bar_op: number
+    }
+
+    delete_no_confirm: boolean
+    time_max_length: number
+
+    judgement: {
+      // perfect+
+      p1: number
+      // perfect, also bomb
+      p2: number
+      // great
+      p3: number
+      // good
+      p4: number
+      // miss-early
+      p5: number
+    }
   }
 
   export interface storage_scheme {

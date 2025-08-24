@@ -2,46 +2,23 @@
 import { Chart } from '@renderer/core/chart/chart'
 import SvgLane from '@renderer/components/chart-v2/svg-lane.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Settings, Version } from '@renderer/core/Settings'
 import AImg from '@renderer/components/a-elements/a-img.vue'
+import FnCounter from '@renderer/components/chart-v2/FnCounter.vue'
 import { notify } from '@renderer/core/notify'
-import SvgNotesPlaying from '@renderer/components/chart-v2/svg-lane/svg-notes-playing.vue'
 import { Invoke } from '@renderer/core/ipc'
-import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 
 const chart = Chart.$current
-const playfield = chart.$playfield
-const paused = chart.audio.refs.paused
 
 function onkeydown(e: KeyboardEvent) {
-  if (e.key == 'Escape') {
-    if (chart.audio.paused) {
-      exit_play()
-    }
-    chart.audio.pause()
-    chart.audio.set_current_time(chart.audio.current_time - 2000)
+  if (e.key == ' ') {
+    GlobalStat.chart_state.value = 0
   }
 }
-function exit_play() {
-  GlobalStat.chart_state.value = 0
-}
-function continue_play() {
-  chart.audio.set_and_play()
-}
-
-function restart() {
-  GlobalStat.chart_state.value = 0
-  nextTick().then(() => {
-    GlobalStat.chart_state.value = 2
-    return nextTick()
-  }).then(() => {
-    document.dispatchEvent(new KeyboardEvent('keydown', {key: " "}))
-  })
-}
-
 const setting = computed(() => Settings.data.value.settings.record_field)
+const editor = computed(() => Settings.editor)
 const current_time = chart.audio.refs.current_ms
 const length = chart.length
 const current_timing = chart.diff.current_timing
@@ -101,28 +78,19 @@ async function start_record() {
   chart.audio.on_end(() =>
     setTimeout(() => {
       show_result.value = true
-      final.value = playfield.final_stats
-    }, 500)
+    }, 2000)
   )
-  main_loop()
-}
-function main_loop() {
-  playfield.update_per_frame()
-  if (GlobalStat.chart_state.value != 2) return
-  if (chart.audio.ended) return
-  requestAnimationFrame(main_loop)
 }
 
 onMounted(() => {
   Invoke('enter-fullscreen')
-  chart.audio.set_current_time(-3000)
-  notify.normal('按空格以开始游玩。')
+  chart.audio.set_current_time(-5000)
+  notify.normal('按空格以开始。')
   start_record()
   Settings.data.value.settings.meter = 1
   document.addEventListener('keydown', onkeydown)
 
 })
-
 onUnmounted(() => {
   if (interval_id != -1) clearInterval(interval_id)
   Invoke('leave-fullscreen')
@@ -131,13 +99,10 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onkeydown)
 
 })
-
-const refs = playfield.refs
-const final = ref(playfield.final_stats)
 </script>
 
 <template>
-  <div id="playfield" ref="top-div" class="playfield" :style="{cursor: paused ? 'default' : 'none'}">
+  <div ref="top-div" class="playfield" id="preview-field">
     <img v-if="bg_error == 0" :src="bg_src" alt="" class="playfield-bg" @error="bg_error = 1" />
     <transition name="fadeout">
       <div v-if="animation_state < 3" class="pf-animations">
@@ -188,12 +153,14 @@ const final = ref(playfield.final_stats)
       <div v-if="setting.sprite" class="pf-sprite">
         <a-img :src="img_src" alt="" />
       </div>
-      <svg-lane>
-        <svg-notes-playing />
-      </svg-lane>
+      <slot>
+        <svg-lane />
+      </slot>
+
       <div class="pf-inf">
         <slot name="info"></slot>
-        <div>{{ refs.click_sec }}/sec</div>
+        <div v-if="setting.detail > 2">scale: {{ editor.scale }}</div>
+        <div v-if="setting.detail > 1">{{ current_density }}/sec</div>
         <div>Bpm: {{ chart.diff.timing[current_timing].bpm }}</div>
         <div class="pf-diff">{{ chart.diff.diff1 }} {{ chart.diff.diff2 }}</div>
         <div class="pf-charter">{{ chart.diff.charter }}</div>
@@ -203,26 +170,7 @@ const final = ref(playfield.final_stats)
         <br />
         {{ Math.max(0, Math.round((current_time / length) * 100)) + '%' }}
       </div>
-      <div class="pf-version">
-        <div>{{ Version.str }}</div>
-      </div>
-      <div class="pf-acc">
-        {{ refs.acc.toFixed(2) }}%
-        <br />
-        {{ playfield.parse_judgements(refs.last_judgement) }}
-        <br />
-        {{ refs.combo }}
-      </div>
-      <div class="pf-pause" v-if="paused">
-        <div class="pf-pause-header">
-          暂停ing
-        </div>
-        <div class="pf-pause-functions">
-          <a-button2 @click="continue_play" msg="resume" />
-          <a-button2 @click="restart" msg="restart" />
-          <a-button2 @click="exit_play" msg="exit" />
-        </div>
-      </div>
+      <div class="pf-version">{{ Version.str }}</div>
     </template>
     <transition v-if="show_result" name="fade">
       <div class="pf-results" style="cursor: auto">
@@ -235,122 +183,14 @@ const final = ref(playfield.final_stats)
           <div class="pr-charter">{{ chart.diff.charter }}</div>
         </div>
         <div class="pr-result">
-          <div class="pr-score-wrapper">
-            <div class="pr-score">{{ final.acc.toFixed(2) }} %</div>
-            <div class="pr-combo">
-              MAX COMBO
-              <br />{{ final.max_combo }} <br />COMBO <br />{{ refs.combo }}
+          <slot name="result">
+            <div class="pr-score-wrapper">
+              <div class="pr-score">101.0000%</div>
+              <div class="pr-combo">COMBO<br />{{ chart.diff.notes.length }}</div>
             </div>
-          </div>
-          <div class="pr-counter">
-            <div>
-              <div>{{ final.counts.pn4 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.pn4 / final.total) * 250 + 'px' }"
-              />
-              <div>Miss-</div>
-            </div>
-            <div>
-              <div>{{ final.counts.pn3 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.pn3 / final.total) * 250 + 'px' }"
-              />
-              <div>Good-</div>
-            </div>
-            <div>
-              <div>{{ final.counts.pn2 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.pn2 / final.total) * 250 + 'px' }"
-              />
-              <div>Great-</div>
-            </div>
-            <div>
-              <div>{{ final.counts.pn1 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.pn1 / final.total) * 250 + 'px' }"
-              />
-              <div>Perfect-</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p0 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.p0 / final.total) * 250 + 'px' }"
-              />
-              <div>Pure</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p1 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.p1 / final.total) * 250 + 'px' }"
-              />
-              <div>Perfect+</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p2 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.p2 / final.total) * 250 + 'px' }"
-              />
-              <div>Great+</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p3 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.p3 / final.total) * 250 + 'px' }"
-              />
-              <div>Good+</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p4 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.p4 / final.total) * 250 + 'px' }"
-              />
-              <div>Miss+</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p5 }}</div>
-              <div
-                class="pr-portion"
-                :style="{ height: (final.counts.p5 / final.total) * 250 + 'px' }"
-              />
-              <div>Boom!</div>
-            </div>
-          </div>
-          <div class="pr-other">
-            <div>
-              <div>avg. delay</div>
-              <div>{{ final.avg_delay.toFixed(2) }}</div>
-            </div>
-            <div>
-              <div>density</div>
-              <div>{{ final.density.toFixed(3) }}</div>
-            </div>
-            <div>
-              <div>Max CPS</div>
-              <div>{{ final.max_cps }}</div>
-            </div>
-            <div>
-              <div>Total Press</div>
-              <div>{{final.total_click}}</div>
-            </div>
-            <div>
-              <div>Empty Clicks</div>
-              <div>{{final.empty}}</div>
-            </div>
-            <div>
-              <div>Total</div>
-              <div>{{ final.total }}</div>
-            </div>
-          </div>
-          <div class="pr-back" @click="GlobalStat.chart_state.value = 0">返回编辑</div>
+            <fn-counter class="pr-counter" />
+            <div class="pr-back" @click="GlobalStat.chart_state.value = 0">返回编辑</div>
+          </slot>
         </div>
       </div>
     </transition>
@@ -368,7 +208,6 @@ const final = ref(playfield.final_stats)
   justify-content: center;
   background-color: black;
   user-select: none;
-  cursor: none;
 }
 .playfield-bg {
   position: absolute;
@@ -513,46 +352,6 @@ img {
   opacity: 0.4;
   color: gray;
 }
-.pf-acc {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-shadow: 0 0 2px black;
-  top: 10vh;
-  text-align: center;
-}
-
-.pf-pause {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 30%;
-  border: 2px solid white;
-  box-shadow: 0 0 15px 5px black;
-  background: var(--darker-bgi);
-  padding: 25px;
-  user-select: none;
-  width: 30vw;
-}
-.pf-pause-header {
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 30px;
-}
-.pf-pause-functions {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-}
-.pf-pause-functions > * {
-  cursor: pointer;
-  line-height: 2rem;
-  height: 2rem;
-  width: 7rem;
-}
 .pr-inf {
   position: absolute;
   left: 10%;
@@ -585,10 +384,10 @@ img {
 }
 .pr-result {
   position: absolute;
-  right: 100px;
+  left: 50%;
   top: 50%;
   transform: translateY(-50%);
-  width: 50%;
+  width: 30%;
   display: flex;
   gap: 50px;
   flex-direction: column;
@@ -605,7 +404,7 @@ img {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: center;
 }
 .pr-score {
   font-family: oppo-sans, sans-serif;
@@ -618,24 +417,6 @@ img {
   width: calc(100% - 30px);
   border: 2px white solid;
   padding: 15px;
-  height: 300px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-}
-.pr-counter > div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: end;
-}
-.pr-counter > div > div:last-child {
-  height: 1.3rem;
-  line-height: 1.3rem;
-}
-.pr-portion {
-  width: 1.5rem;
-  background: #b8dcee;
 }
 .pr-back {
   border: 2px white solid;
@@ -643,19 +424,5 @@ img {
   width: 6rem;
   cursor: pointer;
   line-height: 2rem;
-}
-.pr-other {
-  width: 100%;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  border: 2px solid white;
-  box-sizing: border-box;
-  padding: 15px;
-}
-.pr-other > div {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 </style>

@@ -4,8 +4,8 @@ import { utils } from '@renderer/core/utils'
 import { Charter } from '@renderer/core/charter'
 
 export const Version = {
-  val: 6,
-  str: "reborn-alpha"
+  val: 8,
+  str: "v8"
 }
 
 const note = {
@@ -65,6 +65,7 @@ const settings: Ref<storages.storage_scheme> = ref({
     show_bottom_timing: true,
     offset1: 0,
     offset2: 0,
+    offset3: 0,
     record_field: {
       show_bar_text: true,
       show_beat_line: true,
@@ -73,9 +74,23 @@ const settings: Ref<storages.storage_scheme> = ref({
       detail: 3,
       sprite: true
     },
-    show_bpm_bottom: true
+    show_bpm_bottom: true,
+    sprites: {
+      bar_color: "#ffffff",
+      bar_length: 6,
+      bar_op: 0
+    },
+    delete_no_confirm: false,
+    time_max_length: 50,
+    judgement: {
+      p1: 25,
+      p2: 60,
+      p3: 120,
+      p4: 200,
+      p5: 60,
+    }
   },
-  version: 6,
+  version: Version.val,
   shortcut: ''
 })
 
@@ -87,6 +102,7 @@ const computes = {
 
 export const Settings = {
   data: settings,
+  settings,
   get editor(): storages.storage_scheme['settings'] {
     return settings.value.settings
   },

@@ -92,6 +92,12 @@ import Build from '@renderer/components/credits/build.vue'
       <div>增加了skin。</div>
       <div>调整了很多界面。</div>
     </Build>
+    <Build build="8" y="2025" m="8" d="24">
+      <template #header>
+        stray-vivify 101.00%
+      </template>
+      <div>Major 新增游玩模式</div>
+    </Build>
   </div>
 </template>
 

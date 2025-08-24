@@ -1,11 +1,11 @@
 import { ChartType, ChartTypeV2, Invoke } from '@preload/types'
 import { notify } from '@renderer/core/notify'
 import { computed, ComputedRef, ref, Ref, watch, WritableComputedRef } from 'vue'
-import Translations from '@renderer/core/translations'
 import { Charter } from '@renderer/core/charter'
-import { Chart_audio } from '@renderer/core/chart/chart_audio'
-import { Chart_song } from '@renderer/core/chart/chart_song'
-import { Chart_diff } from './Chart_diff'
+import { Chart_audio } from '@renderer/core/chart/audio'
+import { Chart_song } from '@renderer/core/chart/song'
+import { Chart_diff } from '@renderer/core/chart/diff'
+import { Chart_playfield } from './playfield'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Settings } from '@renderer/core/Settings'
 import { modal } from '@renderer/core/modal'
@@ -26,6 +26,9 @@ export class Chart {
   audio: Chart_audio
   diff: Chart_diff
   length: ms
+  // for audio counting only
+  length_end: ms
+
   shown_timing: ComputedRef<[ms, ms]>
   current_bpm: WritableComputedRef<number>
   ref: {
@@ -35,6 +38,8 @@ export class Chart {
   }
   id: string
 
+  playfield: Chart_playfield | null
+
   constructor() {
     this.song = new Chart_song(this)
     this.diffs = [Chart_diff.createDiff()]
@@ -42,6 +47,7 @@ export class Chart {
     this.audio = new Chart_audio(this)
     this.path = ''
     this.length = -1
+    this.length_end = -1
     this.shown_timing = computed(() => [
       this.audio.refs.current_ms.value,
       this.audio.refs.current_ms.value + Charter.refs.visible.value
@@ -63,6 +69,7 @@ export class Chart {
     }
     this.diff = new Chart_diff(this)
     this.id = ''
+    this.playfield = null
   }
 
   static get $current() {
@@ -174,7 +181,7 @@ export class Chart {
 
   static parse_data(data: string): { data: ChartTypeV2.final; status: 'converted' | 'loaded' } {
     const parsed = JSON.parse(data) as ChartType.Chart | ChartTypeV2.final
-    if (Object.keys(parsed).includes("version")) {
+    if (Object.keys(parsed).includes('version')) {
       return {
         data: parsed as ChartTypeV2.final,
         status: 'loaded'
@@ -277,15 +284,14 @@ export class Chart {
   load_vsb(r: Invoke['read-vsb']['r']) {
     if (!r) return
     const new_diff = Chart_diff.createDiff()
-    Charter.modal.ConfirmModal.show({ msg: '' }).then(() => {
-      new_diff.notes = r[0]
-      new_diff.timing = r[1]
-      this.add_diff(new_diff)
-      setTimeout(() => {
-        this.diff.fuck_shown(this.audio.current_time, true)
-        this.diff.update_diff_counts()
-      }, 200)
-    })
+    new_diff.notes = r[0]
+    new_diff.timing = r[1]
+    this.add_diff(new_diff)
+    setTimeout(() => {
+      this.diff.fuck_shown(this.audio.current_time, true)
+      this.diff.update_diff_counts()
+    }, 200)
+
   }
 
   fuck_shown(force = false) {
@@ -307,7 +313,9 @@ export class Chart {
 
   post_define() {
     this.length = (this.audio.ele?.duration ?? -1) * 1000
+    this.length_end = this.length + 3000
     this.set_header_name()
+    this.audio.init_on_end()
     watch(
       this.ref.diff,
       () => {
@@ -324,9 +332,6 @@ export class Chart {
       this.fuck_shown()
       this.ref.chart_current_time.value = this.audio.refs.current_ms.value
     })
-    setTimeout(() => {
-      this.fuck_shown(true)
-    }, 500)
   }
 
   create_diff() {
@@ -348,7 +353,7 @@ export class Chart {
         this.diff.notes = []
       })
     else
-      Charter.modal.ConfirmModal.show({ msg: Translations.confirm.del_diff }).then(() => {
+      Charter.modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
         this.diffs.splice(this.diff_index, 1)
         this.diff_index = 0
       })
@@ -388,7 +393,6 @@ export class Chart {
           diffs: this.diffs.map((x) => x.meta.diff1 + ' ' + x.meta.diff2)
         })
       ).then(() => {
-        console.log("saved chart!!!!")
         return GlobalStat.update_all_chart()
       })
     }
@@ -405,7 +409,23 @@ export class Chart {
     const r = this.save()
     if (!r) return
     await r
-    await Charter.invoke("export-zip", this.id)
+    await Charter.invoke('export-zip', this.id)
+  }
+
+  init_playfield() {
+    this.playfield = new Chart_playfield(this)
+  }
+
+  handle_key(key: number) {
+    this.playfield?.handle_keydown(key)
+  }
+  handle_keyup(key: number) {
+    this.playfield?.handle_keyup(key)
+  }
+
+  get $playfield() {
+    if (!this.playfield) this.init_playfield()
+    return this.playfield as Chart_playfield
   }
 }
 

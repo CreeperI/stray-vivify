@@ -27,6 +27,14 @@ function add_diff() {
 function delete_diff() {
   chart.delete_diff()
 }
+
+function import_sprite() {
+  Charter.invoke("import-sprite", chart.id)
+}
+function import_bg() {
+  Charter.invoke("import-background", chart.id)
+}
+
 </script>
 
 <template>
@@ -40,23 +48,26 @@ function delete_diff() {
       <song-info-single name="BPM" v-model.trim="refs.bpm" />
       <song-info-single name="来源" v-model="refs.source" />
       <song-info-single name="注释" v-model="refs.ref" />
-      <div class="song-info-single" v-if="img_show">
-        <div>曲绘</div>
+      <div class="song-info-single">
+        <div>曲绘<a-button2 msg="导入曲绘" @click="import_sprite"/></div>
         <img
           class="song-sprite"
           alt="how are you reading this?"
           :src="src"
           @error="img_show = false"
+          v-if="img_show"
         />
       </div>
-      <div class="song-info-single" v-if="img2_show">
-        <div>曲绘</div>
+      <div class="song-info-single" >
+        <div>背景<a-button2 msg="导入背景" @click="import_bg"/></div>
         <img
           class="song-sprite"
           alt="how are you reading this?"
           :src="src2"
           @error="img2_show = false"
+          v-if="img2_show"
         />
+
       </div>
     </div>
     <div class="info-inner">
@@ -109,6 +120,13 @@ function delete_diff() {
   border-radius: 10px;
   padding: 15px;
   background: var(--darker-bgi);
+}
+.song-info-single:last-child {
+  margin-bottom: 10vh;
+}
+.song-info-single > div:first-child {
+  display: flex;
+  justify-content: space-between;
 }
 .diff-choose {
   display: flex;

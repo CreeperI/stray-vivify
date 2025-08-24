@@ -65,7 +65,6 @@ function style() {
 img {
   width: min-content;
   user-select: none;
-  background-size: 100% 100%;
   display: block;
   position: absolute;
 }

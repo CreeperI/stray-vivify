@@ -1,7 +1,7 @@
 import { Ref, ref } from 'vue'
 
 type log = {
-  level: "msg" | "err" | "warn" | "debug"
+  level: 'msg' | 'err' | 'warn' | 'debug'
   msg: string
   time: number
 }
@@ -18,35 +18,55 @@ export const Log = {
   handle() {
     let oldlog = console.log.bind(console)
     console.log = function (...args: any) {
-      Log.msg(args.join(" "))
+      args = args.map((v) => {
+        if (typeof v == 'object') return JSON.stringify(v)
+        else return v
+      })
+      Log.msg(args.join(' '))
       oldlog(...args)
     }
     let oldwarn = console.warn.bind(console)
     console.warn = function (...args: any) {
-      Log.warn(args.join(" "))
+      args = args.map((v) => {
+        if (typeof v == 'object') return JSON.stringify(v)
+        else return v
+      })
+      Log.warn(args.join(' '))
       oldwarn(...args)
     }
     let olderr = console.error.bind(console)
     console.error = function (...args: any) {
-      Log.err(args.join(" "))
+      args = args.map((v) => {
+        if (typeof v == 'object') return JSON.stringify(v)
+        else return v
+      })
+      Log.err(args.join(' '))
       olderr(...args)
     }
     let olddebug = console.debug.bind(console)
     console.debug = function (...args: any) {
+      args = args.map((v) => {
+        if (typeof v == 'object') return JSON.stringify(v)
+        else return v
+      })
       olddebug(...args)
-      Log.debug(args.join(" "))
+      Log.debug(args.join(' '))
     }
-    window.addEventListener("error", (e) => {
-      let msg = ""
-      if (e.target instanceof HTMLImageElement) {
-        msg += "Image load error: " + e.target.src
-      }
-      Log.err(msg)
-    }, true)
+    window.addEventListener(
+      'error',
+      (e) => {
+        let msg = ''
+        if (e.target instanceof HTMLImageElement) {
+          msg += 'Image load error: ' + e.target.src
+        }
+        Log.err(msg)
+      },
+      true
+    )
   },
   err(msg: string) {
     this.error_list.value.push({
-      level: "err",
+      level: 'err',
       msg,
       time: Date.now()
     })
@@ -54,7 +74,7 @@ export const Log = {
   },
   msg(msg: string) {
     this.error_list.value.push({
-      level: "msg",
+      level: 'msg',
       msg,
       time: Date.now()
     })
@@ -62,7 +82,7 @@ export const Log = {
   },
   warn(msg: string) {
     this.error_list.value.push({
-      level: "warn",
+      level: 'warn',
       msg,
       time: Date.now()
     })
@@ -70,10 +90,10 @@ export const Log = {
   },
   debug(msg: string) {
     this.error_list.value.push({
-      level: "debug",
+      level: 'debug',
       msg,
       time: Date.now()
     })
     this.count.value.debug++
-  },
+  }
 }
