@@ -65,11 +65,6 @@ jobs:
           body: |
             Auto-generated release for ${{ github.ref_name }}
           files: |
-            artifacts/**/*.dmg
-            artifacts/**/*.exe
-            artifacts/**/*.AppImage
-            artifacts/**/*.deb
-            artifacts/**/*.rpm
-            artifacts/**/*.zip
+            artifacts/win-unpacked/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
