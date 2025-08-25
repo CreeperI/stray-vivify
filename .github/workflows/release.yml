@@ -31,11 +31,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build project
-        run: npm run build
-
-      - name: Build Electron app
-        run: npm run build:win
+      - name: Force build:win
+        run: npm run force-build:win
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -59,9 +56,6 @@ jobs:
           path: artifacts
           pattern: win-unpacked
           merge-multiple: true
-
-      - name: List files for debugging
-        run: find artifacts -type f
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
