@@ -53,7 +53,7 @@ import Build from '@renderer/components/credits/build.vue'
         <div>修复了撞尾bug。</div>
       </template>
       <template #header>
-        <div>- stray/vivify</div>
+        stray/vivify
       </template>
         <div>新增了纯享模式。该模式下，你可以撇掉别的乱七八糟的东西。</div>
         <div>增加了撤销、重做功能。快捷键为Ctrl+Z和Ctrl+Y，这方面（指快捷键）的自定义还在路上（悲</div>
@@ -97,6 +97,17 @@ import Build from '@renderer/components/credits/build.vue'
         stray-vivify 101.00%
       </template>
       <div>Major 新增游玩模式</div>
+      <div>解除了不能下宽面（？）的限制。</div>
+      <div>修改F1界面为Inspector.快捷键可以在设置中修改。</div>
+    </Build>
+    <Build build="8.1" y="2025" m="8" d="29">
+      <template #header>
+        开学快乐……？
+      </template>
+      <template #bugs>
+        <div>修复了预览模式暴毙的bug，原因是我把退出的逻辑写到空格上了</div>
+      </template>
+      <div>修改了宽面的皮肤读取逻辑</div>
     </Build>
   </div>
 </template>

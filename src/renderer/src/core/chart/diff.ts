@@ -439,10 +439,11 @@ export class Chart_diff {
           n: 'h'
         }
       } else {
+        if (note.width == 1) return { time: note.time, lane: note.lane, n: 'n' }
         if (note.snm == 2) return { time: note.time, lane: note.lane, n: 's' }
         else if (note.snm == 1) {
           if (note.width == 1) return { time: note.time, lane: note.lane, n: 'm' }
-          else return { time: note.time, lane: note.lane, n: 'mb' }
+          return { time: note.time, lane: note.lane, n: 'mb' }
         } else {
           if (note.width == 1) return { time: note.time, lane: note.lane, n: 'n' }
           else return { time: note.time, lane: note.lane, n: 'b' }
@@ -481,6 +482,19 @@ export class Chart_diff {
     this.timing.push(timing)
     this.timing.sort((a, b) => a.time - b.time)
     return -1
+  }
+
+  validate_chart() {
+    this.notes = this.notes.map(x => {
+      if (x.width == 1) return {
+        lane: x.lane,
+        time: x.time,
+        width: 1,
+        ani: x.ani,
+        snm: 0,
+      }
+      return x
+    })
   }
 }
 

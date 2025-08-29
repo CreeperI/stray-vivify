@@ -21,9 +21,9 @@ function toDate(y: string | number, m: string | number, d: string | number) {
       <span class="build-date">
         {{ toDate(y, m, d) }}
       </span>
-    </div>
-    <div v-if="$slots.header" class="build-name">
-      <slot name="header"></slot>
+      <span v-if="$slots.header" class="build-name">
+        <slot name="header"></slot>
+      </span>
     </div>
     <div v-if="$slots.bugs" class="build-content pointed-list">
       <div class="build-content-title">Bug修复</div>
@@ -74,6 +74,8 @@ function toDate(y: string | number, m: string | number, d: string | number) {
 .build-name {
   font-size: 1.3rem;
   text-align: center;
+  margin-left: 25px;
+  font-weight: bold;
 }
 
 .build-content {
@@ -90,13 +92,12 @@ function toDate(y: string | number, m: string | number, d: string | number) {
   left: 0;
   margin-bottom: 10px;
 }
-
 </style>
 <style>
 .build-content > span {
   display: block;
   font-size: 0.95rem;
-  margin-left:  5px;
+  margin-left: 5px;
 }
 .pointed-list > div:not(.build-content-title)::before {
   content: '•';
@@ -104,6 +105,9 @@ function toDate(y: string | number, m: string | number, d: string | number) {
   left: 0;
   width: 10px;
   display: inline-block;
+}
+.pointed-list > :not(div) {
+  margin-left: 10px;
 }
 .build-content > div {
   margin-bottom: 5px;

@@ -33,12 +33,16 @@ function continue_play() {
 
 function restart() {
   GlobalStat.chart_state.value = 0
-  nextTick().then(() => {
-    GlobalStat.chart_state.value = 2
-    return nextTick()
-  }).then(() => {
-    document.dispatchEvent(new KeyboardEvent('keydown', {key: " "}))
-  })
+  chart.audio.pause()
+  nextTick()
+    .then(() => {
+      chart.init_playfield()
+      GlobalStat.chart_state.value = 2
+      return nextTick()
+    })
+    .then(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }))
+    })
 }
 
 const setting = computed(() => Settings.data.value.settings.record_field)
@@ -120,7 +124,6 @@ onMounted(() => {
   start_record()
   Settings.data.value.settings.meter = 1
   document.addEventListener('keydown', onkeydown)
-
 })
 
 onUnmounted(() => {
@@ -129,7 +132,6 @@ onUnmounted(() => {
   chart.audio.pause()
   off = true
   document.removeEventListener('keydown', onkeydown)
-
 })
 
 const refs = playfield.refs
@@ -137,7 +139,12 @@ const final = ref(playfield.final_stats)
 </script>
 
 <template>
-  <div id="playfield" ref="top-div" class="playfield" :style="{cursor: paused ? 'default' : 'none'}">
+  <div
+    id="playfield"
+    ref="top-div"
+    class="playfield"
+    :style="{ cursor: paused ? 'default' : 'none' }"
+  >
     <img v-if="bg_error == 0" :src="bg_src" alt="" class="playfield-bg" @error="bg_error = 1" />
     <transition name="fadeout">
       <div v-if="animation_state < 3" class="pf-animations">
@@ -214,9 +221,7 @@ const final = ref(playfield.final_stats)
         {{ refs.combo }}
       </div>
       <div class="pf-pause" v-if="paused">
-        <div class="pf-pause-header">
-          暂停ing
-        </div>
+        <div class="pf-pause-header">暂停ing</div>
         <div class="pf-pause-functions">
           <a-button2 @click="continue_play" msg="resume" />
           <a-button2 @click="restart" msg="restart" />
@@ -339,11 +344,11 @@ const final = ref(playfield.final_stats)
             </div>
             <div>
               <div>Total Press</div>
-              <div>{{final.total_click}}</div>
+              <div>{{ final.total_click }}</div>
             </div>
             <div>
               <div>Empty Clicks</div>
-              <div>{{final.empty}}</div>
+              <div>{{ final.empty }}</div>
             </div>
             <div>
               <div>Total</div>

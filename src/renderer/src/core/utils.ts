@@ -170,30 +170,19 @@ export namespace utils {
   export function average(arr: number[]) {
     return arr.reduce((a, b) => a + b, 0) / arr.length
   }
-}
 
-export class Lazy<T = any> {
-  static all: Lazy[] = []
-  getter: () => T
-
-  constructor(_value: () => T) {
-    this._value = undefined
-    this.getter = _value
-    Lazy.all.push(this)
-  }
-
-  _value: T | undefined
-
-  get value() {
-    if (!this._value) this._value = this.getter()
-    return this._value
-  }
-
-  static invalidateAll() {
-    Lazy.all.forEach((l) => l.invalidate())
-  }
-
-  invalidate() {
-    this._value = undefined
+  export function getSrc(note: ChartTypeV2.note): string {
+    if (note.width == 0) return ''
+    let str =  'stray:/__skin__' + '/' + note.width
+    if ('snm' in note) {
+      if (note.snm == 1) return str + 'b.png'
+      if (note.snm == 2 && note.width != 1) str += 's'
+    }
+    if (note.width == 2) {
+      str += note.lane == 0 ? 'l' : note.lane == 2 ? 'r' : 'm'
+    } else if (note.width == 3) {
+      str += note.lane == 0 ? 'l' : 'r'
+    }
+    return str + '.png'
   }
 }

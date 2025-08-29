@@ -13,7 +13,7 @@ import { Invoke } from '@renderer/core/ipc'
 const chart = Chart.$current
 
 function onkeydown(e: KeyboardEvent) {
-  if (e.key == ' ') {
+  if (e.key == 'Escape') {
     GlobalStat.chart_state.value = 0
   }
 }
@@ -208,6 +208,7 @@ onUnmounted(() => {
   justify-content: center;
   background-color: black;
   user-select: none;
+  cursor: none;
 }
 .playfield-bg {
   position: absolute;

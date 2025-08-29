@@ -71,6 +71,7 @@ async function main() {
   setInterval(() => {
     FrameRate.refresh()
     Chart.current?.playfield?.refresh()
+    Chart.current?.diff.update_diff_counts()
   }, 1000)
 
   requestAnimationFrame(update_per_frame)

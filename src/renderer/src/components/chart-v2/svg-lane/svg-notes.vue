@@ -1,10 +1,11 @@
 <script lang="ts" setup>
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
-import { computed, MaybeRef, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { Charter } from '@renderer/core/charter'
 import { ChartTypeV2 } from '@preload/types'
 import { Settings } from '@renderer/core/Settings'
 import { GlobalStat } from '@renderer/core/globalStat'
+import { FrameRate } from '@renderer/core/frame-rates'
 
 const chart = Charter.get_chart()
 // const force_playing = ref(false)
@@ -17,7 +18,7 @@ const lane_width = Settings.editor.lane_width
 const svg_width = 4 * lane_width + 2 * 50 + 12
 const offset1 = Settings.editor.offset1
 
-const { shown } = defineProps<{ shown: MaybeRef<ChartTypeV2.note[]> }>()
+const { shown } = defineProps<{ shown: ChartTypeV2.note[] }>()
 const mul = Settings.computes.mul
 const current_time = chart.audio.refs.current_ms
 
@@ -33,7 +34,7 @@ const pending_note = computed(() => {
     ? ({
         time: pending_time.value,
         lane: pending_lane.value,
-        width: 1,
+        width: Settings.note.w,
         ani: [],
         len: pending_len.value
       } as ChartTypeV2.hold_note)
@@ -71,8 +72,9 @@ function update_pending(e: MouseEvent) {
   if (e.target instanceof HTMLImageElement) {
     return
   }
+  FrameRate.update_pending.start()
   const bottom = screen.availHeight - 80 - e.offsetY
-  const mouse_time = chart.diff.nearest(bottom / mul.value + current_time.value)
+  const mouse_time = chart.diff.nearest(bottom / mul.value + current_time.value, true)
   if (pending_hold_fixed) {
     pending_len.value = Math.abs(mouse_time - pending_hold_fixed_time)
     if (mouse_time <= pending_hold_fixed_time) {
@@ -97,11 +99,12 @@ function update_pending(e: MouseEvent) {
     default:
       lane = Math.floor(lane * 4)
   }
-  pending_time.value = mouse_time
+  pending_time.value = Math.floor(mouse_time)
   pending_lane.value = lane
   pending_snm.value = Settings.note.snm
 
   pending_display.value = pending_time.value >= 0
+  FrameRate.update_pending.end()
 }
 
 function on_click() {
@@ -119,15 +122,11 @@ function on_click() {
     return
   } else chart.diff.add_note(pending_note.value)
 }
-function time_bottom(t: number, note: ChartTypeV2.note, _mul: number) {
-  // if (note.n == 'h')
-  //   return (note.t + note.h / 2 - t) * _mul + 'px'
-  // else
-  return (note.time - t - offset1) * _mul + 'px'
-}
 
-function x_of(note: ChartTypeV2.note) {
-  return note.lane * lane_width + 6 + 'px'
+function time_bottom(t: number, note: ChartTypeV2.note, _mul: number) {
+  return Math.round(
+    window.screen.availHeight - 72 - (note.time - t - offset1 + (note['len'] ?? 0)) * _mul
+  )
 }
 
 function del_note(n: ChartTypeV2.note) {
@@ -182,26 +181,20 @@ onUnmounted(() => {
       @click="on_click"
       @mousemove.capture="update_pending"
     >
-      <note-v2
-        v-if="pending_display"
-        :note="pending_note"
-        :style="{
-          bottom: time_bottom(current_time, pending_note, mul),
-          left: x_of(pending_note)
-        }"
-        style="opacity: 0.7; pointer-events: none; z-index: 10"
-      />
-      <note-v2
-        v-for="note in shown"
-        :note="note"
-        :style="{
-          bottom: time_bottom(current_time, note, mul),
-          left: x_of(note)
-        }"
-        data-shown-note
-        @contextmenu="del_note(note)"
-      />
     </foreignObject>
+    <note-v2
+      v-if="pending_display"
+      :note="pending_note"
+      :y="time_bottom(current_time, pending_note, mul)"
+      style="opacity: 0.7; pointer-events: none; z-index: 10"
+    />
+    <note-v2
+      v-for="note in shown"
+      :note="note"
+      :y="time_bottom(current_time, note, mul)"
+      data-shown-note
+      @contextmenu="del_note(note)"
+    />
   </g>
 </template>
 

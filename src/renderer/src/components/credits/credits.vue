@@ -32,6 +32,7 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <span>1sk3se</span>
       <span>2569083408</span>
       <span>૮ ・ﻌ・ა</span>
+      <span>-Re-Again-</span>
     </div>
     <div class="credits-head">
       Special Thanks

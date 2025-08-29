@@ -92,8 +92,8 @@ function import_bg() {
 .info-wrapper {
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 25px;
   box-sizing: border-box;
   border: 50px solid transparent;
@@ -107,7 +107,6 @@ function import_bg() {
   padding: 5px;
 }
 .info-inner {
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
   padding: 15px;

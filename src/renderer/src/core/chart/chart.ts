@@ -384,6 +384,7 @@ export class Chart {
   save() {
     if (this.audio.ele) {
       this.diff.floor_time()
+      this.diff.validate_chart()
       Charter.invoke('save-chart', this.id, JSON.stringify(this.chart))
       return Charter.invoke(
         'update-chart-data',

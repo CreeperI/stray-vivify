@@ -4,8 +4,8 @@ import { utils } from '@renderer/core/utils'
 import { Charter } from '@renderer/core/charter'
 
 export const Version = {
-  val: 8,
-  str: "v8"
+  val: 8.1,
+  str: "v8a1"
 }
 
 const note = {
@@ -14,14 +14,13 @@ const note = {
   b: ref(false),
   hold: ref(false),
   set_width(v: number) {
-    if (v != 1) this.hold.value = false
+    if (v==1) this.s.value = false
     if (v == this.w) this.width.value = 0
     else this.width.value = v
   },
   set_s(v: boolean) {
     this.s.value = v
     this.b.value = false
-    this.hold.value = false
   },
   set_b(v: boolean) {
     this.b.value = v
@@ -30,9 +29,7 @@ const note = {
   },
   set_hold(v: boolean) {
     this.hold.value = v
-    this.s.value = false
     this.b.value = false
-    this.width.value = 1
   },
   get w() {
     return this.width.value

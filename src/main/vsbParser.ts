@@ -385,7 +385,8 @@ class MessageBuffer {
     } else if (t === 8) {
       return this.readFloat()
     }
-    throw new Error('Unknown type')
+    return this.readFloat()
+    // throw new Error('Unknown type')
   }
 
   writeByte(val: number): void {
@@ -669,12 +670,18 @@ class VsbParser {
             break
           }
           const id = this.reader.readSByte()
+          try {
           const value = this.reader.readByNoteType(TypeToBufferType(type))
-
           const NE = new NoteExtra()
           NE.id = id
           NE.value = value
           extra.push(NE)
+
+          } catch (e) {
+            console.log(type, e)
+            break
+          }
+
         }
         note.extra = extra
       }

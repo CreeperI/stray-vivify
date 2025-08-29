@@ -115,5 +115,6 @@ export const FrameRate = {
   next_tick: new _FrameRateClass(),
   fuck_shown: new _FrameRateClass(),
   fps: new _FPS(),
-  playfield_frame: new _FrameRateClass()
+  playfield_frame: new _FrameRateClass(),
+  update_pending: new _FrameRateClass(),
 }

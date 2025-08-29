@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
-import { Charter } from '@renderer/core/charter'
 import AButton from '@renderer/components/a-elements/a-button.vue'
 import { Settings } from '@renderer/core/Settings'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import SettingHeader from '@renderer/components/modals/setting-header.vue'
 import AColorInput from '@renderer/components/a-elements/a-color-input.vue'
+import { modal } from '@renderer/core/modal'
 
 const r = Settings.settings
 </script>
@@ -14,7 +14,7 @@ const r = Settings.settings
 <template>
   <SimpleModal title="设置" size="sm">
     <div class="settings-wrapper">
-      <div style="width: 100%; text-align:center;">编辑数字可以使用键盘上下和滚轮哦。</div>
+      <div style="width: 100%; text-align: center">编辑数字可以使用键盘上下和滚轮哦。</div>
       <div class="contain">
         <setting-header msg="编辑器" />
         <div>
@@ -65,7 +65,7 @@ const r = Settings.settings
         <setting-header msg="小节线" />
         <div>
           <div>小节线颜色</div>
-          <a-color-input v-model="r.settings.sprites.bar_color"/>
+          <a-color-input v-model="r.settings.sprites.bar_color" />
         </div>
         <div>
           <div>小节线透明度</div>
@@ -73,7 +73,7 @@ const r = Settings.settings
         </div>
         <div>
           <div>小节线宽度</div>
-          <a-number-input v-model="r.settings.sprites.bar_length" min="0"/>
+          <a-number-input v-model="r.settings.sprites.bar_length" min="0" />
         </div>
         <setting-header msg="游玩" />
         <div>
@@ -107,8 +107,9 @@ const r = Settings.settings
       </div>
     </div>
     <template #footer>
-      <a-button msg="快捷键设置" @click="Charter.modal.ShortcutModal.show({})" />
-      <a-button msg="Credits" @click="Charter.modal.CreditsModal.show({})" />
+      <a-button msg="Inspector" @click="modal.InspectorModal.show({})" />
+      <a-button msg="快捷键设置" @click="modal.ShortcutModal.show({})" />
+      <a-button msg="<strong>信用</strong>" @click="modal.CreditsModal.show({})" />
     </template>
   </SimpleModal>
 </template>

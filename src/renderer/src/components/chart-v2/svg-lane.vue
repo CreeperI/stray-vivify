@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { Settings } from '@renderer/core/Settings'
 import { Charter } from '@renderer/core/charter'
-import { onMounted } from 'vue'
 import SvgBarText from '@renderer/components/chart-v2/svg-lane/svg-bar-text.vue'
 import SvgBarLine from '@renderer/components/chart-v2/svg-lane/svg-bar-line.vue'
 import SvgBeatLine from '@renderer/components/chart-v2/svg-lane/svg-beat-line.vue'
@@ -16,13 +15,6 @@ const _px = svg_width + 'px'
 
 const chart = Charter.get_chart()
 
-onMounted(() => {
-  console.log(
-    'svg-lane mounted',
-    `lane-width ${lane_width}px, bar-length ${bar_length}px`,
-    Charter.constants.screenH - 73
-  )
-})
 const shown = chart.diff.shown
 </script>
 
@@ -32,6 +24,7 @@ const shown = chart.diff.shown
       id="lane-svg"
       :viewBox="view_port.join(' ')"
       :width="svg_width"
+      height="1080"
       preserveAspectRatio="xMidYMax slice"
     >
       <rect fill="#000000" height="100%" width="100%" x="0" y="0"></rect>

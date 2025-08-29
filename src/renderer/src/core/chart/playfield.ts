@@ -157,10 +157,13 @@ export class Chart_playfield {
         if (jr != null) {
           this.j(current, jr, current - note.time)
           this.holding.push(note)
+          this.spawn_particle(jr, note.width, note.lane)
           return
         }
       } else {
-        if (this.judge_normal(note, current)) return
+        if (this.judge_normal(note, current)) {
+          return
+        }
       }
     }
   }
@@ -291,8 +294,7 @@ export class Chart_playfield {
         if (note.snm == 1) {
           this.j(note.time, 0, 0)
           this.spawn_particle(0, note.width, note.lane)
-        }
-        else {
+        } else {
           this.j(current, 4, current - note.time)
           this.spawn_particle(4, note.width, note.lane)
         }
@@ -316,8 +318,10 @@ export class Chart_playfield {
   }
 
   remove_note(v: ChartTypeV2.note) {
-    this.notes = this.notes.filter((x) => x != v)
-    this.shown.value = this.shown.value.filter((x) => x != v)
+    this.notes.splice(this.notes.indexOf(v), 1)
+    this.shown.value = this.shown.value.filter(
+      (x) => !(x.time == v.time && x.lane == v.lane && x.width == v.width)
+    )
   }
 
   j(time: number, lvl: number, delta: number) {
@@ -392,14 +396,14 @@ export class Chart_playfield {
     const color = ['#ff0', '#ff0', '#7f3', '#54b9ff', '#f00'][Math.abs(lvl)]
     const particle = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
     particle.id = Math.floor(Math.random() * 1000).toFixed(0)
-    particle.x.baseVal.value = lane_width * (lane) + 56
+    particle.x.baseVal.value = lane_width * lane + 56
     particle.y.baseVal.value = window.screen.height - 115
     particle.width.baseVal.value = lane_width * width
     particle.height.baseVal.value = 50
     particle.style.transformOrigin = `${lane_width * (lane + 0.5) + 56}px ${particle.y.baseVal.value}px`
     particle.setAttribute('stroke', color)
     particle.setAttribute('stroke-width', '3')
-    particle.setAttribute("fill", "transparent")
+    particle.setAttribute('fill', 'transparent')
     container.append(particle)
     setTimeout(() => {
       particle.remove()

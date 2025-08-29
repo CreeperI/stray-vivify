@@ -76,7 +76,6 @@ export class Chart_audio {
 
   set paused(v: boolean) {
     this._paused = v
-    console.log(v)
     this.refs.paused.value = v
   }
 
