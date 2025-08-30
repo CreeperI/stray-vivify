@@ -335,7 +335,7 @@ export class Chart_diff {
     v.time = Math.floor(v.time)
     if (this.notes.find((x) => x.time == v.time && x.lane == v.lane && x.width == x.width)) return
     this.notes.push(v)
-    this.shown.value.push(v)
+    this.fuck_shown(this.chart.audio.current_time, true)
     return true
   }
 
@@ -347,9 +347,9 @@ export class Chart_diff {
     const bpm = this.bpm_of_time(t)
     if (!bpm) throw new Error('No bpm found???')
     const passed = t - bpm.time
-    const per_beat = this.time_per_beat(bpm)
-    if (round) return Math.round(passed / per_beat) * per_beat + bpm.time
-    else return Math.floor(Math.floor(passed / per_beat) * per_beat + bpm.time)
+    const per_beat = (240 / (bpm.bpm * Settings.editor.meter)) * 1000
+    if (round) return Math.fround(Math.round(passed / per_beat) * per_beat + bpm.time)
+    else return Math.fround(Math.floor(passed / per_beat) * per_beat + bpm.time)
   }
 
   bpm_of_time(time: ms) {
@@ -399,6 +399,10 @@ export class Chart_diff {
 
   fuck_shown(t: number, force = false) {
     if (force ? false : Math.abs(t - this.last_update) < 2000) return
+    this._fuck_shown(t)
+  }
+
+  private _fuck_shown(t: number) {
     FrameRate.fuck_shown.start()
     this.update_shown_flag.value = true
     const visible = [t - 2000, t + Settings.computes.visible.value + 2500] as [number, number]

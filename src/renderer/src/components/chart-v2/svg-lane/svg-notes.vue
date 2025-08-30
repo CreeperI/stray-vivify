@@ -33,7 +33,7 @@ const pending_note = computed(() => {
     ? ({
         time: pending_time.value,
         lane: pending_lane.value,
-        width: 1,
+        width: Settings.note.w,
         ani: [],
         len: pending_len.value
       } as ChartTypeV2.hold_note)
@@ -131,6 +131,7 @@ function x_of(note: ChartTypeV2.note) {
 }
 
 function del_note(n: ChartTypeV2.note) {
+  console.log('called del')
   chart.diff.remove_note(n)
 }
 
@@ -189,7 +190,7 @@ onUnmounted(() => {
           bottom: time_bottom(current_time, pending_note, mul),
           left: x_of(pending_note)
         }"
-        style="opacity: 0.7; pointer-events: none; z-index: 10"
+        style="opacity: 0.7; pointer-events: none"
       />
       <note-v2
         v-for="note in shown"
@@ -199,7 +200,7 @@ onUnmounted(() => {
           left: x_of(note)
         }"
         data-shown-note
-        @contextmenu="del_note(note)"
+        @click.right="del_note(note)"
       />
     </foreignObject>
   </g>

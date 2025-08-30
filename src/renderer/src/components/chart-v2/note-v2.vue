@@ -26,6 +26,27 @@ function getSrc(): string {
   return str + '.png'
 }
 
+function borderSrc(): string {
+  let str = note_style + '/' + note.width
+  if (note.width == 1) {
+    switch (note.lane) {
+      case 0:
+      case 1:
+        str += 'l'
+        break
+      case 2:
+      case 3:
+        str += 'r'
+        break
+    }
+  }else   if (note.width == 2) {
+    str += note.lane == 0 ? 'l' : note.lane == 2 ? 'r' : 'm'
+  } else if (note.width == 3) {
+    str += note.lane == 0 ? 'l' : 'r'
+  }
+  return str + 'h.png'
+}
+
 function size() {
   return lane_width * note.width + 'px'
 }
@@ -38,10 +59,24 @@ function left() {
   return `${note.lane * lane_width + 6}px`
 }
 
-function borderTop() {
+/*function border() {
   // @ts-expect-error here the len isnt guaranteed in typing but its only called
   // when its a ln so dont fuck it.
-  return `border-top: ${note.lane < 2 ? '#b3bdff' : '#feb3c7'} solid ${note.len * mul.value}px`
+  const width = note.len * mul.value
+  return `border-top: transparent solid ${width}px;` +
+    `border-image-source: url("${getSrc().replace('.png', 'h.png')}");`+
+    `border-image-outset: ${width}px;` +
+    `border-image-repeat: stretch; border-image-slice: 43;`
+}*/
+function border() {
+  // @ts-expect-error
+  const width = note.len * mul.value
+  const sliceHeight = 43 // 贴图实际高度（单位：px），按需替换为实际值
+  return `border:none; border-top: transparent solid ${width}px;
+    border-image-source: url("${borderSrc()}");
+    border-image-slice: ${sliceHeight};
+    border-image-repeat: stretch;
+  `
 }
 
 function height() {
@@ -50,7 +85,7 @@ function height() {
 
 function style() {
   if ('len' in note) {
-    return `height:${height()};width: ${size()}; left: ${left()}; ${borderTop()};`
+    return `height:${height()};width: ${size()}; left: ${left()}; ${border()};`
   } else {
     return `width: ${size()}; left: ${left()}`
   }
@@ -58,7 +93,7 @@ function style() {
 </script>
 
 <template>
-  <img alt="" :src="urlOf()" :style="style()"/>
+  <img alt="" :src="urlOf()" :style="style()" :data-time="note.time"/>
 </template>
 
 <style scoped>
