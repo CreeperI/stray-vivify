@@ -40,6 +40,9 @@ async function write_vsc() {
 async function export_chart() {
   Chart.$current.export_chart()
 }
+function open_exporter() {
+  modal.VscLoaderModal.show({})
+}
 
 function start_play() {
   Chart.$current.init_playfield()
@@ -59,7 +62,8 @@ function start_preview() {
         <div class="h-menu-btn-i">
           <div class="h-menu-btn-text" @click="read_vsb">打开vsb</div>
           <div class="h-menu-btn-text" @click="write_vsc">写入vsc</div>
-          <div class="h-menu-btn-text" @click="export_chart">打包&导出</div>
+          <div class="h-menu-btn-text" @click="export_chart">打包导出</div>
+          <div class="h-menu-btn-text" @click="open_exporter">导出... ></div>
           <div class="h-menu-btn-text h-menu-btn-i-sep" @click="modal.SettingModal.show({})">
             设置
           </div>

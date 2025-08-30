@@ -105,6 +105,12 @@ export default class ChartManager {
     return this.data
   }
 
+  write_file(id: string, fname: string, data: string) {
+    const chart = this.data.find((v) => v.id === id)
+    if (chart) {
+      fs.writeFileSync(path.join(this.charts_folder, id, fname), data)
+    }
+  }
   read_chart(id: string, ext: string) {
     const folder = path.join(this.charts_folder, id)
     if (fs.existsSync(path.join(folder, 'vs-chart.json'))) {
@@ -171,6 +177,10 @@ export default class ChartManager {
 
     zip.writeZip(path.join(this.charts_folder, id + '.svc'))
     shell.showItemInFolder(path.join(this.charts_folder, id + '.svc'))
+  }
+
+  show_file(id: string, fp: string) {
+    shell.showItemInFolder(path.join(this.charts_folder, id, fp))
   }
 
   async import_chart() {
@@ -256,6 +266,7 @@ export default class ChartManager {
       sender('notify-error', '导入失败', 1000)
     }
   }
+
 
   import_sprite(id: string) {
     const png = dialog.showOpenDialogSync({

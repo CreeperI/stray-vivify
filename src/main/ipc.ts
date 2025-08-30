@@ -137,6 +137,12 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'leave-fullscreen': () => {
       mw.setFullScreen(false)
+    },
+    'write-file': (_, id, fname, data) => {
+      chart_manager.write_file(id, fname, data)
+    },
+    'show-file': (_, id, fname) => {
+      chart_manager.show_file(id, fname)
     }
   } as Required<IpcHandlers.invoke.handler>
 }

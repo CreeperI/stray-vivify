@@ -303,6 +303,21 @@ export type Invoke = {
   'leave-fullscreen': {
     arg: {}
     r: void
+  },
+  'write-file': {
+    arg: {
+      id: string,
+      fname: string,
+      data: string
+    },
+    r: void
+  },
+  'show-file': {
+    arg: {
+      id: string,
+      fname: string
+    },
+    r: void
   }
 }
 

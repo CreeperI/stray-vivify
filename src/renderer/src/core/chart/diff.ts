@@ -27,6 +27,9 @@ function parse_type(v: string) {
       throw new Error('Unknown Type.' + v)
   }
 }
+function isNote(v: ChartTypeV2.note): v is ChartTypeV2.normal_note {
+  return 'snm' in v
+}
 
 export class Chart_diff {
   bound: Ref<ChartTypeV2.diff>
@@ -322,7 +325,7 @@ export class Chart_diff {
   }
 
   remove_note_no_undo(v: ChartTypeV2.note) {
-    if (!this.notes.includes(v)) return false
+    if (this.notes.indexOf(v) == -1) return false
     this.notes.splice(this.notes.indexOf(v), 1)
     this.shown.value = this.shown.value.filter((x) => x != v)
     return true
@@ -486,12 +489,23 @@ export class Chart_diff {
 
   validate_chart() {
     this.notes = this.notes.map(x => {
-      if (x.width == 1) return {
+      if (x.width == 1 && isNote(x)) return {
         lane: x.lane,
         time: x.time,
         width: 1,
         ani: x.ani,
         snm: 0,
+      }
+      if (!isNote(x)) {
+        if (x.len == 0) {
+          return {
+            lane: x.lane,
+            time: x.time,
+            width: x.width,
+            ani: x.ani,
+            snm: 0,
+          }
+        }
       }
       return x
     })

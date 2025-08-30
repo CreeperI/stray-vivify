@@ -90,6 +90,7 @@ const props = defineProps({
   font-size: 1.25rem;
   font-weight: 500;
   margin: 0;
+  user-select: none;
 }
 
 .vue-modal-btn-close {

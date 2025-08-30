@@ -14,21 +14,30 @@ const current_time = chart.audio.refs.current_ms
 const offset = Settings.settings.value.settings.offset3
 
 function time_bottom(t: number, note: ChartTypeV2.note, _mul: number) {
-  return Math.round(
-    window.screen.availHeight - 72 - (note.time - t - offset + (note['len'] ?? 0)) * _mul
-  )
+  // if (note.n == 'h')
+  //   return (note.t + note.h / 2 - t) * _mul + 'px'
+  // else
+  return (note.time - t - offset) * _mul + 'px'
 }
 
+function x_of(note: ChartTypeV2.note) {
+  return note.lane * lane_width + 6 + 'px'
+}
 const refs = playfield.refs
 </script>
 
 <template>
   <g id="svg-notes">
-    <note-v2
+    <foreignObject id="lane-notes" height="100%" width="100%" x="50" y="-80">
+      <note-v2
         v-for="note in shown"
         :note="note"
-        :y="time_bottom(current_time, note, mul)"
-    />
+        :style="{
+          bottom: time_bottom(current_time, note, mul),
+          left: x_of(note)
+        }"
+      />
+    </foreignObject>
   </g>
   <g class="laser" transform="translate(56)">
     <transition-group name="laser">

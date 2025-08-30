@@ -23,33 +23,42 @@ function getSrc(): string {
   } else if (note.width == 3) {
     str += note.lane == 0 ? 'l' : 'r'
   }
-  if ('len' in note) str += 'h'
   return str + '.png'
 }
 
 function size() {
-  return lane_width * note.width
+  return lane_width * note.width + 'px'
 }
 
-function x_of() {
-  return note.lane * lane_width + 56
+function urlOf() {
+  return `${getSrc()}`
+}
+
+function left() {
+  return `${note.lane * lane_width + 6}px`
+}
+
+function borderTop() {
+  // @ts-expect-error here the len isnt guaranteed in typing but its only called
+  // when its a ln so dont fuck it.
+  return `border-top: ${note.lane < 2 ? '#b3bdff' : '#feb3c7'} solid ${note.len * mul.value}px`
 }
 
 function height() {
-  return Math.floor((note['len'] ?? 0) * mul.value + 43 * (lane_width / 130))
+  return `${43 * (lane_width / 130)}px`
 }
 
+function style() {
+  if ('len' in note) {
+    return `height:${height()};width: ${size()}; left: ${left()}; ${borderTop()};`
+  } else {
+    return `width: ${size()}; left: ${left()}`
+  }
+}
 </script>
 
 <template>
-  <image
-    :href="getSrc()"
-    :width="size()"
-    :x="x_of()"
-    :height="height()"
-    preserveAspectRatio="none meet"
-    :data-time="note.time"
-  />
+  <img alt="" :src="urlOf()" :style="style()"/>
 </template>
 
 <style scoped>

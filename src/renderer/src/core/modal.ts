@@ -8,6 +8,7 @@ import CreditsModal from '@renderer/components/modals/credits-modal.vue'
 import AskIdModal from '@renderer/components/modals/ask-id-modal.vue'
 import ShortcutModal from '@renderer/components/modals/shortcut-modal.vue'
 import InspectorModal from '@renderer/components/modals/inspector-modal.vue'
+import VscLoaderModal from '@renderer/components/modals/vsc-loader-modal.vue'
 
 export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal, true)
@@ -18,6 +19,7 @@ export class modal<T extends Component> {
   static AskIdModal = new modal(AskIdModal)
   static ShortcutModal = new modal(ShortcutModal, true)
   static InspectorModal = new modal(InspectorModal, true)
+  static VscLoaderModal = new modal(VscLoaderModal, true)
 
   component: T
   priority: number

@@ -4,8 +4,8 @@ import { utils } from '@renderer/core/utils'
 import { Charter } from '@renderer/core/charter'
 
 export const Version = {
-  val: 8.1,
-  str: "v8a1"
+  val: 8.3,
+  str: "Build 8.3"
 }
 
 const note = {

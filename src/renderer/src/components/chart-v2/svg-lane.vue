@@ -24,7 +24,6 @@ const shown = chart.diff.shown
       id="lane-svg"
       :viewBox="view_port.join(' ')"
       :width="svg_width"
-      height="1080"
       preserveAspectRatio="xMidYMax slice"
     >
       <rect fill="#000000" height="100%" width="100%" x="0" y="0"></rect>
