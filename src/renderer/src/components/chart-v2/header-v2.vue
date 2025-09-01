@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { Charter } from '@renderer/core/charter'
 import { Chart } from '@renderer/core/chart/chart'
-import { notify } from '@renderer/core/notify'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { modal } from '@renderer/core/modal'
 
@@ -21,27 +20,8 @@ function close_chart() {
   Chart.current = undefined
   GlobalStat.route.change('start')
 }
-
-async function read_vsb() {
-  const r1 = await Charter.invoke('ask-vsb')
-  if (!r1) {
-    notify.error('读取vsb失败……')
-    return
-  }
-  const chart = Chart.current as Chart
-  chart.load_vsb(await Charter.invoke('read-vsb', r1.path))
-}
-
-async function write_vsc() {
-  const chart = Chart.current
-  if (!chart) throw new Error('?????')
-  chart.write_current_vsc()
-}
-async function export_chart() {
-  Chart.$current.export_chart()
-}
 function open_exporter() {
-  modal.VscLoaderModal.show({})
+  modal.IExporterModal.show({})
 }
 
 function start_play() {
@@ -56,14 +36,11 @@ function start_preview() {
 <template>
   <div class="header-wrapper">
     <div class="header-top">
-      <img alt="wug" class="header-wug" src="/yq.jpg" />
+      <img alt="wug" class="header-yq" src="/yq.jpg" />
       <div class="header-menu-ul">
         <div class="h-menu-btn-text">工具</div>
         <div class="h-menu-btn-i">
-          <div class="h-menu-btn-text" @click="read_vsb">打开vsb</div>
-          <div class="h-menu-btn-text" @click="write_vsc">写入vsc</div>
-          <div class="h-menu-btn-text" @click="export_chart">打包导出</div>
-          <div class="h-menu-btn-text" @click="open_exporter">导出... ></div>
+          <div class="h-menu-btn-text" @click="open_exporter">导入/导出</div>
           <div class="h-menu-btn-text h-menu-btn-i-sep" @click="modal.SettingModal.show({})">
             设置
           </div>
@@ -125,7 +102,7 @@ div {
   pointer-events: all;
 }
 
-.header-wug {
+.header-yq {
   height: 30px;
   margin: 0 15px;
   border-radius: 5px;

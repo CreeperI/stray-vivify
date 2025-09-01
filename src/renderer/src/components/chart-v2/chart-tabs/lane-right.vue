@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ARange from '@renderer/components/a-elements/a-range.vue'
 import { computed } from 'vue'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import { Charter } from '@renderer/core/charter'
 import { utils } from '@renderer/core/utils'
@@ -66,8 +66,8 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
         {{ utils.toTimeStr(current_ms / 1000) }}/{{ utils.toTimeStr(chart.length / 1000) }}
       </label>
       <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
-      <label>播放速度:{{ play_rate }}x</label>
-      <a-range v-model="writable_play_rate" max="2" min="0.5" step="0.1" />
+      <label @click="writable_play_rate = 1">播放速度:{{ play_rate }}x</label>
+      <a-range v-model="writable_play_rate" max="2" min="0.25" step="0.05" />
     </div>
   </div>
 </template>

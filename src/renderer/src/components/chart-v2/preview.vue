@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { Chart } from '@renderer/core/chart/chart'
-import SvgLane from '@renderer/components/chart-v2/svg-lane.vue'
+import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { utils } from '@renderer/core/utils'
-import { Settings, Version } from '@renderer/core/Settings'
+import { Settings, Version } from '@renderer/core/settings'
 import AImg from '@renderer/components/a-elements/a-img.vue'
-import FnCounter from '@renderer/components/chart-v2/FnCounter.vue'
+import FnCounter from '@renderer/components/chart-v2/chart-tabs/fn-counter.vue'
 import { notify } from '@renderer/core/notify'
 import { Invoke } from '@renderer/core/ipc'
 

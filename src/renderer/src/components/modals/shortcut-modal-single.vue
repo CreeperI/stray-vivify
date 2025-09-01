@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ShortCuts } from '@renderer/core/shortcut'
 import { ref, watch } from 'vue'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 
 const { short, msg } = defineProps<{
   msg: string

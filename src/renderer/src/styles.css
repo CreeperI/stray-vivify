@@ -46,15 +46,18 @@
   transition: opacity .5s;
   position: relative;
 }
-.fade-enter-from, .fade-leave-to {
+.fade-enter-from, .fade-leave-to, .fade-0\.2-leave-to, .fade-0\.2-enter-from {
   opacity: 0;
 }
-.fade-enter-to, .fade-leave-from {
+.fade-enter-to, .fade-leave-from, .fade-0\.2-enter-to, .fade-0\.2-leave-from {
   opacity: 1;
 }
 
 .fadeout-leave-active, .fadein-enter-active {
   transition: opacity .5s;
+}
+.fade-0\.2-enter-active, .fade-0\.2-leave-active {
+  transition: opacity .2s ease;
 }
 .fadeout-leave-to, .fadein-enter-from {
   opacity: 0;
@@ -97,4 +100,8 @@ input:invalid {
 }
 #svg-particle > rect {
   animation: note-particle-ani 0.15s ease-out;
+}
+
+.no-cursor{
+  cursor: none !important;
 }

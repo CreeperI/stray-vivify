@@ -6,14 +6,13 @@ import { createModal } from '@kolirt/vue-modal'
 import { ShortCuts } from '@renderer/core/shortcut'
 import { Charter } from '@renderer/core/charter'
 import { Invoke, load_ipc_handlers } from '@renderer/core/ipc'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Listener } from '@renderer/core/listener'
 import { Log } from '@renderer/core/log'
 import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/frame-rates'
-
-
+import { modal } from '@renderer/core/modal'
 
 const app = createApp(App).use(
   createModal({
@@ -55,15 +54,15 @@ Listener.on('resize', () => {
 })
 
 async function main() {
-  await Settings.set_from_storage()
+  const r = await Settings.set_from_storage()
   ShortCuts.fromJson(Settings.data.value.shortcut)
   await GlobalStat.update_all_chart()
-  await Invoke("leave-fullscreen")
+  await Invoke('leave-fullscreen')
 
   Settings.init_invertal()
   Log.handle()
   ShortCuts.handle()
-
+  GlobalStat.MouseTracker.init()
 
   setInterval(() => {
     Chart.current?.save()
@@ -76,6 +75,14 @@ async function main() {
 
   requestAnimationFrame(update_per_frame)
   app.mount('#app')
+  if (r) {
+    if (r[0] > 0) {
+      modal.ShowInformationModal.show({ msg: `已从更新的版本（版本号${r[1]}）回退至${r[2]}。` })
+    }
+    if (r[0] < 0) {
+      modal.VersionsModal.show({})
+    }
+  }
 }
 
 load_ipc_handlers()

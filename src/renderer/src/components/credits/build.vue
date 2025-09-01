@@ -7,10 +7,10 @@ defineProps<{
 }>()
 
 function toDate(y: string | number, m: string | number, d: string | number) {
-  if (typeof y == 'string') y = parseInt(y)
-  if (typeof m == 'string') m = parseInt(m)
-  if (typeof d == 'string') d = parseInt(d)
-  return new Date(y, m, d).toLocaleDateString()
+  if (typeof y == 'string') y = Number(y)
+  if (typeof m == 'string') m = Number(m)
+  if (typeof d == 'string') d = Number(d)
+  return new Date(y, m -1, d).toLocaleDateString()
 }
 </script>
 

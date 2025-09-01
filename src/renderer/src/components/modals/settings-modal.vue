@@ -2,11 +2,12 @@
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import AButton from '@renderer/components/a-elements/a-button.vue'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import SettingHeader from '@renderer/components/modals/setting-header.vue'
 import AColorInput from '@renderer/components/a-elements/a-color-input.vue'
 import { modal } from '@renderer/core/modal'
+import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 
 const r = Settings.settings
 </script>
@@ -40,6 +41,10 @@ const r = Settings.settings
         <div>
           <div>延迟（编辑模式）</div>
           <a-number-input class="in" v-model="r.settings.offset1" />
+        </div>
+        <div>
+          <word-helper msg="密度采样间隔" dec="密度折线的采样数，也即折线的数据点数" />
+          <a-number-input class="in" v-model="r.settings.density_data_count" min="10" />
         </div>
         <setting-header msg="预览模式" />
         <div>
@@ -104,6 +109,11 @@ const r = Settings.settings
           <div>延迟（视觉）</div>
           <a-number-input class="in" v-model="r.settings.offset3" />
         </div>
+        <setting-header msg="debug"/>
+        <div>
+          <div>Mouse Tracker</div>
+          <a-checkbox v-model="r.settings.mouse_tracker" />
+        </div>
       </div>
     </div>
     <template #footer>
@@ -119,13 +129,13 @@ const r = Settings.settings
   display: flex;
   flex-basis: 1.8rem;
   margin-bottom: 10px;
+  user-select: none;
 }
 
 .setting-list > div {
   cursor: pointer;
   border-bottom: 3px solid transparent;
   transition: all 0.2s linear;
-  user-select: none;
   width: 70px;
   text-align: center;
   padding: 0;

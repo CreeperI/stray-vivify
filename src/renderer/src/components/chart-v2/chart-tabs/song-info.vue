@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Charter } from '@renderer/core/charter'
-import SongInfoSingle from '@renderer/components/chart-v2/song-info-single.vue'
+import SongInfoSingle from '@renderer/components/chart-v2/chart-tabs/song-info-single.vue'
 import ASelect from '@renderer/components/a-elements/a-select.vue'
 import { ref } from 'vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'

@@ -2,10 +2,11 @@ import { storages } from '@preload/types'
 import { computed, ref, Ref, toRaw, watch } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Charter } from '@renderer/core/charter'
+import { Invoke } from '@renderer/core/ipc'
 
 export const Version = {
-  val: 8.3,
-  str: "Build 8.3"
+  val: 8.4,
+  str: 'Build 8.4'
 }
 
 const note = {
@@ -14,7 +15,7 @@ const note = {
   b: ref(false),
   hold: ref(false),
   set_width(v: number) {
-    if (v==1) this.s.value = false
+    if (v == 1) this.s.value = false
     if (v == this.w) this.width.value = 0
     else this.width.value = v
   },
@@ -73,7 +74,7 @@ const settings: Ref<storages.storage_scheme> = ref({
     },
     show_bpm_bottom: true,
     sprites: {
-      bar_color: "#ffffff",
+      bar_color: '#ffffff',
       bar_length: 6,
       bar_op: 0
     },
@@ -84,17 +85,20 @@ const settings: Ref<storages.storage_scheme> = ref({
       p2: 60,
       p3: 120,
       p4: 200,
-      p5: 60,
-    }
+      p5: 60
+    },
+    density_data_count: 100,
+    mouse_tracker: false
   },
   version: Version.val,
   shortcut: ''
-})
+} as storages.storage_scheme)
 
 watch(settings, () => {}, { deep: true })
 const computes = {
   mul: computed(() => (settings.value.settings.scale * 200 + 100) / 1000),
-  visible: computed(() => Math.round(Charter.refs.window.height.value / computes.mul.value))
+  visible: computed(() => Math.round(Charter.refs.window.height.value / computes.mul.value)),
+  mul_sec: computed(() => settings.value.settings.scale * 200 + 100)
 }
 
 export const Settings = {
@@ -103,15 +107,21 @@ export const Settings = {
   get editor(): storages.storage_scheme['settings'] {
     return settings.value.settings
   },
+  /**
+   * @returns undefined|number positive if switching from future versions,
+   *          0 -> no change, neg -> updated!
+   */
   async set_from_storage() {
-    const data = await Charter.invoke('get-conf')
+    const data = await Invoke('get-conf')
     if (!data) return
     const parsed = JSON.parse(data) as storages.storage_scheme
     utils.less_assign(this.data.value, parsed)
+    const d = [ Version.val - parsed.version , parsed.version, Version.val]
     this.data.value.version = Version.val
+    return d
   },
   save() {
-    Charter.invoke('save-conf', JSON.stringify(toRaw(this.data.value)))
+    Invoke('save-conf', JSON.stringify(toRaw(this.data.value)))
   },
   get version() {
     return settings.value.version
@@ -122,8 +132,7 @@ export const Settings = {
     }, 10000)
   },
   computes: computes,
-  note: note,
-
+  note: note
 }
 
 // @ts-ignore

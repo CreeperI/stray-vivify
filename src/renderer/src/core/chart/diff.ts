@@ -3,7 +3,7 @@ import { computed, ComputedRef, nextTick, Ref, ref, watch } from 'vue'
 import { Chart, ms } from './chart'
 import { Charter } from '../charter'
 import { utils } from '../utils'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import { notify } from '@renderer/core/notify'
 import { FrameRate } from '@renderer/core/frame-rates'
 
@@ -56,6 +56,7 @@ export class Chart_diff {
   shown_bar_beat: Ref<[[ms, number][], ms[]]>
   shown_timing: Ref<ChartTypeV2.timing[]>
   current_timing: ComputedRef<number>
+  density_data: Ref<number[]>
 
   constructor(chart: Chart) {
     this.bound = chart.ref.diff
@@ -87,6 +88,7 @@ export class Chart_diff {
         this.timing.findLastIndex((v) => v.time <= this.chart.ref.chart_current_time.value)
       )
     )
+    this.density_data = ref([0])
     watch(
       () => this.bound.value.timing,
       () => {
@@ -163,7 +165,8 @@ export class Chart_diff {
         diff2: Math.floor(Math.random() * 20) + '+',
         charter: '???'
       },
-      ani: []
+      ani: [],
+      sv: []
     }
   }
 
@@ -249,42 +252,6 @@ export class Chart_diff {
     this.notes = v
   }
 
-  set_timing(v: ChartTypeV2.timing[]) {
-    this.timing = v
-  }
-
-  set_diff(v: ChartTypeV2.diff) {
-    this.diff1 = v.meta.diff1
-    this.charter = v.meta.charter
-    this.diff2 = v.meta.diff2
-    this.set_notes(v.notes)
-    return this
-  }
-
-  save(): ChartTypeV2.diff {
-    this.sort()
-    return {
-      notes: this.notes,
-      meta: {
-        charter: this.charter,
-        diff1: this.diff1,
-        diff2: this.diff2,
-        diff_name: ''
-      },
-      timing: this.timing,
-      ani: []
-    }
-  }
-  sort() {
-    this.notes.sort(utils.sort_notes)
-    this.notes.forEach((x) => (x.time = Math.floor(x.time)))
-    return this.notes
-  }
-
-  to_sorted() {
-    return this.notes.toSorted(utils.sort_notes)
-  }
-
   add_note(v: ChartTypeV2.note) {
     const r = this.add_note_no_undo(v)
     if (r)
@@ -300,6 +267,7 @@ export class Chart_diff {
       this.push_undo(() => {
         this.undo_remove(v)
       })
+    return r
   }
 
   undo_add(v: ChartTypeV2.note) {
@@ -324,23 +292,31 @@ export class Chart_diff {
     this.remove_note(v)
   }
 
+  /** @returns if the note is successfully removed */
   remove_note_no_undo(v: ChartTypeV2.note) {
-    if (this.notes.indexOf(v) == -1) return false
-    this.notes.splice(this.notes.indexOf(v), 1)
     this.shown.value = this.shown.value.filter((x) => x != v)
+    const index = this.notes.findIndex(
+      (n) => n.time == v.time && n.lane == v.lane && n.width == v.width
+    )
+    if (index == -1) {
+      console.log('unexist', v)
+      return false
+    }
+    this.notes.splice(index, 1)
     return true
   }
 
-  add_note_no_undo(v: ChartTypeV2.note) {
+  /** @returns if the note is successfully added */
+  add_note_no_undo(v: ChartTypeV2.note): boolean {
     v.time = Math.floor(v.time)
-    if (this.notes.find((x) => x.time == v.time && x.lane == v.lane && x.width == x.width)) return
+    if (this.notes.find((x) => x.time == v.time && x.lane == v.lane && x.width == x.width))
+      return false
+    if ('len' in v) {
+      if (v.len == 0) v = { time: v.time, lane: v.lane, width: 1, ani: [], snm: 0}
+    }
     this.notes.push(v)
     this.fuck_shown(this.chart.audio.current_time, true)
     return true
-  }
-
-  del_note(v: ChartTypeV2.note) {
-    this.remove_note(v)
   }
 
   nearest(t: ms, round = true): ms {
@@ -348,31 +324,14 @@ export class Chart_diff {
     if (!bpm) throw new Error('No bpm found???')
     const passed = t - bpm.time
     const per_beat = (240 / (bpm.bpm * Settings.editor.meter)) * 1000
-    if (round) return Math.fround(Math.round(passed / per_beat) * per_beat + bpm.time)
-    else return Math.fround(Math.floor(passed / per_beat) * per_beat + bpm.time)
+    if (round) return Math.round(Math.round(passed / per_beat) * per_beat + bpm.time)
+    else return Math.round(Math.floor(passed / per_beat) * per_beat + bpm.time)
   }
 
   bpm_of_time(time: ms) {
     if (time <= 0) time = 0
     return this.timing.findLast((v) => v.time <= time)
   }
-
-  $bpm_of_time(time: ms) {
-    const r = this.bpm_of_time(time)
-    if (!r) throw new Error("what where's my timing")
-    return r
-  }
-
-  bpm_of_list(time: ms, list: ChartTypeV2.timing[]) {
-    if (time <= 0) time = 0
-    return list.findLast((v) => v.time <= time) ?? list[0]
-  }
-
-  time_per_beat(timing: ChartTypeV2.timing): ms {
-    const meter = Settings.editor.meter
-    return (240 / (timing.bpm * meter)) * 1000 // to ms
-  }
-
   push_undo(fn: () => void) {
     this.undo.push(fn)
     while (this.undo.length >= 20) this.undo.shift()
@@ -400,19 +359,6 @@ export class Chart_diff {
   fuck_shown(t: number, force = false) {
     if (force ? false : Math.abs(t - this.last_update) < 2000) return
     this._fuck_shown(t)
-  }
-
-  private _fuck_shown(t: number) {
-    FrameRate.fuck_shown.start()
-    this.update_shown_flag.value = true
-    const visible = [t - 2000, t + Settings.computes.visible.value + 2500] as [number, number]
-    this.shown.value = this.notes.filter((x) => {
-      return this.isVisible(x, visible)
-    })
-    this.update_bar_beat_timing(visible)
-    this.last_update = t
-    FrameRate.fuck_shown.end()
-    nextTick().then(() => (this.update_shown_flag.value = false))
   }
 
   update_bar_beat_timing(visible: [number, number]) {
@@ -492,14 +438,15 @@ export class Chart_diff {
   }
 
   validate_chart() {
-    this.notes = this.notes.map(x => {
-      if (x.width == 1 && isNote(x)) return {
-        lane: x.lane,
-        time: x.time,
-        width: 1,
-        ani: x.ani,
-        snm: 0,
-      }
+    this.notes = this.notes.map((x) => {
+      if (x.width == 1 && isNote(x))
+        return {
+          lane: x.lane,
+          time: x.time,
+          width: 1,
+          ani: x.ani,
+          snm: Math.min(1, x.snm)
+        }
       if (!isNote(x)) {
         if (x.len == 0) {
           return {
@@ -507,12 +454,50 @@ export class Chart_diff {
             time: x.time,
             width: x.width,
             ani: x.ani,
-            snm: 0,
+            snm: 0
           }
         }
       }
       return x
     })
   }
-}
 
+  calc_density() {
+    FrameRate.calc_density.start()
+    const max_count = Settings.editor.density_data_count
+    const per_length = this.chart.length / max_count
+    const d: number[] = []
+    for (let i = 0; i < this.chart.length; i += per_length) {
+      d.push(
+        (this.notes.filter((x) => utils.between(x.time, [i, i + per_length])).length / per_length) *
+          1000
+      )
+    }
+    this.density_data.value = d
+    FrameRate.calc_density.end()
+  }
+
+  private _fuck_shown(t: number) {
+    FrameRate.fuck_shown.start()
+    this.update_shown_flag.value = true
+    const visible = [t - 2000, t + Settings.computes.visible.value + 2500] as [number, number]
+    this.shown.value = this.notes.filter((x) => {
+      return this.isVisible(x, visible)
+    })
+      /*.toSorted((a,b) => {
+      if (isNote(a)) {
+        if (!isNote(b)) return 1
+        if (a.time == b.time) {
+          return b.width - a.width
+        } else return a.time - b.time
+      } else {
+        if (a.time == b.time) return b.width - a.width
+        else return a.time - b.time
+      }
+    })*/
+    this.update_bar_beat_timing(visible)
+    this.last_update = t
+    FrameRate.fuck_shown.end()
+    nextTick().then(() => (this.update_shown_flag.value = false))
+  }
+}

@@ -6,7 +6,9 @@ import { Charter } from '@renderer/core/charter'
 import ChartList from '@renderer/components/miscellaneous/chart-list.vue'
 import ChartV2 from '@renderer/components/chart-v2/chart-v2.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Version } from '@renderer/core/Settings'
+import { Version } from '@renderer/core/settings'
+import WordHelperOverlay from '@renderer/components/miscellaneous/word-helper-overlay.vue'
+import MouseTracker from '@renderer/components/miscellaneous/mouse-tracker.vue'
 
 const state = GlobalStat.route.route
 </script>
@@ -23,6 +25,8 @@ const state = GlobalStat.route.route
     @click="Charter.modal.VersionsModal.show({})"
     v-if="state != 'editor'"
   />
+  <WordHelperOverlay />
+  <MouseTracker />
 </template>
 <style scoped>
 .--build {
@@ -161,6 +165,7 @@ body {
 
 * {
   color: #b8dcee;
+  user-select: none;
 }
 
 #app {

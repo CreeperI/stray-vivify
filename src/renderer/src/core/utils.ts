@@ -87,7 +87,6 @@ export namespace utils {
     if (target == null) {
       throw new TypeError('Cannot convert undefined or null to object')
     }
-
     const to = Object(target)
 
     for (const source of sources) {
@@ -171,18 +170,13 @@ export namespace utils {
     return arr.reduce((a, b) => a + b, 0) / arr.length
   }
 
-  export function getSrc(note: ChartTypeV2.note): string {
-    if (note.width == 0) return ''
-    let str =  'stray:/__skin__' + '/' + note.width
-    if ('snm' in note) {
-      if (note.snm == 1) return str + 'b.png'
-      if (note.snm == 2 && note.width != 1) str += 's'
+  export function shallow_assign<T>(target: Required<T>, source: Partial<T>) {
+    for (const key of keyof(source)) {
+      target[key] = JSON.parse(JSON.stringify(source[key]))
     }
-    if (note.width == 2) {
-      str += note.lane == 0 ? 'l' : note.lane == 2 ? 'r' : 'm'
-    } else if (note.width == 3) {
-      str += note.lane == 0 ? 'l' : 'r'
-    }
-    return str + '.png'
+  }
+
+  export function keyof<T extends object>(obj: T) {
+    return Object.keys(obj) as (keyof T)[]
   }
 }

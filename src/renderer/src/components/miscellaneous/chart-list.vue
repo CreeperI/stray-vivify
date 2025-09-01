@@ -7,7 +7,7 @@ import { Chart } from '@renderer/core/chart/chart'
 import { charts_data } from '@preload/types'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { modal } from '@renderer/core/modal'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 
 const shown = ref(GlobalStat.all_chart)
 const search = ref('')
@@ -64,8 +64,8 @@ function detail(id: string) {
     <div class="chart-list-left">
       <div class="su-title">stray/vivify</div>
       <div class="su-desc" v-if="!display_id">
-        /a b30 <br />
-        等我有时间一定找个画师来加个看板
+        广告位招租 <br />
+        一定要请画师来加个看板……？
       </div>
       <div class="su-display" v-if="display_data">
         <div class="sd-title">{{ display_data.name }}</div>
@@ -192,6 +192,7 @@ function detail(id: string) {
   flex-direction: row;
   flex-wrap: wrap;
   transition: 0.2s ease all;
+  cursor: pointer;
 }
 
 .chart-unit:hover {

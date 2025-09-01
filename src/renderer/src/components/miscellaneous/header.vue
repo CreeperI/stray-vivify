@@ -9,7 +9,7 @@ const isMax = Charter.refs.window.isMaximized
 <template>
   <div class="header-wrapper">
     <div class="header-top">
-      <img alt="wug" class="header-wug" src="/yq.jpg" />
+      <img alt="wug" class="header-yq" src="/yq.jpg" />
       <div class="header-menu-ul">
         <div class="h-menu-btn-text" @click="Charter.modal.SettingModal.show({})">设置</div>
       </div>
@@ -52,7 +52,7 @@ div {
   pointer-events: all;
 }
 
-.header-wug {
+.header-yq {
   height: 30px;
   margin: 0 15px;
   border-radius: 5px;

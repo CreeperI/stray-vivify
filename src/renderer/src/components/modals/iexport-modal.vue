@@ -5,6 +5,8 @@ import { ref } from 'vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { Invoke } from '@renderer/core/ipc'
 import Hide from '@renderer/components/a-elements/hide.vue'
+import { Charter } from '@renderer/core/charter'
+import { notify } from '@renderer/core/notify'
 
 const chart = Chart.$current
 const gml = ref(`array_push(global.song_list,
@@ -53,11 +55,37 @@ function write_gml() {
     return Invoke("show-file", chart.id, 'songinfo.gml')
   })
 }
+
+async function read_vsb() {
+  const r1 = await Charter.invoke('ask-vsb')
+  if (!r1) {
+    notify.error('读取vsb失败……')
+    return
+  }
+  const chart = Chart.current as Chart
+  chart.load_vsb(await Charter.invoke('read-vsb', r1.path))
+}
+
+async function write_vsc() {
+  const chart = Chart.current
+  if (!chart) throw new Error('?????')
+  chart.write_current_vsc()
+}
+async function export_chart() {
+  Chart.$current.export_chart()
+}
 </script>
 
 <template>
-  <simple-modal size="sm" title="导出……">
+  <simple-modal size="sm" title="好多东西啊……">
     <div class="vsc-loader-wrapper">
+      <Hide title="导入/导出" :def="true">
+        <div class="iexports">
+          <a-button2 msg="打开vsb" @click="read_vsb" />
+          <a-button2 msg="导出vsc" @click="write_vsc" />
+          <a-button2 msg="导出svc" @click="export_chart" />
+        </div>
+      </Hide>
       <Hide title="gml">
         <div>修改下方的diff_constant_3来调整一个合适的定数，其它的帮你填好啦。</div>
         <div>注意准备的音乐需要和这个谱面是同一个id哦，或者你可以修改chart-id字段</div>
@@ -77,6 +105,11 @@ function write_gml() {
   max-height: 55vh;
   width: 100%;
   overflow-y: auto;
+}
+.iexports {
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
 }
 .vsc-loader-header {
   font-size: 1.5rem;

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ChartTypeV2 } from '@preload/types'
 import { Charter } from '@renderer/core/charter'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 
 const { note } = defineProps<{
   note: ChartTypeV2.note
@@ -39,7 +39,7 @@ function borderSrc(): string {
         str += 'r'
         break
     }
-  }else   if (note.width == 2) {
+  } else if (note.width == 2) {
     str += note.lane == 0 ? 'l' : note.lane == 2 ? 'r' : 'm'
   } else if (note.width == 3) {
     str += note.lane == 0 ? 'l' : 'r'
@@ -83,17 +83,22 @@ function height() {
   return `${43 * (lane_width / 130)}px`
 }
 
+function zix() {
+  if ('len' in note) return `z-index: ${5 - note.width}`
+  else return `z-index: ${9 - note.width}`
+}
+
 function style() {
   if ('len' in note) {
-    return `height:${height()};width: ${size()}; left: ${left()}; ${border()};`
+    return `${zix()};height:${height()};width: ${size()}; left: ${left()}; ${border()};`
   } else {
-    return `width: ${size()}; left: ${left()}`
+    return `${zix()};width: ${size()}; left: ${left()}`
   }
 }
 </script>
 
 <template>
-  <img alt="" :src="urlOf()" :style="style()" :data-time="note.time"/>
+  <img alt="" :src="urlOf()" :style="style()" :data-time="note.time" />
 </template>
 
 <style scoped>

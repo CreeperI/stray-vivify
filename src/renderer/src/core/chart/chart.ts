@@ -1,4 +1,4 @@
-import { ChartType, ChartTypeV2, Invoke } from '@preload/types'
+import { ChartType, ChartTypeV2 } from '@preload/types'
 import { notify } from '@renderer/core/notify'
 import { computed, ComputedRef, ref, Ref, watch, WritableComputedRef } from 'vue'
 import { Charter } from '@renderer/core/charter'
@@ -7,8 +7,10 @@ import { Chart_song } from '@renderer/core/chart/song'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Chart_playfield } from './playfield'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import { modal } from '@renderer/core/modal'
+import { Invoke } from '@renderer/core/ipc'
+import { utils } from '@renderer/core/utils'
 
 function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
@@ -149,14 +151,13 @@ export class Chart {
   }*/
 
   static async open_chart(id: string) {
-    const file = await Charter.invoke('open-song', id)
+    const file = await Invoke('open-song', id)
     const blob_path = URL.createObjectURL(await this.fetch_blob(file.path))
     const chart = await this.create(id, blob_path)
     if (file.data) {
       const data = this.parse_data(file.data)
       if (data.status == 'converted') {
-        await Charter.invoke('backup-chart', id, file.data)
-        notify.normal('')
+        await Invoke('backup-chart', id, file.data)
       }
       chart.set_chart(data.data)
       chart.set_name(data.data.song.name)
@@ -165,7 +166,7 @@ export class Chart {
     this.current = chart
     GlobalStat.route.change('editor')
     watch(
-      Charter.refs.state,
+      GlobalStat.route.route,
       () => {
         chart.audio.pause()
       },
@@ -281,7 +282,7 @@ export class Chart {
     return new_diff
   }
 
-  load_vsb(r: Invoke['read-vsb']['r']) {
+  load_vsb(r: [ChartTypeV2.note[], ChartTypeV2.timing[]] | undefined) {
     if (!r) return
     const new_diff = Chart_diff.createDiff()
     new_diff.notes = r[0]
@@ -327,6 +328,7 @@ export class Chart {
       this.ref.diff.value = this.diffs[this.ref.diff_index.value]
       this.set_header_name()
       this.fuck_shown()
+      this.diff.calc_density()
     })
     watch(this.audio.refs.current_ms, () => {
       this.fuck_shown()
@@ -367,10 +369,7 @@ export class Chart {
     this.song.set_song(v.song)
     this.diffs = v.diffs.map((x) => {
       let r = Chart_diff.createDiff()
-      if (x.notes) r.notes = x.notes.toSorted((a, b) => a.time - b.time)
-      if (x.timing) r.timing = x.timing.toSorted((a, b) => a.time - b.time)
-      if (x.meta) r.meta = x.meta
-      if (x.ani) r.ani = x.ani
+      utils.shallow_assign(r, x)
       return r
     })
     // this.diff.set_diff(this.diffs[this.diff_index])
@@ -385,8 +384,8 @@ export class Chart {
     if (this.audio.ele) {
       this.diff.floor_time()
       this.diff.validate_chart()
-      Charter.invoke('save-chart', this.id, JSON.stringify(this.chart))
-      return Charter.invoke(
+      Invoke('save-chart', this.id, JSON.stringify(this.chart))
+      return Invoke(
         'update-chart-data',
         this.id,
         JSON.stringify({
@@ -401,7 +400,7 @@ export class Chart {
   }
 
   write_current_vsc() {
-    Charter.invoke('write-vsc', this.id, this.diff.to_vsc().join('\n'), this.diff.diff1).then(() =>
+    Invoke('write-vsc', this.id, this.diff.to_vsc().join('\n'), this.diff.diff1).then(() =>
       notify.success('已导出为vsc!!!!!!!')
     )
   }
@@ -410,7 +409,7 @@ export class Chart {
     const r = this.save()
     if (!r) return
     await r
-    await Charter.invoke('export-zip', this.id)
+    await Invoke('export-zip', this.id)
   }
 
   init_playfield() {

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import { Charter } from '@renderer/core/charter'
 import SvgBarText from '@renderer/components/chart-v2/svg-lane/svg-bar-text.vue'
 import SvgBarLine from '@renderer/components/chart-v2/svg-lane/svg-bar-line.vue'

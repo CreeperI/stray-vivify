@@ -2,7 +2,7 @@
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import { Charter } from '@renderer/core/charter'
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 
 const chart = Charter.get_chart()
 const playfield = chart.$playfield

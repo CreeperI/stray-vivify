@@ -110,6 +110,24 @@ import Build from '@renderer/components/credits/build.vue'
       </template>
       <div>新增了一个导出选项。后面计划把所有导入导出都塞到这个里面，虽然不太方便（？</div>
     </Build>
+    <Build build="8.4" y="2025" m="8" d="31">
+      <template #bugs>
+        <div>#5 3.0流速下大概会相较鼠标偏后1个16分音</div>
+        <div>#10 修改了2宽bumper的lane摆放逻辑，现在是|-1.5-|-1-|-1.5-|的权重。</div>
+        <div>再次修复了validator的bug，这会导致所有1宽的东西全变成普通chip</div>
+        <div>修复了本界面日期多一个月的bug。</div>
+      </template>
+      <template #qol>
+        <div>#8 0面改米</div>
+        <div>#9 为note添加了z-index来处理遮挡关系，现在是chip在ln上面，其次宽在下。</div>
+        <div>长条上面的贴图可以改了。</div>
+        <div>将所有导入导出都放到了一个modal中。</div>
+      </template>
+      <div>添加了word-helper机制，用来做一些小提示。</div>
+      <div>现在在切换版本的时候会弹出来本页面。</div>
+      <div>密度（梯度）折线图</div>
+      <div>移除了ab30，广告位招租（？</div>
+    </Build>
   </div>
 </template>
 

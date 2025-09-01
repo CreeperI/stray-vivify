@@ -1,5 +1,5 @@
 import { Charter } from '@renderer/core/charter'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import { ref } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'

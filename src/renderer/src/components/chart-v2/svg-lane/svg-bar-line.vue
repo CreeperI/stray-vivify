@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import { computed } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 

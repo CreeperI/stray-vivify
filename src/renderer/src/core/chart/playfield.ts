@@ -1,6 +1,6 @@
 import { ChartTypeV2, storages } from '@preload/types'
 import { Ref, ref, shallowRef } from 'vue'
-import { Settings } from '../Settings'
+import { Settings } from '../settings'
 import { utils } from '../utils'
 import { Chart } from './chart'
 import { Chart_diff } from './diff'

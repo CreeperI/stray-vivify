@@ -74,6 +74,7 @@ const _fps_r = FrameRate.fps.refs
               <frame-rate-single msg="Fuck Shown" :r="FrameRate.fuck_shown" />
               <frame-rate-single msg="Play Frame" :r="FrameRate.playfield_frame" />
               <frame-rate-single msg="Pending-note" :r="FrameRate.update_pending" />
+              <frame-rate-single msg="calc-density" :r="FrameRate.calc_density" />
 
             </tbody>
           </table>

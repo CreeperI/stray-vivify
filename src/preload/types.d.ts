@@ -93,6 +93,11 @@ export namespace ChartTypeV2 {
 
   export type all_things = ChartType.note
 
+  export type SV = {
+    time: number
+    eff: number
+  }
+
   export type timing = {
     time: number
     bpm: number
@@ -123,6 +128,7 @@ export namespace ChartTypeV2 {
     timing: timing[]
     meta: meta
     ani: []
+    sv: SV[]
   }
   export type meta = {
     charter: string
@@ -417,6 +423,9 @@ export namespace storages {
       // miss-early
       p5: number
     }
+
+    density_data_count: number
+    mouse_tracker: boolean
   }
 
   export interface storage_scheme {

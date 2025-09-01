@@ -2,7 +2,7 @@
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import { computed, MaybeRef, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 
@@ -26,9 +26,18 @@ const pending_time = ref(0)
 const pending_lane = ref(0)
 const pending_snm = ref(0)
 const pending_len = ref(0)
+const pending_display = ref(false)
+const dragging = ref<ChartTypeV2.note>()
 let pending_hold_fixed = false
 let pending_hold_fixed_time = 0
 const pending_note = computed(() => {
+  if (dragging.value) {
+    return {
+      ...dragging.value,
+      time: pending_time.value,
+      lane: pending_lane.value
+    }
+  }
   return Settings.note.h
     ? ({
         time: pending_time.value,
@@ -45,7 +54,6 @@ const pending_note = computed(() => {
         snm: pending_snm.value
       } as ChartTypeV2.normal_note)
 })
-const pending_display = ref(false)
 
 watch(chart.audio.refs.paused, (v) => {
   if (!v) {
@@ -57,7 +65,10 @@ watch(chart.audio.refs.paused, (v) => {
 function update_pending_display(_trigger: 'enter' | 'leave' | 'note') {
   if (GlobalStat.chart_state.value != 0) return
   if (Settings.note.w == 0) pending_display.value = false
-  else if (_trigger == 'enter') pending_display.value = true
+  else if (_trigger == 'note') {
+    if (pending_hold_fixed) return
+    pending_display.value = false
+  } else if (_trigger == 'enter') pending_display.value = true
   else if (_trigger == 'leave') {
     pending_display.value = false
     pending_hold_fixed = false
@@ -71,8 +82,10 @@ function update_pending(e: MouseEvent) {
   if (e.target instanceof HTMLImageElement) {
     return
   }
-  const bottom = screen.availHeight - 80 - e.offsetY
-  const mouse_time = chart.diff.nearest(bottom / mul.value + current_time.value)
+  // initially here should be -80 but considering the transform of the beat lines that sucks
+  // so i just made it -100
+  const bottom = screen.availHeight - 100 - e.offsetY
+  const mouse_time = Math.floor(chart.diff.nearest(bottom / mul.value + current_time.value))
   if (pending_hold_fixed) {
     pending_len.value = Math.abs(mouse_time - pending_hold_fixed_time)
     if (mouse_time <= pending_hold_fixed_time) {
@@ -83,13 +96,16 @@ function update_pending(e: MouseEvent) {
     return
   }
   // this is initial value referring the % of the mouse
-  let lane: number = (e.offsetX - 28) / svg_width
-  switch (Settings.note.w) {
+  let lane: number = (e.offsetX) / svg_width
+  switch (dragging.value ? dragging.value.width : Settings.note.w) {
     case 2:
-      lane = Math.min(Math.floor(lane * 3), 2)
+      let lane2 = lane * 4
+      if (lane2 < 1.5) lane = 0
+      else if (lane2 > 2.5) lane = 2
+      else lane = 1
       break
     case 3:
-      lane = Math.min(Math.floor(lane * 2), 1)
+      lane = Math.round(lane)
       break
     case 4:
       lane = 0
@@ -119,6 +135,39 @@ function on_click() {
     return
   } else chart.diff.add_note(pending_note.value)
 }
+
+function del_note(n: ChartTypeV2.note) {
+  chart.diff.remove_note(n)
+}
+
+const opacity = computed(() => {
+  if (dragging.value == undefined) return 0.7
+  else return 1
+})
+
+function ondragstart(e: DragEvent, n: ChartTypeV2.note) {
+  console.log('start')
+  dragging.value = n
+  pending_hold_fixed = false
+  pending_len.value = 0
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.dropEffect = 'move'
+  }
+}
+function ondragend() {
+  console.log("end")
+  dragging.value = undefined
+}
+function ondrop() {
+  if (!dragging.value) return
+  chart.diff.add_note_no_undo(pending_note.value)
+  chart.diff.remove_note(dragging.value)
+
+  dragging.value = undefined
+}
+
+// ------------------ renderer functions -------------
 function time_bottom(t: number, note: ChartTypeV2.note, _mul: number) {
   // if (note.n == 'h')
   //   return (note.t + note.h / 2 - t) * _mul + 'px'
@@ -129,12 +178,6 @@ function time_bottom(t: number, note: ChartTypeV2.note, _mul: number) {
 function x_of(note: ChartTypeV2.note) {
   return note.lane * lane_width + 6 + 'px'
 }
-
-function del_note(n: ChartTypeV2.note) {
-  console.log('called del')
-  chart.diff.remove_note(n)
-}
-
 function fuck_wheel(e: WheelEvent) {
   if (GlobalStat.chart_state.value != 0) return
   if (e.ctrlKey || e.altKey) return
@@ -146,11 +189,11 @@ function fuck_wheel(e: WheelEvent) {
   const current_bpm = chart.diff.bpm_of_time(current_time)?.bpm ?? 120
 
   chart.audio.set_current_time(chart.diff.nearest(current_time))
-  const scr = (4 / meter) * (60 / current_bpm) * Math.sign(e.deltaY)
+  const scr = Math.round((4 / meter) * (60 / current_bpm) * Math.sign(e.deltaY) * 1000)
   if (Settings.editor.reverse_scroll) {
-    chart.audio.set_current_time(chart.audio.current_time + scr * 1000)
+    chart.audio.set_current_time(chart.audio.current_time + scr)
   } else {
-    chart.audio.set_current_time(chart.audio.current_time - scr * 1000)
+    chart.audio.set_current_time(chart.audio.current_time - scr)
   }
 }
 onMounted(() => {
@@ -165,6 +208,10 @@ onMounted(() => {
 onUnmounted(() => {
   document.getElementById('lane-wrapper')?.removeEventListener('wheel', fuck_wheel)
 })
+
+const pointer_class = computed(() => {
+  return dragging.value != undefined ? 'pt-dragging' : ''
+})
 </script>
 
 <template>
@@ -175,6 +222,7 @@ onUnmounted(() => {
     @mouseleave="() => update_pending_display('leave')"
   >
     <foreignObject
+      :class="pointer_class"
       id="lane-notes"
       height="100%"
       width="100%"
@@ -182,16 +230,9 @@ onUnmounted(() => {
       y="-80"
       @click="on_click"
       @mousemove.capture="update_pending"
+      @drop="ondrop"
+      @dragover.prevent="update_pending"
     >
-      <note-v2
-        v-if="pending_display"
-        :note="pending_note"
-        :style="{
-          bottom: time_bottom(current_time, pending_note, mul),
-          left: x_of(pending_note)
-        }"
-        style="opacity: 0.7; pointer-events: none"
-      />
       <note-v2
         v-for="note in shown"
         :note="note"
@@ -201,6 +242,20 @@ onUnmounted(() => {
         }"
         data-shown-note
         @click.right="del_note(note)"
+        @dragstart="(e) => ondragstart(e, note)"
+        @dragend="ondragend"
+        draggable="true"
+        :data-is-dragged="dragging == note"
+      />
+      <note-v2
+        v-if="pending_display"
+        :note="pending_note"
+        :style="{
+          bottom: time_bottom(current_time, pending_note, mul),
+          left: x_of(pending_note),
+          opacity: opacity
+        }"
+        style="pointer-events: none"
       />
     </foreignObject>
   </g>
@@ -209,5 +264,11 @@ onUnmounted(() => {
 <style scoped>
 .not-playing > * > img[data-shown-note] {
   transition: bottom 0.1s cubic-bezier(0, 0, 0, 0.7);
+}
+.pt-dragging {
+  cursor: grabbing;
+}
+#lane-notes > img[data-is-dragged='true'] {
+  opacity: 0;
 }
 </style>

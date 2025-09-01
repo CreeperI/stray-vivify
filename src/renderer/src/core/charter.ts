@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { notify } from '@renderer/core/notify'
 import { Chart } from '@renderer/core/chart/chart'
 import { modal } from '@renderer/core/modal'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 
 const ipcRenderer = window.electron.ipcRenderer
 const _invoke: IpcHandlers.invoke.invoke = ipcRenderer.invoke

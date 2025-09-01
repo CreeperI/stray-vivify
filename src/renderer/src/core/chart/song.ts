@@ -1,6 +1,7 @@
 import { Ref, ref, watch } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
 import { Chart } from '@renderer/core/chart/chart'
+import { utils } from '@renderer/core/utils'
 
 function roman_need(str: string) {
   return /[^\u0000-\u007F]/u.test(str)
@@ -136,13 +137,7 @@ export class Chart_song {
   }
 
   set_song(v: ChartTypeV2.song) {
-    this.name = v.name
-    this.composer = v.composer
-    this.bpm = v.bpm
-    this.name_roman = v.name_roman
-    this.composer_roman = v.composer_roman
-    this.ref = v.ref
-    this.sprite = v.sprite
+    utils.shallow_assign(this, v)
   }
 
   save(): ChartTypeV2.song {

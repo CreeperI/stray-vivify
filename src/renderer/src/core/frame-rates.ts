@@ -1,5 +1,4 @@
 import { ref, Ref } from 'vue'
-import { Settings } from '@renderer/core/Settings'
 import { utils } from '@renderer/core/utils'
 
 const all :_FrameRateClass[] = []
@@ -12,7 +11,7 @@ export type _frameRateRef = Ref<{
   call_count: number
 }>
 
-const recent_max_length = Settings.editor.time_max_length
+const recent_max_length = 10
 export class _FrameRateClass {
   recent: number[]
   // 平均值
@@ -117,4 +116,5 @@ export const FrameRate = {
   fps: new _FPS(),
   playfield_frame: new _FrameRateClass(),
   update_pending: new _FrameRateClass(),
+  calc_density: new _FrameRateClass(),
 }

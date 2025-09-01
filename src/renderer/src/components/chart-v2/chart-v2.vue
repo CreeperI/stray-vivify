@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import SvgLane from '@renderer/components/chart-v2/svg-lane.vue'
+import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
 import HeaderV2 from '@renderer/components/chart-v2/header-v2.vue'
-import FnLeft from '@renderer/components/chart-v2/fn-left.vue'
-import FnRight from '@renderer/components/chart-v2/fn-right.vue'
+import LaneLeft from '@renderer/components/chart-v2/chart-tabs/lane-left.vue'
+import LaneRight from '@renderer/components/chart-v2/chart-tabs/lane-right.vue'
 import { computed } from 'vue'
-import SongInfo from '@renderer/components/chart-v2/song-info.vue'
+import SongInfo from '@renderer/components/chart-v2/chart-tabs/song-info.vue'
 import { Charter } from '@renderer/core/charter'
-import { Settings } from '@renderer/core/Settings'
-import ChartTiming from '@renderer/components/chart-v2/chart-timing.vue'
+import { Settings } from '@renderer/core/settings'
+import ChartTiming from '@renderer/components/chart-v2/chart-tabs/chart-timing.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import Preview from '@renderer/components/chart-v2/preview.vue'
 import Playfield from '@renderer/components/chart-v2/playfield.vue'
@@ -48,9 +48,9 @@ const chart_state = GlobalStat.chart_state
       <header-v2 v-model="active" />
       <song-info v-if="active == 1" />
       <div class="chart-main" v-else-if="active == 2">
-        <fn-left class="chart-fn" v-if="fn_shown" />
+        <lane-left class="chart-fn" v-if="fn_shown" />
         <svg-lane class="svg-lane" />
-        <fn-right class="chart-fn" v-if="fn_shown" />
+        <lane-right class="chart-fn" v-if="fn_shown" />
       </div>
       <chart-timing v-if="active == 3"></chart-timing>
     </template>

@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ComputedRef } from 'vue'
-import { Settings } from '@renderer/core/Settings'
+import { Settings } from '@renderer/core/settings'
 import { ChartTypeV2 } from '@preload/types'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
-import FnCounter from '@renderer/components/chart-v2/FnCounter.vue'
+import FnCounter from '@renderer/components/chart-v2/chart-tabs/fn-counter.vue'
+import FnDensity from '@renderer/components/chart-v2/chart-tabs/fn-density.vue'
 
 const { width, s, hold, b } = Settings.note
 
@@ -82,6 +83,7 @@ const pending_note = computed(() => {
       </div>
     </div>
     <fn-counter />
+    <fn-density />
   </div>
 </template>
 
