@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { Version } from '@renderer/core/settings'
+
 defineProps<{
   build: number | string
   y: string | number
@@ -15,8 +17,8 @@ function toDate(y: string | number, m: string | number, d: string | number) {
 </script>
 
 <template>
-  <div class="builds">
-    <div class="build-title">
+  <div class="builds" :data-is-current-version="Number(build) == Version.val">
+    <div class="build-title" >
       Build {{ build }}
       <span class="build-date">
         {{ toDate(y, m, d) }}
@@ -29,7 +31,7 @@ function toDate(y: string | number, m: string | number, d: string | number) {
       <div class="build-content-title">Bug修复</div>
       <slot name="bugs"></slot>
     </div>
-    <div v-if="$slots.bugs" class="build-content pointed-list">
+    <div v-if="$slots.qol" class="build-content pointed-list">
       <div class="build-content-title">优化</div>
       <slot name="qol"></slot>
     </div>

@@ -96,7 +96,7 @@ function update_pending(e: MouseEvent) {
     return
   }
   // this is initial value referring the % of the mouse
-  let lane: number = (e.offsetX) / svg_width
+  let lane: number = e.offsetX / svg_width
   switch (dragging.value ? dragging.value.width : Settings.note.w) {
     case 2:
       let lane2 = lane * 4
@@ -145,6 +145,8 @@ const opacity = computed(() => {
   else return 1
 })
 
+const _tp_img = document.createElement('img')
+_tp_img.src = ''
 function ondragstart(e: DragEvent, n: ChartTypeV2.note) {
   console.log('start')
   dragging.value = n
@@ -153,16 +155,16 @@ function ondragstart(e: DragEvent, n: ChartTypeV2.note) {
   if (e.dataTransfer) {
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.dropEffect = 'move'
+    e.dataTransfer.setDragImage(_tp_img, 0, 0)
   }
 }
 function ondragend() {
-  console.log("end")
+  console.log('end')
   dragging.value = undefined
 }
 function ondrop() {
   if (!dragging.value) return
-  chart.diff.add_note_no_undo(pending_note.value)
-  chart.diff.remove_note(dragging.value)
+  if (chart.diff.add_note_no_undo(pending_note.value)) chart.diff.remove_note(dragging.value)
 
   dragging.value = undefined
 }
@@ -244,7 +246,6 @@ const pointer_class = computed(() => {
         @click.right="del_note(note)"
         @dragstart="(e) => ondragstart(e, note)"
         @dragend="ondragend"
-        draggable="true"
         :data-is-dragged="dragging == note"
       />
       <note-v2
@@ -255,7 +256,7 @@ const pointer_class = computed(() => {
           left: x_of(pending_note),
           opacity: opacity
         }"
-        style="pointer-events: none"
+        style="pointer-events: none; z-index: 10"
       />
     </foreignObject>
   </g>
@@ -267,8 +268,5 @@ const pointer_class = computed(() => {
 }
 .pt-dragging {
   cursor: grabbing;
-}
-#lane-notes > img[data-is-dragged='true'] {
-  opacity: 0;
 }
 </style>

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
+import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 
 const { msg } = defineProps<{ msg: string }>()
 </script>
@@ -8,7 +9,7 @@ const { msg } = defineProps<{ msg: string }>()
   <simple-modal size="m">
     {{ msg }}
     <template #footer>
-      <button class="btn btn-primary" @click="$emit('close')">OK</button>
+      <a-button2 msg="ok" @click="$emit('close')"/>
     </template>
   </simple-modal>
 </template>

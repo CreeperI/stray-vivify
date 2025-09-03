@@ -76,10 +76,10 @@ async function main() {
   requestAnimationFrame(update_per_frame)
   app.mount('#app')
   if (r) {
-    if (r[0] > 0) {
+    if (r[0] < 0) {
       modal.ShowInformationModal.show({ msg: `已从更新的版本（版本号${r[1]}）回退至${r[2]}。` })
     }
-    if (r[0] < 0) {
+    if (r[0] > 0) {
       modal.VersionsModal.show({})
     }
   }
@@ -87,3 +87,4 @@ async function main() {
 
 load_ipc_handlers()
 main()
+GlobalStat.CheckSkin.check_skin()

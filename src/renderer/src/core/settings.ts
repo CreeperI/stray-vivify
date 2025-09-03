@@ -5,8 +5,8 @@ import { Charter } from '@renderer/core/charter'
 import { Invoke } from '@renderer/core/ipc'
 
 export const Version = {
-  val: 8.4,
-  str: 'Build 8.4'
+  val: 8.5,
+  str: 'Build 8.5'
 }
 
 const note = {

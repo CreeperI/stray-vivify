@@ -294,7 +294,7 @@ export class Chart_diff {
 
   /** @returns if the note is successfully removed */
   remove_note_no_undo(v: ChartTypeV2.note) {
-    this.shown.value = this.shown.value.filter((x) => x != v)
+    this.shown.value = this.shown.value.filter((n) => !(n.time == v.time && n.lane == v.lane && n.width == v.width))
     const index = this.notes.findIndex(
       (n) => n.time == v.time && n.lane == v.lane && n.width == v.width
     )

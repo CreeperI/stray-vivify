@@ -3,7 +3,7 @@ import fs, { existsSync, readFileSync } from 'fs'
 import VsbParser from './vsbParser'
 import * as electron from 'electron'
 import { dialog, ipcMain, shell } from 'electron'
-import { basename } from 'node:path'
+import path, { basename } from 'node:path'
 import ChartManager from './chart_manager'
 import { file_paths } from './fp_parser'
 
@@ -143,6 +143,9 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'show-file': (_, id, fname) => {
       chart_manager.show_file(id, fname)
+    },
+    'open-skin-folder': () => {
+      shell.showItemInFolder(path.join(file_paths.skin, '1.png'))
     }
   } as Required<IpcHandlers.invoke.handler>
 }

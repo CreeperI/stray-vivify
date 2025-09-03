@@ -128,6 +128,15 @@ import Build from '@renderer/components/credits/build.vue'
       <div>密度（梯度）折线图</div>
       <div>移除了ab30，广告位招租（？</div>
     </Build>
+    <Build build="8.5" y="2025" m="9" d="1">
+      <template #bugs>
+        <div>修复了本页面在没有bug修复的时候不会显示qol的bug。（？？？</div>
+      </template>
+      <template #qol>
+        <div>新增了一个检查skin缺失哪些贴图的modal。</div>
+        <div>给本页面增加了高亮。</div>
+      </template>
+    </Build>
   </div>
 </template>
 

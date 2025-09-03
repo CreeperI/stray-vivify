@@ -325,6 +325,10 @@ export type Invoke = {
     },
     r: void
   }
+  'open-skin-folder': {
+    arg: {}
+    r: void
+  }
 }
 
 export type Send = {
