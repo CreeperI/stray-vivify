@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { join } from 'path'
 import path, { basename, extname } from 'node:path'
-import { file_paths } from './fp_parser'
+import { file_paths } from './fp-parser'
 
 function convertPath(originalPath: string) {
   const match = originalPath.match(/^\/([a-zA-Z])\/(.*)$/)

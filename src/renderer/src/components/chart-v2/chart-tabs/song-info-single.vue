@@ -9,7 +9,7 @@ const { name, disabled } = defineProps<{name: string, disabled?: boolean}>()
 <template>
   <div class="song-info-single">
     <div :data-disabled="disabled">{{name}}</div>
-    <a-text-input :disabled="disabled" v-model="model" class="sis-input" />
+    <a-text-input :disabled="disabled" v-model.trim="model" class="sis-input" />
   </div>
 </template>
 

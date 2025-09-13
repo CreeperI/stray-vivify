@@ -58,6 +58,12 @@ export class Chart_diff {
   current_timing: ComputedRef<number>
   density_data: Ref<number[]>
 
+  on_sv: boolean
+  last_svs: Ref<ChartTypeV2.parsed_sv[]>
+  shown_sv: Ref<ChartTypeV2.parsed_sv[]>
+  last_sv_update: number
+  sv_update_threshold: [number, number]
+
   constructor(chart: Chart) {
     this.bound = chart.ref.diff
     this.chart = chart
@@ -85,7 +91,7 @@ export class Chart_diff {
     this.current_timing = computed(() =>
       Math.max(
         0,
-        this.timing.findLastIndex((v) => v.time <= this.chart.ref.chart_current_time.value)
+        this.timing.findLastIndex((v) => v.time <= this.chart.audio.current_time)
       )
     )
     this.density_data = ref([0])
@@ -103,6 +109,12 @@ export class Chart_diff {
         this.update_bar_beat_timing(this.visible)
       }
     )
+
+    this.on_sv = false
+    this.last_svs = ref(this.parsed_sv)
+    this.shown_sv = ref([])
+    this.last_sv_update = 0
+    this.sv_update_threshold = [0, 0]
   }
 
   get notes() {
@@ -153,6 +165,28 @@ export class Chart_diff {
       this.chart.audio.current_time - 1000,
       this.chart.audio.current_time + Charter.refs.visible.value + 2500
     ]
+  }
+
+  get sv() {
+    return this.bound.value.sv
+  }
+  set sv(v) {
+    this.bound.value.sv = v
+  }
+
+  get parsed_sv() {
+    const sv: ChartTypeV2.parsed_sv[] = [{ time: 0, eff: 1, line: true, base: 0 }]
+    this.sort_sv()
+    this.sv.map((v) => {
+      if ('type' in v) {
+        // here the V is a SV_Factory
+        switch (v.type) {
+          case 0:
+            sv.push(...this.parse_sv_aq(v))
+        }
+      } else sv.push({ time: v.time, eff: v.eff, line: true, base: 0 })
+    })
+    return sv
   }
 
   static createDiff(): ChartTypeV2.diff {
@@ -294,7 +328,9 @@ export class Chart_diff {
 
   /** @returns if the note is successfully removed */
   remove_note_no_undo(v: ChartTypeV2.note) {
-    this.shown.value = this.shown.value.filter((n) => !(n.time == v.time && n.lane == v.lane && n.width == v.width))
+    this.shown.value = this.shown.value.filter(
+      (n) => !(n.time == v.time && n.lane == v.lane && n.width == v.width)
+    )
     const index = this.notes.findIndex(
       (n) => n.time == v.time && n.lane == v.lane && n.width == v.width
     )
@@ -312,7 +348,7 @@ export class Chart_diff {
     if (this.notes.find((x) => x.time == v.time && x.lane == v.lane && x.width == x.width))
       return false
     if ('len' in v) {
-      if (v.len == 0) v = { time: v.time, lane: v.lane, width: 1, ani: [], snm: 0}
+      if (v.len == 0) v = { time: v.time, lane: v.lane, width: 1, ani: [], snm: 0 }
     }
     this.notes.push(v)
     this.fuck_shown(this.chart.audio.current_time, true)
@@ -330,8 +366,9 @@ export class Chart_diff {
 
   bpm_of_time(time: ms) {
     if (time <= 0) time = 0
-    return this.timing.findLast((v) => v.time <= time)
+    return this.timing.findLast((v) => v.time <= time) ?? this.timing[0]
   }
+
   push_undo(fn: () => void) {
     this.undo.push(fn)
     while (this.undo.length >= 20) this.undo.shift()
@@ -357,6 +394,9 @@ export class Chart_diff {
   }
 
   fuck_shown(t: number, force = false) {
+    if (this.on_sv) {
+      this.fuck_sv_shown(t, force)
+    }
     if (force ? false : Math.abs(t - this.last_update) < 2000) return
     this._fuck_shown(t)
   }
@@ -382,6 +422,7 @@ export class Chart_diff {
   }
 
   to_vsc() {
+    this.validate_chart()
     const strs: string[] = []
     const parsed_notes = this.notes.map((note) => {
       if ('len' in note) {
@@ -392,11 +433,12 @@ export class Chart_diff {
           n: 'h'
         }
       } else {
-        if (note.width == 1) return { time: note.time, lane: note.lane, n: 'n' }
-        if (note.snm == 2) return { time: note.time, lane: note.lane, n: 's' }
-        else if (note.snm == 1) {
+        // then its a note
+        if (note.snm == 1) {
           if (note.width == 1) return { time: note.time, lane: note.lane, n: 'm' }
           return { time: note.time, lane: note.lane, n: 'mb' }
+        } else if (note.snm == 2) {
+          return { time: note.time, lane: note.lane, n: 's' }
         } else {
           if (note.width == 1) return { time: note.time, lane: note.lane, n: 'n' }
           else return { time: note.time, lane: note.lane, n: 'b' }
@@ -477,6 +519,119 @@ export class Chart_diff {
     FrameRate.calc_density.end()
   }
 
+  sv_base(t: ms, mul: number) {
+    FrameRate.sv_base.start()
+    const all_sv = this.parsed_sv
+    // having a guard of [0] because for neg timing it's the first sv
+    const current_sv = Math.max(
+      all_sv.findLastIndex((v) => v.time <= t),
+      0
+    )
+
+    all_sv[current_sv].base = (all_sv[current_sv].time - t) * all_sv[current_sv].eff * mul
+
+    for (let i = current_sv + 1; i < all_sv.length; i++) {
+      all_sv[i].base =
+        all_sv[i - 1].base + (all_sv[i].time - all_sv[i - 1].time) * all_sv[i].eff * mul
+    }
+    if (current_sv != 0) {
+      for (let i = current_sv - 1; i >= 0; i--) {
+        all_sv[i].base =
+          all_sv[i + 1].base - (all_sv[i + 1].time - all_sv[i].time) * all_sv[i].eff * mul
+      }
+    }
+    FrameRate.sv_base.end()
+    return all_sv
+  }
+
+  sort_sv() {
+    this.sv = this.sv.toSorted((a, b) => a.time - b.time)
+  }
+
+  add_sv(sv: ChartTypeV2.sv_all) {
+    if ('type' in sv) {
+      if (
+        this.sv.find((x) => {
+          if ('type' in x) {
+            // if that starts earlier, then the sv cant start within its duration, so returns true if it's within.
+            if (x.time > sv.time) return sv.time < x.end
+            // else the new sv starts earlier, then it cant be overlapped. true if overlapped
+            else return sv.end > x.time
+          }
+          // a normal sv, then it cant exist within factory time
+          return utils.between(x.time, [sv.time, sv.end])
+        })
+      )
+        return
+    } else if (
+      this.sv.find((x) => {
+        if ('type' in x) {
+          return utils.between(sv.time, [x.time, x.end])
+        } else return x.time == sv.time
+      })
+    )
+      return
+
+    this.sv.push(sv)
+    this.update_last_svs()
+  }
+
+  remove_sv(sv: ChartTypeV2.sv_all) {
+    this.sv = this.sv.filter((x) => x.time != sv.time)
+    this.update_last_svs()
+  }
+
+  sv_time_bottom(note: ChartTypeV2.note, mul: number) {
+    const in_which_sv =
+      this.last_svs.value.findLast((x) => x.time <= note.time) ?? this.last_svs.value[0]
+    return (note.time - in_which_sv.time) * in_which_sv.eff * mul + in_which_sv.base
+  }
+
+  fuck_sv_shown(t: ms, force = false) {
+    if (utils.between(t, this.sv_update_threshold) && !force) return
+    const base = this.last_svs.value
+
+    const min_time = this.first_time_of_px(-2 * window.screen.height)
+    const max_time = this.last_time_of_px(4 * window.screen.height)
+
+    this.sv_update_threshold = [
+      this.first_time_of_px(-window.screen.height),
+      this.last_time_of_px(3 * window.screen.height)
+    ]
+
+    this.shown.value = this.notes.filter((x) => utils.between(x.time, [min_time, max_time]))
+    this.shown_sv.value = base.filter((v) => utils.between(v.time, [min_time, max_time]))
+  }
+
+  update_last_svs() {
+    this.last_svs.value = this.parsed_sv
+  }
+
+  last_time_of_px(px: number) {
+    const on = this.last_svs.value.findLast((x) => x.base <= px) ?? this.last_svs.value[0]
+    return (px - on.base) / on.eff
+  }
+
+  first_time_of_px(px: number) {
+    const on =
+      this.last_svs.value.find((x) => x.base >= px) ??
+      this.last_svs.value[this.last_svs.value.length - 1]
+    return (px - on.base) / on.eff
+  }
+
+  update() {
+    if (this.on_sv) {
+      this.fuck_sv_shown(this.chart.audio.current_time)
+    } else {
+    this.fuck_shown(this.chart.audio.current_time)
+
+    }
+  }
+
+  calc_shown_sv() {
+    // wtf
+  }
+
   private _fuck_shown(t: number) {
     FrameRate.fuck_shown.start()
     this.update_shown_flag.value = true
@@ -484,7 +639,7 @@ export class Chart_diff {
     this.shown.value = this.notes.filter((x) => {
       return this.isVisible(x, visible)
     })
-      /*.toSorted((a,b) => {
+    /*.toSorted((a,b) => {
       if (isNote(a)) {
         if (!isNote(b)) return 1
         if (a.time == b.time) {
@@ -499,5 +654,36 @@ export class Chart_diff {
     this.last_update = t
     FrameRate.fuck_shown.end()
     nextTick().then(() => (this.update_shown_flag.value = false))
+  }
+
+  private parse_sv_aq(f: ChartTypeV2.SV_Factory.SV_aq): ChartTypeV2.parsed_sv[] {
+    let _times = this.notes.map((x) => x.time).filter((x) => utils.between(x, [f.time, f.end]))
+    const times = [...new Set(_times)]
+    times.sort((a, b) => a - b)
+
+    const parsed: ChartTypeV2.parsed_sv[] = []
+    for (let i = 0; i < times.length; i++) {
+      const time = times[i]
+      parsed.push({
+        time: time - 1,
+        eff: f.eff1,
+        line: false,
+        base: 0
+      })
+      parsed.push({
+        time: time + 1,
+        eff: f.eff2,
+        line: false,
+        base: 0
+      })
+    }
+    parsed.pop()
+    parsed.push({
+      time: f.end,
+      eff: 1,
+      line: true,
+      base: 0
+    })
+    return parsed
   }
 }

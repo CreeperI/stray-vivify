@@ -23,4 +23,9 @@ const {msg} = defineProps<{msg: string}>()
 .a2-button:hover {
   transform: scale(1.1);
 }
+.a2-button[disabled] {
+  cursor: not-allowed;
+  pointer-events: none;
+  opacity: 0.7;
+}
 </style>

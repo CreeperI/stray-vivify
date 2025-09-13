@@ -18,38 +18,38 @@ export const Log = {
   handle() {
     let oldlog = console.log.bind(console)
     console.log = function (...args: any) {
+      oldlog(...args)
       args = args.map((v) => {
         if (typeof v == 'object') return JSON.stringify(v)
         else return v
       })
       Log.msg(args.join(' '))
-      oldlog(...args)
     }
     let oldwarn = console.warn.bind(console)
     console.warn = function (...args: any) {
+      oldwarn(...args)
       args = args.map((v) => {
         if (typeof v == 'object') return JSON.stringify(v)
         else return v
       })
       Log.warn(args.join(' '))
-      oldwarn(...args)
     }
     let olderr = console.error.bind(console)
     console.error = function (...args: any) {
+      olderr(...args)
       args = args.map((v) => {
         if (typeof v == 'object') return JSON.stringify(v)
         else return v
       })
       Log.err(args.join(' '))
-      olderr(...args)
     }
     let olddebug = console.debug.bind(console)
     console.debug = function (...args: any) {
+      olddebug(...args)
       args = args.map((v) => {
         if (typeof v == 'object') return JSON.stringify(v)
         else return v
       })
-      olddebug(...args)
       Log.debug(args.join(' '))
     }
     window.addEventListener(

@@ -14,8 +14,10 @@ export namespace GlobalStat {
     }
   }
   export let all_chart = [] as charts_data
+  export const all_chart_ref = ref(all_chart)
   export async function update_all_chart() {
     all_chart = (await Invoke('get-charts-data')).sort((a, b) => b.last_open - a.last_open)
+    all_chart_ref.value = all_chart
   }
   export const window_max_state = ref(false)
   export function log(...args: any) {

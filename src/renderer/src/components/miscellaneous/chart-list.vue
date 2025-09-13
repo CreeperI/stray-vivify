@@ -8,11 +8,17 @@ import { charts_data } from '@preload/types'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { modal } from '@renderer/core/modal'
 import { Settings } from '@renderer/core/settings'
+import AImg from '@renderer/components/a-elements/a-img.vue'
 
 const shown = ref(GlobalStat.all_chart)
 const search = ref('')
 watch(search, (c) => {
   shown.value = GlobalStat.all_chart.filter((v) => v.name.includes(c) || v.id.includes(c))
+})
+
+watch(GlobalStat.all_chart_ref, () => {
+  search.value = ''
+  shown.value = GlobalStat.all_chart
 })
 
 const display_id = ref<string>()
@@ -27,12 +33,6 @@ async function import_chart() {
   shown.value = GlobalStat.all_chart
 }
 
-async function import_svc() {
-  await Invoke('import-zip')
-  await GlobalStat.update_all_chart()
-  shown.value = GlobalStat.all_chart
-}
-
 function open_proj(id: string) {
   Chart.open_chart(id)
 }
@@ -41,11 +41,13 @@ function delete_proj(id: string, name: string) {
   if (!Settings.settings.value.settings.delete_no_confirm) {
     modal.ConfirmModal.show({
       msg: `确定要删除${name} (id: ${id})吗？不可以撤销的哦！<br><small>设置中可以关闭此确认。</small>`
-    }).then(() => {
-      return Invoke('remove-chart', id)
-    }).then(() => {
-      GlobalStat.update_all_chart()
     })
+      .then(() => {
+        return Invoke('remove-chart', id)
+      })
+      .then(() => {
+        GlobalStat.update_all_chart()
+      })
   } else {
     Invoke('remove-chart', id)
   }
@@ -86,7 +88,6 @@ function detail(id: string) {
         </div>
         <div class="importer">
           <a-button2 msg="导入曲目" @click="import_chart" />
-          <a-button2 msg="导入svc" @click="import_svc" />
         </div>
       </div>
       <div class="charts-wrapper">
@@ -100,8 +101,12 @@ function detail(id: string) {
             @contextmenu="delete_proj(chart.id, chart.name)"
           >
             <div class="chart-unit-name">{{ chart.name }}</div>
+            <div class="chart-unit-cid">
+
             <div class="chart-unit-composer">{{ chart.composer }}</div>
             <div class="chart-unit-id">id: {{ chart.id }}</div>
+            </div>
+            <a-img :src="`stray:///__sprite__/${chart.id}`" class="chart-unit-bg"></a-img>
           </div>
         </TransitionGroup>
         <div v-if="shown.length == 0">这里没有歌哦。试试导入和更换搜索方式吧！</div>
@@ -113,8 +118,8 @@ function detail(id: string) {
 <style scoped>
 .chart-list-wrapper {
   display: grid;
-  grid-template-columns: 5fr 4fr;
-  height: 100%;
+  grid-template-columns: 4fr 5fr;
+  height: calc(100vh - 2rem);
 }
 
 .chart-list-left {
@@ -154,6 +159,7 @@ function detail(id: string) {
 .chart-list-right {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .charts-func {
@@ -170,12 +176,14 @@ function detail(id: string) {
   flex-grow: 1;
   padding-left: 25px;
 }
+
 .importer {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   height: 100%;
 }
+
 .charts-input {
   width: calc(100% - 50px);
   text-align: left;
@@ -185,32 +193,68 @@ function detail(id: string) {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  height: calc(100vh - 7rem - 20px);
+  overflow: visible auto;
+  transform: translateX(calc(0 - var(--ch-transform-len)));
+  border: 4px solid transparent;
+  width: calc(100% - 10px);
+
+  --ch-transform-len: 0.4rem;
 }
 
 .chart-unit {
   display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+  flex-direction: column;
   transition: 0.2s ease all;
   cursor: pointer;
+  transform: translateX(var(--ch-transform-len));
+  padding: 5px;
+  border-radius: 5px;
 }
 
 .chart-unit:hover {
-  filter: brightness(2);
-  transform: translateX(-0.8rem);
+  transform: translateX(0);
+}
+
+.chart-unit:hover > .chart-unit-cid {
+  filter: brightness(1.5);
 }
 
 .chart-unit > div {
   user-select: none;
 }
+.chart-unit:hover .chart-unit-name{
+  box-shadow: 0 0 2px black;
+  background-color: rgba(0,0,0,0.4);
+  color: #e2f2ff;
+}
+
+.chart-unit-bg {
+  width: 100%;
+  position: absolute;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  top: 0;
+  left: 0;
+  filter: blur(2px);
+  opacity: 0.6;
+}
 
 .chart-unit-name {
-  flex-basis: 100%;
   text-align: left;
   text-wrap: nowrap;
   line-height: 1.2rem;
   font-size: 1.2rem;
   font-weight: bold;
+  width: min-content;
+  transition: all 0.2s ease;
+}
+
+.chart-unit-cid {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
 }
 
 .chart-unit-composer {

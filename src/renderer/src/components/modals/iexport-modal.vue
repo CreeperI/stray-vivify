@@ -74,6 +74,14 @@ async function write_vsc() {
 async function export_chart() {
   Chart.$current.export_chart()
 }
+
+async function import_osz() {
+  Chart.$current.import_osz()
+}
+
+function import_osz_pics() {
+  Chart.$current.import_osz_pics()
+}
 </script>
 
 <template>
@@ -84,6 +92,8 @@ async function export_chart() {
           <a-button2 msg="打开vsb" @click="read_vsb" />
           <a-button2 msg="导出vsc" @click="write_vsc" />
           <a-button2 msg="导出svc" @click="export_chart" />
+          <a-button2 msg="导入osz" @click="import_osz" />
+          <a-button2 msg="导入osz的曲绘" @click="import_osz_pics" />
         </div>
       </Hide>
       <Hide title="gml">

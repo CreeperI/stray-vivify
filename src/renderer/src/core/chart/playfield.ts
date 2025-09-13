@@ -150,7 +150,6 @@ export class Chart_playfield {
 
     // 2. sort the notes in order of distance to current time
     can_handle.sort((a, b) => Math.abs(a.time - current) - Math.abs(b.time - current))
-    console.log(current, can_handle)
     for (const note of can_handle) {
       if ('len' in note) {
         const jr = this.what_judgement_hold(current - note.time)

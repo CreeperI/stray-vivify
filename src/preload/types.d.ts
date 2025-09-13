@@ -98,6 +98,28 @@ export namespace ChartTypeV2 {
     eff: number
   }
 
+  export namespace SV_Factory {
+    export type SV_aq = {
+      type: 0
+      time: number
+      end: number
+      eff1: number
+      eff2: number
+    }
+
+    export type all = (SV_aq) & {type: number, time: number, end: number}
+  }
+
+  export type sv_all = SV | SV_Factory.all
+
+  export type parsed_sv = {
+    time: number
+    eff: number
+    // whether to display a line for it
+    line: boolean
+    base: number
+  }
+
   export type timing = {
     time: number
     bpm: number
@@ -128,7 +150,7 @@ export namespace ChartTypeV2 {
     timing: timing[]
     meta: meta
     ani: []
-    sv: SV[]
+    sv: (SV | SV_Factory.all)[]
   }
   export type meta = {
     charter: string
@@ -327,6 +349,18 @@ export type Invoke = {
   }
   'open-skin-folder': {
     arg: {}
+    r: void
+  }
+  'read-osz': {
+    arg: {}
+    r: {diff?: ChartTypeV2.diff[], song?: ChartTypeV2.song} | undefined
+  },
+  'import-from-osz': {
+    arg: {}
+    r: Promise<void> | undefined
+  }
+  'import-osz-pics': {
+    arg: {id: string}
     r: void
   }
 }

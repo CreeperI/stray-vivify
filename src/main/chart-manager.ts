@@ -2,7 +2,7 @@ import path from 'node:path'
 import fs from 'fs'
 import { charts_data, ChartType, IpcHandlers } from '../preload/types'
 import { dialog, ipcMain, shell } from 'electron'
-import { file_paths } from './fp_parser'
+import { file_paths } from './fp-parser'
 import AdmZip from 'adm-zip'
 import { find_png } from './stray'
 
@@ -291,6 +291,21 @@ export default class ChartManager {
     } catch (e) {
       return
     }
+  }
+
+  create_with_buffer(id: string, buf: Buffer, ext: string) {
+    const folder = path.join(this.charts_folder, id)
+    if (fs.existsSync(folder)) return 0
+    fs.mkdirSync(folder)
+    fs.writeFileSync(path.join(folder, 'song' + ext), buf)
+    this.add_chart(id, "song", "unknown", "unknown", ext, [])
+    return 1
+  }
+
+  import_osz_sprite(id: string, buf: Buffer, ext: string) {
+    const folder = path.join(this.charts_folder, id)
+    if (fs.existsSync(path.join(folder, 'song' + ext))) fs.rmSync(path.join(folder, 'song' + ext))
+    fs.writeFileSync(path.join(folder, 'song' + ext), buf)
   }
 
   private init_json() {

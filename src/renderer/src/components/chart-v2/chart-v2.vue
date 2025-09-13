@@ -55,7 +55,7 @@ const chart_state = GlobalStat.chart_state
       <chart-timing v-if="active == 3"></chart-timing>
     </template>
     <preview v-if="chart_state == 1" />
-    <playfield v-if="chart_state == 2"/>
+    <playfield v-if="chart_state == 2" />
   </div>
 </template>
 

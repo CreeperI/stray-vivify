@@ -18,8 +18,9 @@ async function update_path() {
   chart.diff.calc_density()
   path.value = 'M 20 240'
   const max = Math.max(...data.value)
-  const dx = width / data.value.length
-  const dt = 1500 / data.value.length
+  if (data.value.findIndex((v) => v > 0) == -1) return
+  const dx = width / (data.value.length)
+  const dt = 1500 /  (data.value.length)
   is_drawing = true
   for (let i = 0; i < data.value.length; i++) {
     const y = 240 - Math.floor((data.value[i] / max) * 230)

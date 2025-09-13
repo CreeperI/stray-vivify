@@ -117,4 +117,5 @@ export const FrameRate = {
   playfield_frame: new _FrameRateClass(),
   update_pending: new _FrameRateClass(),
   calc_density: new _FrameRateClass(),
+  sv_base: new _FrameRateClass()
 }

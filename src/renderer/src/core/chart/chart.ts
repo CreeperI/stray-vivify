@@ -36,7 +36,6 @@ export class Chart {
   ref: {
     diff_index: Ref<number>
     diff: Ref<ChartTypeV2.diff>
-    chart_current_time: Ref<number>
   }
   id: string
 
@@ -66,8 +65,7 @@ export class Chart {
     })
     this.ref = {
       diff_index: ref(0),
-      diff: ref(this.diffs[0]),
-      chart_current_time: ref(0)
+      diff: ref(this.diffs[0])
     }
     this.diff = new Chart_diff(this)
     this.id = ''
@@ -103,6 +101,11 @@ export class Chart {
     }
   }
 
+  get $playfield() {
+    if (!this.playfield) this.init_playfield()
+    return this.playfield as Chart_playfield
+  }
+
   static createChart(n = ''): ChartTypeV2.final {
     return {
       song: {
@@ -120,21 +123,6 @@ export class Chart {
     }
   }
 
-  static create(musicPath: string, musicURL: string): Promise<Chart> {
-    const chart = new Chart()
-    chart.audio.load_url(musicURL)
-    chart.set_path(musicPath)
-    return new Promise((resolve) => {
-      chart.audio.on_can_play_through(
-        () => {
-          chart.post_define()
-          resolve(chart)
-        },
-        { once: true }
-      )
-    })
-  }
-
   /*static create_vsb(vsb_path: string): Promise<Chart> {
     const chart = new Chart()
     chart.set_path(vsb_path)
@@ -149,6 +137,21 @@ export class Chart {
       })
     })
   }*/
+
+  static create(musicPath: string, musicURL: string): Promise<Chart> {
+    const chart = new Chart()
+    chart.audio.load_url(musicURL)
+    chart.set_path(musicPath)
+    return new Promise((resolve) => {
+      chart.audio.on_can_play_through(
+        () => {
+          chart.post_define()
+          resolve(chart)
+        },
+        { once: true }
+      )
+    })
+  }
 
   static async open_chart(id: string) {
     const file = await Invoke('open-song', id)
@@ -292,7 +295,6 @@ export class Chart {
       this.diff.fuck_shown(this.audio.current_time, true)
       this.diff.update_diff_counts()
     }, 200)
-
   }
 
   fuck_shown(force = false) {
@@ -327,13 +329,16 @@ export class Chart {
     watch(this.ref.diff_index, () => {
       this.ref.diff.value = this.diffs[this.ref.diff_index.value]
       this.set_header_name()
-      this.fuck_shown()
+      this.diff.fuck_shown(this.audio.current_time, true)
       this.diff.calc_density()
     })
     watch(this.audio.refs.current_ms, () => {
-      this.fuck_shown()
-      this.ref.chart_current_time.value = this.audio.refs.current_ms.value
+      this.update_on_time_change()
     })
+  }
+
+  update_on_time_change() {
+    this.diff.update()
   }
 
   create_diff() {
@@ -342,6 +347,7 @@ export class Chart {
     this.diffs.push(new_diff)
     this.diff_index = this.diffs.length - 1
   }
+
   add_diff(d: ChartTypeV2.diff) {
     this.diffs.push(d)
     this.diff_index = this.diffs.length - 1
@@ -419,13 +425,19 @@ export class Chart {
   handle_key(key: number) {
     this.playfield?.handle_keydown(key)
   }
+
   handle_keyup(key: number) {
     this.playfield?.handle_keyup(key)
   }
 
-  get $playfield() {
-    if (!this.playfield) this.init_playfield()
-    return this.playfield as Chart_playfield
+  async import_osz() {
+    const r = await Invoke('read-osz')
+    if (!r) return
+    console.log(r)
+    modal.LoadOszModal.show({ diff: r.diff, song: r.song })
+  }
+  import_osz_pics() {
+    Invoke('import-osz-pics', this.id)
   }
 }
 

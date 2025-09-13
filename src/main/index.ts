@@ -4,7 +4,7 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import fs from 'fs'
 import { load_ipc_handlers } from './ipc'
-import { file_paths } from './fp_parser'
+import { file_paths } from './fp-parser'
 import { stray_handler } from './stray'
 
 function window_max(win: BrowserWindow) {

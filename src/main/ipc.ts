@@ -4,8 +4,9 @@ import VsbParser from './vsbParser'
 import * as electron from 'electron'
 import { dialog, ipcMain, shell } from 'electron'
 import path, { basename } from 'node:path'
-import ChartManager from './chart_manager'
-import { file_paths } from './fp_parser'
+import ChartManager from './chart-manager'
+import { file_paths } from './fp-parser'
+import { OszReader } from './osz-reader'
 
 export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
   const handler = Handler(mainWindow)
@@ -18,6 +19,14 @@ export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
 const Handler = (mw: Electron.BrowserWindow) => {
   const chart_manager = new ChartManager(mw)
   const sender = mw.webContents.send.bind(mw.webContents) as IpcHandlers.send.send
+  function ask_id() {
+    return new Promise<string | undefined>((resolve) => {
+      sender('ask-id', chart_manager.id_list())
+      ipcMain.once('return-id', (_, id: undefined | string) => {
+        resolve(id)
+      })
+    })
+  }
   return {
     'ask-song': function (_): Invoke['ask-song']['r'] {
       const x = dialog.showOpenDialogSync({
@@ -54,14 +63,8 @@ const Handler = (mw: Electron.BrowserWindow) => {
       chart_manager.write_chart(id, JSON.parse(data))
     },
     'import-song': async function (_, music_path: string) {
-      const id = (await new Promise((resolve) => {
-        sender('ask-id', chart_manager.id_list())
-        ipcMain.once('return-id', (_, id: undefined | string) => {
-          if (!id) resolve(0)
-          else resolve(id)
-        })
-      })) as string | 0
-      if (id == 0) return { state: 'cancelled' }
+      const id = await ask_id() as string | undefined
+      if (id == undefined) return { state: 'cancelled' }
       return chart_manager.import_song(music_path, id)
     },
     'open-song': function (_, id: string) {
@@ -117,20 +120,20 @@ const Handler = (mw: Electron.BrowserWindow) => {
         cd: cd
       }
     },
-    'export-zip':function(_, id){
+    'export-zip': function (_, id) {
       chart_manager.export_chart(id)
     },
-    'import-zip': function(_) {
+    'import-zip': function (_) {
       return chart_manager.import_chart()
     },
-    'remove-chart': function(_, id) {
+    'remove-chart': function (_, id) {
       chart_manager.remove_chart(id)
     },
     'import-sprite': (_, id) => {
       chart_manager.import_sprite(id)
     },
     'import-background': (_, id) => {
-      chart_manager.import_sprite(id)
+      chart_manager.import_bg(id)
     },
     'enter-fullscreen': () => {
       mw.setFullScreen(true)
@@ -146,6 +149,43 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'open-skin-folder': () => {
       shell.showItemInFolder(path.join(file_paths.skin, '1.png'))
-    }
+    },
+    'read-osz': () => {
+      const fp = dialog.showOpenDialogSync({
+        properties: ['openFile'],
+        filters: [{ name: 'OSZ', extensions: ['osz'] }]
+      })
+      if (!fp) return
+      const osz = new OszReader(fp[0])
+      return {
+        song: osz.get_song(),
+        diff: osz.get_diffs()
+      }
+    },
+    'import-from-osz': async () => {
+      const fp = dialog.showOpenDialogSync({
+        properties: ['openFile'],
+        filters: [{ name: 'OSZ', extensions: ['osz'] }]
+      })
+      if (!fp) return
+      const osz = new OszReader(fp[0])
+      const song = osz.getAudioFile()
+      if (!song) return
+      const id = await ask_id()
+      if (!id) return
+      chart_manager.create_with_buffer(id, song[1], song[0])
+    },
+    'import-osz-pics': (_, id) => {
+      const fp = dialog.showOpenDialogSync({
+        properties: ['openFile'],
+        filters: [{ name: 'OSZ', extensions: ['osz'] }]
+      })
+      if (!fp) return
+      const osz = new OszReader(fp[0])
+      const images = osz.getImages()
+      if (images.length == 0) return
+      chart_manager.import_osz_sprite(id, images[0][0], images[0][1])
+
+  }
   } as Required<IpcHandlers.invoke.handler>
 }

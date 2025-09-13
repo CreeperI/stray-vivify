@@ -67,7 +67,6 @@ function import_bg() {
           @error="img2_show = false"
           v-if="img2_show"
         />
-
       </div>
     </div>
     <div class="info-inner">

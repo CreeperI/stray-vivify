@@ -70,7 +70,7 @@ const _fps_r = FrameRate.fps.refs
               </tr>
               <frame-rate-single msg="帧逻辑" :r="FrameRate.aniFrame" />
               <frame-rate-single msg="Inspector" :r="FrameRate.invalidator" />
-              <frame-rate-single msg="Layout Shift" :r="FrameRate.next_tick" />
+              <frame-rate-single msg="依赖/渲染" :r="FrameRate.next_tick" />
               <frame-rate-single msg="Fuck Shown" :r="FrameRate.fuck_shown" />
               <frame-rate-single msg="Play Frame" :r="FrameRate.playfield_frame" />
               <frame-rate-single msg="Pending-note" :r="FrameRate.update_pending" />
