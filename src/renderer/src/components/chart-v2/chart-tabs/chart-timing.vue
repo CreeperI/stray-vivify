@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { Chart } from '@renderer/core/chart/chart'
 import TimingSingle from '@renderer/components/chart-v2/timing-single.vue'
-import { computed, provide, ref } from 'vue'
+import { computed, onMounted, provide, ref } from 'vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
+import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 
 const chart = Chart.$current
 const diff = chart.diff
 const index = ref(-1)
 const bpm_input = ref<HTMLInputElement>()
+const move1 = ref( false)
+const move2 = ref( false)
 provide('focus', (idx: number) => {
   index.value = idx
   bpm_input.value?.focus()
@@ -42,12 +45,17 @@ const time = computed({
     return diff.timing[index.value].time
   },
   set(value) {
-    diff.timing[index.value].time = value
+    const delta = value - diff.timing[index.value].time
+    if (move2.value) chart.diff.push_timing_all(index.value, delta)
+    else if (move1.value) chart.diff.push_timing(index.value, delta)
+    else diff.timing[index.value].time = value
   }
 })
 
 function del_timing(ix: number) {
-  if (ix == 0) return
+  if (ix == 0) {
+    if (chart.diff.timing.length == 1) return
+  }
   diff.timing.splice(ix, 1)
   index.value = -1
 }
@@ -63,10 +71,14 @@ function add_timing() {
   }
 }
 
-function switcher(t:number) {
+function switcher(t: number) {
   chart.audio.set_current_time(t)
   GlobalStat.refs.chart_tab.value = 2
 }
+
+onMounted(() => {
+  chart.diff.sort_timing()
+})
 </script>
 
 <template>
@@ -77,14 +89,17 @@ function switcher(t:number) {
           <div>Timing List</div>
           <a-button2 class="timing-add" @click="add_timing" msg="+new Timing" />
         </div>
-        <timing-single
-          :class="index == idx ? 'chosen' : ''"
-          :idx="idx"
-          :timing="t"
-          v-for="(t, idx) in diff.timing"
-          @click="index = idx"
-          @click.ctrl.capture="switcher(t.time)"
-        />
+        <div class="timing-list-inner">
+          <timing-single
+            :class="index == idx ? 'chosen' : ''"
+            :idx="idx"
+            :timing="t"
+            v-for="(t, idx) in diff.timing"
+            @click="index = idx"
+            @click.ctrl.capture="switcher(t.time)"
+            @contextmenu.ctrl.capture="del_timing(idx)"
+          />
+        </div>
       </div>
     </div>
     <div class="timing-right">
@@ -114,8 +129,14 @@ function switcher(t:number) {
         >
           删除
         </div>
+        <div class="timing-move">
+          <div @click="move1 = !move1"><a-checkbox v-model="move1" /> 移动此timing内的所有物件</div>
+          <div @click="move2 = !move2"><a-checkbox v-model="move2" /> 移动此timing之后的所有物件</div>
+        </div>
       </div>
-      <div class="timing-placeholder" v-else-if="diff.timing.length == 1">没有变奏呢。好曲师！</div>
+      <div class="timing-placeholder" v-else-if="diff.timing.length == 1">
+        没有变奏呢。好曲（师）！
+      </div>
       <div class="timing-placeholder" v-else-if="diff.timing.length == 0">
         为什么这里一个timing都没有，我代码哪里炸了？
       </div>
@@ -149,7 +170,7 @@ function switcher(t:number) {
 }
 .timing-add {
   border-radius: 3px;
-  background:var(--purple-bgi);
+  background: var(--purple-bgi);
   line-height: 1.6rem;
   height: 1.6rem;
   cursor: pointer;
@@ -157,6 +178,12 @@ function switcher(t:number) {
 }
 .timing-list {
   padding: 15px;
+  height: 100%;
+}
+.timing-list-inner {
+  overflow-y: scroll;
+  max-height: calc(100% - 60px - 2rem);
+  height: 100%;
 }
 .chosen {
   background: var(--button-hover);
@@ -219,10 +246,19 @@ function switcher(t:number) {
   margin-top: 25px;
   cursor: pointer;
   user-select: none;
+  margin-bottom: 15px;
 }
 .timing-first {
   cursor: not-allowed;
   filter: brightness(0.6);
   font-style: italic;
+}
+.timing-move {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+.timing-move > div {
+  cursor: pointer;
 }
 </style>

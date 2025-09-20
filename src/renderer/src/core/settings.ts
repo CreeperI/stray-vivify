@@ -5,8 +5,8 @@ import { Charter } from '@renderer/core/charter'
 import { Invoke } from '@renderer/core/ipc'
 
 export const Version = {
-  val: 8.5,
-  str: 'Build 8.5'
+  val: 8.9,
+  str: 'Pre-9'
 }
 
 const note = {
@@ -74,7 +74,11 @@ const settings: Ref<storages.storage_scheme> = ref({
     },
     show_bpm_bottom: true,
     sprites: {
-      bar_color: '#ffffff',
+      bar_color1: '#ffffff',
+      bar_color2: '#7afbff',
+      bar_color3: '#8bff66',
+      bar_color4: '#4a5dff',
+      bar_color5: '#f64eff',
       bar_length: 6,
       bar_op: 0
     },

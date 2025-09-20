@@ -15,6 +15,7 @@ export const Log = {
     all: 0
   }),
   error_list: ref([]) as Ref<log[]>,
+  need_img: ref([]) as Ref<[string, number][]>,
   handle() {
     let oldlog = console.log.bind(console)
     console.log = function (...args: any) {
@@ -57,7 +58,15 @@ export const Log = {
       (e) => {
         let msg = ''
         if (e.target instanceof HTMLImageElement) {
-          msg += 'Image load error: ' + e.target.src
+          const t = e.target
+          const src = decodeURIComponent(t.src)
+          const ix = this.need_img.value.findIndex((v) => v[0] == src)
+          if (ix >= 0) {
+            this.need_img.value[ix][1] += 1
+          } else {
+            this.need_img.value.push([src, 1])
+          }
+          return
         }
         Log.err(msg)
       },

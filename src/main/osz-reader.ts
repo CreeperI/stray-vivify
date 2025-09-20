@@ -2,11 +2,7 @@ import AdmZip from 'adm-zip'
 import { extname } from 'node:path'
 import { ChartTypeV2 } from '../preload/types'
 
-export type diff = {
-  notes: ChartTypeV2.note[]
-  timing: ChartTypeV2.timing[]
-  sv: ChartTypeV2.SV[]
-}
+export type diff = ChartTypeV2.diff
 
 // Internal interfaces for parsing
 interface OsuTimingPoint {
@@ -194,7 +190,7 @@ function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
       const bpm = 60000 / tp.beatLength // Convert beat length to BPM
       timing.push({
         time: tp.time,
-        bpm:Math.floor( bpm),
+        bpm: Math.fround(bpm),
         den: 4,
         num: 4
       })

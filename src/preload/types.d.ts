@@ -442,8 +442,13 @@ export namespace storages {
 
     sprites: {
       bar_length: number
-      bar_color: string
       bar_op: number
+
+      bar_color1: string
+      bar_color2: string
+      bar_color3: string
+      bar_color4: string
+      bar_color5: string
     }
 
     delete_no_confirm: boolean

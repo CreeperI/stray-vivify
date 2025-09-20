@@ -31,6 +31,12 @@ function start_play() {
 function start_preview() {
   GlobalStat.chart_state.value = 1
 }
+
+const on = GlobalStat.refs.chart_tab
+
+function is_active(i: number, i1:number) {
+  return i == i1 ? "header-active" : ""
+}
 </script>
 
 <template>
@@ -47,13 +53,13 @@ function start_preview() {
           <div class="h-menu-btn-text" @click="close_chart">关闭文件</div>
         </div>
       </div>
-      <div class="header-menu-ul" @click="active = 1">
+      <div class="header-menu-ul" @click="active = 1" :class="is_active(on, 1)">
         <div class="h-menu-btn-text">曲目</div>
       </div>
-      <div class="header-menu-ul" @click="active = 2">
+      <div class="header-menu-ul" @click="active = 2" :class="is_active(on, 2)">
         <div class="h-menu-btn-text">编排</div>
       </div>
-      <div class="header-menu-ul" @click="active = 3">
+      <div class="header-menu-ul" @click="active = 3" :class="is_active(on, 3)">
         <div class="h-menu-btn-text">时轴</div>
       </div>
       <div class="header-menu-ul" @click="start_preview">
@@ -124,6 +130,7 @@ div {
   display: flex;
   flex-direction: column;
   height: 100%;
+  transition: all 0.2s linear;
 }
 
 .h-menu-btn-text {
@@ -207,5 +214,8 @@ div {
 .header-close:hover {
   background-color: #ff1145;
   color: #0d1418;
+}
+.header-active {
+  background-color: #3c3e6e;
 }
 </style>

@@ -29,7 +29,7 @@ function load_song(s: ChartTypeV2.song) {
 </script>
 
 <template>
-  <simple-modal size="sm" title="importing osz">
+  <simple-modal size="lg" title="importing osz">
     <div class="wrapper">
       <Hide title="谱面">
 

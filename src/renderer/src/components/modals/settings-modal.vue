@@ -69,9 +69,26 @@ const r = Settings.settings
         </div>
         <setting-header msg="小节线" />
         <div>
-          <div>小节线颜色</div>
-          <a-color-input v-model="r.settings.sprites.bar_color" />
+          <div>小节线颜色 1</div>
+          <a-color-input v-model="r.settings.sprites.bar_color1" />
         </div>
+        <div>
+          <div>小节线颜色 4</div>
+          <a-color-input v-model="r.settings.sprites.bar_color2" />
+        </div>
+        <div>
+          <div>小节线颜色 8</div>
+          <a-color-input v-model="r.settings.sprites.bar_color3" />
+        </div>
+        <div>
+          <div>小节线颜色 16</div>
+          <a-color-input v-model="r.settings.sprites.bar_color4" />
+        </div>
+        <div>
+          <div>小节线颜色 32</div>
+          <a-color-input v-model="r.settings.sprites.bar_color5" />
+        </div>
+
         <div>
           <div>小节线透明度</div>
           <a-number-input v-model="r.settings.sprites.bar_op" max="100" min="0" step="1" />

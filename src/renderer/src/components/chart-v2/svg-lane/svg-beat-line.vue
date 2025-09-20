@@ -14,7 +14,6 @@ const mul = Settings.computes.mul
 const view_port = [0, 0, svg_width, window.screen.height]
 const bb_list = chart.diff.shown_bar_beat
 
-const __bar_color = computed(() => Settings.data.value.settings.sprites.bar_color)
 const __bar_length = computed(() => Settings.data.value.settings.sprites.bar_length)
 const __bar_op = computed(() => Settings.data.value.settings.sprites.bar_op / 100)
 const _show_beat_line = computed(
@@ -27,19 +26,24 @@ const bar_offset = (((lane_width - 130) / 130) * 43) / 4
 function time_bottom_bar(t: number, time: number, _mul: number) {
   return view_port[3] - (time - t - offset1) * _mul - 80 - bar_offset
 }
+
+function color_of_level(lvl: number):string {
+  return Settings.editor.sprites["bar_color" + lvl] ?? "#ffffff"
+}
 </script>
 
 <template>
   <g id="svg-beat-line" transform="translate(50 -20)" v-if="_show_beat_line">
     <line
-      v-for="line in bb_list[1]"
+      v-for="[line, lvl] in bb_list[1]"
       x1="0"
       :x2="bar_length"
       :y1="time_bottom_bar(current_time, line, mul)"
       :y2="time_bottom_bar(current_time, line, mul)"
-      :stroke="__bar_color"
+      :stroke="color_of_level(lvl)"
       :stroke-width="__bar_length"
       :opacity="__bar_op"
+      :data-lvl="lvl"
     ></line>
   </g>
 </template>

@@ -33,7 +33,6 @@ function response_img(folder: string, spr: string) {
 export function stray_handler() {
   return function (request: GlobalRequest) {
     const decodedUrl = decodeURIComponent(request.url.replace(new RegExp(`^stray:/`, 'i'), ''))
-    console.log(decodedUrl)
     const fullPath = process.platform === 'win32' ? convertPath(decodedUrl) : decodedUrl
     if (!fullPath.includes('__')) {
       const data = fs.readFileSync(fullPath)

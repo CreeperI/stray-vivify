@@ -1,70 +1,58 @@
-name: Build and Release
+name: Build/release Electron app
 
 on:
   push:
     branches:
-      - master
       - main
+      - master
   workflow_dispatch:
 
 jobs:
-  build-and-release:
+  release:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [windows-latest]
-        include:
-          - os: windows-latest
-            artifact_name: win32
+        os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - name: Check out Git repository
+        uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Install Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          cache: 'npm'
+          node-version: 16
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install Dependencies
+        run: npm install
 
-      - name: Force build:win
-        run: npm run force-build:win
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: build-linux
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run build:linux
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact_name }}-build-${{ github.ref_name }}
-          path: |
-            dist/win-unpacked/
-            !dist/**/*.blockmap
-            !dist/**/*.yml
+      - name: build-mac
+        if: matrix.os == 'macos-latest'
+        run: npm run build:mac
 
-  create-release:
-    runs-on: ubuntu-latest
-    needs: build-and-release
+      - name: build-win
+        if: matrix.os == 'windows-latest'
+        run: npm run build:win
 
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-          pattern: win-unpacked
-          merge-multiple: true
-
-      - name: Create Release
+      - name: release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            Auto-generated release for ${{ github.ref_name }}
+          draft: true
           files: |
-            artifacts/win-unpacked/*
+            dist/*.exe
+            dist/*.zip
+            dist/*.dmg
+            dist/*.AppImage
+            dist/*.snap
+            dist/*.deb
+            dist/*.rpm
+            dist/*.tar.gz
+            dist/*.yml
+            dist/*.blockmap
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}

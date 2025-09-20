@@ -16,6 +16,7 @@ function toLocalDate(t: number) {
 }
 const count = Log.count
 const level = ref('all' as 'all' | 'debug' | 'msg' | 'warn' | 'err')
+const needed = Log.need_img
 
 const _fps_r = FrameRate.fps.refs
 </script>
@@ -29,6 +30,9 @@ const _fps_r = FrameRate.fps.refs
         </div>
         <div @click="func_state = 1" :class="func_state == 1 ? 'chosen' : ''" class="state-option">
           Performance
+        </div>
+        <div @click="func_state = 2" :class="func_state == 2 ? 'chosen' : ''" class="state-option">
+          Needed Images
         </div>
       </div>
       <template v-if="func_state == 0">
@@ -78,6 +82,22 @@ const _fps_r = FrameRate.fps.refs
 
             </tbody>
           </table>
+        </div>
+      </template>
+      <template v-else-if="func_state == 2">
+        <div class="imgs-wrapper">
+          <div class="imgs-header">
+            <div>需要的图片</div>
+            <div>请求次数</div>
+          </div>
+          <div class="imgs-header">
+            <div>需要的图片</div>
+            <div>请求次数</div>
+          </div>
+          <div v-for="i in needed">
+            <div v-html="i[0]"></div>
+            <div v-html="i[1]"></div>
+          </div>
         </div>
       </template>
     </div>
@@ -176,5 +196,24 @@ td {
 .fr-table tr:first-child {
   background: #0d1418;
   line-height: 1.4rem;
+}
+.imgs-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow-y: hidden;
+  max-height: 100%;
+  margin-top: 15px;
+}
+.imgs-header {
+  border-bottom: 2px solid #b8dcee;
+  border-collapse: collapse;
+  line-height: 1.5rem;
+  margin-bottom: 10px;
+}
+.imgs-wrapper > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  justify-items: center;
 }
 </style>

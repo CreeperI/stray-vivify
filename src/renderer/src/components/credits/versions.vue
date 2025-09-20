@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import Build from '@renderer/components/credits/build.vue'
+import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 </script>
 
 <template>
@@ -136,6 +137,22 @@ import Build from '@renderer/components/credits/build.vue'
         <div>新增了一个检查skin缺失哪些贴图的modal。</div>
         <div>给本页面增加了高亮。</div>
       </template>
+    </Build>
+    <Build build="8.9" y="2025" m="9" d="20" title="Pre 9">
+      <template #qol>
+        <div>仿osu的小节线渲染。但是不知道为什么这个颜色总是不对，但是我的<WordHelper msg="脑子有点过载" dec="物竞委你们最好晚上睁着眼睡觉"/>无法处理这个问题。后面再说</div>
+        <div>比osu略微高级一点的移动所有物件的选项。下面的移动全部会覆盖上面的移动此timing。</div>
+        <div>给谱面列表添加了曲绘显示。</div>
+        <div>给header添加了所处页面的高亮提示。</div>
+      </template>
+      <template #bugs>
+        <div>修复了vsc导出中1宽全部都会导出为chip的bug。</div>
+      </template>
+      <div>新增了导入osz的东西，调整了<word-helper msg="chart-list" dec="谱 面 列 表"/>页面中的导入按钮</div>
+      <div>调整了Inspector页面中对缺失图片的分类逻辑。现在是单独一面的了。</div>
+      <div style="font-size: 2rem; font-weight: bold"><word-helper msg="Pre5还在追我！" dec="我草我们pre5真王朝了" /></div>
+      <div>塞了一些sv的史在里面</div>
+      <div>osz导入中由于osu存储timing的方式比较伪人（指存储时长），所以导入的timing的bpm会比较奇怪。</div>
     </Build>
   </div>
 </template>

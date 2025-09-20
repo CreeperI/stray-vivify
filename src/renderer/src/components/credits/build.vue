@@ -6,6 +6,7 @@ defineProps<{
   y: string | number
   m: string | number
   d: string | number
+  title?: string
 }>()
 
 function toDate(y: string | number, m: string | number, d: string | number) {
@@ -19,7 +20,8 @@ function toDate(y: string | number, m: string | number, d: string | number) {
 <template>
   <div class="builds" :data-is-current-version="Number(build) == Version.val">
     <div class="build-title" >
-      Build {{ build }}
+      <template v-if="title">{{title}}</template>
+      <template v-else>Build {{build}}</template>
       <span class="build-date">
         {{ toDate(y, m, d) }}
       </span>
@@ -70,6 +72,7 @@ function toDate(y: string | number, m: string | number, d: string | number) {
 }
 
 .build-date {
+  padding-left: 10px;
   font-size: 0.9rem;
 }
 

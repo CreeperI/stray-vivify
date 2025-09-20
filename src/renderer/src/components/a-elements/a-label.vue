@@ -6,8 +6,8 @@ const { label } = defineProps<{
 
 <template>
   <div class="a-label">
-    <span v-html="label" />
     <slot />
+    <span v-html="label" />
   </div>
 </template>
 
