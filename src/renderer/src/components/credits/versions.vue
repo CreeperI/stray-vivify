@@ -129,7 +129,7 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <div>密度（梯度）折线图</div>
       <div>移除了ab30，广告位招租（？</div>
     </Build>
-    <Build build="8.5" y="2025" m="9" d="1">
+    <Build build="8.5" y="2025" m="9" d="1" title="V8 Stable(?">
       <template #bugs>
         <div>修复了本页面在没有bug修复的时候不会显示qol的bug。（？？？</div>
       </template>
