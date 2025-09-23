@@ -50,10 +50,13 @@ export class Chart_diff {
   shown: Ref<ChartTypeV2.note[]>
   update_shown_flag: Ref<boolean>
   last_update: number
-  bar_list: Ref<ms[]>
-  beat_list: Ref<[ms, number][]>
+  // 小节线
+  bar_list: ms[]
+  // 分音 t - 等级
+  beat_list: [ms, number][]
+  ticks: [ms, number][]
   // first for bar_list, 2nd beat_list
-  shown_bar_beat: Ref<[[ms, number][], [ms, number][]]>
+  shown_t: Ref<{bar_list: [ms, number][],beat_list: [ms, number][],ticks: [ms, number][]}>
   shown_timing: Ref<ChartTypeV2.timing[]>
   current_timing: ComputedRef<number>
   density_data: Ref<number[]>
@@ -78,14 +81,18 @@ export class Chart_diff {
     this.shown = ref([])
     this.update_shown_flag = ref(false)
     this.last_update = 0
-    this.bar_list = ref([])
-    this.beat_list = ref([])
-    this.shown_bar_beat = ref([[], []])
+    this.bar_list = []
+    this.beat_list = []
+    this.shown_t = ref({
+      bar_list: [],
+      beat_list: [],
+      ticks: [],
+    })
     this.shown_timing = ref([])
     this.current_timing = computed(() =>
       Math.max(
         0,
-        this.timing.findLastIndex((v) => v.time <= this.chart.audio.current_time)
+        this.timing.findLastIndex((v) => v.time <= this.chart.audio.refs.current_ms.value)
       )
     )
     this.density_data = ref([0])
@@ -94,15 +101,19 @@ export class Chart_diff {
       () => {
         this.update_beat_list()
         this.update_bar_list()
+        this.update_tick_list()
       }
     )
     watch(
       () => Settings.editor.meter,
       () => {
         this.update_beat_list()
-        this.update_bar_beat_timing(this.visible)
+        this.update_t(this.visible)
       }
     )
+    // which is for 分音
+    // 我想做一个和pjsk.moe那种差不多的谱面导出所以加了一个分音的list
+    this.ticks = []
   }
 
   get notes() {
@@ -171,20 +182,20 @@ export class Chart_diff {
   }
 
   update_bar_list() {
-    this.bar_list.value = []
+    this.bar_list = []
     const v = this.timing
     for (let i = 0; i < v.length; i++) {
       const part = v[i]
       const time_per_bar = (60 / part.bpm) * part.num * 1000
       const part_end = this.timing_end_of(part, v, this.chart.length)
       for (let time = part.time; time < part_end; time += time_per_bar) {
-        this.bar_list.value.push(time)
+        this.bar_list.push(time)
       }
     }
   }
 
   update_beat_list() {
-    this.beat_list.value = []
+    this.beat_list = []
     const v = this.timing
     for (let i = 0; i < v.length; i++) {
       const end = this.timing_end_of(v[i], v, this.chart.length)
@@ -201,9 +212,32 @@ export class Chart_diff {
       const time_per_beat = (240 / (v[i].bpm * den)) * 1000 // to ms
       let len = 0
       for (let time = v[i].time; time < end; time += time_per_beat) {
-        this.beat_list.value.push([time, to_level(len)])
+        this.beat_list.push([time, to_level(len)])
         len += 1
       }
+    }
+  }
+
+  update_tick_list() {
+    this.ticks = []
+    const v = this.timing
+    const all_times = [...new Set(this.notes.map((v) => v.time))]
+    for (let i = 0; i < v.length; i++) {
+      const part = v[i]
+      // ms
+      const time_per_4 = (60e3 / part.bpm)
+      const part_end = this.timing_end_of(part, v)
+      const part_times = i == 0 ? all_times.filter((v) => v < part_end) :all_times.filter((v) => v >= part.time && v < part_end)
+
+      // here got a len-1 'c i want to make the last independently fucked
+      for (let j = 0; j < part_times.length - 1; j++) {
+        const tick = Math.round(4*time_per_4 / (part_times[j + 1] - part_times[j]))
+        // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
+        if (tick < 3) continue
+        this.ticks.push([part_times[j],tick])
+      }
+      const tick = time_per_4 / (part_end - part_times[part_times.length -1])
+      if (tick > 2 && tick < 256) this.ticks.push([part_times[part_times.length -1], tick])
     }
   }
 
@@ -374,15 +408,12 @@ export class Chart_diff {
     this._fuck_shown(t)
   }
 
-  update_bar_beat_timing(visible: [number, number]) {
-    this.shown_bar_beat.value = [
-      // why this type-errors i cant understand all-fucking-night
-      this.bar_list.value.map((x, dx) => [x, dx]).filter((x) => utils.between(x[0], visible)) as [
-        number,
-        number
-      ][],
-      this.beat_list.value.filter((x) => utils.between(x[0], visible))
-    ]
+  update_t(visible: [number, number]) {
+    this.shown_t.value = {
+      bar_list: this.bar_list.map((x, dx) => [x, dx] as [number, number]).filter((x) => utils.between(x[0], visible)),
+      beat_list: this.beat_list.filter((x) => utils.between(x[0], visible)),
+      ticks: this.ticks.filter((x) => utils.between(x[0], visible))
+    }
     this.shown_timing.value = this.timing.filter((x) => utils.between(x.time, visible))
   }
 
@@ -500,6 +531,32 @@ export class Chart_diff {
     this.timing.sort((a, b) => a.time - b.time)
   }
 
+  push_timing(idx: number, delta: number) {
+    const end = this.timing_end(this.timing[idx])
+    for (let i = 0; i < this.notes.length; i++) {
+      if (utils.between(this.notes[i].time, [this.timing[idx].time, end])) {
+        this.notes[i].time += delta
+      }
+    }
+    this.timing[idx].time += delta
+  }
+
+  push_timing_all(idx: number, delta: number) {
+    for (let i = 0; i < this.notes.length; i++) {
+      if (this.notes[i].time > this.timing[idx].time) {
+        this.notes[i].time += delta
+      }
+    }
+    for (let i = 0; i < this.timing.length; i++) {
+      if (this.timing[i].time > this.timing[idx].time) {
+        this.timing[i].time += delta
+      }
+    }
+    this.timing[idx].time += delta
+    this.update_bar_list()
+    this.update_beat_list()
+  }
+
   private _fuck_shown(t: number) {
     FrameRate.fuck_shown.start()
     this.update_shown_flag.value = true
@@ -518,34 +575,10 @@ export class Chart_diff {
         else return a.time - b.time
       }
     })*/
-    this.update_bar_beat_timing(visible)
+    this.update_t(visible)
     this.last_update = t
     FrameRate.fuck_shown.end()
     nextTick().then(() => (this.update_shown_flag.value = false))
-  }
-  push_timing(idx: number, delta: number) {
-    const end = this.timing_end(this.timing[idx])
-    for (let i = 0; i < this.notes.length; i++) {
-      if (utils.between(this.notes[i].time, [this.timing[idx].time, end])) {
-        this.notes[i].time += delta
-      }
-    }
-    this.timing[idx].time += delta
-  }
-  push_timing_all(idx: number, delta: number) {
-    for (let i = 0; i < this.notes.length; i++) {
-      if (this.notes[i].time > this.timing[idx].time) {
-        this.notes[i].time += delta
-      }
-    }
-    for (let i = 0; i < this.timing.length; i++) {
-      if (this.timing[i].time > this.timing[idx].time) {
-        this.timing[i].time += delta
-      }
-    }
-    this.timing[idx].time += delta
-    this.update_bar_list()
-    this.update_beat_list()
   }
 
   /*private parse_sv_aq(f: ChartTypeV2.SV_Factory.SV_aq): ChartTypeV2.parsed_sv[] {

@@ -61,6 +61,8 @@ const settings: Ref<storages.storage_scheme> = ref({
     reverse_scroll: false,
     lane_width: 130,
     show_bottom_timing: true,
+    show_bpm_bottom: true,
+    show_ticks: true,
     offset1: 0,
     offset2: 0,
     offset3: 0,
@@ -72,7 +74,6 @@ const settings: Ref<storages.storage_scheme> = ref({
       detail: 3,
       sprite: true
     },
-    show_bpm_bottom: true,
     sprites: {
       bar_color1: '#ffffff',
       bar_color2: '#7afbff',

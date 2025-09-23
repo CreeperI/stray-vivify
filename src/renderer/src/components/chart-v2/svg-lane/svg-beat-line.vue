@@ -12,7 +12,7 @@ const bar_length = 4 * lane_width + 12
 const current_time = chart.audio.refs.current_ms
 const mul = Settings.computes.mul
 const view_port = [0, 0, svg_width, window.screen.height]
-const bb_list = chart.diff.shown_bar_beat
+const bb_list = chart.diff.shown_t
 
 const __bar_length = computed(() => Settings.data.value.settings.sprites.bar_length)
 const __bar_op = computed(() => Settings.data.value.settings.sprites.bar_op / 100)
@@ -35,7 +35,7 @@ function color_of_level(lvl: number):string {
 <template>
   <g id="svg-beat-line" transform="translate(50 -20)" v-if="_show_beat_line">
     <line
-      v-for="[line, lvl] in bb_list[1]"
+      v-for="[line, lvl] in bb_list.beat_list"
       x1="0"
       :x2="bar_length"
       :y1="time_bottom_bar(current_time, line, mul)"

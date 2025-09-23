@@ -11,6 +11,7 @@ import InspectorModal from '@renderer/components/modals/inspector-modal.vue'
 import IexportModal from '@renderer/components/modals/iexport-modal.vue'
 import MissingSkinModal from '@renderer/components/modals/missing-skin-modal.vue'
 import LoadOszModal from '@renderer/components/modals/load-osz-modal.vue'
+import ChartPreviewModal from '@renderer/components/modals/chart-preview-modal.vue'
 
 export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal, true)
@@ -24,6 +25,7 @@ export class modal<T extends Component> {
   static IExporterModal = new modal(IexportModal, true)
   static MissingSkinModal = new modal(MissingSkinModal, true)
   static LoadOszModal = new modal(LoadOszModal, true)
+  static ChartPreviewModal = new modal(ChartPreviewModal, true)
 
   component: T
   priority: number

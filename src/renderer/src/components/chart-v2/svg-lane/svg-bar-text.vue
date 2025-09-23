@@ -19,7 +19,7 @@ const _show_bar_text = computed(
   () =>
     chart_state.value == 0 || (chart_state.value == 1 && Settings.editor.record_field.show_bar_text)
 )
-const bb_list = chart.diff.shown_bar_beat
+const bb_list = chart.diff.shown_t
 
 
 const bar_offset = (((lane_width - 130) / 130) * 43) / 4
@@ -32,7 +32,7 @@ function time_bottom_bar(t: number, time: number, _mul: number) {
 <template>
   <g v-if="_show_bar_text">
     <text
-      v-for="[line, idx] in bb_list[0]"
+      v-for="[line, idx] in bb_list.bar_list"
       x="25"
       fill="#ffffff"
       dy="-1rem"

@@ -64,14 +64,12 @@ async function main() {
   ShortCuts.handle()
   GlobalStat.MouseTracker.init()
 
-  setInterval(() => {
-    Chart.current?.save()
-  }, 10000)
-  setInterval(() => {
+  GlobalStat.Intervals.on(1e4, () => Chart.current?.save())
+  GlobalStat.Intervals.on(1000, () => {
     FrameRate.refresh()
     Chart.current?.playfield?.refresh()
     Chart.current?.diff.update_diff_counts()
-  }, 1000)
+  })
 
   requestAnimationFrame(update_per_frame)
   app.mount('#app')

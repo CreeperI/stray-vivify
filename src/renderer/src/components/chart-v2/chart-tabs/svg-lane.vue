@@ -6,6 +6,7 @@ import SvgBarLine from '@renderer/components/chart-v2/svg-lane/svg-bar-line.vue'
 import SvgBeatLine from '@renderer/components/chart-v2/svg-lane/svg-beat-line.vue'
 import SvgNotes from '@renderer/components/chart-v2/svg-lane/svg-notes.vue'
 import SvgBottomBpm from '@renderer/components/chart-v2/svg-lane/svg-bottom-bpm.vue'
+import SvgTicks from '@renderer/components/chart-v2/svg-lane/svg-ticks.vue'
 
 const lane_width = Settings.editor.lane_width
 const svg_width = 4 * lane_width + 2 * 50 + 12
@@ -31,6 +32,7 @@ const shown = chart.diff.shown
       <svg-bar-line />
       <rect :width="bar_length" fill="#131520" height="100%" x="50" y="0"></rect>
       <svg-beat-line />
+      <svg-ticks />
       <slot>
         <svg-notes :shown="shown" />
       </slot>

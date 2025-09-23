@@ -424,7 +424,11 @@ export namespace storages {
     meter: number
     reverse_scroll: boolean
     lane_width: number
+
+    show_bpm_bottom: boolean
+    show_ticks: boolean
     show_bottom_timing: boolean
+
     // for charting
     offset1: number
     // for playing
@@ -438,7 +442,6 @@ export namespace storages {
       detail: number
       sprite: boolean
     }
-    show_bpm_bottom: boolean
 
     sprites: {
       bar_length: number

@@ -7,6 +7,7 @@ import { Invoke } from '@renderer/core/ipc'
 import Hide from '@renderer/components/a-elements/hide.vue'
 import { Charter } from '@renderer/core/charter'
 import { notify } from '@renderer/core/notify'
+import { modal } from '@renderer/core/modal'
 
 const chart = Chart.$current
 const gml = ref(`array_push(global.song_list,
@@ -82,6 +83,9 @@ async function import_osz() {
 function import_osz_pics() {
   Chart.$current.import_osz_pics()
 }
+function open_svg() {
+  modal.ChartPreviewModal.show({})
+}
 </script>
 
 <template>
@@ -94,6 +98,7 @@ function import_osz_pics() {
           <a-button2 msg="导出svc" @click="export_chart" />
           <a-button2 msg="导入osz" @click="import_osz" />
           <a-button2 msg="导入osz的曲绘" @click="import_osz_pics" />
+          <a-button2 msg="导出svg" @click="open_svg" />
         </div>
       </Hide>
       <Hide title="gml">

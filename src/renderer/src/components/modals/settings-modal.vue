@@ -31,6 +31,10 @@ const r = Settings.settings
           <a-checkbox v-model="r.settings.show_bpm_bottom" />
         </div>
         <div>
+          <div>分音</div>
+          <a-checkbox v-model="r.settings.show_ticks" />
+        </div>
+        <div>
           <div>跳过删除确认</div>
           <a-checkbox v-model="r.settings.delete_no_confirm" />
         </div>
