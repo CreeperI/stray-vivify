@@ -12,8 +12,8 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <a-href href="https://space.bilibili.com/517691213">TerminalFlow</a-href>
       <a-href href="https://space.bilibili.com/517691213">Allesta</a-href>
       <a-href href="https://space.bilibili.com/517691213">Ts. Final</a-href>
-      <a-href href="https://space.bilibili.com/517691213">Terminal Society Inc.</a-href>
       <a-href href="https://space.bilibili.com/517691213">CharaX</a-href>
+      <a-href href="https://space.bilibili.com/517691213">Terminal Society Inc.</a-href>
     </div>
     <div class="credits-head">
       Pilot Assistants/Contributors

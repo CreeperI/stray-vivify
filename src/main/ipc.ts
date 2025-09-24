@@ -63,7 +63,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
       chart_manager.write_chart(id, JSON.parse(data))
     },
     'import-song': async function (_, music_path: string) {
-      const id = await ask_id() as string | undefined
+      const id = (await ask_id()) as string | undefined
       if (id == undefined) return { state: 'cancelled' }
       return chart_manager.import_song(music_path, id)
     },
@@ -185,7 +185,15 @@ const Handler = (mw: Electron.BrowserWindow) => {
       const images = osz.getImages()
       if (images.length == 0) return
       chart_manager.import_osz_sprite(id, images[0][0], images[0][1])
-
-  }
+    },
+    'export-preview-svg': (_, id, svg_text) => {
+      chart_manager.write_svg_text(id, svg_text)
+    },
+    'open-dev': () => {
+      mw.webContents.openDevTools({ mode: 'right' })
+    },
+    'memory-backend': () => {
+      return process.memoryUsage()
+    }
   } as Required<IpcHandlers.invoke.handler>
 }

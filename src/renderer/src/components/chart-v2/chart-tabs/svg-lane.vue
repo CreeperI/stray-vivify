@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { Settings } from '@renderer/core/settings'
-import { Charter } from '@renderer/core/charter'
 import SvgBarText from '@renderer/components/chart-v2/svg-lane/svg-bar-text.vue'
 import SvgBarLine from '@renderer/components/chart-v2/svg-lane/svg-bar-line.vue'
 import SvgBeatLine from '@renderer/components/chart-v2/svg-lane/svg-beat-line.vue'
@@ -13,10 +12,6 @@ const svg_width = 4 * lane_width + 2 * 50 + 12
 const bar_length = 4 * lane_width + 12
 const view_port = [0, 0, svg_width, window.screen.height]
 const _px = svg_width + 'px'
-
-const chart = Charter.get_chart()
-
-const shown = chart.diff.shown
 </script>
 
 <template>
@@ -34,7 +29,7 @@ const shown = chart.diff.shown
       <svg-beat-line />
       <svg-ticks />
       <slot>
-        <svg-notes :shown="shown" />
+        <svg-notes />
       </slot>
       <rect
         id="svg-bottom-rect"
@@ -49,8 +44,15 @@ const shown = chart.diff.shown
       />
       <g id="svg-particle"></g>
       <g transform="translate(50 0)">
-        <rect fill="#ffffff" height="100%" width="6" x="0" y="0"></rect>
-        <rect :x="lane_width * 4 + 6" fill="#ffffff" height="100%" width="6" y="0"></rect>
+        <rect fill="#ffffff" height="100%" width="6" x="0" y="0" class="no-event" />
+        <rect
+          :x="lane_width * 4 + 6"
+          fill="#ffffff"
+          height="100%"
+          width="6"
+          y="0"
+          class="no-event"
+        />
       </g>
       <svg-bottom-bpm />
     </svg>

@@ -1,7 +1,3 @@
-type json_data = {
-  [key: string]: number | string | boolean
-}
-
 class Mod {
   B: number
   D: number
@@ -20,30 +16,6 @@ class Mod {
     this.M = ''
     this.P = 0
   }
-
-  static fromJson(data: json_data): Mod {
-    const mod = new Mod()
-    mod.B = Number(data.B)
-    mod.D = Number(data.D)
-    mod.V1 = Number(data.V1)
-    mod.V2 = Number(data.V2)
-    mod.E = Number(data.E)
-    mod.M = String(data.M)
-    mod.P = Number(data.P)
-    return mod
-  }
-
-  dump() {
-    return {
-      B: this.B,
-      D: this.D,
-      V1: this.V1,
-      V2: this.V2,
-      E: this.E,
-      M: this.M,
-      P: this.P
-    }
-  }
 }
 
 class PerFrame {
@@ -56,22 +28,6 @@ class PerFrame {
     this.E = 0
     this.F = ''
   }
-
-  static fromJson(data: json_data): PerFrame {
-    const perFrame = new PerFrame()
-    perFrame.B = Number(data.B)
-    perFrame.E = Number(data.E)
-    perFrame.F = String(data.F)
-    return perFrame
-  }
-
-  dump() {
-    return {
-      B: this.B,
-      E: this.E,
-      F: this.F
-    }
-  }
 }
 
 class ModData {
@@ -82,20 +38,6 @@ class ModData {
     this.Proxies = 0
     this.Obj = ''
   }
-
-  static fromJson(data: json_data): ModData {
-    const modData = new ModData()
-    modData.Proxies = Number(data.Proxies)
-    modData.Obj = String(data.Obj)
-    return modData
-  }
-
-  dump() {
-    return {
-      Proxies: this.Proxies,
-      Obj: this.Obj
-    }
-  }
 }
 
 class NoteExtra {
@@ -105,20 +47,6 @@ class NoteExtra {
   constructor() {
     this.id = 0
     this.value = 0
-  }
-
-  static fromJson(data: json_data): NoteExtra {
-    const noteExtra = new NoteExtra()
-    noteExtra.id = Number(data.id)
-    noteExtra.value = Number(data.value)
-    return noteExtra
-  }
-
-  dump() {
-    return {
-      id: this.id,
-      value: this.value
-    }
   }
 }
 
@@ -133,28 +61,6 @@ class Note {
     this.lane = 0
     this.type = 0
     this.extra = []
-  }
-
-  static fromJson(data: json_data): Note {
-    const note = new Note()
-    note.time = Number(data.time)
-    note.lane = Number(data.lane)
-    note.type = Number(data.type)
-    if (Array.isArray(data.extra)) {
-      for (const extra of data.extra) {
-        note.extra.push(NoteExtra.fromJson(extra as json_data))
-      }
-    }
-    return note
-  }
-
-  dump() {
-    return {
-      time: this.time,
-      lane: this.lane,
-      type: this.type,
-      extra: this.extra.map((extra) => extra.dump())
-    }
   }
 }
 

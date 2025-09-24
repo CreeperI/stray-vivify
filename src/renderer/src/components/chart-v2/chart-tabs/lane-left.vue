@@ -6,6 +6,8 @@ import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import FnCounter from '@renderer/components/chart-v2/chart-tabs/fn-counter.vue'
 import FnDensity from '@renderer/components/chart-v2/chart-tabs/fn-density.vue'
+import { GlobalStat } from '@renderer/core/globalStat'
+import { utils } from '@renderer/core/utils'
 
 const { width, s, hold, b } = Settings.note
 
@@ -27,6 +29,11 @@ const pending_note = computed(() => {
     }
   }
 }) as ComputedRef<ChartTypeV2.note>
+const select = GlobalStat.NoteClipboard.selected
+const select_max = computed(() => Math.max(...select.value.map((x) => x.time)))
+const select_min = computed(() => Math.min(...select.value.map((x) => x.time)))
+const select_ln = computed(() => select.value.filter((x) => 'len' in x).length)
+const select_chip = computed(() => select.value.length - select_ln.value)
 </script>
 
 <template>
@@ -64,7 +71,7 @@ const pending_note = computed(() => {
         </div>
       </div>
       <div class="note-snb">
-        <s>S/B</s>
+        <s>SBLN</s>
         <div>
           <a-checkbox v-model="s"></a-checkbox>
           S
@@ -76,6 +83,24 @@ const pending_note = computed(() => {
         <div>
           <a-checkbox v-model="hold"></a-checkbox>
           长条
+        </div>
+      </div>
+      <div v-if="width == 0" class="note-select-wrapper">
+        <div v-if="select.length == 0" class="note-select">Select</div>
+        <div v-else>
+          <div>
+            <div>已选中 {{ select.length }}</div>
+            <div>
+              {{ select.length }} notes
+              (<template v-if="select_chip">{{ select_chip }}米</template>
+              <template v-if="select_ln">{{ select_ln }}面</template>)
+            </div>
+            <div>
+              {{ utils.toTimeStr(select_min / 1000) }}
+              ~
+              {{ utils.toTimeStr(select_max / 1000) }}
+            </div>
+          </div>
         </div>
       </div>
       <div class="note-pending">
@@ -128,6 +153,14 @@ const pending_note = computed(() => {
 .note-pending > img {
   position: relative;
   max-width: 90%;
+}
+.note-select-wrapper {
+  width: 100%;
+  text-align: center;
+}
+.note-select {
+  color: gray;
+  font-style: italic;
 }
 
 .counter-inner div:nth-child(2n + 1) {

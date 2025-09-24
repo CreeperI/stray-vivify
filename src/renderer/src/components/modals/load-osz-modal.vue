@@ -37,7 +37,6 @@ function load_song(s: ChartTypeV2.song) {
         <div class="osz-diff-line" v-for="(d, ix) in diff">
           <div>{{ d.meta.diff1 }}</div>
           <div>by {{ d.meta.charter }}</div>
-          <div></div>
           <a-button2 msg="已导入！" disabled v-if="imported.includes(ix)" />
           <a-button2 msg="导入" v-else @click="import_diff(d, ix)" />
         </div>
@@ -68,8 +67,11 @@ function load_song(s: ChartTypeV2.song) {
 }
 .osz-diff-line {
   display: grid;
-  grid-template-columns: 1fr 1fr 3fr 1fr;
+  grid-template-columns: 3fr 1fr 1fr;
   text-align: center;
+}
+.osz-diff-line > :first-child {
+  word-break: keep-all;
 }
 .osz-song {
   display: flex;

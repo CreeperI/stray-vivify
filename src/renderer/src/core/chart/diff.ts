@@ -45,8 +45,8 @@ export class Chart_diff {
     avg_density: number
     s: number
   }>
-  undo: (() => void)[]
-  redo: (() => void)[]
+  undo: (() => void)[][]
+  redo: (() => void)[][]
   shown: Ref<ChartTypeV2.note[]>
   update_shown_flag: Ref<boolean>
   last_update: number
@@ -56,10 +56,14 @@ export class Chart_diff {
   beat_list: [ms, number][]
   ticks: [ms, number][]
   // first for bar_list, 2nd beat_list
-  shown_t: Ref<{bar_list: [ms, number][],beat_list: [ms, number][],ticks: [ms, number][]}>
+  shown_t: Ref<{ bar_list: [ms, number][]; beat_list: [ms, number][]; ticks: [ms, number][] }>
   shown_timing: Ref<ChartTypeV2.timing[]>
   current_timing: ComputedRef<number>
   density_data: Ref<number[]>
+
+  on_operating: boolean
+  operating_fns: (() => void)[]
+  hit_error: boolean
 
   constructor(chart: Chart) {
     this.bound = chart.ref.diff
@@ -86,7 +90,7 @@ export class Chart_diff {
     this.shown_t = ref({
       bar_list: [],
       beat_list: [],
-      ticks: [],
+      ticks: []
     })
     this.shown_timing = ref([])
     this.current_timing = computed(() =>
@@ -114,6 +118,11 @@ export class Chart_diff {
     // which is for 分音
     // 我想做一个和pjsk.moe那种差不多的谱面导出所以加了一个分音的list
     this.ticks = []
+
+    this.on_operating = false
+    this.operating_fns = []
+
+    this.hit_error = false
   }
 
   get notes() {
@@ -197,23 +206,32 @@ export class Chart_diff {
   update_beat_list() {
     this.beat_list = []
     const v = this.timing
+
     for (let i = 0; i < v.length; i++) {
-      const end = this.timing_end_of(v[i], v, this.chart.length)
+      const timing = v[i]
+      const end = this.timing_end_of(timing, v, this.chart.length)
       const den = Settings.editor.meter
 
-      const mod = [1, 4, 8, 16, 32].filter((v) => v <= den).toReversed()
+      // Available snap divisors that are <= den, in order (coarsest to finest)
+      const mod = [1, 4, 8, 16, 32].filter((snap) => snap <= den)
 
-      function to_level(idx: number) {
-        const level = mod.findIndex((m) => idx % m == 0)
-        return level == -1 ? mod.length : level + 1
+      function to_level(beat_index: number) {
+        // Find the coarsest snap divisor that this beat falls on
+        for (let i = 0; i < mod.length; i++) {
+          const snap = mod[i]
+          if (beat_index % (den / snap) === 0) {
+            return i + 1
+          }
+        }
+        return mod.length + 1 // Fallback
       }
 
-      // copyright deepseek .jpg
-      const time_per_beat = (240 / (v[i].bpm * den)) * 1000 // to ms
-      let len = 0
-      for (let time = v[i].time; time < end; time += time_per_beat) {
-        this.beat_list.push([time, to_level(len)])
-        len += 1
+      const time_per_beat = (240 / (timing.bpm * den)) * 1000
+      let beat_index = 0
+
+      for (let time = timing.time; time < end; time += time_per_beat) {
+        this.beat_list.push([time, to_level(beat_index)])
+        beat_index++
       }
     }
   }
@@ -225,19 +243,23 @@ export class Chart_diff {
     for (let i = 0; i < v.length; i++) {
       const part = v[i]
       // ms
-      const time_per_4 = (60e3 / part.bpm)
+      const time_per_4 = 60000 / part.bpm
       const part_end = this.timing_end_of(part, v)
-      const part_times = i == 0 ? all_times.filter((v) => v < part_end) :all_times.filter((v) => v >= part.time && v < part_end)
+      const part_times =
+        i == 0
+          ? all_times.filter((v) => v < part_end)
+          : all_times.filter((v) => v >= part.time && v < part_end)
 
       // here got a len-1 'c i want to make the last independently fucked
       for (let j = 0; j < part_times.length - 1; j++) {
-        const tick = Math.round(4*time_per_4 / (part_times[j + 1] - part_times[j]))
+        const tick = (time_per_4 / (part_times[j + 1] - part_times[j])) * 4
         // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
         if (tick < 3) continue
-        this.ticks.push([part_times[j],tick])
+        this.ticks.push([part_times[j], Math.round(tick)])
       }
-      const tick = time_per_4 / (part_end - part_times[part_times.length -1])
-      if (tick > 2 && tick < 256) this.ticks.push([part_times[part_times.length -1], tick])
+      const tick = (time_per_4 / (part_end - part_times[part_times.length - 1])) * 4
+      if (tick > 2 && tick < 256)
+        this.ticks.push([part_times[part_times.length - 1], Math.round(tick)])
     }
   }
 
@@ -304,6 +326,21 @@ export class Chart_diff {
       })
     return r
   }
+  add_notes(v: ChartTypeV2.note[]) {
+    const r: boolean[] = []
+    const undo: (() => void)[] = []
+    for (let i = 0; i < v.length; i++) {
+      r.push(this.add_note_no_undo(v[i], false))
+      undo.push(() => {
+        this.remove_note_no_undo(v[i])
+      })
+    }
+    this.push_undo(() => {
+      undo.forEach((v) => v())
+    })
+    this.fuck_shown(this.chart.audio.current_time, true)
+    return r.every((v) => v)
+  }
 
   remove_note(v: ChartTypeV2.note) {
     const r = this.remove_note_no_undo(v)
@@ -312,6 +349,18 @@ export class Chart_diff {
         this.undo_remove(v)
       })
     return r
+  }
+  remove_notes(v: ChartTypeV2.note[]) {
+    const undo: (() => void)[] = []
+    for (let i = 0; i < v.length; i++) {
+      this.remove_note_no_undo(v[i])
+      undo.push(() => {
+        this.add_note_no_undo(v[i])
+      })
+    }
+    this.push_undo(() => {
+      undo.forEach((v) => v())
+    })
   }
 
   undo_add(v: ChartTypeV2.note) {
@@ -353,7 +402,7 @@ export class Chart_diff {
   }
 
   /** @returns if the note is successfully added */
-  add_note_no_undo(v: ChartTypeV2.note): boolean {
+  add_note_no_undo(v: ChartTypeV2.note, fuck = true): boolean {
     v.time = Math.floor(v.time)
     if (this.notes.find((x) => x.time == v.time && x.lane == v.lane && x.width == x.width))
       return false
@@ -361,7 +410,7 @@ export class Chart_diff {
       if (v.len == 0) v = { time: v.time, lane: v.lane, width: 1, ani: [], snm: 0 }
     }
     this.notes.push(v)
-    this.fuck_shown(this.chart.audio.current_time, true)
+    this.fuck_shown(this.chart.audio.current_time, fuck)
     return true
   }
 
@@ -380,23 +429,27 @@ export class Chart_diff {
   }
 
   push_undo(fn: () => void) {
-    this.undo.push(fn)
+    if (this.on_operating) this.operating_fns.push(fn)
+    else this.undo.push([fn])
     while (this.undo.length >= 20) this.undo.shift()
   }
 
   execute_undo() {
-    const fn = this.undo.pop()
-    if (fn) fn()
+    const fns = this.undo.pop()
+    if (fns) {
+      fns.forEach((fn) => fn())
+    }
   }
 
   push_redo(fn: () => void) {
-    this.redo.push(fn)
+    if (this.on_operating) this.operating_fns.push(fn)
+    else this.redo.push([fn])
     while (this.redo.length >= 20) this.redo.shift()
   }
 
   execute_redo() {
-    const fn = this.redo.pop()
-    if (fn) fn()
+    const fns = this.redo.pop()
+    if (fns) fns.forEach((fn) => fn())
   }
 
   floor_time() {
@@ -410,7 +463,9 @@ export class Chart_diff {
 
   update_t(visible: [number, number]) {
     this.shown_t.value = {
-      bar_list: this.bar_list.map((x, dx) => [x, dx] as [number, number]).filter((x) => utils.between(x[0], visible)),
+      bar_list: this.bar_list
+        .map((x, dx) => [x, dx] as [number, number])
+        .filter((x) => utils.between(x[0], visible)),
       beat_list: this.beat_list.filter((x) => utils.between(x[0], visible)),
       ticks: this.ticks.filter((x) => utils.between(x[0], visible))
     }
@@ -487,11 +542,11 @@ export class Chart_diff {
     this.notes = this.notes.map((x) => {
       if (x.width == 1 && isNote(x))
         return {
-          lane: x.lane,
+          lane: Math.min(x.lane, 3),
           time: x.time,
           width: 1,
           ani: x.ani,
-          snm: Math.min(1, x.snm)
+          snm: x.snm == 2 ? 0 : x.snm
         }
       if (!isNote(x)) {
         if (x.len == 0) {
@@ -506,6 +561,7 @@ export class Chart_diff {
       }
       return x
     })
+    if (this.timing.some((x) => x.bpm <= 0)) this.timing = this.timing.filter((x) => x.bpm >= 0)
   }
 
   calc_density() {
@@ -525,6 +581,9 @@ export class Chart_diff {
 
   update() {
     this.fuck_shown(this.chart.audio.current_time)
+    if (!this.chart.audio.paused) {
+      if (Settings.editor.hit_sound) this.play_hit()
+    }
   }
 
   sort_timing() {
@@ -579,6 +638,22 @@ export class Chart_diff {
     this.last_update = t
     FrameRate.fuck_shown.end()
     nextTick().then(() => (this.update_shown_flag.value = false))
+  }
+
+  private play_hit() {
+    if (this.hit_error) return
+
+    const FPS = FrameRate.fps.refs.value.avg
+    const current = this.chart.audio.current_time - Settings.editor.offset3
+    const time = 1000 / FPS // in ms
+    if (this.shown.value.find((x) => utils.between(x.time, [current, current + time]))) {
+      const sound = new Audio('stray:/__skin__/hit.mp3')
+      sound.play()
+      sound.onerror = () => {
+        this.hit_error = true
+        notify.error('无法播放音效。请检查skin下的hit.mp3')
+      }
+    }
   }
 
   /*private parse_sv_aq(f: ChartTypeV2.SV_Factory.SV_aq): ChartTypeV2.parsed_sv[] {

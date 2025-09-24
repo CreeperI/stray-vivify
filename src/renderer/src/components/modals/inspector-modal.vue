@@ -4,6 +4,8 @@ import { Log } from '@renderer/core/log'
 import { computed, ref } from 'vue'
 import { FrameRate } from '@renderer/core/frame-rates'
 import FrameRateSingle from '@renderer/components/modals/frame-rate-single.vue'
+import { GlobalStat } from '@renderer/core/globalStat'
+import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 
 const func_state = ref(0)
 
@@ -19,6 +21,14 @@ const level = ref('all' as 'all' | 'debug' | 'msg' | 'warn' | 'err')
 const needed = Log.need_img
 
 const _fps_r = FrameRate.fps.refs
+
+function parse_size(size: number) {
+  if (size < 1024) return `${size}B`
+  else if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)}KB`
+  else return `${(size / 1024 / 1024).toFixed(2)}MB`
+}
+const frontend = GlobalStat.MemoryUsage.frontend
+const backend = GlobalStat.MemoryUsage.backend
 </script>
 
 <template>
@@ -79,9 +89,33 @@ const _fps_r = FrameRate.fps.refs
               <frame-rate-single msg="Play Frame" :r="FrameRate.playfield_frame" />
               <frame-rate-single msg="Pending-note" :r="FrameRate.update_pending" />
               <frame-rate-single msg="calc-density" :r="FrameRate.calc_density" />
-
             </tbody>
           </table>
+          <div class="fr-header">Memory Usage</div>
+          <div class="memory-wrapper">
+            <div>
+              <span>Vue</span>
+              <div>可用</div>
+              <div>{{ parse_size(frontend.jsHeapSizeLimit) }}</div>
+              <div>已分配</div>
+              <div>{{ parse_size(frontend.totalJSHeapSize) }}</div>
+              <div>活跃</div>
+              <div>{{ parse_size(frontend.usedJSHeapSize) }}</div>
+            </div>
+            <div>
+              <span>Node</span>
+              <div><word-helper msg="rss" dec="常驻集"/></div>
+              <div>{{ parse_size(backend.rss) }}</div>
+              <div>可用</div>
+              <div>{{parse_size(backend.heapTotal)}}</div>
+              <div>活跃内存</div>
+              <div>{{parse_size(backend.heapUsed)}}</div>
+              <div>external</div>
+              <div>{{parse_size(backend.external)}}</div>
+              <div>缓冲区</div>
+              <div>{{parse_size(backend.arrayBuffers)}}</div>
+            </div>
+          </div>
         </div>
       </template>
       <template v-else-if="func_state == 2">
@@ -215,5 +249,24 @@ td {
   grid-template-columns: 1fr 1fr;
   width: 100%;
   justify-items: center;
+}
+.memory-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  user-select: none;
+}
+.memory-wrapper > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.memory-wrapper > div > span {
+  width: 100%;
+  grid-column: 2;
+}
+.memory-wrapper > div > div {
+  padding: 0 5px;
+}
+.memory-wrapper > div > div:nth-child(2n) {
+  text-align: right;
 }
 </style>

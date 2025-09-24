@@ -98,7 +98,7 @@ function style() {
 </script>
 
 <template>
-  <img alt="" :src="urlOf()" :style="style()" :data-time="note.time" />
+  <img alt="" :src="urlOf()" :style="style()"/>
 </template>
 
 <style scoped>

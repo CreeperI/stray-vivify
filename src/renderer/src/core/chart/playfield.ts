@@ -31,6 +31,7 @@ export class Chart_playfield {
   private diff: Chart_diff
   private readonly keydown_count: number[]
   private empty_key: number
+  private processed_notes: Set<ChartTypeV2.note> = new Set() // Track processed notes
 
   constructor(ch: Chart) {
     this.chart = ch
@@ -134,35 +135,48 @@ export class Chart_playfield {
     this.key_pressed[key] = true
     this.keydown_count[key]++
     this.refs.value.key_pressed[key] = true
-    // 1. choose the notes that are in timing window
-    // which is between +-p4
+
+    // Get all hittable notes in timing window
     const can_handle = this.shown.value.filter((x) => {
-      // here type-errors why but anyway it needs to be
+      // Skip if note already processed
+      if (this.processed_notes.has(x)) return false
+      // Skip if hold note is already being held
       if (this.holding.includes(x as ChartTypeV2.hold_note)) return false
-      if (x.lane <= key && x.lane + x.width > key)
-        if (Math.abs(x.time - current) <= this.timing.p5) return true
+      // Check if note covers this key lane
+      if (x.lane <= key && x.lane + x.width > key) {
+        const delta = Math.abs(x.time - current)
+        // Use miss window for all notes (including bombs)
+        return delta <= this.timing.p5
+      }
       return false
     })
+
     if (can_handle.length == 0) {
       this.empty_key++
       return
     }
 
-    // 2. sort the notes in order of distance to current time
+    // Sort by absolute time difference (closest note first)
     can_handle.sort((a, b) => Math.abs(a.time - current) - Math.abs(b.time - current))
-    for (const note of can_handle) {
-      if ('len' in note) {
-        const jr = this.what_judgement_hold(current - note.time)
-        if (jr != null) {
-          this.j(current, jr, current - note.time)
-          this.holding.push(note)
-          this.spawn_particle(jr, note.width, note.lane)
-          return
-        }
-      } else {
-        if (this.judge_normal(note, current)) {
-          return
-        }
+
+    // Process the closest note only
+    const note = can_handle[0]
+
+    if ('len' in note) {
+      // Hold note
+      const delta = current - note.time
+      const jr = this.what_judgement_hold(delta)
+      if (jr !== null) {
+        this.j(current, jr, delta)
+        this.holding.push(note)
+        this.spawn_particle(jr, note.width, note.lane)
+        this.processed_notes.add(note)
+      }
+    } else {
+      // Normal note
+      if (this.judge_normal(note, current)) {
+        this.processed_notes.add(note)
+        this.remove_note(note)
       }
     }
   }
@@ -171,73 +185,72 @@ export class Chart_playfield {
     const current = this.chart.audio.current_time - this.offset
     this.key_pressed[key] = false
     this.refs.value.key_pressed[key] = false
+
     const can_handle_holds = this.holding.filter((x) => {
-      // checks if the note covers the key
+      // Check if the note covers the key that was released
       if (x.lane <= key && x.lane + x.width > key) {
-        if (x.time + x.len >= current) return true
+        return x.time + x.len >= current
       }
       return false
     })
+
     for (const note of can_handle_holds) {
-      // any of its key is still holded
-      if (this.key_pressed.slice(note.lane, note.lane + note.width).includes(true)) continue
-      else {
-        this.j(
-          current,
-          this.what_judgement_hold_end(current - note.time - note.len),
-          current - note.time
-        )
-        this.remove_note(note)
+      // Check if any required key is still being pressed
+      let still_holding = false
+      for (let i = note.lane; i < note.lane + note.width; i++) {
+        if (this.key_pressed[i]) {
+          still_holding = true
+          break
+        }
+      }
+
+      if (!still_holding) {
+        const delta = current - note.time - note.len
+        const judgment = this.what_judgement_hold_end(delta)
+        this.j(current, judgment, current - note.time)
+        this.holding = this.holding.filter((x) => x !== note)
+        // Note: Don't remove from notes array here as it's already removed when hold started
       }
     }
   }
 
   /**
-   * @param time {number} current time
-   * @param note {ChartTypeV2.normal_note} the note to be judged
-   * @returns {boolean} whether to end this key-judge
-   * */
+   * Judge a normal note (non-hold)
+   */
   judge_normal(note: ChartTypeV2.normal_note, time: number): boolean {
-    // late is +, early is -
     const delta = time - note.time
-    // if it's a bomb then it will miss if in p2
+
+    // Handle bomb notes
     if (note.snm == 1) {
       if (Math.abs(delta) <= this.timing.p2) {
-        this.j(time, 5, delta)
-        this.remove_note(note)
+        this.j(time, 5, delta) // BOOM judgment
         this.spawn_particle(5, note.width, note.lane)
+        return true
       }
       return false
-    } else {
-      // it's not a bomb.
-
-      // it's an s or 1w
-      if (note.width == 1 || note.snm == 2) {
-        const j = this.what_judgement(delta)
-        if (j == null) {
-          return false
-        } else {
-          this.j(time, j, delta)
-          this.spawn_particle(j, note.width, note.lane)
-          this.remove_note(note)
-          return true
-        }
-      } else {
-        // it's a bumper
-        const j = this.what_judgement_bumper(delta)
-        if (j == null) {
-          return false
-        } else {
-          this.j(time, j, delta)
-          this.spawn_particle(j, note.width, note.lane)
-          this.remove_note(note)
-          return true
-        }
-      }
     }
+
+    // Handle normal notes, S notes, and bumpers
+    let judgment: number | null
+
+    if (note.width == 1 || note.snm == 2) {
+      // Single notes or S notes - use normal timing
+      judgment = this.what_judgement(delta)
+    } else {
+      // Bumper notes - more lenient timing
+      judgment = this.what_judgement_bumper(delta)
+    }
+
+    if (judgment !== null) {
+      this.j(time, judgment, delta)
+      this.spawn_particle(judgment, note.width, note.lane)
+      return true
+    }
+
+    return false
   }
 
-  what_judgement(delta: number) {
+  what_judgement(delta: number): number | null {
     const abs = Math.abs(delta)
     if (abs <= this.timing.p1) return 0
     else if (abs <= this.timing.p2) return Math.sign(delta)
@@ -246,74 +259,90 @@ export class Chart_playfield {
     else return delta < -this.timing.p5 ? -4 : null
   }
 
-  what_judgement_hold(delta: number) {
+  what_judgement_hold(delta: number): number | null {
     const abs = Math.abs(delta)
     if (abs <= this.timing.p1) return 0
     else if (abs <= this.timing.p2) return Math.sign(delta)
     else if (abs <= this.timing.p3) return Math.sign(delta) * 2
     else if (abs <= this.timing.p4) return Math.sign(delta) * 3
+    else if (abs <= this.timing.p5) return Math.sign(delta) * 4 // Allow miss judgment for holds
     else return null
   }
 
-  // for hold end the delta is only to be <0 because it's released early
-  what_judgement_hold_end(delta: number) {
-    delta = -delta
-    if (delta <= this.timing.p1) return 0
-    else if (delta <= this.timing.p2) return Math.sign(delta)
-    else if (delta <= this.timing.p3) return Math.sign(delta) * 2
-    else if (delta <= this.timing.p4) return Math.sign(delta) * 3
-    else return -4
-  }
+  what_judgement_hold_end(delta: number): number {
+    // For hold ends, only early release matters (negative delta)
+    if (delta >= 0) return 0 // Perfect if released on time or late
 
-  what_judgement_bumper(delta: number) {
     const abs = Math.abs(delta)
+    if (abs <= this.timing.p1) return 0
+    else if (abs <= this.timing.p2) return -1
+    else if (abs <= this.timing.p3) return -2
+    else if (abs <= this.timing.p4) return -3
+    else return -4 // Miss for very early release
+  }
+
+  what_judgement_bumper(delta: number): number | null {
+    const abs = Math.abs(delta)
+    // Bumpers are more lenient - use Good timing window but give Pure judgment
     if (abs <= this.timing.p4) return 0
+    else if (abs <= this.timing.p5) return Math.sign(delta) * 4 // Miss if outside good window
     else return null
   }
 
-  // to fuck the late +200 notes and not-bombing mines
+  // Handle notes that have passed their timing window
   out_of_time(current: number) {
-    const late = this.shown.value.filter((x) => {
-      if ('snm' in x)
+    const late_notes = this.shown.value.filter((x) => {
+      if (this.processed_notes.has(x)) return false
+
+      if ('len' in x) {
+        // Hold note - check if start was missed
+        if (!this.holding.includes(x)) {
+          return current - x.time > this.timing.p5
+        }
+        return false
+      } else {
+        // Normal note
         if (x.snm == 1) {
+          // Bomb - if not hit within bomb window, it's safe
           return current - x.time > this.timing.p2
         } else {
-          return current - x.time > this.timing.p4
+          // Regular note - missed if past miss window
+          return current - x.time > this.timing.p5
         }
-      else {
-        // so this is hold.
-        if (this.holding.includes(x)) return false
-        if (current - x.time > this.timing.p4) return true
       }
-      return false
     })
-    // here notes are late 200+
-    for (const note of late) {
-      if ('snm' in note) {
-        if (note.snm == 1) {
-          this.j(note.time, 0, 0)
-          this.spawn_particle(0, note.width, note.lane)
-        } else {
-          this.j(current, 4, current - note.time)
-          this.spawn_particle(4, note.width, note.lane)
-        }
-      } else {
-        // because the holds take up 2 judgements.
+
+    // Process missed notes
+    for (const note of late_notes) {
+      if ('len' in note) {
+        // Missed hold note - give two miss judgments (start + end)
         this.j(current, 4, current - note.time)
         this.j(current, 4, current - note.time)
         this.spawn_particle(4, note.width, note.lane)
+      } else if (note.snm == 1) {
+        // Bomb that wasn't hit - give perfect judgment (avoided successfully)
+        this.j(note.time, 0, 0)
+        this.spawn_particle(0, note.width, note.lane)
+      } else {
+        // Regular missed note
+        this.j(current, 4, current - note.time)
+        this.spawn_particle(4, note.width, note.lane)
       }
+      this.processed_notes.add(note)
       this.remove_note(note)
     }
 
-    // and check the hold-ends
-    for (const note of this.holding) {
+    // Check for hold note ends that were missed
+    this.holding = this.holding.filter(note => {
       if (current > note.time + note.len) {
+        // Hold ended naturally - give perfect judgment for the end
         this.j(current, 0, 0)
-        this.holding = this.holding.filter((x) => x != note)
-        this.remove_note(note)
+        this.processed_notes.add(note)
+        // Don't remove from notes array here as it's already removed
+        return false
       }
-    }
+      return true
+    })
   }
 
   remove_note(v: ChartTypeV2.note) {
@@ -329,8 +358,11 @@ export class Chart_playfield {
       lvl: lvl,
       delta: delta
     })
-    if (Math.abs(lvl) <= 3) this.refs.value.combo++
-    else {
+
+    // Update combo - break on miss or bomb hit
+    if (Math.abs(lvl) <= 3) {
+      this.refs.value.combo++
+    } else {
       this.max_combo = Math.max(this.max_combo, this.refs.value.combo)
       this.refs.value.combo = 0
     }
@@ -349,17 +381,26 @@ export class Chart_playfield {
   calc_acc() {
     if (performance.now() - this._acc_timer < 500) return
     this._acc_timer = performance.now()
-    this._acc =
-      this.judgements
-        .map(function (x): number {
-          if (x.lvl == 0) return 101
-          if (x.lvl == 1 || x.lvl == -1) return 100
-          if (x.lvl == 2 || x.lvl == -2) return 80
-          if (x.lvl == 3 || x.lvl == -3) return 50
-          else return 0
-        })
-        .reduce((a, b) => a + b, 0) / this.judgements.length
-    if (Number.isNaN(this._acc)) this._acc = 100
+
+    if (this.judgements.length === 0) {
+      this._acc = 100
+      this.refs.value.acc = this._acc
+      return
+    }
+
+    this._acc = this.judgements
+      .map(function (x): number {
+        const absLvl = Math.abs(x.lvl)
+        if (absLvl == 0) return 101  // Pure/MAX
+        if (absLvl == 1) return 100  // Perfect
+        if (absLvl == 2) return 80   // Great
+        if (absLvl == 3) return 50   // Good
+        if (absLvl == 4) return 0    // Miss
+        if (absLvl == 5) return 0    // Bomb hit
+        return 0
+      })
+      .reduce((a, b) => a + b, 0) / this.judgements.length
+
     this.refs.value.acc = this._acc
   }
 

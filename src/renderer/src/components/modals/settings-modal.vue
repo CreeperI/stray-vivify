@@ -8,6 +8,7 @@ import SettingHeader from '@renderer/components/modals/setting-header.vue'
 import AColorInput from '@renderer/components/a-elements/a-color-input.vue'
 import { modal } from '@renderer/core/modal'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
+import { Invoke } from '@renderer/core/ipc'
 
 const r = Settings.settings
 </script>
@@ -49,6 +50,15 @@ const r = Settings.settings
         <div>
           <word-helper msg="密度采样间隔" dec="密度折线的采样数，也即折线的数据点数" />
           <a-number-input class="in" v-model="r.settings.density_data_count" min="10" />
+        </div>
+        <setting-header msg="打击音" />
+        <div>
+          <div>打击音</div>
+          <a-number-input class="in" v-model="r.settings.offset3" />
+        </div>
+        <div>
+          <div>打击音</div>
+          <a-checkbox v-model="r.settings.hit_sound" />
         </div>
         <setting-header msg="预览模式" />
         <div>
@@ -138,6 +148,7 @@ const r = Settings.settings
       </div>
     </div>
     <template #footer>
+      <a-button msg="DevTools" @click="Invoke('open-dev')" />
       <a-button msg="Inspector" @click="modal.InspectorModal.show({})" />
       <a-button msg="快捷键设置" @click="modal.ShortcutModal.show({})" />
       <a-button msg="<strong>信用</strong>" @click="modal.CreditsModal.show({})" />

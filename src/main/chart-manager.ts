@@ -1,6 +1,7 @@
 import path from 'node:path'
 import fs from 'fs'
 import { charts_data, ChartType, IpcHandlers } from '../preload/types'
+import * as electron from 'electron'
 import { dialog, ipcMain, shell } from 'electron'
 import { file_paths } from './fp-parser'
 import AdmZip from 'adm-zip'
@@ -267,7 +268,6 @@ export default class ChartManager {
     }
   }
 
-
   import_sprite(id: string) {
     const png = dialog.showOpenDialogSync({
       properties: ['openFile'],
@@ -298,7 +298,7 @@ export default class ChartManager {
     if (fs.existsSync(folder)) return 0
     fs.mkdirSync(folder)
     fs.writeFileSync(path.join(folder, 'song' + ext), buf)
-    this.add_chart(id, "song", "unknown", "unknown", ext, [])
+    this.add_chart(id, 'song', 'unknown', 'unknown', ext, [])
     return 1
   }
 
@@ -306,6 +306,20 @@ export default class ChartManager {
     const folder = path.join(this.charts_folder, id)
     if (fs.existsSync(path.join(folder, 'song' + ext))) fs.rmSync(path.join(folder, 'song' + ext))
     fs.writeFileSync(path.join(folder, 'song' + ext), buf)
+  }
+
+  write_svg_text(id: string, text: string) {
+    const chart = this.data.find((v) => v.id === id)
+    if (!chart) return
+
+    const img = electron.nativeImage.createFromDataURL(text)
+    const png_buffer = img.toPNG()
+
+    const date = new Date()
+    const fname = `preview-${id}-${date.getHours()}${date.getMinutes()}${date.getSeconds()}`
+
+    fs.writeFileSync(path.join(this.charts_folder, id, fname + '.png'), png_buffer)
+    shell.showItemInFolder(path.join(this.charts_folder, id, fname + '.png'))
   }
 
   private init_json() {

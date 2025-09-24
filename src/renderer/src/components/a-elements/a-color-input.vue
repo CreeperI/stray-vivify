@@ -4,6 +4,7 @@ const model = defineModel<string>()
 
 <template>
   <div class="a-color-input">
+    <div></div>
     <input
       type="color"
       v-model="model"
@@ -14,14 +15,14 @@ const model = defineModel<string>()
 
 <style scoped>
 .a-color-input {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
+  display: grid;
+  grid-template-columns:1fr 1fr 6em;
 }
 input[type=color] {
   border: none;
   cursor: pointer;
   box-shadow: 0 0 2px white;
+  text-align: right;
 }
 div {
   user-select: none;

@@ -154,6 +154,25 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <div>塞了一些sv的史在里面</div>
       <div>osz导入中由于osu存储timing的方式比较伪人（指存储时长），所以导入的timing的bpm会比较奇怪。</div>
     </Build>
+    <Build build="9" y="2025" m="9" d="24" title="Build ⑨">
+      <template #qol>
+        <div>添加了select功能，以及配套的快捷键。</div>
+        <div>添加了打击音。由于html特色延迟，打击音大概率是不准的，请谨慎使用</div>
+        <div>在Inspector中新增了（运行）内存占用管理。</div>
+        <div>给输入id的界面添加了enter确认。</div>
+      </template>
+      <template #bugs>
+        <div>修复timing无法滚动的问题</div>
+        <div>略修改了validator的逻辑。</div>
+      </template>
+        <div>添加了svg导出。要求谱面至少有1个物件。会很卡的。</div>
+        <div>调整了导入osz的界面。</div>
+        <div>调整了CORS policy</div>
+        <div>给变速打了个底。</div>
+        <div>移除了部分不需要的东西（指node库）</div>
+      <div>调整了小节线的上色逻辑。现在应该比较人类了。</div>
+      <div><s>神秘东方小妖精正在入侵sv。</s></div>
+    </Build>
   </div>
 </template>
 

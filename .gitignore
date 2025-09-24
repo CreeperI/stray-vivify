@@ -8,3 +8,4 @@ out
 charts/
 skin/
 *.mjs
+package-lock.json

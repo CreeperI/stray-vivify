@@ -48,16 +48,3 @@ And for other platforms, you can run commands like ```npm run build:mac```,
 Sometimes you may find errors in the building process (not during vue-tsc), you can
 retry it in command line with administrator privilege.
 (I haven't met other situations, but this can solve most of the problems.)
-
-## About copyright
-Well, this is a open source project, I hope your forks or PRs to make this project better
-and *vivid*(?).
-
-Though, my coding skill is sadly bad, hope you wont be annoyed when refracting some of the codes.
-
-I still have only one requirement:
-
-You can add anything in anywhere of the Credit (or translates the session title), but
-plz dont change the existing contents.
-
-For my friends...

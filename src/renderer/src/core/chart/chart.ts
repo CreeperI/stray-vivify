@@ -86,6 +86,7 @@ export class Chart {
   set diff_index(v: number) {
     this.ref.diff_index.value = v
     this.ref.diff.value = this.diffs[this.ref.diff_index.value]
+    this.set_header_name()
     this._diff_index = v
   }
 
@@ -100,6 +101,21 @@ export class Chart {
       version: Settings.version
     }
   }
+
+  /*static create_vsb(vsb_path: string): Promise<Chart> {
+    const chart = new Chart()
+    chart.set_path(vsb_path)
+    return new Promise((resolve, reject) => {
+      Charter.invoke('read-vsb', vsb_path).then((r) => {
+        if (!r) {
+          reject('')
+          return
+        }
+        chart.diff.set_notes(r)
+        resolve(chart)
+      })
+    })
+  }*/
 
   get $playfield() {
     if (!this.playfield) this.init_playfield()
@@ -122,21 +138,6 @@ export class Chart {
       version: Settings.version
     }
   }
-
-  /*static create_vsb(vsb_path: string): Promise<Chart> {
-    const chart = new Chart()
-    chart.set_path(vsb_path)
-    return new Promise((resolve, reject) => {
-      Charter.invoke('read-vsb', vsb_path).then((r) => {
-        if (!r) {
-          reject('')
-          return
-        }
-        chart.diff.set_notes(r)
-        resolve(chart)
-      })
-    })
-  }*/
 
   static create(musicPath: string, musicURL: string): Promise<Chart> {
     const chart = new Chart()
@@ -436,8 +437,153 @@ export class Chart {
     console.log(r)
     modal.LoadOszModal.show({ diff: r.diff, song: r.song })
   }
+
   import_osz_pics() {
     Invoke('import-osz-pics', this.id)
+  }
+  async write_png() {
+    const svg = document.getElementById('chart-preview-svg')
+    if (!svg) {
+      console.error('未找到 SVG 元素');
+      return;
+    }
+
+    try {
+      // 获取 SVG 尺寸
+      const { width, height } = svg.getBoundingClientRect();
+
+      // 创建 Canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        throw new Error('无法获取 Canvas 上下文');
+      }
+
+      // 设置白色背景
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, width, height);
+
+      // 克隆 SVG 元素以避免修改原元素
+      const clonedSvg = svg.cloneNode(true) as SVGElement;
+
+      // 处理 SVG 中的 image 元素，将其转换为 data URL
+      const imageElements = clonedSvg.querySelectorAll('image');
+      const imagePromises: Promise<void>[] = [];
+
+      // 处理每个 image 元素
+      imageElements.forEach((imgElement) => {
+        const promise = new Promise<void>((resolve) => {
+          try {
+            const href = imgElement.getAttribute('href') || imgElement.getAttribute('xlink:href');
+            if (!href) {
+              resolve();
+              return;
+            }
+
+            // 如果是 data URL，直接使用
+            if (href.startsWith('data:')) {
+              resolve();
+              return;
+            }
+
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+
+            img.onload = () => {
+              try {
+                // 创建临时 canvas 来转换图片
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = img.width;
+                tempCanvas.height = img.height;
+
+                const tempCtx = tempCanvas.getContext('2d');
+                if (!tempCtx) {
+                  console.warn('无法创建临时 Canvas 上下文');
+                  resolve();
+                  return;
+                }
+
+                tempCtx.drawImage(img, 0, 0);
+
+                // 转换为 data URL
+                const dataUrl = tempCanvas.toDataURL('image/png');
+
+                // 更新 image 元素的 href
+                if (imgElement.hasAttribute('xlink:href')) {
+                  imgElement.setAttribute('xlink:href', dataUrl);
+                } else {
+                  imgElement.setAttribute('href', dataUrl);
+                }
+
+                resolve();
+              } catch (error) {
+                console.warn('图片转换失败:', error);
+                resolve(); // 即使失败也继续处理
+              }
+            };
+
+            img.onerror = () => {
+              console.warn('图片加载失败:', href);
+              resolve(); // 即使加载失败也继续处理
+            };
+
+            img.src = href;
+          } catch (error) {
+            console.warn('处理图片时出错:', error);
+            resolve(); // 即使出错也继续处理
+          }
+        });
+
+        imagePromises.push(promise);
+      });
+
+      // 等待所有图片处理完成
+      await Promise.all(imagePromises);
+
+      // 将 SVG 转换为数据 URL
+      const svgString = new XMLSerializer().serializeToString(clonedSvg);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      // 创建图片元素来加载 SVG
+      const pngDataUrl = await new Promise<string>((resolve, reject) => {
+        const img = new Image();
+
+        img.onload = () => {
+          try {
+            // 绘制到 Canvas
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // 转换为 PNG data URL
+            const pngData = canvas.toDataURL('image/png');
+
+            // 清理 URL
+            URL.revokeObjectURL(svgUrl);
+
+            resolve(pngData);
+          } catch (error) {
+            URL.revokeObjectURL(svgUrl);
+            reject(error);
+          }
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(svgUrl);
+          reject(new Error('SVG 图片加载失败'));
+        };
+
+        img.src = svgUrl;
+      });
+
+      // 调用主进程保存
+      Invoke('export-preview-svg', this.id, pngDataUrl);
+
+    } catch (error) {
+      console.error('SVG 转换失败:', error);
+    }
   }
 }
 

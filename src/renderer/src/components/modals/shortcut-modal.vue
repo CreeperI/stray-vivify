@@ -21,11 +21,17 @@ import ShortcutModalHeader from '@renderer/components/modals/shortcut-modal-head
         <shortcut-modal-single msg="s" :short="ShortCuts.$fun('s')" />
         <shortcut-modal-single msg="面" :short="ShortCuts.$fun('hold')" />
 
-        <shortcut-modal-header msg="不知道叫什么" />
+        <shortcut-modal-header msg="CTRL家族" />
         <shortcut-modal-single msg="撤销" :short="ShortCuts.$fun('undo')" />
         <shortcut-modal-single msg="重做" :short="ShortCuts.$fun('redo')" />
+        <shortcut-modal-single msg="复制" :short="ShortCuts.$fun('copy')" />
+        <shortcut-modal-single msg="剪切" :short="ShortCuts.$fun('cut')"/>
+        <shortcut-modal-single msg="粘贴" :short="ShortCuts.$fun('paste')"/>
+
+        <shortcut-modal-header msg="Modals"/>
         <shortcut-modal-single msg="Inspector" :short="ShortCuts.$fun('log')"/>
         <shortcut-modal-single msg="Settings" :short="ShortCuts.$fun('settings')"/>
+        <shortcut-modal-single msg="导入导出" :short="ShortCuts.$fun('iexport')"/>
 
         <shortcut-modal-header msg="键位" />
         <shortcut-modal-single msg="4k-1" :short="ShortCuts.$fun('4k1')" />

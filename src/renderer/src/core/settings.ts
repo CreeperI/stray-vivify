@@ -5,8 +5,8 @@ import { Charter } from '@renderer/core/charter'
 import { Invoke } from '@renderer/core/ipc'
 
 export const Version = {
-  val: 8.9,
-  str: 'Pre-9'
+  val: 9,
+  str: '⑨'
 }
 
 const note = {
@@ -93,7 +93,9 @@ const settings: Ref<storages.storage_scheme> = ref({
       p5: 60
     },
     density_data_count: 100,
-    mouse_tracker: false
+    mouse_tracker: false,
+    frame_time: true,
+    hit_sound: true
   },
   version: Version.val,
   shortcut: ''

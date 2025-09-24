@@ -1,5 +1,27 @@
 import { Buffer } from 'buffer'
 
+export interface MemoryUsage {
+  /**
+   * Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the
+   * process, including all C++ and JavaScript objects and code.
+   */
+  rss: number;
+  /**
+   * Refers to V8's memory usage.
+   */
+  heapTotal: number;
+  /**
+   * Refers to V8's memory usage.
+   */
+  heapUsed: number;
+  external: number;
+  /**
+   * Refers to memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s, including all Node.js Buffers. This is also included
+   * in the external value. When Node.js is used as an embedded library, this value may be `0` because allocations for `ArrayBuffer`s
+   * may not be tracked in that case.
+   */
+  arrayBuffers: number;
+}
 export namespace ChartType {
   /**
    *   [time, lane, type, extra?]
@@ -363,6 +385,18 @@ export type Invoke = {
     arg: {id: string}
     r: void
   }
+  'export-preview-svg': {
+    arg: {id: string, svg_text: string}
+    r:void
+  }
+  'open-dev': {
+    arg: {}
+    r: void
+  }
+  'memory-backend': {
+    arg: {}
+    r: MemoryUsage
+  }
 }
 
 export type Send = {
@@ -433,6 +467,7 @@ export namespace storages {
     offset1: number
     // for playing
     offset2: number
+    // for hit-sound
     offset3: number
     record_field: {
       show_bar_text: boolean
@@ -472,6 +507,10 @@ export namespace storages {
 
     density_data_count: number
     mouse_tracker: boolean
+
+    hit_sound: boolean
+
+    frame_time: boolean
   }
 
   export interface storage_scheme {

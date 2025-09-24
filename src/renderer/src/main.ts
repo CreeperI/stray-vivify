@@ -29,16 +29,19 @@ const app = createApp(App).use(
 
 function update_per_frame() {
   FrameRate.aniFrame.start()
+
   Charter.if_current()?.on_update()
   requestAnimationFrame(update_per_frame)
+
   FrameRate.aniFrame.end()
   FrameRate.next_tick.start()
+
   nextTick().then(() => {
     FrameRate.next_tick.end()
   })
 }
 
-Charter.ipcRenderer.on('window-resize', (_) => {
+window.electron.ipcRenderer.on('window-resize', (_) => {
   Listener.trigger('resize')
 })
 
@@ -64,11 +67,15 @@ async function main() {
   ShortCuts.handle()
   GlobalStat.MouseTracker.init()
 
-  GlobalStat.Intervals.on(1e4, () => Chart.current?.save())
+  GlobalStat.Intervals.on(1e4, () => {
+    Chart.current?.save()
+    Chart.current?.diff.update_tick_list()
+  })
   GlobalStat.Intervals.on(1000, () => {
     FrameRate.refresh()
     Chart.current?.playfield?.refresh()
     Chart.current?.diff.update_diff_counts()
+    GlobalStat.MemoryUsage.update()
   })
 
   requestAnimationFrame(update_per_frame)

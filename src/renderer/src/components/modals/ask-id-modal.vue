@@ -21,7 +21,7 @@ onMounted(() => {
 <template>
   <SimpleModal :show-close="false" size="sm">
     <div>请输入一个id以识别该曲目</div>
-    <a-text-input
+    <a-text-input @keydown.enter.capture="confirmModal(pending)"
       v-model="pending" placeholder="这里输入哦" id="id-input-box"></a-text-input>
     <div>建议：不要使用中文或特殊字符</div>
     <div v-if="all.includes(pending)">该id已存在。请换一个试试。</div>

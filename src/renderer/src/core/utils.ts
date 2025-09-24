@@ -156,8 +156,8 @@ export namespace utils {
     let secs = (absSeconds % 60).toFixed(fix)
 
     // 处理秒数部分补零逻辑
+    if (minutes == 0 ) {return (isNegative ? '-' : '') + secs}
     secs = parseFloat(secs) < 10 ? '0' + secs : secs
-
     // 添加负号标识
     return (isNegative ? '-' : '') + minutes + ':' + secs
   }
@@ -178,5 +178,8 @@ export namespace utils {
 
   export function keyof<T extends object>(obj: T) {
     return Object.keys(obj) as (keyof T)[]
+  }
+  export function range(...args: number[]) {
+    return Math.max(...args) - Math.min(...args)
   }
 }

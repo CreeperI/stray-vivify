@@ -109,9 +109,16 @@ input:invalid {
 #lane-notes > img[data-is-dragged=true] {
   opacity: 0 !important;
 }
+#lane-notes > img[data-is-selected=true] {
+  box-shadow: gold 0 0 15px;
+}
 
 div[data-is-current-version=true] {
   box-shadow: 0 0 10px 2px white inset;
   padding: 10px 0;
   border-radius: 10px;
+}
+
+.no-event {
+  pointer-events: none;
 }

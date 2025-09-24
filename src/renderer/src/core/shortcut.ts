@@ -5,6 +5,7 @@ import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { modal } from '@renderer/core/modal'
 import { notify } from '@renderer/core/notify'
+import { Invoke } from '@renderer/core/ipc'
 
 const functions = [
   'redo',
@@ -21,6 +22,7 @@ const functions = [
 
   'log',
   'settings',
+  'iexport',
 
   '4k1',
   '4k2',
@@ -226,6 +228,15 @@ new ShortCuts('settings', 'F2', () => {
   modal.SettingModal.show({})
 })
 
+new ShortCuts("dev", "F12", () => {
+  Invoke("open-dev")
+})
+
+new ShortCuts("copy", "c", () => {GlobalStat.NoteClipboard.copy()}, false, true)
+new ShortCuts("paste", "v", () => {GlobalStat.NoteClipboard.paste()}, false, true)
+new ShortCuts("cut", "x", () => {GlobalStat.NoteClipboard.cut()}, false, true)
+
+
 new ShortCuts('4k1', 'd', () => {
   Chart.current?.handle_key(0)
 })
@@ -238,6 +249,8 @@ new ShortCuts('4k3', 'j', () => {
 new ShortCuts('4k4', 'k', () => {
   Chart.current?.handle_key(3)
 })
+
+new ShortCuts("iexport", "p", () => {modal.IExporterModal.show({})})
 
 ShortCuts.$fun('4k1').set_keyup(() => Chart.current?.handle_keyup(0))
 ShortCuts.$fun('4k2').set_keyup(() => Chart.current?.handle_keyup(1))

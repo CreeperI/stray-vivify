@@ -47,7 +47,7 @@ const on_click = (val: T) => {
   padding-left: 1em;
   border: 1px solid;
   margin: 0 10px;
-  padding-right: 15px;
+  padding-right: 20px;
 }
 
 .a-select-value:after {
@@ -85,7 +85,10 @@ const on_click = (val: T) => {
   background-color: transparent;
   line-height: 1.5em;
   text-align: left;
-  height: 1.5em;
   padding-left: 1em;
+}
+.a-option:hover {
+  filter: brightness(1.1);
+  background-color: #3b4652;
 }
 </style>

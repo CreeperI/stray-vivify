@@ -13,6 +13,7 @@ const need = chart.song.need_roman
 const bound = chart.diff.bound
 const options = () =>
   chart.diffs.map((x, v) => {
+    if (x.meta.diff2 == '') return { val: v, display: x.meta.diff1 }
     return { val: v, display: x.meta.diff1 + ' - ' + x.meta.diff2 }
   })
 const dix = chart.ref.diff_index

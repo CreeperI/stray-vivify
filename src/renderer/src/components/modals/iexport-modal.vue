@@ -98,7 +98,7 @@ function open_svg() {
           <a-button2 msg="导出svc" @click="export_chart" />
           <a-button2 msg="导入osz" @click="import_osz" />
           <a-button2 msg="导入osz的曲绘" @click="import_osz_pics" />
-          <a-button2 msg="导出svg" @click="open_svg" />
+          <a-button2 msg="导出svg" @click="open_svg" v-if="chart.diff.notes.length != 0" />
         </div>
       </Hide>
       <Hide title="gml">

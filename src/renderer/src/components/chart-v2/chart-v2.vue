@@ -3,9 +3,7 @@ import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
 import HeaderV2 from '@renderer/components/chart-v2/header-v2.vue'
 import LaneLeft from '@renderer/components/chart-v2/chart-tabs/lane-left.vue'
 import LaneRight from '@renderer/components/chart-v2/chart-tabs/lane-right.vue'
-import { computed } from 'vue'
 import SongInfo from '@renderer/components/chart-v2/chart-tabs/song-info.vue'
-import { Charter } from '@renderer/core/charter'
 import { Settings } from '@renderer/core/settings'
 import ChartTiming from '@renderer/components/chart-v2/chart-tabs/chart-timing.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
@@ -14,9 +12,6 @@ import Playfield from '@renderer/components/chart-v2/playfield.vue'
 
 const active = GlobalStat.refs.chart_tab
 active.value = 2
-const fn_shown = computed(
-  () => Charter.refs.window.width.value > 1.5 * (4 * Settings.editor.lane_width + 50 + 12)
-)
 
 document.addEventListener('keydown', (e) => {
   if (e.key != 'Tab') return
@@ -48,9 +43,9 @@ const chart_state = GlobalStat.chart_state
       <header-v2 v-model="active" />
       <song-info v-if="active == 1" />
       <div class="chart-main" v-else-if="active == 2">
-        <lane-left class="chart-fn" v-if="fn_shown" />
+        <lane-left class="chart-fn" />
         <svg-lane class="svg-lane" />
-        <lane-right class="chart-fn" v-if="fn_shown" />
+        <lane-right class="chart-fn" />
       </div>
       <chart-timing v-if="active == 3"></chart-timing>
     </template>

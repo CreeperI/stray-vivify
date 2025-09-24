@@ -18,10 +18,40 @@ const CHART_WIDTH = 4 * LANE_WIDTH // 4 lanes = 160px
 const CHART_GAP = 50
 const PADDING = 50
 const chart = Chart.$current
-
-const ms_to_px = 1
-const max_height = 3000 + 10
+const ms_to_px = 0.7
 const inf_height = 250
+
+const timeRange = (() => {
+  const minTime = Math.min(...chart.diff.notes.map((n) => n.time))
+  const maxTime = Math.max(
+    ...chart.diff.notes.map((n) => {
+      if ('len' in n) {
+        return n.time + n.len
+      }
+      return n.time
+    })
+  )
+
+  return {
+    min: minTime,
+    max: maxTime,
+    total: maxTime
+  }
+})()
+
+const totalPixelHeight = timeRange.total * ms_to_px
+const max_height = Math.floor(Math.sqrt(totalPixelHeight * (CHART_GAP + CHART_WIDTH)))
+const layoutInfo = (() => {
+  const columnsNeeded = Math.ceil(totalPixelHeight / max_height)
+  const timePerColumn = timeRange.total / columnsNeeded
+
+  return {
+    totalPixelHeight,
+    columnsNeeded: columnsNeeded,
+    timePerColumn
+  }
+})()
+
 const inf_base = max_height + 50
 const svg_height = inf_height + 10 + max_height
 
@@ -65,38 +95,13 @@ function src_of_len(note: hold_note): string {
   return str + 'h.png'
 }
 
-// Computed values for time range and layout
-const timeRange = (() => {
-  const minTime = Math.min(...chart.diff.notes.map((n) => n.time))
-  const maxTime = Math.max(
-    ...chart.diff.notes.map((n) => {
-      if ('len' in n) {
-        return n.time + n.len
-      }
-      return n.time
-    })
-  )
-
-  return {
-    min: minTime,
-    max: maxTime,
-    total: maxTime
-  }
-})()
-
-const layoutInfo = (() => {
-  const totalPixelHeight = timeRange.total * ms_to_px
-  const columnsNeeded = Math.ceil(totalPixelHeight / max_height)
-  const timePerColumn = timeRange.total / columnsNeeded
-
-  return {
-    totalPixelHeight,
-    columnsNeeded: columnsNeeded,
-    timePerColumn
-  }
-})()
 
 const svgWidth = layoutInfo.columnsNeeded * (CHART_WIDTH + CHART_GAP) + 2 * PADDING
+
+// Helper function to get base x coordinate for a column (lane 0 position)
+function getColumnBaseX(column: number): number {
+  return PADDING + column * (CHART_WIDTH + CHART_GAP)
+}
 
 // Independent function to convert time to coordinate [x, y] for lane 0
 function timeToCoordinate(time: number): [number, number] {
@@ -106,8 +111,8 @@ function timeToCoordinate(time: number): [number, number] {
 
   // In rhythm games, earlier notes appear at the bottom, later notes at the top
   // So we invert the y coordinate
-  const y = max_height - timeInColumn * ms_to_px
-  const x = column * (CHART_WIDTH + CHART_GAP) + PADDING // Lane 0 position
+  const y = Math.round(max_height - timeInColumn * ms_to_px + PADDING / 2)
+  const x = getColumnBaseX(column) // Lane 0 position
 
   return [x, y]
 }
@@ -120,14 +125,14 @@ function timeToPixel(time: number): { column: number; y: number } {
 
   // In rhythm games, earlier notes appear at the bottom, later notes at the top
   // So we invert the y coordinate
-  const y = max_height - timeInColumn * ms_to_px
+  const y = Math.round(max_height - timeInColumn * ms_to_px + PADDING / 2)
 
   return { column, y }
 }
 
 // Helper function to get x coordinate for a lane
 function laneToX(lane: number, column: number): number {
-  return column * (CHART_WIDTH + CHART_GAP) + lane * LANE_WIDTH + PADDING
+  return getColumnBaseX(column) + lane * LANE_WIDTH
 }
 
 // Main render function
@@ -151,7 +156,7 @@ function get_render_elements(): RenderElement[] {
       result.push([
         src_of(holdNote),
         startX,
-        startPos.y - NOTE_HEIGHT , // Adjust y to position note correctly
+        startPos.y - NOTE_HEIGHT, // Adjust y to position note correctly
         NOTE_HEIGHT,
         noteWidth
       ])
@@ -165,7 +170,7 @@ function get_render_elements(): RenderElement[] {
         result.push([
           src_of_len(holdNote),
           lengthX,
-          Math.min(startPos.y, endPos.y) - NOTE_HEIGHT ,
+          Math.min(startPos.y, endPos.y) - NOTE_HEIGHT,
           lengthHeight,
           noteWidth
         ])
@@ -178,15 +183,15 @@ function get_render_elements(): RenderElement[] {
           if (col === startPos.column) {
             // First column: from start position to bottom of column
             segmentStartY = startPos.y
-            segmentEndY = 0
+            segmentEndY = PADDING / 2
           } else if (col === endPos.column) {
             // Last column: from top of column to end position
-            segmentStartY = max_height
+            segmentStartY = max_height + PADDING / 2
             segmentEndY = endPos.y
           } else {
             // Middle columns: full height
-            segmentStartY = max_height
-            segmentEndY = 0
+            segmentStartY = max_height + PADDING / 2
+            segmentEndY = PADDING / 2
           }
 
           const segmentHeight = Math.abs(segmentStartY - segmentEndY)
@@ -218,24 +223,24 @@ function get_render_elements(): RenderElement[] {
     }
   }
 
-  result.forEach((r) => r[2] = r[2] + PADDING / 2)
   return result
 }
 
 const render_notes = get_render_elements()
 const cd_of_bar_list = (() => {
-  const r: { x1: number; y1: number; x2: number; y2: number; ix: number }[] = []
+  const r: { x1: number; y1: number; x2: number; y2: number; ix: string }[] = []
   chart.diff.update_bar_list()
+  const timing_times = chart.diff.timing.map((t) => t.time)
   for (let i = 0; i < chart.diff.bar_list.length; i++) {
     const time = chart.diff.bar_list[i]
     if (time > timeRange.max) break
     const cd = timeToCoordinate(time)
     r.push({
-      x1: cd[0] ,
-      y1: cd[1] - 6 + PADDING / 2,
+      x1: cd[0],
+      y1: cd[1] - 6,
       x2: cd[0] + CHART_WIDTH,
-      y2: cd[1] - 6 + PADDING / 2,
-      ix: i
+      y2: cd[1] - 6,
+      ix: timing_times.includes(time) ? '' : i.toString()
     })
   }
   return r
@@ -243,14 +248,27 @@ const cd_of_bar_list = (() => {
 
 const cd_of_timing_list = (() => {
   const r: { x: number; y: number; timing: ChartTypeV2.timing; ix: number }[] = []
-  for (let i = 0; i < chart.diff.timing.length; i++) {
+  let start = chart.diff.timing.findLastIndex((t) => t.time < timeRange.min)
+  if (start < 0) start = 0
+  else {
+    const first_timing = chart.diff.timing[start]
+    const cd = timeToCoordinate(timeRange.min)
+    r.push({
+      x: cd[0],
+      y: cd[1] - 6,
+      timing: first_timing,
+      ix: start + 1
+    })
+    start += 1
+  }
+  for (let i = start; i < chart.diff.timing.length; i++) {
     const timing = chart.diff.timing[i]
     const cd = timeToCoordinate(timing.time)
     r.push({
       x: cd[0],
-      y: cd[1] - 6 + PADDING / 2,
+      y: cd[1] - 6,
       timing: timing,
-      ix: i
+      ix: i +1
     })
   }
   return r
@@ -263,7 +281,7 @@ const cd_of_ticks = (() => {
     const cd = timeToCoordinate(chart.diff.ticks[i][0])
     r.push({
       x: cd[0] + CHART_WIDTH + 3,
-      y: cd[1] - 6 + PADDING / 2,
+      y: cd[1] - 6,
       tick: chart.diff.ticks[i][1]
     })
   }
@@ -271,19 +289,21 @@ const cd_of_ticks = (() => {
 })()
 </script>
 <template>
-  <svg :width="svgWidth" :height="svg_height" id="full-svg">
+  <svg :width="svgWidth" :height="svg_height" id="chart-preview-svg">
+    <rect x="0" y="0" height="100%" width="100%" fill="black" />
+    <text x="50" y="100%" dy="-10px" font-size="20" fill="gray">Generated by stray/vivify (TerminalFlow)</text>
     <g>
       <rect
         v-for="c in layoutInfo.columnsNeeded"
-        :x="laneToX(0, c - 1)"
-        y="20"
+        :x="getColumnBaseX(c - 1)"
+        y="10"
         :width="CHART_WIDTH"
-        :height="max_height"
+        :height="max_height + 30"
         fill="#131520"
       ></rect>
     </g>
     <g>
-      <template v-for="bar in cd_of_bar_list">
+      <template v-for="bar in cd_of_bar_list" :key="'bar-' + bar.ix">
         <line
           :x1="bar.x1"
           :y1="bar.y1"
@@ -306,8 +326,8 @@ const cd_of_ticks = (() => {
       </template>
     </g>
     <g>
-      <template v-for="timing in cd_of_timing_list">
-        <text :x="timing.x" :y="timing.y" text-anchor="end" fill="pink" font-size="15" dx="-20">
+      <template v-for="timing in cd_of_timing_list" :key="'timing-' + timing.ix">
+        <text :x="timing.x" :y="timing.y" text-anchor="end" fill="pink" font-size="15">
           #{{ timing.ix }}
         </text>
         <text
@@ -317,7 +337,6 @@ const cd_of_ticks = (() => {
           fill="pink"
           font-size="15"
           dy="15"
-          dx="-20"
         >
           {{ timing.timing.bpm }}
         </text>
@@ -326,7 +345,7 @@ const cd_of_ticks = (() => {
     <g>
       <image
         v-for="(element, index) in render_notes"
-        :key="index"
+        :key="'note-' + index"
         :href="element[0]"
         :x="element[1]"
         :y="element[2]"
@@ -337,7 +356,8 @@ const cd_of_ticks = (() => {
     </g>
     <g>
       <text
-        v-for="tick in cd_of_ticks"
+        v-for="(tick, index) in cd_of_ticks"
+        :key="'tick-' + index"
         :x="tick.x"
         :y="tick.y"
         font-size="12px"
@@ -358,7 +378,7 @@ const cd_of_ticks = (() => {
         :y="inf_base"
         x="50"
       />
-      <image v-else xlink:href="/song.jpg" height="150" :y="inf_base + 50" x="50" width="150" />
+      <image v-else xlink:href="/song.jpg" height="150" :y="inf_base + 20" x="50" width="150" />
 
       <text text-anchor="end" x="100%" :y="inf_base + 75" dx="-50px" font-size="50" fill="white">
         {{ chart.song.name }} - {{ chart.song.composer }}
@@ -369,9 +389,3 @@ const cd_of_ticks = (() => {
     </g>
   </svg>
 </template>
-
-<style scoped>
-#full-svg {
-  background: black;
-}
-</style>
