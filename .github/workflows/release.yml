@@ -1,4 +1,4 @@
-name: Build/release Electron app
+name: build + release
 
 on:
   push:
@@ -13,60 +13,45 @@ on:
 
 jobs:
   release:
-    runs-on: linux-latest
+    runs-on: ubuntu-latest  # Fixed: was "linux-latest"
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # Updated to latest version
 
       - name: Install Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4  # Updated to latest version
         with:
-          node-version: 22.13.1
+          node-version: '22'  # More flexible version specification
+          cache: 'npm'  # Added npm caching for faster builds
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci  # Use npm ci for faster, more reliable installs
 
-      - name: build-win
+      - name: Build Windows App
         run: npm run build:win
 
-      - name: zipping win-unpacked
-        uses: montudor/action-zip@v1
-        with:
-          args: zip -qq -r win-unpacked.zip win-unpacked
+      - name: List build output (debug)
+        run: ls -la  # Debug step to see what files were created
 
-      - name: small version release
-        uses: softprops/action-gh-release@v1
+      - name: Create zip archive
+        run: |
+          if [ -d "win-unpacked" ]; then
+            zip -qq -r win-unpacked.zip win-unpacked/
+          elif [ -d "dist/win-unpacked" ]; then
+            zip -qq -r win-unpacked.zip dist/win-unpacked/
+          elif [ -d "build/win-unpacked" ]; then
+            zip -qq -r win-unpacked.zip build/win-unpacked/
+          else
+            echo "Could not find win-unpacked directory"
+            find . -name "*win*" -type d
+            exit 1
+          fi
+
+      - name: Release
+        uses: softprops/action-gh-release@v2  # Updated version
         with:
-          draft: true
-          prerelease: false
           files: win-unpacked.zip
           name: ${{ github.ref_name }}
         env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref_name, '.')
-
-      # Release for major versions (v*) - Published release
-      - name: Major Version Release
-        uses: softprops/action-gh-release@v1
-        with:
-          draft: false
-          prerelease: false
-          files: win-unpacked.zip
-          name: "${{ github.ref_name }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '.')
-
-      # Release for branch pushes (main/master) - Development build
-      - name: Development Build
-        uses: softprops/action-gh-release@v1
-        with:
-          draft: false
-          prerelease: true
-          files: win-unpacked.zip
-          name: "Development Build - ${{ github.sha }}"
-          tag_name: "dev-${{ github.sha }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        if: github.event_name == 'push' && contains(fromJson('["refs/heads/main", "refs/heads/master"]'), github.ref)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Try default token first
