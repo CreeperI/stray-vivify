@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import ARange from '@renderer/components/a-elements/a-range.vue'
 import { computed } from 'vue'
 import { Settings } from '@renderer/core/settings'
@@ -33,7 +33,7 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
         <tr>
           <td style="width: 10%">流速</td>
           <td colspan="9">
-            <a-range style="width: 100%" v-model="scale" :max="20" :min="0.1" :step="0.1" />
+            <a-range v-model="scale" :max="20" :min="0.1" :step="0.1" style="width: 100%" />
           </td>
           <td style="width: 15%">
             <a-number-input v-model="scale" max="20" min="0.1" step="0.1" />
@@ -42,7 +42,7 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
         <tr>
           <td rowspan="2">分音</td>
           <td colspan="9">
-            <a-range style="width: 100%" v-model="meter" max="64" min="1" step="1" />
+            <a-range v-model="meter" max="64" min="1" step="1" style="width: 100%" />
           </td>
           <td>
             <a-number-input v-model="meter" max="64" min="1" step="1" />
@@ -68,6 +68,14 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
       <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
       <label @click="writable_play_rate = 1">播放速度:{{ play_rate }}x</label>
       <a-range v-model="writable_play_rate" max="2" min="0.25" step="0.05" />
+      <label v-if="Settings.editor.hit_sound">打击音量: {{ Settings.editor.hit_volume }}</label>
+      <a-range
+        v-if="Settings.editor.hit_sound"
+        v-model="Settings.editor.hit_volume"
+        max="100"
+        min="0"
+        step="1"
+      />
     </div>
   </div>
 </template>

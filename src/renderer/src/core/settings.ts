@@ -5,8 +5,8 @@ import { Charter } from '@renderer/core/charter'
 import { Invoke } from '@renderer/core/ipc'
 
 export const Version = {
-  val: 9.1,
-  str: '9s'
+  val: 9.2,
+  str: '9s1'
 }
 
 const note = {
@@ -107,7 +107,8 @@ const settings = ref({
     },
     star_rating: false,
     min_lane: 4,
-    bar_or_section: false
+    bar_or_section: false,
+    hit_volume: 100,
   },
   version: Version.val,
   shortcut: '',

@@ -234,6 +234,16 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'open-file-utf': (_, fp) => {
       if (!fs.existsSync(fp)) return
       return fs.readFileSync(fp, 'utf-8')
+    },
+    "create-folder": (_, id, name) => {
+      if (fs.existsSync(path.join(file_paths.charts, id)))
+        if (fs.existsSync(path.join(file_paths.charts, id, name))) return 1
+      return 0
+    },
+    "write-blob": (_, id:string, _name:string, _blob:string) => {
+      if (fs.existsSync(path.join(file_paths.charts, id))) {
+        fs.writeFileSync(path.join(file_paths.charts, id, _name), Buffer.from(_blob), "binary")
+      }
     }
   } as Required<IpcHandlers.invoke.handler>
 }

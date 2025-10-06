@@ -373,7 +373,7 @@ onMounted(() => {
     clearInterval(id)
   }, 500)
 
-  chart.diff.fuck_shown(0, true)
+  chart.diff.fuck_shown(chart.audio.current_time, true)
 })
 onUnmounted(() => {
   document.getElementById('lane-wrapper')?.removeEventListener('wheel', fuck_wheel)
@@ -392,31 +392,31 @@ const pointer_class = computed(() => {
     @mouseleave="() => update_pending_display('leave')"
   >
     <foreignObject
-      :class="pointer_class"
       id="lane-notes"
+      :class="pointer_class"
       height="100%"
       width="100%"
       y="-80"
       @click="on_click"
-      @mousemove.capture="update_pending"
       @drop="ondrop"
-      @dragover.prevent="update_pending"
       @mousedown="(e) => on_mouse_down(e)"
+      @mousemove.capture="update_pending"
+      @dragover.prevent="update_pending"
     >
       <note-v2
         v-for="note in shown"
+        :data-is-dragged="dragging?.some((x) => same_note(x, note))"
+        :data-is-selected="am_i_selected(selected, note)"
         :note="note"
         :style="{
           bottom: time_bottom(current_time, note, mul),
           left: x_of(note)
         }"
         data-shown-note
+        @dragend="ondragend"
+        @dragstart="(e) => ondragstart(e, note)"
         @click.right="del_note(note)"
         @click.ctrl="change_my_select(note)"
-        @dragstart="(e) => ondragstart(e, note)"
-        @dragend="ondragend"
-        :data-is-dragged="dragging?.some((x) => same_note(x, note))"
-        :data-is-selected="am_i_selected(selected, note)"
       />
       <template v-if="pending_display">
         <note-v2
@@ -434,13 +434,13 @@ const pointer_class = computed(() => {
   </g>
   <rect
     v-if="select_rect.shown"
+    :height="select_rect.height"
+    :width="select_rect.width"
     :x="select_rect.x"
     :y="select_rect.y"
-    :width="select_rect.width"
-    :height="select_rect.height"
+    class="no-event select-rect"
     fill="#b8dcee"
     opacity="0.6"
-    class="no-event select-rect"
   ></rect>
 </template>
 

@@ -62,7 +62,7 @@ class HitSoundSystem {
 
     // Find note in current time window
     const hitNote = this.shown.value.find(
-      (x: any) => utils.between(x.time, [current, current + time]) && x['snm'] != 1
+      (x: any) => utils.between(x.time, [current, current + time * 1.5]) && x['snm'] != 1
     )
 
     if (hitNote && !this.playedNotes.has(hitNote.time)) {
@@ -97,6 +97,10 @@ class HitSoundSystem {
     try {
       this.audioContext = new AudioContext()
       this.gainNode = this.audioContext.createGain()
+      watch(() => Settings.editor.hit_volume, (v) => {
+        if (this.gainNode) this.gainNode.gain.value = v / 100
+        else notify.error("GainNode炸了")
+      })
       this.gainNode.gain.value = 1.0
       this.gainNode.connect(this.audioContext.destination)
 
@@ -516,11 +520,12 @@ export class Chart_diff {
 
   update_bar_section_list() {
     this.bar_list = []
+    this.section_list = []
     const v = this.timing
     for (let i = 0; i < v.length; i++) {
       const part = v[i]
       const time_per_bar = (60 / part.bpm) * part.num * 1000
-      const time_per_section = (60 / part.bpm) * part.den * 1000
+      const time_per_section = (60 / part.bpm) * part.den * 250
       const part_end = this.timing_end_of(part, v, this.chart.length)
       for (let time = part.time; time < part_end; time += time_per_bar) {
         this.bar_list.push(time)

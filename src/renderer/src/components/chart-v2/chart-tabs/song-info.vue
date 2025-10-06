@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import SongInfoSingle from '@renderer/components/chart-v2/chart-tabs/song-info-single.vue'
 import ASelect from '@renderer/components/a-elements/a-select.vue'
-import { ref } from 'vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { utils } from '@renderer/core/utils'
 import { Invoke } from '@renderer/core/ipc'
@@ -20,8 +19,8 @@ const options = () =>
 const dix = chart.ref.diff_index
 const src = `stray:///__sprite__/${chart.id}`
 const src2 = `stray:///__bg__/${chart.id}`
-const img_show = ref(true)
-const img2_show = ref(true)
+const img_show = chart.sprite_err
+const img2_show = chart.bg_err
 
 function add_diff() {
   chart.create_diff()
@@ -56,21 +55,21 @@ const rkey = utils.refresh_key
       <div class="song-info-single">
         <div>曲绘<a-button2 msg="导入曲绘" @click="import_sprite" /></div>
         <img
-          v-if="img_show"
+          v-if="!img_show"
           :src="src"
           alt="how are you reading this?"
           class="song-sprite"
-          @error="img_show = false"
+          @error="img_show = true"
         />
       </div>
       <div class="song-info-single">
         <div>背景<a-button2 msg="导入背景" @click="import_bg" /></div>
         <img
-          v-if="img2_show"
+          v-if="!img2_show"
           :src="src2"
           alt="how are you reading this?"
           class="song-sprite"
-          @error="img2_show = false"
+          @error="img2_show = true"
         />
       </div>
     </div>

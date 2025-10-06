@@ -47,7 +47,7 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
         </span>
       </template>
     </Build>
-    <Build build="4" y="2025" m="3" d="8">
+    <Build build="4" d="8" m="3" y="2025">
       <template #bugs>
         <div>修复了撞尾bug。</div>
       </template>
@@ -64,7 +64,7 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       </div>
       <div>为制谱器起了个名字。</div>
     </Build>
-    <Build build="5" y="2025" m="4" d="3">
+    <Build build="5" d="3" m="4" y="2025">
       <template #bugs>
         <div>修复了（？）关于谱面offset的一系列问题。现在应该好了吧……</div>
       </template>
@@ -80,7 +80,7 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <div>新增了株洲岛有栖。</div>
       <template #header> 我愚人节呢？？？ </template>
     </Build>
-    <Build build="7.3" y="2025" m="8" d="17">
+    <Build build="7.3" d="17" m="8" y="2025">
       <template #header> stray-vivify Reborn </template>
       <div>移除了waiting-load</div>
       <div>移除了株洲岛有栖，新增了株洲岛有栖（汉堡ver）画师：River</div>
@@ -91,27 +91,27 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <div>增加了skin。</div>
       <div>调整了很多界面。</div>
     </Build>
-    <Build build="8" y="2025" m="8" d="24">
+    <Build build="8" d="24" m="8" y="2025">
       <template #header> stray-vivify 101.00% </template>
       <div>Major 新增游玩模式</div>
       <div>解除了不能下宽面（？）的限制。</div>
       <div>修改F1界面为Inspector.快捷键可以在设置中修改。</div>
     </Build>
-    <Build build="8.2" y="2025" m="8" d="29">
+    <Build build="8.2" d="29" m="8" y="2025">
       <template #header> 开学快乐……？ </template>
       <template #bugs>
         <div>修复了预览模式暴毙的bug，原因是我把退出的逻辑写到空格上了</div>
       </template>
       <div>修改了宽面的皮肤读取逻辑</div>
     </Build>
-    <Build build="8.3" y="2025" m="8" d="30">
+    <Build build="8.3" d="30" m="8" y="2025">
       <template #bugs>
         <div>回滚了宽面和渲染逻辑。由于img的鼠标操作比较猎奇，所以后面再说吧</div>
         <div>修复了validator的bug，这会导致所有面变成米。</div>
       </template>
       <div>新增了一个导出选项。后面计划把所有导入导出都塞到这个里面，虽然不太方便（？</div>
     </Build>
-    <Build build="8.4" y="2025" m="8" d="31">
+    <Build build="8.4" d="31" m="8" y="2025">
       <template #bugs>
         <div>#5 3.0流速下大概会相较鼠标偏后1个16分音</div>
         <div>#10 修改了2宽bumper的lane摆放逻辑，现在是|-1.5-|-1-|-1.5-|的权重。</div>
@@ -129,7 +129,7 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <div>密度（梯度）折线图</div>
       <div>移除了ab30，广告位招租（？</div>
     </Build>
-    <Build build="8.5" y="2025" m="9" d="1" title="V8 Stable(?">
+    <Build build="8.5" d="1" m="9" title="V8 Stable(?" y="2025">
       <template #bugs>
         <div>修复了本页面在没有bug修复的时候不会显示qol的bug。（？？？</div>
       </template>
@@ -139,9 +139,14 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       </template>
       <div>添加了word-helper</div>
     </Build>
-    <Build build="8.9" y="2025" m="9" d="20" title="Pre 9">
+    <Build build="8.9" d="20" m="9" title="Pre 9" y="2025">
       <template #qol>
-        <div>仿osu的小节线渲染。但是不知道为什么这个颜色总是不对，但是我的<WordHelper msg="脑子有点过载" dec="物竞委你们最好晚上睁着眼睡觉"/>无法处理这个问题。后面再说</div>
+        <div>
+          仿osu的小节线渲染。但是不知道为什么这个颜色总是不对，但是我的<WordHelper
+            dec="物竞委你们最好晚上睁着眼睡觉"
+            msg="脑子有点过载"
+          />无法处理这个问题。后面再说
+        </div>
         <div>比osu略微高级一点的移动所有物件的选项。下面的移动全部会覆盖上面的移动此timing。</div>
         <div>给谱面列表添加了曲绘显示。</div>
         <div>给header添加了所处页面的高亮提示。</div>
@@ -149,13 +154,22 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <template #bugs>
         <div>修复了vsc导出中1宽全部都会导出为chip的bug。</div>
       </template>
-      <div>新增了导入osz的东西，调整了<word-helper msg="chart-list" dec="谱 面 列 表"/>页面中的导入按钮</div>
+      <div>
+        新增了导入osz的东西，调整了<word-helper
+          dec="谱 面 列 表"
+          msg="chart-list"
+        />页面中的导入按钮
+      </div>
       <div>调整了Inspector页面中对缺失图片的分类逻辑。现在是单独一面的了。</div>
-      <div style="font-size: 2rem; font-weight: bold"><word-helper msg="Pre5还在追我！" dec="我草我们pre5真王朝了" /></div>
+      <div style="font-size: 2rem; font-weight: bold">
+        <word-helper dec="我草我们pre5真王朝了" msg="Pre5还在追我！" />
+      </div>
       <div>塞了一些sv的史在里面</div>
-      <div>osz导入中由于osu存储timing的方式比较伪人（指存储时长），所以导入的timing的bpm会比较奇怪。</div>
+      <div>
+        osz导入中由于osu存储timing的方式比较伪人（指存储时长），所以导入的timing的bpm会比较奇怪。
+      </div>
     </Build>
-    <Build build="9" y="2025" m="9" d="24" title="Build ⑨">
+    <Build build="9" d="24" m="9" title="Build ⑨" y="2025">
       <template #qol>
         <div>添加了select功能，以及配套的快捷键。</div>
         <div>添加了打击音。由于html特色延迟，打击音大概率是不准的，请谨慎使用</div>
@@ -166,15 +180,15 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
         <div>修复timing无法滚动的问题</div>
         <div>略修改了validator的逻辑。</div>
       </template>
-        <div>添加了svg导出。要求谱面至少有1个物件。会很卡的。</div>
-        <div>调整了导入osz的界面。</div>
-        <div>调整了CORS policy</div>
-        <div>给变速打了个底。</div>
-        <div>移除了部分不需要的东西（指node库）</div>
+      <div>添加了svg导出。要求谱面至少有1个物件。会很卡的。</div>
+      <div>调整了导入osz的界面。</div>
+      <div>调整了CORS policy</div>
+      <div>给变速打了个底。</div>
+      <div>移除了部分不需要的东西（指node库）</div>
       <div>调整了小节线的上色逻辑。现在应该比较人类了。</div>
       <div><s>神秘东方小妖精正在入侵sv。</s></div>
     </Build>
-    <Build build="9.1" y="2025" m="9" d="6" title="Build 9s">
+    <Build build="9.1" d="6" m="9" title="Build 9s" y="2025">
       <template #qol>
         <div>添加了diff复制的功能。（指复制一整个diff）</div>
         <div>为导出谱面预览png添加了显示部分内容的选项。</div>
@@ -187,11 +201,25 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <div>@-Re-Again- 添加了拍号的选项。可以在设置中修改，注意和小节数只能选一个。</div>
       <div>大概修复了打击音延迟比较大的问题，切换到了HTML的AudioContext。</div>
       <div>@-Re-Again- 添加了导入vsc的功能。</div>
-      <div>限制了<word-helper msg="Word Helper" dec="是我哦。" />的大小。</div>
+      <div>限制了<word-helper dec="是我哦。" msg="Word Helper" />的大小。</div>
       <template #bugs>
         <div>修复了osz导入会出现负数bpm的bug。</div>
         <div>调整了曲目信息页面的信息不同步的bug。</div>
+        <div style="font-size: 2rem">
+          <word-helper
+            dec="我说怎么sv包体积这么鬼大原来是"
+            msg="修复了打包应用时错误的把我写的谱塞到应用包里面的bug。"
+          ></word-helper>
+        </div>
       </template>
+    </Build>
+    <Build build="9.2" y="2025" m="10" d="6">
+      <template #bugs>
+        <div>修改了导入曲目的bug</div>
+      </template>
+      <div>添加了打击音音量</div>
+      <div>custom song导出</div>
+      <div>回退了diff的编辑逻辑</div>
     </Build>
   </div>
 </template>
