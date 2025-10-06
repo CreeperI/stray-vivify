@@ -1,11 +1,11 @@
 import path from 'node:path'
 import fs from 'fs'
-import { charts_data, ChartType, IpcHandlers } from '../preload/types'
+import { charts_data, ChartType, ChartTypeV2, IpcHandlers } from '../preload/types'
 import * as electron from 'electron'
 import { dialog, ipcMain, shell } from 'electron'
 import { file_paths } from './fp-parser'
 import AdmZip from 'adm-zip'
-import { find_png } from './stray'
+import { find_png, find_song } from './stray'
 
 export default class ChartManager {
   private readonly charts_folder: string
@@ -16,11 +16,20 @@ export default class ChartManager {
     this.charts_folder = file_paths.charts
     this.json_path = path.join(this.charts_folder, 'charts.json')
     this.read_json()
+    this.possible_charts()
   }
 
-  add_chart(id: string, name: string, composer: string, bpm: string, ext: string, diffs: string[]) {
+  add_chart(
+    id: string,
+    name: string,
+    composer: string,
+    bpm: string,
+    ext: string,
+    diffs: string[],
+    last_open?: number
+  ) {
     this.data.push({
-      last_open: Date.now(),
+      last_open: last_open ?? Date.now(),
       id,
       name,
       composer,
@@ -59,15 +68,28 @@ export default class ChartManager {
           path.join(folder, 'vs-chart.json')
         )
       }
-
-      this.add_chart(
-        id,
-        path.basename(fp, path.extname(fp)),
-        'unknown',
-        'unknown',
-        path.extname(fp),
-        []
-      )
+      const chart = JSON.parse(
+        fs.readFileSync(path.join(folder, 'vs-chart.json'), 'utf-8')
+      ) as ChartTypeV2.final
+      if (!chart.version) {
+        this.add_chart(
+          id,
+          path.basename(fp, path.extname(fp)),
+          'unknown',
+          'unknown',
+          path.extname(fp),
+          []
+        )
+      } else {
+        this.add_chart(
+          id,
+          path.basename(fp, path.extname(fp)),
+          chart.song.composer,
+          chart.song.bpm,
+          path.extname(fp),
+          chart.diffs.map((v) => v.meta.diff1 + ' ' + v.meta.diff2)
+        )
+      }
       return {
         state: 'success',
         folder: song_path,
@@ -112,6 +134,7 @@ export default class ChartManager {
       fs.writeFileSync(path.join(this.charts_folder, id, fname), data)
     }
   }
+
   read_chart(id: string, ext: string) {
     const folder = path.join(this.charts_folder, id)
     if (fs.existsSync(path.join(folder, 'vs-chart.json'))) {
@@ -164,20 +187,11 @@ export default class ChartManager {
     return fp
   }
 
-  export_chart(id: string) {
-    const chart = this.data.find((v) => v.id === id)
-    if (!chart) return
-    const zip = new AdmZip()
-    const chart_folder = path.join(this.charts_folder, id)
-    zip.addLocalFile(path.join(chart_folder, 'song' + chart.ext))
-    zip.addLocalFile(path.join(chart_folder, 'vs-chart.json'))
-    const sprite = find_png(chart_folder, 'song')
-    if (sprite) zip.addLocalFile(path.join(chart_folder, sprite))
-    const bg = find_png(chart_folder, 'bg')
-    if (bg) zip.addLocalFile(path.join(chart_folder, bg))
-
-    zip.writeZip(path.join(this.charts_folder, id + '.svc'))
-    shell.showItemInFolder(path.join(this.charts_folder, id + '.svc'))
+  export_svc(id: string) {
+    this._export_chart(id, '.svc')
+  }
+  export_zip(id: string) {
+    this._export_chart(id, '.zip')
   }
 
   show_file(id: string, fp: string) {
@@ -280,6 +294,7 @@ export default class ChartManager {
       return
     }
   }
+
   import_bg(id: string) {
     const png = dialog.showOpenDialogSync({
       properties: ['openFile'],
@@ -322,6 +337,22 @@ export default class ChartManager {
     shell.showItemInFolder(path.join(this.charts_folder, id, fname + '.png'))
   }
 
+  private _export_chart(id: string, ext: string) {
+    const chart = this.data.find((v) => v.id === id)
+    if (!chart) return
+    const zip = new AdmZip()
+    const chart_folder = path.join(this.charts_folder, id)
+    zip.addLocalFile(path.join(chart_folder, 'song' + chart.ext))
+    zip.addLocalFile(path.join(chart_folder, 'vs-chart.json'))
+    const sprite = find_png(chart_folder, 'song')
+    if (sprite) zip.addLocalFile(path.join(chart_folder, sprite))
+    const bg = find_png(chart_folder, 'bg')
+    if (bg) zip.addLocalFile(path.join(chart_folder, bg))
+
+    zip.writeZip(path.join(this.charts_folder, id + ext))
+    shell.showItemInFolder(path.join(this.charts_folder, id + ext))
+  }
+
   private init_json() {
     if (!fs.existsSync(this.charts_folder)) {
       fs.mkdirSync(this.charts_folder)
@@ -348,6 +379,38 @@ export default class ChartManager {
       this.guard_data()
     } else {
       this.init_json()
+    }
+  }
+
+  private possible_charts() {
+    const json_charts = this.data.map((v) => v.id)
+    const folders = fs
+      .readdirSync(this.charts_folder)
+      .filter((v) => {
+        return fs.lstatSync(path.join(this.charts_folder, v)).isDirectory()
+      })
+      .filter((v) => !json_charts.includes(v))
+
+    // so we got those folders excluded in json!
+    for (const folder of folders) {
+      if (fs.existsSync(path.join(this.charts_folder, folder, 'vs-chart.json'))) {
+        const chart = JSON.parse(
+          fs.readFileSync(path.join(this.charts_folder, folder, 'vs-chart.json'), 'utf-8')
+        ) as ChartTypeV2.final
+        const song = find_song(path.join(this.charts_folder, folder), 'song')
+        if (!song) continue
+        // old version fuck
+        if (!chart.version) continue
+        this.add_chart(
+          folder,
+          chart.song.name,
+          chart.song.composer,
+          chart.song.bpm,
+          path.extname(song),
+          chart.diffs.map((v) => v.meta.diff1 + ' ' + v.meta.diff2),
+          0
+        )
+      }
     }
   }
 }

@@ -6,26 +6,39 @@ import SvgBeatLine from '@renderer/components/chart-v2/svg-lane/svg-beat-line.vu
 import SvgNotes from '@renderer/components/chart-v2/svg-lane/svg-notes.vue'
 import SvgBottomBpm from '@renderer/components/chart-v2/svg-lane/svg-bottom-bpm.vue'
 import SvgTicks from '@renderer/components/chart-v2/svg-lane/svg-ticks.vue'
+import { Chart } from '@renderer/core/chart/chart'
+import { GlobalStat } from '@renderer/core/globalStat'
+import { utils } from '@renderer/core/utils'
+import SvgSection from '@renderer/components/chart-v2/svg-lane/svg-section.vue'
+import { computed } from 'vue'
 
+const svg_sizing = GlobalStat.SvgSizing
 const lane_width = Settings.editor.lane_width
-const svg_width = 4 * lane_width + 2 * 50 + 12
-const bar_length = 4 * lane_width + 12
-const view_port = [0, 0, svg_width, window.screen.height]
-const _px = svg_width + 'px'
+svg_sizing.max_lane = Chart.$current.diff.max_lane.value
+svg_sizing.svg_width = svg_sizing.max_lane * lane_width + 2 * 50 + 12
+svg_sizing.bar_length = svg_sizing.max_lane * lane_width + 12
+svg_sizing.view_port = [0, 0, svg_sizing.svg_width, window.screen.height]
+
+const _px = svg_sizing.svg_width + 'px'
+const rkey = utils.refresh_key
+
+const bar_or_section = computed(() => Settings.editor.bar_or_section)
 </script>
 
 <template>
   <div id="lane-wrapper" :style="{ flexBasis: _px }" class="lane-wrapper">
     <svg
       id="lane-svg"
-      :viewBox="view_port.join(' ')"
-      :width="svg_width"
+      :key="rkey"
+      :viewBox="svg_sizing.view_port.join(' ')"
+      :width="svg_sizing.svg_width"
       preserveAspectRatio="xMidYMax slice"
     >
       <rect fill="#000000" height="100%" width="100%" x="0" y="0"></rect>
-      <svg-bar-text />
+      <svg-section v-if="bar_or_section" />
+      <svg-bar-text v-else />
       <svg-bar-line />
-      <rect :width="bar_length" fill="#131520" height="100%" x="50" y="0"></rect>
+      <rect :width="svg_sizing.bar_length" fill="#131520" height="100%" x="50" y="0"></rect>
       <svg-beat-line />
       <svg-ticks />
       <slot>
@@ -33,7 +46,7 @@ const _px = svg_width + 'px'
       </slot>
       <rect
         id="svg-bottom-rect"
-        :width="bar_length - 6"
+        :width="svg_sizing.bar_length - 6"
         fill="#888"
         height="80"
         stroke="#ffffff"
@@ -44,14 +57,14 @@ const _px = svg_width + 'px'
       />
       <g id="svg-particle"></g>
       <g transform="translate(50 0)">
-        <rect fill="#ffffff" height="100%" width="6" x="0" y="0" class="no-event" />
+        <rect class="no-event" fill="#ffffff" height="100%" width="6" x="0" y="0" />
         <rect
-          :x="lane_width * 4 + 6"
+          :x="lane_width * svg_sizing.max_lane + 6"
+          class="no-event"
           fill="#ffffff"
           height="100%"
           width="6"
           y="0"
-          class="no-event"
         />
       </g>
       <svg-bottom-bpm />

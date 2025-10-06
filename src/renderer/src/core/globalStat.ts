@@ -206,6 +206,33 @@ export namespace GlobalStat {
     export let cut = () => {}
     export let paste = () => {}
   }
+
+  export let is_dev = false
+  export async function check_dev() {
+    is_dev = await Invoke('is-dev')
+  }
+
+  export namespace ChartSize {
+    export const data = ref({
+      total: 0,
+      detail: [] as [number, string][],
+      detail_sf: [] as [number, string][],
+      exe: 0,
+      app: 0
+    })
+
+    export async function update() {
+      data.value = await Invoke('charts-size')
+    }
+  }
+
+  export const SvgSizing = {
+    max_lane: 4,
+    lane_width: 130,
+    svg_width: 520,
+    bar_length: 500,
+    view_port: [0,0,520, window.screen.height]
+  }
 }
 
 //@ts-ignore

@@ -17,6 +17,16 @@ function convertPath(originalPath: string) {
  * @param name img name
  * @returns string the basename "xx.png" of the file, remember to join the P
  */
+export function find_song(p: string, name: string) {
+  return fs.readdirSync(p).find((f) => {
+    return basename(f).includes(name) && ['.mp3', '.ogg', '.m4a', '.wav'].includes(extname(f))
+  })
+}
+/**
+ * @param p base path of the dir
+ * @param name img name
+ * @returns string the basename "xx.png" of the file, remember to join the P
+ */
 export function find_png(p: string, name: string) {
   return fs.readdirSync(p).find((f) => {
     return basename(f).includes(name) && ['.jpg', '.png', '.gif', '.webp'].includes(extname(f))
@@ -44,7 +54,7 @@ export function stray_handler() {
       const song_path = decodedUrl.replace('/__song__/', '')
       return new Response(fs.readFileSync(song_path), {
         headers: {
-          'Content-Type': 'audio/' + extname(song_path).replace('.', ''),
+          'Content-Type': 'audio/' + extname(song_path).slice(1),
           'Content-Disposition': 'inline'
         }
       })
@@ -52,14 +62,21 @@ export function stray_handler() {
       const id = decodedUrl.replace('/__sprite__/', '')
       const folder = path.join(file_paths.charts, id)
       const spr = find_png(folder, 'song')
-      console.log(spr)
       if (spr) return response_img(folder, spr)
     } else if (decodedUrl.includes('__bg__')) {
       const id = decodedUrl.replace('/__bg__/', '')
       const folder = path.join(file_paths.charts, id)
       const spr = find_png(folder, 'bg')
-      console.log(spr)
       if (spr) return response_img(folder, spr)
+    } else if (decodedUrl.includes('__hit__')) {
+      const st = find_song(file_paths.skin, 'hit')
+      if (st)
+        return new Response(fs.readFileSync(join(file_paths.skin, st)), {
+          headers: {
+            'Content-Type': 'audio/' + extname(st).slice(1),
+            'Content-Disposition': 'inline'
+          }
+        })
     }
     return new Response(null, { status: 404 })
   }

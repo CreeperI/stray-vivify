@@ -137,6 +137,7 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
         <div>新增了一个检查skin缺失哪些贴图的modal。</div>
         <div>给本页面增加了高亮。</div>
       </template>
+      <div>添加了word-helper</div>
     </Build>
     <Build build="8.9" y="2025" m="9" d="20" title="Pre 9">
       <template #qol>
@@ -172,6 +173,25 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
         <div>移除了部分不需要的东西（指node库）</div>
       <div>调整了小节线的上色逻辑。现在应该比较人类了。</div>
       <div><s>神秘东方小妖精正在入侵sv。</s></div>
+    </Build>
+    <Build build="9.1" y="2025" m="9" d="6" title="Build 9s">
+      <template #qol>
+        <div>添加了diff复制的功能。（指复制一整个diff）</div>
+        <div>为导出谱面预览png添加了显示部分内容的选项。</div>
+        <div>修改了打击音的导入逻辑，现在不要求打击音的后缀了。</div>
+        <div>在谱面统计中调整了总数的计算方式，添加了bpm的统计</div>
+      </template>
+      <div>为Inspector添加了一个占用磁盘空间的统计。</div>
+      <div>添加了用户名设置（然并卵）</div>
+      <div>添加了vsc导入，调整了导入导出界面的排版。</div>
+      <div>@-Re-Again- 添加了拍号的选项。可以在设置中修改，注意和小节数只能选一个。</div>
+      <div>大概修复了打击音延迟比较大的问题，切换到了HTML的AudioContext。</div>
+      <div>@-Re-Again- 添加了导入vsc的功能。</div>
+      <div>限制了<word-helper msg="Word Helper" dec="是我哦。" />的大小。</div>
+      <template #bugs>
+        <div>修复了osz导入会出现负数bpm的bug。</div>
+        <div>调整了曲目信息页面的信息不同步的bug。</div>
+      </template>
     </Build>
   </div>
 </template>

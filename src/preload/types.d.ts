@@ -5,22 +5,22 @@ export interface MemoryUsage {
    * Resident Set Size, is the amount of space occupied in the main memory device (that is a subset of the total allocated memory) for the
    * process, including all C++ and JavaScript objects and code.
    */
-  rss: number;
+  rss: number
   /**
    * Refers to V8's memory usage.
    */
-  heapTotal: number;
+  heapTotal: number
   /**
    * Refers to V8's memory usage.
    */
-  heapUsed: number;
-  external: number;
+  heapUsed: number
+  external: number
   /**
    * Refers to memory allocated for `ArrayBuffer`s and `SharedArrayBuffer`s, including all Node.js Buffers. This is also included
    * in the external value. When Node.js is used as an embedded library, this value may be `0` because allocations for `ArrayBuffer`s
    * may not be tracked in that case.
    */
-  arrayBuffers: number;
+  arrayBuffers: number
 }
 export namespace ChartType {
   /**
@@ -129,7 +129,7 @@ export namespace ChartTypeV2 {
       eff2: number
     }
 
-    export type all = (SV_aq) & {type: number, time: number, end: number}
+    export type all = SV_aq & { type: number; time: number; end: number }
   }
 
   export type sv_all = SV | SV_Factory.all
@@ -191,13 +191,13 @@ export namespace ChartTypeV2 {
     time: number
     delta: number
     /*
-    * 0 for perfect+
-    * 1 for perfect late
-    * 2 for great late
-    * 3 for good late
-    * 4 for miss late
-    * 5 for boooomb!
-    *  */
+     * 0 for perfect+
+     * 1 for perfect late
+     * 2 for great late
+     * 3 for good late
+     * 4 for miss late
+     * 5 for boooomb!
+     *  */
     lvl: number
   }
 }
@@ -318,14 +318,20 @@ export type Invoke = {
       skin: string | undefined
     }
   }
+  'export-svc': {
+    arg: {
+      id: string
+    }
+    r: void
+  }
   'export-zip': {
     arg: {
       id: string
-    },
+    }
     r: void
   }
   'import-zip': {
-    arg: {},
+    arg: {}
     r: Promise<void>
   }
   'remove-chart': {
@@ -333,14 +339,14 @@ export type Invoke = {
       id: string
     }
     r: void
-  },
+  }
   'import-sprite': {
     arg: {
       id: string
-    },
+    }
     r: void
-  },
-  'import-background' : {
+  }
+  'import-background': {
     arg: {
       id: string
     }
@@ -353,20 +359,20 @@ export type Invoke = {
   'leave-fullscreen': {
     arg: {}
     r: void
-  },
+  }
   'write-file': {
     arg: {
-      id: string,
-      fname: string,
+      id: string
+      fname: string
       data: string
-    },
+    }
     r: void
-  },
+  }
   'show-file': {
     arg: {
-      id: string,
+      id: string
       fname: string
-    },
+    }
     r: void
   }
   'open-skin-folder': {
@@ -375,19 +381,19 @@ export type Invoke = {
   }
   'read-osz': {
     arg: {}
-    r: {diff?: ChartTypeV2.diff[], song?: ChartTypeV2.song} | undefined
-  },
+    r: { diff?: ChartTypeV2.diff[]; song?: ChartTypeV2.song } | undefined
+  }
   'import-from-osz': {
     arg: {}
     r: Promise<void> | undefined
   }
   'import-osz-pics': {
-    arg: {id: string}
+    arg: { id: string }
     r: void
   }
   'export-preview-svg': {
-    arg: {id: string, svg_text: string}
-    r:void
+    arg: { id: string; svg_text: string }
+    r: void
   }
   'open-dev': {
     arg: {}
@@ -396,6 +402,33 @@ export type Invoke = {
   'memory-backend': {
     arg: {}
     r: MemoryUsage
+  }
+  'is-dev': {
+    arg: {}
+    r: boolean
+  }
+  'charts-size': {
+    arg: {}
+    r: Promise<{
+      total: number
+      detail: [number, string][]
+      detail_sf: [number, string][]
+      exe: number
+      app: number
+    }>
+  }
+  /* The first of arg is the displayed name */
+  'ask-file': {
+    arg: {
+      file: string[]
+    }
+    r: string | undefined
+  }
+  'open-file-utf': {
+    arg: {
+      path: string
+    }
+    r: string | undefined
   }
 }
 
@@ -409,12 +442,12 @@ export type Send = {
   }
   'ask-id': {
     arg: {
-      ids: string[],
-      def?: string,
+      ids: string[]
+      def?: string
     }
     r: Promise<string | 0>
   }
-  'notify-error':{
+  'notify-error': {
     arg: {
       msg: string
       dur: number
@@ -511,12 +544,28 @@ export namespace storages {
     hit_sound: boolean
 
     frame_time: boolean
+
+    svg_shown_parts: {
+      sprite: boolean
+      song: boolean
+      diff: boolean
+      sv: boolean
+      timing: boolean
+      tick: boolean
+      bar: boolean
+    }
+
+    star_rating: boolean
+    min_lane: number
+
+    bar_or_section: boolean
   }
 
   export interface storage_scheme {
     settings: settings
     version: number
     shortcut: string
+    username: string
   }
 }
 export type charts_data = {
@@ -529,8 +578,26 @@ export type charts_data = {
   diffs: string[]
 }[]
 
-export type keysOf<T, Parent extends string = ''> = T extends object
-  ? {
-      [K in keyof T]: keysOf<T[K], Parent extends '' ? K & string : `${Parent}.${K & string}`>
-    }[keyof T]
-  : Parent
+export namespace SkinType {
+  type skin_position = {
+    left?: number
+    right?: number
+    top?: number
+    bottom?: number
+    width?: number
+  }
+  export type skin_object = skin_position &
+    (
+      | {
+          type: 'image'
+          src: string
+        }
+      | {}
+    )
+  export type skin_data = {
+    name: string
+    maker: string
+    version: string
+    pos: {}[]
+  }
+}

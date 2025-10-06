@@ -8,7 +8,7 @@ const r = props.r.refs
 <template>
   <tr>
     <td>{{ msg }}</td>
-    <td>{{ r.min.toFixed(2) }}/{{ r.max.toFixed(2) }}</td>
+    <td>{{ r.min.toFixed(1) }}/{{ r.max.toFixed(1) }}</td>
     <td>{{ r.avg.toFixed(2) }}</td>
     <td>{{ r.sd.toFixed(2) }}</td>
     <td>{{ r.cv.toFixed(2) }}</td>

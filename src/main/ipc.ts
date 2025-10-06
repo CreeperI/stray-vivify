@@ -2,10 +2,10 @@ import { ChartType, Invoke, IpcHandlers } from '../preload/types'
 import fs, { existsSync, readFileSync } from 'fs'
 import VsbParser from './vsbParser'
 import * as electron from 'electron'
-import { dialog, ipcMain, shell } from 'electron'
+import { app, dialog, ipcMain, shell } from 'electron'
 import path, { basename } from 'node:path'
 import ChartManager from './chart-manager'
-import { file_paths } from './fp-parser'
+import { file_paths, folder_size } from './fp-parser'
 import { OszReader } from './osz-reader'
 
 export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
@@ -120,8 +120,11 @@ const Handler = (mw: Electron.BrowserWindow) => {
         cd: cd
       }
     },
-    'export-zip': function (_, id) {
-      chart_manager.export_chart(id)
+    'export-svc': function (_, id) {
+      chart_manager.export_svc(id)
+    },
+    'export-zip': (_, id) => {
+      chart_manager.export_zip(id)
     },
     'import-zip': function (_) {
       return chart_manager.import_chart()
@@ -194,6 +197,43 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'memory-backend': () => {
       return process.memoryUsage()
+    },
+    'is-dev': () => {
+      return process.env.NODE_ENV === 'development'
+    },
+    'charts-size': async () => {
+      const what = fs.readdirSync(file_paths.charts)
+      let detail: [number, string][] = []
+      let detailsf: [number, string][] = []
+      for (let i = 0; i < what.length; i++) {
+        const lstat = fs.lstatSync(path.join(file_paths.charts, what[i]))
+        if (lstat.isDirectory())
+          detail.push([await folder_size(path.join(file_paths.charts, what[i])), what[i]])
+        else detailsf.push([lstat.size, what[i]])
+      }
+      const _app = await folder_size(app.getPath('userData'))
+      const _exe = await folder_size(path.dirname(app.getPath('module')))
+      const _total = await folder_size(file_paths.charts)
+      console.log(114514)
+      return {
+        detail: detail,
+        detail_sf: detailsf,
+        app: _app,
+        exe: _exe,
+        total: _total
+      }
+    },
+    "ask-file":(_, f) => {
+      const fp = dialog.showOpenDialogSync({
+        properties: ['openFile'],
+        filters: [{ name: f[0], extensions: f.slice(1) }]
+      })
+      if (!fp) return
+      return fp[0]
+    },
+    'open-file-utf': (_, fp) => {
+      if (!fs.existsSync(fp)) return
+      return fs.readFileSync(fp, 'utf-8')
     }
   } as Required<IpcHandlers.invoke.handler>
 }

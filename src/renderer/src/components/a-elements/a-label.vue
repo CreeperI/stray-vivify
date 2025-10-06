@@ -16,7 +16,7 @@ const { label } = defineProps<{
   display: flex;
   align-items: flex-start;
   width: min-content;
-  gap: 0.5rem;
+  margin-left: 0.5em;
 }
 span {
   text-wrap: nowrap;

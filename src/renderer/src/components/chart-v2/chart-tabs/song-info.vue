@@ -1,18 +1,19 @@
-<script setup lang="ts">
-import { Charter } from '@renderer/core/charter'
+<script lang="ts" setup>
 import SongInfoSingle from '@renderer/components/chart-v2/chart-tabs/song-info-single.vue'
 import ASelect from '@renderer/components/a-elements/a-select.vue'
 import { ref } from 'vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
+import { utils } from '@renderer/core/utils'
+import { Invoke } from '@renderer/core/ipc'
+import { Chart } from '@renderer/core/chart/chart'
 
-const chart = Charter.get_chart()
+const chart = Chart.$current
 
 const refs = chart.song.refs
 const need = chart.song.need_roman
 
-const bound = chart.diff.bound
 const options = () =>
-  chart.diffs.map((x, v) => {
+  chart.diffs.map((x, v: number) => {
     if (x.meta.diff2 == '') return { val: v, display: x.meta.diff1 }
     return { val: v, display: x.meta.diff1 + ' - ' + x.meta.diff2 }
   })
@@ -28,45 +29,48 @@ function add_diff() {
 function delete_diff() {
   chart.delete_diff()
 }
+function copy_diff() {
+  chart.copy_diff()
+}
 
 function import_sprite() {
-  Charter.invoke("import-sprite", chart.id)
+  Invoke('import-sprite', chart.id)
 }
 function import_bg() {
-  Charter.invoke("import-background", chart.id)
+  Invoke('import-background', chart.id)
 }
-
+const rkey = utils.refresh_key
 </script>
 
 <template>
   <div class="info-wrapper">
-    <div class="info-inner">
-      <song-info-single name="曲名" v-model="refs.name" />
-      <song-info-single :disabled="!need[0]" name="曲名-罗马音" v-model="refs.name_roman" />
-      <song-info-single name="编曲" v-model="refs.composer" />
-      <song-info-single :disabled="!need[1]" name="编曲-罗马音" v-model="refs.composer_roman" />
-      <song-info-single name="画师" v-model="refs.sprite" />
-      <song-info-single name="BPM" v-model.trim="refs.bpm" />
-      <song-info-single name="来源" v-model="refs.source" />
-      <song-info-single name="注释" v-model="refs.ref" />
+    <div :key="rkey" class="info-inner">
+      <song-info-single v-model="refs.name" name="曲名" />
+      <song-info-single v-model="refs.name_roman" :disabled="!need[0]" name="曲名-罗马音" />
+      <song-info-single v-model="refs.composer" name="编曲" />
+      <song-info-single v-model="refs.composer_roman" :disabled="!need[1]" name="编曲-罗马音" />
+      <song-info-single v-model="refs.sprite" name="画师" />
+      <song-info-single v-model.trim="refs.bpm" name="BPM" />
+      <song-info-single v-model="refs.source" name="来源" />
+      <song-info-single v-model="refs.ref" name="注释" />
       <div class="song-info-single">
-        <div>曲绘<a-button2 msg="导入曲绘" @click="import_sprite"/></div>
+        <div>曲绘<a-button2 msg="导入曲绘" @click="import_sprite" /></div>
         <img
-          class="song-sprite"
-          alt="how are you reading this?"
-          :src="src"
-          @error="img_show = false"
           v-if="img_show"
+          :src="src"
+          alt="how are you reading this?"
+          class="song-sprite"
+          @error="img_show = false"
         />
       </div>
-      <div class="song-info-single" >
-        <div>背景<a-button2 msg="导入背景" @click="import_bg"/></div>
+      <div class="song-info-single">
+        <div>背景<a-button2 msg="导入背景" @click="import_bg" /></div>
         <img
-          class="song-sprite"
-          alt="how are you reading this?"
-          :src="src2"
-          @error="img2_show = false"
           v-if="img2_show"
+          :src="src2"
+          alt="how are you reading this?"
+          class="song-sprite"
+          @error="img2_show = false"
         />
       </div>
     </div>
@@ -74,16 +78,17 @@ function import_bg() {
       <div class="song-info-single diff-choose">
         <div>
           <div>选择难度：</div>
-          <a-select :options="options()" v-model="dix" :key="JSON.stringify(bound.meta)"></a-select>
+          <a-select :key="rkey" v-model="dix" :options="options()"></a-select>
         </div>
         <div>
-          <a-button2 @click="add_diff" msg="新建难度" />
-          <a-button2 @click="delete_diff" msg="删除该难度" />
+          <a-button2 msg="新建难度" @click="add_diff" />
+          <a-button2 msg="删除该难度" @click="delete_diff" />
+          <a-button2 msg="复制该难度" @click="copy_diff" />
         </div>
       </div>
-      <song-info-single name="难度" v-model="bound.meta.diff1" />
-      <song-info-single name="等级" v-model="bound.meta.diff2" />
-      <song-info-single name="谱师" v-model="bound.meta.charter" />
+      <song-info-single v-model="chart.diff.diff1" name="难度" />
+      <song-info-single v-model="chart.diff.diff2" name="等级" />
+      <song-info-single v-model="chart.diff.charter" name="谱师" />
     </div>
   </div>
 </template>

@@ -2,50 +2,19 @@
 import { ChartTypeV2 } from '@preload/types'
 import { Charter } from '@renderer/core/charter'
 import { Settings } from '@renderer/core/settings'
+import { computed } from 'vue'
+import { utils } from '@renderer/core/utils'
+import { Chart } from '@renderer/core/chart/chart'
 
 const { note } = defineProps<{
   note: ChartTypeV2.note
 }>()
+const max_width = Chart.$current.diff.max_lane.value
 const mul = Charter.refs.mul
 const lane_width = Settings.editor.lane_width
 
-const note_style = 'stray:/__skin__'
-
-function getSrc(): string {
-  if (note.width == 0) return ''
-  let str = note_style + '/' + note.width
-  if ('snm' in note) {
-    if (note.snm == 1) return str + 'b.png'
-    if (note.snm == 2 && note.width != 1) str += 's'
-  }
-  if (note.width == 2) {
-    str += note.lane == 0 ? 'l' : note.lane == 2 ? 'r' : 'm'
-  } else if (note.width == 3) {
-    str += note.lane == 0 ? 'l' : 'r'
-  }
-  return str + '.png'
-}
-
-function borderSrc(): string {
-  let str = note_style + '/' + note.width
-  if (note.width == 1) {
-    switch (note.lane) {
-      case 0:
-      case 1:
-        str += 'l'
-        break
-      case 2:
-      case 3:
-        str += 'r'
-        break
-    }
-  } else if (note.width == 2) {
-    str += note.lane == 0 ? 'l' : note.lane == 2 ? 'r' : 'm'
-  } else if (note.width == 3) {
-    str += note.lane == 0 ? 'l' : 'r'
-  }
-  return str + 'h.png'
-}
+const borderSrc = () => utils.borderSrc(note, max_width)
+const getSrc = () => utils.getSrc(note, max_width)
 
 function size() {
   return lane_width * note.width + 'px'
@@ -59,15 +28,6 @@ function left() {
   return `${note.lane * lane_width + 6}px`
 }
 
-/*function border() {
-  // @ts-expect-error here the len isnt guaranteed in typing but its only called
-  // when its a ln so dont fuck it.
-  const width = note.len * mul.value
-  return `border-top: transparent solid ${width}px;` +
-    `border-image-source: url("${getSrc().replace('.png', 'h.png')}");`+
-    `border-image-outset: ${width}px;` +
-    `border-image-repeat: stretch; border-image-slice: 43;`
-}*/
 function border() {
   // @ts-expect-error
   const width = note.len * mul.value
@@ -95,10 +55,13 @@ function style() {
     return `${zix()};width: ${size()}; left: ${left()}`
   }
 }
+
+const _src = computed(urlOf)
+const _style = computed(style)
 </script>
 
 <template>
-  <img alt="" :src="urlOf()" :style="style()"/>
+  <img alt="" :src="_src" :style="_style"/>
 </template>
 
 <style scoped>

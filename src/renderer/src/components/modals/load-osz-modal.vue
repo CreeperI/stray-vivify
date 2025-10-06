@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import { ChartTypeV2 } from '@preload/types'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
@@ -15,8 +15,7 @@ defineProps<{
 const chart = Chart.$current
 const imported = ref<number[]>([])
 function import_diff(d: ChartTypeV2.diff, ix: number) {
-  chart.diffs.push(d)
-  chart.save()
+  chart.add_diff(d)
   imported.value.push(ix)
 }
 
@@ -32,22 +31,21 @@ function load_song(s: ChartTypeV2.song) {
   <simple-modal size="lg" title="importing osz">
     <div class="wrapper">
       <Hide title="谱面">
-
-      <div class="osz-diffs" v-if="diff">
-        <div class="osz-diff-line" v-for="(d, ix) in diff">
-          <div>{{ d.meta.diff1 }}</div>
-          <div>by {{ d.meta.charter }}</div>
-          <a-button2 msg="已导入！" disabled v-if="imported.includes(ix)" />
-          <a-button2 msg="导入" v-else @click="import_diff(d, ix)" />
+        <div v-if="diff" class="osz-diffs">
+          <div v-for="(d, ix) in diff" class="osz-diff-line">
+            <div>{{ d.meta.diff1 }}</div>
+            <div>by {{ d.meta.charter }}</div>
+            <a-button2 v-if="imported.includes(ix)" disabled msg="已导入！" />
+            <a-button2 v-else msg="导入" @click="import_diff(d, ix)" />
+          </div>
         </div>
-      </div>
       </Hide>
       <Hide title="歌曲">
-        <div class="osz-song" v-if="song">
-          <div>{{song.name}}</div>
-          <div>{{song.composer}}</div>
-          <a-button2 msg="已导入" disabled @click="load_song(song)" v-if="show_song"></a-button2>
-          <a-button2 msg="导入" @click="load_song(song)" v-else></a-button2>
+        <div v-if="song" class="osz-song">
+          <div>{{ song.name }}</div>
+          <div>{{ song.composer }}</div>
+          <a-button2 v-if="show_song" disabled msg="已导入" @click="load_song(song)"></a-button2>
+          <a-button2 v-else msg="导入" @click="load_song(song)"></a-button2>
         </div>
       </Hide>
     </div>

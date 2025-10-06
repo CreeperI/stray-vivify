@@ -60,6 +60,7 @@ async function main() {
   const r = await Settings.set_from_storage()
   ShortCuts.fromJson(Settings.data.value.shortcut)
   await GlobalStat.update_all_chart()
+  await GlobalStat.check_dev()
   await Invoke('leave-fullscreen')
 
   Settings.init_invertal()
@@ -70,6 +71,7 @@ async function main() {
   GlobalStat.Intervals.on(1e4, () => {
     Chart.current?.save()
     Chart.current?.diff.update_tick_list()
+    Chart.current?.diff.update_sr()
   })
   GlobalStat.Intervals.on(1000, () => {
     FrameRate.refresh()

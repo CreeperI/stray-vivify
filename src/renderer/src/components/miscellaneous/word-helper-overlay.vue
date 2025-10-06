@@ -24,5 +24,6 @@ const { word, shown, position } = GlobalStat.WordHelper
   border: 2px solid #b8dcee;
   user-select: none;
   pointer-events: none;
+  max-width: 40vw;
 }
 </style>

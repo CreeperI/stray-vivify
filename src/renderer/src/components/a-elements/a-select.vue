@@ -86,6 +86,7 @@ const on_click = (val: T) => {
   line-height: 1.5em;
   text-align: left;
   padding-left: 1em;
+  transition: all 0.1s linear;
 }
 .a-option:hover {
   filter: brightness(1.1);

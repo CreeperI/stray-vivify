@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { Chart } from '@renderer/core/chart/chart'
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import { ref } from 'vue'
@@ -53,7 +53,7 @@ const gml = ref(`array_push(global.song_list,
 
 function write_gml() {
   Invoke('write-file', chart.id, 'songinfo.gml', gml.value).then(() => {
-    return Invoke("show-file", chart.id, 'songinfo.gml')
+    return Invoke('show-file', chart.id, 'songinfo.gml')
   })
 }
 
@@ -67,16 +67,29 @@ async function read_vsb() {
   chart.load_vsb(await Charter.invoke('read-vsb', r1.path))
 }
 
-async function write_vsc() {
+async function read_vsc() {
+  const r1 = await Invoke('ask-file', ['vsc文件', 'vsc'])
+  if (!r1) return notify.error('读取vsc失败……')
+  const chart = Chart.$current
+  const r2 = await Invoke('open-file-utf', r1)
+  if (!r2) return notify.error('读取vsc失败……')
+
+  chart.load_vsc(r2)
+}
+
+function write_vsc() {
   const chart = Chart.current
   if (!chart) throw new Error('?????')
   chart.write_current_vsc()
 }
-async function export_chart() {
-  Chart.$current.export_chart()
+function export_svc() {
+  Chart.$current.export_chart('svc')
+}
+function export_zip() {
+  Chart.$current.export_chart("zip")
 }
 
-async function import_osz() {
+function import_osz() {
   Chart.$current.import_osz()
 }
 
@@ -91,20 +104,22 @@ function open_svg() {
 <template>
   <simple-modal size="sm" title="好多东西啊……">
     <div class="vsc-loader-wrapper">
-      <Hide title="导入/导出" :def="true">
+      <Hide :def="true" title="导入/导出">
         <div class="iexports">
-          <a-button2 msg="打开vsb" @click="read_vsb" />
-          <a-button2 msg="导出vsc" @click="write_vsc" />
-          <a-button2 msg="导出svc" @click="export_chart" />
+          <a-button2 msg="导入vsb" @click="read_vsb" />
+          <a-button2 msg="导入vsc" @click="read_vsc" />
           <a-button2 msg="导入osz" @click="import_osz" />
           <a-button2 msg="导入osz的曲绘" @click="import_osz_pics" />
-          <a-button2 msg="导出svg" @click="open_svg" v-if="chart.diff.notes.length != 0" />
+          <a-button2 msg="导出vsc" @click="write_vsc" />
+          <a-button2 msg="导出svc" @click="export_svc" />
+          <a-button2 msg="导出zip" @click="export_zip" />
+          <a-button2 v-if="chart.diff.notes.length != 0" msg="导出svg" @click="open_svg" />
         </div>
       </Hide>
       <Hide title="gml">
         <div>修改下方的diff_constant_3来调整一个合适的定数，其它的帮你填好啦。</div>
         <div>注意准备的音乐需要和这个谱面是同一个id哦，或者你可以修改chart-id字段</div>
-        <textarea id="vsc-gml" spellcheck="false" v-model="gml" />
+        <textarea id="vsc-gml" v-model="gml" spellcheck="false" />
         <a-button2 class="gml-btn" msg="导出gml" @click="write_gml" />
       </Hide>
     </div>
@@ -122,9 +137,11 @@ function open_svg() {
   overflow-y: auto;
 }
 .iexports {
-  display: flex;
-  justify-content: space-evenly;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   width: 100%;
+  justify-items: center;
+  gap: 5px;
 }
 .vsc-loader-header {
   font-size: 1.5rem;

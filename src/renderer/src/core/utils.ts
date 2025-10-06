@@ -1,4 +1,5 @@
 import { ChartTypeV2 } from '@preload/types'
+import { ref } from 'vue'
 
 export namespace utils {
   /** return whether a value is between the given states */
@@ -149,21 +150,23 @@ export namespace utils {
     return arr[Math.floor(Math.random() * arr.length)]
   }
 
-  export function toTimeStr(seconds: number, fix=3) {
+  export function toTimeStr(seconds: number, fix = 3) {
     const isNegative = seconds < 0
     const absSeconds = Math.abs(seconds)
     const minutes = Math.floor(absSeconds / 60)
     let secs = (absSeconds % 60).toFixed(fix)
 
     // 处理秒数部分补零逻辑
-    if (minutes == 0 ) {return (isNegative ? '-' : '') + secs}
+    if (minutes == 0) {
+      return (isNegative ? '-' : '') + secs
+    }
     secs = parseFloat(secs) < 10 ? '0' + secs : secs
     // 添加负号标识
     return (isNegative ? '-' : '') + minutes + ':' + secs
   }
 
-  export function ms2str(ms: number,fix=3) {
-    return toTimeStr(ms / 1000,fix)
+  export function ms2str(ms: number, fix = 3) {
+    return toTimeStr(ms / 1000, fix)
   }
 
   export function average(arr: number[]) {
@@ -182,4 +185,50 @@ export namespace utils {
   export function range(...args: number[]) {
     return Math.max(...args) - Math.min(...args)
   }
+  export function timer(cb: () => void) {
+    const r0 = performance.now()
+    cb()
+    return performance.now() - r0
+  }
+  export function nextFrame() {
+    return new Promise((resolve) => requestAnimationFrame(resolve))
+  }
+
+  const note_style = 'stray:/__skin__'
+
+  export function getSrc(note: ChartTypeV2.note, max = 4): string {
+    if (note.width == 0) return ''
+    let str = note_style + '/' + note.width
+    if ('snm' in note) {
+      if (note.snm == 1) return str + 'b.png'
+      if (note.snm == 2 && note.width != 1) str += 's'
+    }
+    if (note.width == 1) return str + '.png'
+    if (note.lane < (max - note.width) / 3) str += 'l'
+    else if (note.lane > ((max - note.width) / 3) * 2) str += 'r'
+    else str += 'm'
+
+    return str + '.png'
+  }
+
+  export function borderSrc(note: ChartTypeV2.note, max = 4): string {
+    let str = note_style + '/' + note.width
+    if (note.width == 1) {
+      if (note.lane < max / 2) str += 'l'
+      else str += 'r'
+    } else {
+      if (note.lane < max / 3) str += 'l'
+      else if (note.lane > (max / 3) * 2) str += 'r'
+      else str += 'm'
+    }
+    return str + 'h.png'
+  }
+
+  export const refresh_key = ref('')
+  export function refresh() {
+    refresh_key.value = Math.random().toString().slice(0, 7)
+  }
 }
+
+// @ts-expect-error
+window.utils = utils

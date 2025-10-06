@@ -9,6 +9,7 @@ import AColorInput from '@renderer/components/a-elements/a-color-input.vue'
 import { modal } from '@renderer/core/modal'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Invoke } from '@renderer/core/ipc'
+import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 
 const r = Settings.settings
 </script>
@@ -18,21 +19,22 @@ const r = Settings.settings
     <div class="settings-wrapper">
       <div style="width: 100%; text-align: center">编辑数字可以使用键盘上下和滚轮哦。</div>
       <div class="contain">
+        <setting-header msg="欢迎来到stray-vivify！" />
+        <div>
+          <word-helper msg="设定一个名字吧！" dec="会帮你自动填到谱师栏"/>
+          <a-text-input v-model="r.username" />
+        </div>
         <setting-header msg="编辑器" />
         <div>
           <div>滚轮反转</div>
           <a-checkbox v-model="r.settings.reverse_scroll" />
         </div>
         <div>
-          <s>显示timing</s>
-          <a-checkbox v-model="r.settings.show_bottom_timing" />
-        </div>
-        <div>
-          <div>显示底部#Timing</div>
+          <div>显示底部#Timing黑字</div>
           <a-checkbox v-model="r.settings.show_bpm_bottom" />
         </div>
         <div>
-          <div>分音</div>
+          <div>右侧分音</div>
           <a-checkbox v-model="r.settings.show_ticks" />
         </div>
         <div>
@@ -40,16 +42,20 @@ const r = Settings.settings
           <a-checkbox v-model="r.settings.delete_no_confirm" />
         </div>
         <div>
-          <div>lane-width</div>
+          <div>lane-width (px)</div>
           <a-number-input class="in" min="1" v-model="r.settings.lane_width" />
         </div>
         <div>
-          <div>延迟（编辑模式）</div>
+          <div>延迟（视觉）</div>
           <a-number-input class="in" v-model="r.settings.offset1" />
         </div>
         <div>
           <word-helper msg="密度采样间隔" dec="密度折线的采样数，也即折线的数据点数" />
           <a-number-input class="in" v-model="r.settings.density_data_count" min="10" />
+        </div>
+        <div>
+          <word-helper msg="小节号或拍号" dec="仿照malody，不使用小节来标注，而是每一个四分音符（按timing设置）标一个。勾选这个=启用malody。" />
+          <a-checkbox v-model="r.settings.bar_or_section" />
         </div>
         <setting-header msg="打击音" />
         <div>

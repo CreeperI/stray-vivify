@@ -1,12 +1,12 @@
 import { storages } from '@preload/types'
-import { computed, ref, Ref, toRaw, watch } from 'vue'
+import { computed, ref, toRaw, watch } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Charter } from '@renderer/core/charter'
 import { Invoke } from '@renderer/core/ipc'
 
 export const Version = {
-  val: 9,
-  str: '⑨'
+  val: 9.1,
+  str: '9s'
 }
 
 const note = {
@@ -54,7 +54,7 @@ const note = {
   }
 }
 
-const settings: Ref<storages.storage_scheme> = ref({
+const settings = ref({
   settings: {
     scale: 10,
     meter: 4,
@@ -95,11 +95,24 @@ const settings: Ref<storages.storage_scheme> = ref({
     density_data_count: 100,
     mouse_tracker: false,
     frame_time: true,
-    hit_sound: true
+    hit_sound: true,
+    svg_shown_parts: {
+      sprite: true,
+      song: true,
+      diff: true,
+      sv: true,
+      timing: true,
+      tick: true,
+      bar: true
+    },
+    star_rating: false,
+    min_lane: 4,
+    bar_or_section: false
   },
   version: Version.val,
-  shortcut: ''
-} as storages.storage_scheme)
+  shortcut: '',
+  username: '???',
+} as Required<storages.storage_scheme>)
 
 watch(settings, () => {}, { deep: true })
 const computes = {
@@ -123,7 +136,7 @@ export const Settings = {
     if (!data) return
     const parsed = JSON.parse(data) as storages.storage_scheme
     utils.less_assign(this.data.value, parsed)
-    const d = [ Version.val - parsed.version , parsed.version, Version.val]
+    const d = [Version.val - parsed.version, parsed.version, Version.val]
     this.data.value.version = Version.val
     return d
   },

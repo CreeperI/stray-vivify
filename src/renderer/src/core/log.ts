@@ -1,4 +1,5 @@
 import { Ref, ref } from 'vue'
+import { GlobalStat } from '@renderer/core/globalStat'
 
 type log = {
   level: 'msg' | 'err' | 'warn' | 'debug'
@@ -17,6 +18,7 @@ export const Log = {
   error_list: ref([]) as Ref<log[]>,
   need_img: ref([]) as Ref<[string, number][]>,
   handle() {
+    if (GlobalStat.is_dev) return
     let oldlog = console.log.bind(console)
     console.log = function (...args: any) {
       oldlog(...args)

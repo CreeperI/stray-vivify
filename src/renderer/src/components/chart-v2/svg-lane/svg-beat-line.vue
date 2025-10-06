@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed } from 'vue'
 import { Settings } from '@renderer/core/settings'
 import { GlobalStat } from '@renderer/core/globalStat'
@@ -6,12 +6,13 @@ import { Chart } from '@renderer/core/chart/chart'
 
 const chart_state = GlobalStat.chart_state
 const chart = Chart.$current
-const lane_width = Settings.editor.lane_width
-const svg_width = 4 * lane_width + 2 * 50 + 12
-const bar_length = 4 * lane_width + 12
+
+const sizing = GlobalStat.SvgSizing
+const lane_width = sizing.lane_width
+const bar_length = sizing.bar_length
 const current_time = chart.audio.refs.current_ms
 const mul = Settings.computes.mul
-const view_port = [0, 0, svg_width, window.screen.height]
+const view_port = sizing.view_port
 const bb_list = chart.diff.shown_t
 
 const __bar_length = computed(() => Settings.data.value.settings.sprites.bar_length)
@@ -27,23 +28,23 @@ function time_bottom_bar(t: number, time: number, _mul: number) {
   return view_port[3] - (time - t - offset1) * _mul - 80 - bar_offset
 }
 
-function color_of_level(lvl: number):string {
-  return Settings.editor.sprites["bar_color" + lvl] ?? "#ffffff"
+function color_of_level(lvl: number): string {
+  return Settings.editor.sprites['bar_color' + lvl] ?? '#ffffff'
 }
 </script>
 
 <template>
-  <g id="svg-beat-line" transform="translate(50 -20)" v-if="_show_beat_line">
+  <g v-if="_show_beat_line" id="svg-beat-line" transform="translate(50 -20)">
     <line
       v-for="[line, lvl] in bb_list.beat_list"
-      x1="0"
+      :data-lvl="lvl"
+      :opacity="__bar_op"
+      :stroke="color_of_level(lvl)"
+      :stroke-width="__bar_length"
       :x2="bar_length"
       :y1="time_bottom_bar(current_time, line, mul)"
       :y2="time_bottom_bar(current_time, line, mul)"
-      :stroke="color_of_level(lvl)"
-      :stroke-width="__bar_length"
-      :opacity="__bar_op"
-      :data-lvl="lvl"
+      x1="0"
     ></line>
   </g>
 </template>

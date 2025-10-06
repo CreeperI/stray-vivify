@@ -5,9 +5,8 @@ import { computed } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 
 const chart_state = GlobalStat.chart_state
-const lane_width = Settings.editor.lane_width
-const svg_width = 4 * lane_width + 2 * 50 + 12
-const view_port = [0, 0, svg_width, window.screen.height]
+
+const view_port = GlobalStat.SvgSizing.view_port
 const offset1 = Settings.editor.offset1
 
 const chart = Chart.$current
@@ -27,7 +26,7 @@ const timing_list = chart.diff.shown_timing
 </script>
 
 <template>
-  <g v-if="_show_left_bpm">
+  <g v-if="_show_left_bpm" id="svg-bar-line">
     <text
       v-for="tm in timing_list"
       x="25"

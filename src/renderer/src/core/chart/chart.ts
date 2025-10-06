@@ -1,6 +1,6 @@
 import { ChartType, ChartTypeV2 } from '@preload/types'
 import { notify } from '@renderer/core/notify'
-import { computed, ComputedRef, ref, Ref, watch, WritableComputedRef } from 'vue'
+import { computed, ComputedRef, ref, Ref, toValue, triggerRef, watch, WritableComputedRef } from 'vue'
 import { Charter } from '@renderer/core/charter'
 import { Chart_audio } from '@renderer/core/chart/audio'
 import { Chart_song } from '@renderer/core/chart/song'
@@ -11,6 +11,7 @@ import { Settings } from '@renderer/core/settings'
 import { modal } from '@renderer/core/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { utils } from '@renderer/core/utils'
+import nextFrame = utils.nextFrame
 
 function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
@@ -35,7 +36,6 @@ export class Chart {
   current_bpm: WritableComputedRef<number>
   ref: {
     diff_index: Ref<number>
-    diff: Ref<ChartTypeV2.diff>
   }
   id: string
 
@@ -64,8 +64,7 @@ export class Chart {
       }
     })
     this.ref = {
-      diff_index: ref(0),
-      diff: ref(this.diffs[0])
+      diff_index: ref(0)
     }
     this.diff = new Chart_diff(this)
     this.id = ''
@@ -85,7 +84,7 @@ export class Chart {
 
   set diff_index(v: number) {
     this.ref.diff_index.value = v
-    this.ref.diff.value = this.diffs[this.ref.diff_index.value]
+    this.diff = new Chart_diff(this, v)
     this.set_header_name()
     this._diff_index = v
   }
@@ -165,6 +164,8 @@ export class Chart {
       }
       chart.set_chart(data.data)
       chart.set_name(data.data.song.name)
+      chart.diff.calc_max_lane()
+      chart.diff.update_timing_list()
     }
     chart.id = id
     this.current = chart
@@ -298,6 +299,56 @@ export class Chart {
     }, 200)
   }
 
+  load_vsc(r: string) {
+    const lines = r.split('\n')
+    const notes: ChartTypeV2.note[] = []
+    const timing: ChartTypeV2.timing[] = []
+    lines.forEach((line) => {
+      const [stime, stype, slane, sextra = undefined] = line.split(',')
+      const time = parseFloat(stime)
+      const type = parseInt(stype)
+      const lane = parseInt(slane)
+      if (type == 2 && sextra) {
+        return notes.push({
+          time,
+          lane,
+          ani: [],
+          width: 1,
+          len: (parseFloat(sextra) ?? 0) - time
+        })
+      } else if (type == 3 && sextra) {
+        const matched = sextra.split('|')[0].slice(2)
+        return timing.push({
+          time: time,
+          bpm: parseFloat(matched ?? '120'),
+          num: 4,
+          den: 4
+        })
+      }
+      let width = 1
+      let snm = 0
+      if (type == 1 || type == 8 || type == 7) width = 2
+      if (type == 6 || type == 7) snm = 1
+      if (type == 8) snm = 2
+      return notes.push({
+        time,
+        lane,
+        width,
+        ani: [],
+        snm
+      })
+    })
+
+    const diff = Chart_diff.createDiff()
+    diff.notes = Chart_diff.validate_notes(notes)
+    diff.timing = Chart_diff.validate_timing(timing)
+    this.add_diff(diff)
+    setTimeout(() => {
+      this.diff.fuck_shown(this.audio.current_time, true)
+      this.diff.update_diff_counts()
+    }, 200)
+  }
+
   fuck_shown(force = false) {
     this.diff.fuck_shown(this.audio.current_time, force)
   }
@@ -320,22 +371,20 @@ export class Chart {
     this.length_end = this.length + 3000
     this.set_header_name()
     this.audio.init_on_end()
-    watch(
-      this.ref.diff,
-      () => {
-        this.diffs[this.ref.diff_index.value] = this.ref.diff.value
-      },
-      { deep: true }
-    )
-    watch(this.ref.diff_index, () => {
-      this.ref.diff.value = this.diffs[this.ref.diff_index.value]
+    watch(this.ref.diff_index, (v) => {
+      this.diff = new Chart_diff(this, v)
       this.set_header_name()
       this.diff.fuck_shown(this.audio.current_time, true)
       this.diff.calc_density()
+      this.diff.update_timing_list()
     })
     watch(this.audio.refs.current_ms, () => {
       this.update_on_time_change()
     })
+  }
+
+  sync_from_diff() {
+    this.diffs[this.ref.diff_index.value] = toValue(this.diff.bound)
   }
 
   update_on_time_change() {
@@ -350,8 +399,11 @@ export class Chart {
   }
 
   add_diff(d: ChartTypeV2.diff) {
+    d.notes = Chart_diff.validate_notes(d.notes)
+    d.timing = Chart_diff.validate_timing(d.timing)
     this.diffs.push(d)
     this.diff_index = this.diffs.length - 1
+    utils.refresh()
   }
 
   delete_diff() {
@@ -365,6 +417,8 @@ export class Chart {
       Charter.modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
         this.diffs.splice(this.diff_index, 1)
         this.diff_index = 0
+        triggerRef(this.ref.diff_index)
+        utils.refresh()
       })
   }
 
@@ -387,12 +441,15 @@ export class Chart {
     this.audio.update()
   }
 
-  save() {
+  async save() {
     if (this.audio.ele) {
       this.diff.floor_time()
+      await nextFrame()
       this.diff.validate_chart()
+      await nextFrame()
       Invoke('save-chart', this.id, JSON.stringify(this.chart))
-      return Invoke(
+      await nextFrame()
+      Invoke(
         'update-chart-data',
         this.id,
         JSON.stringify({
@@ -412,11 +469,12 @@ export class Chart {
     )
   }
 
-  async export_chart() {
+  async export_chart(ext: 'svc' | 'zip') {
     const r = this.save()
     if (!r) return
     await r
-    await Invoke('export-zip', this.id)
+    if (ext == 'svc') await Invoke('export-svc', this.id)
+    else if (ext == 'zip') await Invoke('export-zip', this.id)
   }
 
   init_playfield() {
@@ -439,151 +497,151 @@ export class Chart {
   }
 
   import_osz_pics() {
-    Invoke('import-osz-pics', this.id)
+    Invoke('import-osz-pics', this.id).then(() => {
+      utils.refresh()
+    })
   }
   async write_png() {
     const svg = document.getElementById('chart-preview-svg')
-    if (!svg) {
-      console.error('未找到 SVG 元素');
-      return;
+    if (!svg) return
+
+    // 获取 SVG 尺寸
+    const { width, height } = svg.getBoundingClientRect()
+
+    // 创建 Canvas
+    const canvas = document.createElement('canvas')
+    canvas.width = width
+    canvas.height = height
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) {
+      throw new Error('无法获取 Canvas 上下文')
     }
 
-    try {
-      // 获取 SVG 尺寸
-      const { width, height } = svg.getBoundingClientRect();
+    // 设置白色背景
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, width, height)
 
-      // 创建 Canvas
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
+    // 克隆 SVG 元素以避免修改原元素
+    const clonedSvg = svg.cloneNode(true) as SVGElement
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        throw new Error('无法获取 Canvas 上下文');
-      }
+    // 处理 SVG 中的 image 元素，将其转换为 data URL
+    const imageElements = clonedSvg.querySelectorAll('image')
+    const imagePromises: Promise<void>[] = []
 
-      // 设置白色背景
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, width, height);
+    // 处理每个 image 元素
+    imageElements.forEach((imgElement) => {
+      const promise = new Promise<void>((resolve) => {
+        const href = imgElement.getAttribute('href') || imgElement.getAttribute('xlink:href')
+        if (!href) {
+          resolve()
+          return
+        }
 
-      // 克隆 SVG 元素以避免修改原元素
-      const clonedSvg = svg.cloneNode(true) as SVGElement;
+        // 如果是 data URL，直接使用
+        if (href.startsWith('data:')) {
+          resolve()
+          return
+        }
 
-      // 处理 SVG 中的 image 元素，将其转换为 data URL
-      const imageElements = clonedSvg.querySelectorAll('image');
-      const imagePromises: Promise<void>[] = [];
-
-      // 处理每个 image 元素
-      imageElements.forEach((imgElement) => {
-        const promise = new Promise<void>((resolve) => {
-          try {
-            const href = imgElement.getAttribute('href') || imgElement.getAttribute('xlink:href');
-            if (!href) {
-              resolve();
-              return;
-            }
-
-            // 如果是 data URL，直接使用
-            if (href.startsWith('data:')) {
-              resolve();
-              return;
-            }
-
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-
-            img.onload = () => {
-              try {
-                // 创建临时 canvas 来转换图片
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = img.width;
-                tempCanvas.height = img.height;
-
-                const tempCtx = tempCanvas.getContext('2d');
-                if (!tempCtx) {
-                  console.warn('无法创建临时 Canvas 上下文');
-                  resolve();
-                  return;
-                }
-
-                tempCtx.drawImage(img, 0, 0);
-
-                // 转换为 data URL
-                const dataUrl = tempCanvas.toDataURL('image/png');
-
-                // 更新 image 元素的 href
-                if (imgElement.hasAttribute('xlink:href')) {
-                  imgElement.setAttribute('xlink:href', dataUrl);
-                } else {
-                  imgElement.setAttribute('href', dataUrl);
-                }
-
-                resolve();
-              } catch (error) {
-                console.warn('图片转换失败:', error);
-                resolve(); // 即使失败也继续处理
-              }
-            };
-
-            img.onerror = () => {
-              console.warn('图片加载失败:', href);
-              resolve(); // 即使加载失败也继续处理
-            };
-
-            img.src = href;
-          } catch (error) {
-            console.warn('处理图片时出错:', error);
-            resolve(); // 即使出错也继续处理
-          }
-        });
-
-        imagePromises.push(promise);
-      });
-
-      // 等待所有图片处理完成
-      await Promise.all(imagePromises);
-
-      // 将 SVG 转换为数据 URL
-      const svgString = new XMLSerializer().serializeToString(clonedSvg);
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const svgUrl = URL.createObjectURL(svgBlob);
-
-      // 创建图片元素来加载 SVG
-      const pngDataUrl = await new Promise<string>((resolve, reject) => {
-        const img = new Image();
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
 
         img.onload = () => {
           try {
-            // 绘制到 Canvas
-            ctx.drawImage(img, 0, 0, width, height);
+            // 创建临时 canvas 来转换图片
+            const tempCanvas = document.createElement('canvas')
+            tempCanvas.width = img.width
+            tempCanvas.height = img.height
 
-            // 转换为 PNG data URL
-            const pngData = canvas.toDataURL('image/png');
+            const tempCtx = tempCanvas.getContext('2d')
+            if (!tempCtx) {
+              console.warn('无法创建临时 Canvas 上下文')
+              resolve()
+              return
+            }
 
-            // 清理 URL
-            URL.revokeObjectURL(svgUrl);
+            tempCtx.drawImage(img, 0, 0)
 
-            resolve(pngData);
+            // 转换为 data URL
+            const dataUrl = tempCanvas.toDataURL('image/png')
+
+            // 更新 image 元素的 href
+            if (imgElement.hasAttribute('xlink:href')) {
+              imgElement.setAttribute('xlink:href', dataUrl)
+            } else {
+              imgElement.setAttribute('href', dataUrl)
+            }
+
+            resolve()
           } catch (error) {
-            URL.revokeObjectURL(svgUrl);
-            reject(error);
+            console.warn('图片转换失败:', error)
+            resolve() // 即使失败也继续处理
           }
-        };
+        }
 
         img.onerror = () => {
-          URL.revokeObjectURL(svgUrl);
-          reject(new Error('SVG 图片加载失败'));
-        };
+          console.warn('图片加载失败:', href)
+          resolve()
+        }
 
-        img.src = svgUrl;
-      });
+        img.src = href
+      })
 
-      // 调用主进程保存
-      Invoke('export-preview-svg', this.id, pngDataUrl);
+      imagePromises.push(promise)
+    })
 
-    } catch (error) {
-      console.error('SVG 转换失败:', error);
-    }
+    // 等待所有图片处理完成
+    await Promise.all(imagePromises)
+
+    // 将 SVG 转换为数据 URL
+    const svgString = new XMLSerializer().serializeToString(clonedSvg)
+    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' })
+    const svgUrl = URL.createObjectURL(svgBlob)
+
+    // 创建图片元素来加载 SVG
+    const pngDataUrl = await new Promise<string>((resolve, reject) => {
+      const img = new Image()
+
+      img.onload = () => {
+        try {
+          // 绘制到 Canvas
+          ctx.drawImage(img, 0, 0, width, height)
+
+          // 转换为 PNG data URL
+          const pngData = canvas.toDataURL('image/png')
+
+          // 清理 URL
+          URL.revokeObjectURL(svgUrl)
+
+          resolve(pngData)
+        } catch (error) {
+          URL.revokeObjectURL(svgUrl)
+          reject(error)
+        }
+      }
+
+      img.onerror = () => {
+        URL.revokeObjectURL(svgUrl)
+        reject(new Error('SVG 图片加载失败'))
+      }
+
+      img.src = svgUrl
+    })
+
+    // 调用主进程保存
+    Invoke('export-preview-svg', this.id, pngDataUrl)
+  }
+
+  copy_diff() {
+    const new_d = Chart_diff.createDiff()
+    new_d.notes = this.diff.notes
+    new_d.timing = this.diff.timing
+    new_d.meta.charter = this.diff.charter
+    // new_d.sv = this.diff.sv
+
+    this.add_diff(new_d)
+    notify.success("new diffed")
   }
 }
 

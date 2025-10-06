@@ -187,10 +187,11 @@ function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
   for (const tp of beatmap.timingPoints) {
     if (tp.uninherited) {
       // Uninherited timing point - actual BPM change
+      if (tp.beatLength < 0) continue
       const bpm = 60000 / tp.beatLength // Convert beat length to BPM
       timing.push({
         time: tp.time,
-        bpm: Math.fround(bpm),
+        bpm: Math.round(bpm),
         den: 4,
         num: 4
       })
@@ -250,7 +251,7 @@ function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
       charter: beatmap.metadata.Creator || '',
       diff1: beatmap.metadata.Version || '',
       diff2: '',
-      diff_name:''
+      diff_name: ''
     },
     ani: []
   }
