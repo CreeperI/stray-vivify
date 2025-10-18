@@ -212,6 +212,7 @@ export namespace utils {
   }
 
   export function borderSrc(note: ChartTypeV2.note, max = 4): string {
+    if (note.width == 0) return ''
     let str = note_style + '/' + note.width
     if (note.width == 1) {
       if (note.lane < max / 2) str += 'l'

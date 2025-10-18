@@ -64,7 +64,7 @@ const chart_state = GlobalStat.chart_state
 <style scoped>
 .chart-v2-wrapper {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;

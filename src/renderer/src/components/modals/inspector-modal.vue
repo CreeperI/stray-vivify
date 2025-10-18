@@ -7,6 +7,7 @@ import FrameRateSingle from '@renderer/components/modals/frame-rate-single.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Settings } from '@renderer/core/settings'
+import { utils } from '@renderer/core/utils'
 
 const func_state = ref(0)
 
@@ -78,12 +79,12 @@ GlobalStat.ChartSize.update()
           <table class="fr-table">
             <tbody>
               <tr>
-                <td style="width: max-content">函数</td>
-                <td>Min/Max</td>
-                <td>avg.</td>
-                <td>SD</td>
-                <td>CV</td>
-                <td>call_count</td>
+                <th style="width: max-content">函数</th>
+                <th>Min/Max</th>
+                <th>avg.</th>
+                <th>SD</th>
+                <th>CV</th>
+                <th>call_count</th>
               </tr>
               <tr>
                 <td>FPS</td>
@@ -132,6 +133,29 @@ GlobalStat.ChartSize.update()
               <div>{{ parse_size(backend.arrayBuffers) }}</div>
             </div>
           </div>
+          <div class="fr-header">Update Rate</div>
+          <table class="fr-table">
+            <tbody>
+              <tr>
+                <th>Key</th>
+                <th>Min/Max</th>
+                <th>avg.</th>
+                <th>SD</th>
+                <th>CV</th>
+              </tr>
+              <tr v-for="key in utils.keyof(FrameRate.Updates)">
+                <td>{{ key }}</td>
+                <td>
+                  {{ FrameRate.Updates[key].refs.value.min.toFixed(1) }}/{{
+                    FrameRate.Updates[key].refs.value.max.toFixed(1)
+                  }}
+                </td>
+                <td>{{ FrameRate.Updates[key].refs.value.avg.toFixed(2) }}</td>
+                <td>{{ FrameRate.Updates[key].refs.value.sd.toFixed(2) }}</td>
+                <td>{{ FrameRate.Updates[key].refs.value.cv.toFixed(2) }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </template>
       <template v-else-if="func_state == 2">
@@ -273,7 +297,6 @@ td {
   border: 1px solid white;
 }
 .fr-table tr:first-child {
-  background: #0d1418;
   line-height: 1.4rem;
 }
 .imgs-wrapper {
@@ -349,7 +372,7 @@ td {
   text-align: right;
   width: 100%;
 }
-.disk-list-name{
+.disk-list-name {
   text-align: right;
   padding-right: 10px;
 }

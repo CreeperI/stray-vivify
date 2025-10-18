@@ -31,7 +31,11 @@ export namespace GlobalStat {
   }
   export const refs = {
     chart_tab: ref(2),
-    header_display: ref('')
+    header_display: ref(''),
+    window: {
+      height: ref(screen.height),
+      width: ref(screen.width)
+    }
   }
   // 0 - charting 1 - recording 2 - playing
   export const chart_state = ref(0) as Ref<0 | 1 | 2>
@@ -231,7 +235,8 @@ export namespace GlobalStat {
     lane_width: 130,
     svg_width: 520,
     bar_length: 500,
-    view_port: [0,0,520, window.screen.height]
+    view_port: [0,0,520, window.screen.height],
+    taskBarHeight: screen.height - screen.availHeight,
   }
 }
 

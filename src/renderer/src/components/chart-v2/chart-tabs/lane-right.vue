@@ -3,8 +3,8 @@ import ARange from '@renderer/components/a-elements/a-range.vue'
 import { computed } from 'vue'
 import { Settings } from '@renderer/core/settings'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
-import { Charter } from '@renderer/core/charter'
 import { utils } from '@renderer/core/utils'
+import { Chart } from '@renderer/core/chart/chart'
 
 const scale = computed({
   get() {
@@ -22,7 +22,7 @@ const meter = computed({
     Settings.editor.meter = v
   }
 })
-const chart = Charter.get_chart()
+const chart = Chart.$current
 const { current_ms, writable_play_rate, play_rate, writable_current_second } = chart.audio.refs
 </script>
 
@@ -77,6 +77,10 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
         step="1"
       />
     </div>
+    <div class="fn-right-debugger" v-if="Settings.editor.debug_window">
+      <div>Active Notes</div>
+      <div>{{chart.diff.shown.value.length}}x</div>
+    </div>
   </div>
 </template>
 
@@ -126,5 +130,17 @@ td {
 
 .fn-right-inner > input:focus {
   border-bottom: 1px solid var(--grey);
+}
+.fn-right-debugger {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 15px;
+  text-align: left;
+}
+.fn-right-debugger > div {
+  width: 100%;
+}
+.fn-right-debugger > div:nth-child(2n+1) {
+  text-align: right;
 }
 </style>

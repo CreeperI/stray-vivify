@@ -5,7 +5,6 @@ import { ref, watch } from 'vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { Invoke } from '@renderer/core/ipc'
 import Hide from '@renderer/components/a-elements/hide.vue'
-import { Charter } from '@renderer/core/charter'
 import { notify } from '@renderer/core/notify'
 import { modal } from '@renderer/core/modal'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
@@ -72,20 +71,25 @@ async function write_custom_song() {
     `stray:/__sprite__/${chart.id}`,
     crop.value ? 'crop' : 'stretch'
   )
-  await Invoke('write-blob', chart.id, `customsong/song_${the_id.value}_0.png`, await utils.blobToBase64(blob))
+  await Invoke(
+    'write-blob',
+    chart.id,
+    `customsong/song_${the_id.value}_0.png`,
+    await utils.blobToBase64(blob)
+  )
   await Invoke('write-file', chart.id, `customsong/FINALE.vsc`, chart.diff.to_vsc().join('\n'))
   await Invoke('write-file', chart.id, 'customsong/info.json', gml.value)
   Invoke('show-file', chart.id, `customsong/info.json`)
 }
 
 async function read_vsb() {
-  const r1 = await Charter.invoke('ask-vsb')
+  const r1 = await Invoke('ask-vsb')
   if (!r1) {
     notify.error('读取vsb失败……')
     return
   }
   const chart = Chart.current as Chart
-  chart.load_vsb(await Charter.invoke('read-vsb', r1.path))
+  chart.load_vsb(await Invoke('read-vsb', r1.path))
 }
 
 async function read_vsc() {

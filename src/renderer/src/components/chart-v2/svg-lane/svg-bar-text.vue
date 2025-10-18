@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Settings } from '@renderer/core/settings'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
+import { useUpdateFrameRate } from '@renderer/core/frame-rates'
 
 const chart_state = GlobalStat.chart_state
 const offset1 = Settings.editor.offset1
@@ -25,6 +26,7 @@ function time_bottom_bar(t: number, time: number, _mul: number) {
   return view_port[3] - (time - t - offset1) * _mul - 80 - bar_offset
 }
 const bb_list = computed(() => chart.diff.shown_t.value)
+useUpdateFrameRate('svg-bar-text')
 </script>
 
 <template>

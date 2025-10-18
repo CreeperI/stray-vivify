@@ -4,11 +4,9 @@ import '@renderer/styles.css'
 
 import { createModal } from '@kolirt/vue-modal'
 import { ShortCuts } from '@renderer/core/shortcut'
-import { Charter } from '@renderer/core/charter'
 import { Invoke, load_ipc_handlers } from '@renderer/core/ipc'
 import { Settings } from '@renderer/core/settings'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Listener } from '@renderer/core/listener'
 import { Log } from '@renderer/core/log'
 import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/frame-rates'
@@ -30,7 +28,7 @@ const app = createApp(App).use(
 function update_per_frame() {
   FrameRate.aniFrame.start()
 
-  Charter.if_current()?.on_update()
+  Chart.current?.on_update()
   requestAnimationFrame(update_per_frame)
 
   FrameRate.aniFrame.end()
@@ -40,22 +38,6 @@ function update_per_frame() {
     FrameRate.next_tick.end()
   })
 }
-
-window.electron.ipcRenderer.on('window-resize', (_) => {
-  Listener.trigger('resize')
-})
-
-document.addEventListener('resize', () => {
-  Listener.trigger('resize')
-})
-Listener.on('resize', () => {
-  Charter.refs.window.height.value = window.innerHeight
-  Charter.refs.window.width.value = window.innerWidth
-  window.electron.ipcRenderer.invoke('window-max-state').then((r) => {
-    Charter.refs.window.isMaximized.value = r
-  })
-})
-
 async function main() {
   const r = await Settings.set_from_storage()
   ShortCuts.fromJson(Settings.data.value.shortcut)
@@ -78,6 +60,12 @@ async function main() {
     Chart.current?.playfield?.refresh()
     Chart.current?.diff.update_diff_counts()
     GlobalStat.MemoryUsage.update()
+
+    GlobalStat.refs.window.height.value = window.innerHeight
+    GlobalStat.refs.window.width.value = window.innerWidth
+    window.electron.ipcRenderer.invoke('window-max-state').then((r) => {
+      GlobalStat.window_max_state.value = r
+    })
   })
 
   requestAnimationFrame(update_per_frame)

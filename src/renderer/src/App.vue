@@ -2,13 +2,13 @@
 import Header from '@renderer/components/miscellaneous/header.vue'
 import { ModalTarget } from '@kolirt/vue-modal'
 import AButton from '@renderer/components/a-elements/a-button.vue'
-import { Charter } from '@renderer/core/charter'
 import ChartList from '@renderer/components/miscellaneous/chart-list.vue'
 import ChartV2 from '@renderer/components/chart-v2/chart-v2.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Version } from '@renderer/core/settings'
 import WordHelperOverlay from '@renderer/components/miscellaneous/word-helper-overlay.vue'
 import MouseTracker from '@renderer/components/miscellaneous/mouse-tracker.vue'
+import { modal } from '@renderer/core/modal'
 
 const state = GlobalStat.route.route
 </script>
@@ -20,10 +20,10 @@ const state = GlobalStat.route.route
   <div id="n-c" class="notify-container" />
   <ModalTarget />
   <a-button
+    v-if="state != 'editor'"
     :msg="`Version: ${Version.str}`"
     class="--build"
-    @click="Charter.modal.VersionsModal.show({})"
-    v-if="state != 'editor'"
+    @click="modal.VersionsModal.show({})"
   />
   <WordHelperOverlay />
   <MouseTracker />
@@ -141,9 +141,9 @@ body {
   --darker-bgi: linear-gradient(60deg, #0d1418 0%, #11161b 100%);
   --blue-bgi: linear-gradient(220.55deg, #34495d 0%, #0e2c5e 100%);
   --purple-bgi: linear-gradient(90deg, rgba(32, 33, 70, 1) 0%, rgba(37, 49, 50, 1) 100%);
-  --green-bgi: linear-gradient(220.55deg, #97E8B5 0%, #5CB67F 100%);
-  --gray-bgi:linear-gradient(220.55deg, #AFCCCB 0%, #616566 100%);
-  --dark-bgi: linear-gradient(1.83rad, #1E1E1ED6 0%,#1F1D1D 14%,#1F1D1D 80%,#171717D6 100%);
+  --green-bgi: linear-gradient(220.55deg, #97e8b5 0%, #5cb67f 100%);
+  --gray-bgi: linear-gradient(220.55deg, #afcccb 0%, #616566 100%);
+  --dark-bgi: linear-gradient(1.83rad, #1e1e1ed6 0%, #1f1d1d 14%, #1f1d1d 80%, #171717d6 100%);
   --grey: #3b4652;
   --z-highest: 100;
   --h-l-b: 80px;

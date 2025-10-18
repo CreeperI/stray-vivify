@@ -6,7 +6,9 @@ import { Settings } from '@renderer/core/settings'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
+import { useUpdateFrameRate } from '@renderer/core/frame-rates'
 
+useUpdateFrameRate("svg-notes")
 const chart = Chart.$current
 // const force_playing = ref(false)
 const not_playing_class = computed(
@@ -101,7 +103,7 @@ function update_pending(e: MouseEvent) {
   }
   // initially here should be -80 but considering the transform of the beat lines that sucks
   // so i just made it -100
-  const bottom = screen.availHeight - 100 - e.offsetY
+  const bottom = GlobalStat.refs.window.height.value - e.pageY - 100
   const mouse_time = Math.floor(chart.diff.nearest(bottom / mul.value + current_time.value))
   if (pending_hold_fixed) {
     pending_len.value = Math.abs(mouse_time - pending_hold_fixed_time)
@@ -141,10 +143,9 @@ function update_pending(e: MouseEvent) {
 
 function on_click() {
   if (GlobalStat.chart_state.value != 0) return
-  if (clipboard.value.length) {
-    return
-  }
+  if (clipboard.value.length) return
   if (Settings.note.w == 0) return
+
   if (Settings.note.hold.value) {
     if (pending_hold_fixed) {
       chart.diff.add_notes(pending_note.value)
@@ -228,8 +229,10 @@ const select_rect = ref({
 
 function on_mouse_down(e: MouseEvent) {
   if (e.target instanceof HTMLImageElement) return
-  if (clipboard.value) {
+  if (Settings.note.w != 0) return
+  if (clipboard.value.length) {
     NoteClipboard.paste()
+    return
   }
   is_selecting = true
   select_rect.value.shown = true
@@ -244,12 +247,23 @@ function on_mouse_down(e: MouseEvent) {
   select_start_time = Math.floor(bottom / mul.value + current_time.value)
   select_start_offsetX = e.offsetX
   select_start_delta = select_start_time - current_time.value
-  console.log(select_start_time)
+  console.log('select start:', select_start_time)
   document.addEventListener('mouseup', on_mouse_up, { once: true })
   document.addEventListener('mousemove', select_mouse_move, { passive: true })
 }
 
+function select_cleanup() {
+  is_selecting = false
+  select_rect.value.shown = false
+  select_start_time = 0
+  document.removeEventListener('mousemove', select_mouse_move)
+}
+
 function on_mouse_up(e: MouseEvent) {
+  if (!is_selecting) {
+    select_cleanup()
+    return
+  }
   const dy = e.screenY - select_start_screenY
   const mouse_time = current_time.value - dy / mul.value + select_start_delta
   console.log(mouse_time)
@@ -296,10 +310,7 @@ function on_mouse_up(e: MouseEvent) {
   }
 
   // cleanup
-  is_selecting = false
-  select_rect.value.shown = false
-  select_start_time = 0
-  document.removeEventListener('mousemove', select_mouse_move)
+  select_cleanup()
 }
 
 function select_mouse_move(e: MouseEvent) {
@@ -327,6 +338,7 @@ function am_i_selected(s: ChartTypeV2.note[], n: ChartTypeV2.note) {
   return s.some((x) => same_note(x, n))
 }
 function change_my_select(n: ChartTypeV2.note) {
+  if (!is_selecting) return
   const ix = selected.value.findIndex((x) => same_note(x, n))
   if (ix == -1) selected.value.push(n)
   else selected.value.splice(ix, 1)

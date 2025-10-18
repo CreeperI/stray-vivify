@@ -81,7 +81,7 @@ const bar_or_section = computed(() => Settings.editor.bar_or_section)
 #lane-svg {
   bottom: 0;
   position: absolute;
-  height: 100vh;
+  height: 100%;
 }
 
 text {

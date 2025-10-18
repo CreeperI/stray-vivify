@@ -155,6 +155,10 @@ const r = Settings.settings
           <div>Mouse Tracker</div>
           <a-checkbox v-model="r.settings.mouse_tracker" />
         </div>
+        <div>
+          <div>Debug Widget</div>
+          <a-checkbox v-model="r.settings.debug_window" />
+        </div>
       </div>
     </div>
     <template #footer>

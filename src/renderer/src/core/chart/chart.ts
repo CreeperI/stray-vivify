@@ -1,7 +1,6 @@
 import { ChartType, ChartTypeV2 } from '@preload/types'
 import { notify } from '@renderer/core/notify'
 import { computed, ComputedRef, ref, Ref, toValue, triggerRef, watch, WritableComputedRef } from 'vue'
-import { Charter } from '@renderer/core/charter'
 import { Chart_audio } from '@renderer/core/chart/audio'
 import { Chart_song } from '@renderer/core/chart/song'
 import { Chart_diff } from '@renderer/core/chart/diff'
@@ -54,7 +53,7 @@ export class Chart {
     this.length_end = -1
     this.shown_timing = computed(() => [
       this.audio.refs.current_ms.value,
-      this.audio.refs.current_ms.value + Charter.refs.visible.value
+      this.audio.refs.current_ms.value + Settings.computes.visible.value
     ])
     const me = this
     this.current_bpm = computed({
@@ -95,7 +94,7 @@ export class Chart {
   }
 
   get visible_timing() {
-    return this.audio.current_time + Charter.refs.visible.value
+    return this.audio.current_time + Settings.computes.visible.value
   }
 
   get chart(): ChartTypeV2.final {
@@ -424,7 +423,7 @@ export class Chart {
         this.diff.notes = []
       })
     else
-      Charter.modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
+      modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
         this.diffs.splice(this.diff_index, 1)
         this.diff_index = 0
         triggerRef(this.ref.diff_index)

@@ -1,4 +1,4 @@
-import { ref, Ref } from 'vue'
+import { onBeforeUpdate, onUnmounted, onUpdated, ref, Ref } from 'vue'
 import { utils } from '@renderer/core/utils'
 
 const all :_FrameRateClass[] = []
@@ -119,4 +119,17 @@ export const FrameRate = {
   calc_density: new _FrameRateClass(),
   sv_base: new _FrameRateClass(),
   calc_sr: new _FrameRateClass(),
+  Updates: {} as Record<string, _FrameRateClass>
+}
+
+export function useUpdateFrameRate(key: string) {
+  const cls = new _FrameRateClass()
+  FrameRate.Updates[key] = cls
+
+  onBeforeUpdate(() => cls.start())
+  onUpdated(() => cls.end())
+
+  onUnmounted(() => delete FrameRate.Updates[key])
+
+  return cls
 }

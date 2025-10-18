@@ -221,6 +221,16 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <div>custom song导出</div>
       <div>回退了diff的编辑逻辑</div>
     </Build>
+    <Build build="9.3" y="2025" m="10" d="18" title="9s2">
+      <template #bugs>
+        <div>非全屏状态下，note定位错误的问题</div>
+        <div>窗口大小不及时同步的问题，现在采用的是每秒更新一次</div>
+        <div>修复拉面会被select卡掉的问题</div>
+        <div>修复select在摆放note时仍然会触发的问题</div>
+      </template>
+      <div>Inspector添加了Frame Rate - Update Rate</div>
+      <div>调整了部分程序结构</div>
+    </Build>
   </div>
 </template>
 

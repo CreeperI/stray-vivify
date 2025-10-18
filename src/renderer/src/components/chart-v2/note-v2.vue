@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { ChartTypeV2 } from '@preload/types'
-import { Charter } from '@renderer/core/charter'
 import { Settings } from '@renderer/core/settings'
 import { computed } from 'vue'
 import { utils } from '@renderer/core/utils'
@@ -10,7 +9,7 @@ const { note } = defineProps<{
   note: ChartTypeV2.note
 }>()
 const max_width = Chart.$current.diff.max_lane.value
-const mul = Charter.refs.mul
+const mul = Settings.computes.mul
 const lane_width = Settings.editor.lane_width
 
 const borderSrc = () => utils.borderSrc(note, max_width)

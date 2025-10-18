@@ -553,7 +553,10 @@ export namespace storages {
     }
 
     density_data_count: number
+
+    // debug
     mouse_tracker: boolean
+    debug_window: boolean
 
     hit_sound: boolean
     hit_volume: number

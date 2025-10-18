@@ -1,7 +1,6 @@
 import { ChartTypeV2 } from '@preload/types'
 import { computed, ComputedRef, nextTick, Ref, ref, watch } from 'vue'
 import { Chart, ms } from './chart'
-import { Charter } from '../charter'
 import { utils } from '../utils'
 import { Settings } from '@renderer/core/settings'
 import { notify } from '@renderer/core/notify'
@@ -458,7 +457,7 @@ export class Chart_diff {
   get visible(): [number, number] {
     return [
       this.chart.audio.current_time - 1000,
-      this.chart.audio.current_time + Charter.refs.visible.value + 2500
+      this.chart.audio.current_time + Settings.computes.visible.value + 2500
     ]
   }
 
@@ -604,7 +603,6 @@ export class Chart_diff {
 
   timing_end_of(t: ChartTypeV2.timing, timing: ChartTypeV2.timing[], max = Infinity) {
     const idx = timing.findIndex((v) => t.time == v.time)
-    if (max == Infinity) console.warn('max with Infinity may cause a infinite-loooop!')
     if (idx === -1) throw new Error()
     else if (idx == timing.length - 1) return max
     else return timing[idx + 1].time

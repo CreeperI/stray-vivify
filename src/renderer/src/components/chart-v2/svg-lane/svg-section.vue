@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Settings } from '@renderer/core/settings'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Charter } from '@renderer/core/charter'
+import { Chart } from '@renderer/core/chart/chart'
 
 const offset1 = Settings.editor.offset1
 
@@ -9,7 +9,7 @@ const sizing = GlobalStat.SvgSizing
 const lane_width = sizing.lane_width
 const view_port = sizing.view_port
 
-const chart = Charter.get_chart()
+const chart = Chart.$current
 const mul = Settings.computes.mul
 const current_time = chart.audio.refs.current_ms
 
