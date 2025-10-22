@@ -62,7 +62,7 @@ class HitSoundSystem {
 
     // Find note in current time window
     const hitNote = this.shown.value.find(
-      (x: any) => utils.between(x.time, [current, current + delta_time * 2]) && x['snm'] != 1
+      (x: any) => utils.between(x.time, [current, current + delta_time]) && x['snm'] != 1
     ) //the time window before may be too small
 
     if (hitNote && !this.playedNotes.has(hitNote.time)) {
