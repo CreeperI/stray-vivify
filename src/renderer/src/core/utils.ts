@@ -17,6 +17,10 @@ export namespace utils {
     return Math.round(val * 10 ** digit) / 10 ** digit
   }
 
+  export function clamp(val:number,min_val:number,max_val:number) {
+    return Math.min(Math.max(val,min_val),max_val)
+  }
+
   export function deepCopy<T>(obj: T): T {
     if (obj === null || typeof obj !== 'object') {
       return obj

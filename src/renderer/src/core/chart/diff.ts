@@ -57,11 +57,11 @@ class HitSoundSystem {
 
     const FPS = FrameRate.fps.refs.value.avg
     const current = this.chart.audio.current_time - Settings.editor.offset3
-    const time = 1000 / FPS // in ms
+    const delta_time = utils.clamp(1000 / FPS, 16, 30) // in ms
 
     // Find note in current time window
     const hitNote = this.shown.value.find(
-      (x: any) => utils.between(x.time, [current, current + time * 1.5]) && x['snm'] != 1
+      (x: any) => utils.between(x.time, [current, current + delta_time]) && x['snm'] != 1
     )
 
     if (hitNote && !this.playedNotes.has(hitNote.time)) {
