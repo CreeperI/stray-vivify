@@ -60,11 +60,15 @@ const r = Settings.settings
         <setting-header msg="打击音" />
         <div>
           <div>打击音</div>
+          <a-checkbox v-model="r.settings.hit_sound" />
+        </div>
+        <div>
+          <div>打击音延迟</div>
           <a-number-input class="in" v-model="r.settings.offset3" />
         </div>
         <div>
-          <div>打击音</div>
-          <a-checkbox v-model="r.settings.hit_sound" />
+          <div>打击音音量</div>
+          <a-number-input class="in" v-model="r.settings.hit_volume" max="100" min="0" step="1"/>
         </div>
         <setting-header msg="预览模式" />
         <div>
@@ -150,6 +154,10 @@ const r = Settings.settings
         <div>
           <div>Mouse Tracker</div>
           <a-checkbox v-model="r.settings.mouse_tracker" />
+        </div>
+        <div>
+          <div>Debug Widget</div>
+          <a-checkbox v-model="r.settings.debug_window" />
         </div>
       </div>
     </div>

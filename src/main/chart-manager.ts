@@ -68,10 +68,20 @@ export default class ChartManager {
           path.join(folder, 'vs-chart.json')
         )
       }
-      const chart = JSON.parse(
-        fs.readFileSync(path.join(folder, 'vs-chart.json'), 'utf-8')
-      ) as ChartTypeV2.final
-      if (!chart.version) {
+      if (fs.existsSync(path.join(path.dirname(fp), 'vs-chart.json'))) {
+        const chart = JSON.parse(
+          fs.readFileSync(path.join(folder, 'vs-chart.json'), 'utf-8')
+        ) as ChartTypeV2.final
+        if (chart.version)
+          this.add_chart(
+            id,
+            path.basename(fp, path.extname(fp)),
+            chart.song.composer,
+            chart.song.bpm,
+            path.extname(fp),
+            chart.diffs.map((v) => v.meta.diff1 + ' ' + v.meta.diff2)
+          )
+      } else {
         this.add_chart(
           id,
           path.basename(fp, path.extname(fp)),
@@ -79,15 +89,6 @@ export default class ChartManager {
           'unknown',
           path.extname(fp),
           []
-        )
-      } else {
-        this.add_chart(
-          id,
-          path.basename(fp, path.extname(fp)),
-          chart.song.composer,
-          chart.song.bpm,
-          path.extname(fp),
-          chart.diffs.map((v) => v.meta.diff1 + ' ' + v.meta.diff2)
         )
       }
       return {

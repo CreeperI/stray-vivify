@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import { Charter } from '@renderer/core/charter'
-import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { modal } from '@renderer/core/modal'
+import { Chart } from '@renderer/core/chart/chart'
+import { Send } from '@renderer/core/ipc'
 
 const active = defineModel<number>()
 
-const ipcRenderer = Charter.ipcRenderer
+const sender = Send as (m: string) => void
 
-const isMax = Charter.refs.window.isMaximized
+const isMax = GlobalStat.window_max_state
 
 const song_name = GlobalStat.refs.header_display
 
@@ -34,8 +34,8 @@ function start_preview() {
 
 const on = GlobalStat.refs.chart_tab
 
-function is_active(i: number, i1:number) {
-  return i == i1 ? "header-active" : ""
+function is_active(i: number, i1: number) {
+  return i == i1 ? 'header-active' : ''
 }
 </script>
 
@@ -53,13 +53,13 @@ function is_active(i: number, i1:number) {
           <div class="h-menu-btn-text" @click="close_chart">关闭文件</div>
         </div>
       </div>
-      <div class="header-menu-ul" @click="active = 1" :class="is_active(on, 1)">
+      <div :class="is_active(on, 1)" class="header-menu-ul" @click="active = 1">
         <div class="h-menu-btn-text">曲目</div>
       </div>
-      <div class="header-menu-ul" @click="active = 2" :class="is_active(on, 2)">
+      <div :class="is_active(on, 2)" class="header-menu-ul" @click="active = 2">
         <div class="h-menu-btn-text">编排</div>
       </div>
-      <div class="header-menu-ul" @click="active = 3" :class="is_active(on, 3)">
+      <div :class="is_active(on, 3)" class="header-menu-ul" @click="active = 3">
         <div class="h-menu-btn-text">时轴</div>
       </div>
       <div class="header-menu-ul" @click="start_preview">
@@ -71,10 +71,10 @@ function is_active(i: number, i1:number) {
       <div class="chart-name">{{ song_name }}</div>
     </div>
     <div class="header-win-func">
-      <div @click="ipcRenderer.send('window-min')">0</div>
-      <div v-if="isMax" @click="ipcRenderer.send('window-max')">2</div>
-      <div v-else @click="ipcRenderer.send('window-max')">1</div>
-      <div class="header-close" @click="ipcRenderer.send('window-close')">r</div>
+      <div @click="sender('window-min')">0</div>
+      <div v-if="isMax" @click="sender('window-max')">2</div>
+      <div v-else @click="sender('window-max')">1</div>
+      <div class="header-close" @click="sender('window-close')">r</div>
     </div>
   </div>
 </template>

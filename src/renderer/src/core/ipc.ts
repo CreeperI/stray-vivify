@@ -4,6 +4,7 @@ import { modal } from '@renderer/core/modal'
 
 const ipcRenderer = window.electron.ipcRenderer
 export const Invoke: IpcHandlers.invoke.invoke = ipcRenderer.invoke
+export const Send = ipcRenderer.send as IpcHandlers.send.send
 
 const Handler: IpcHandlers.send.handler = {
   'notify-normal': function (_, arg) {

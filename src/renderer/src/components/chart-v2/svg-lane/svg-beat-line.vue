@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Settings } from '@renderer/core/settings'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
+import { useUpdateFrameRate } from '@renderer/core/frame-rates'
 
 const chart_state = GlobalStat.chart_state
 const chart = Chart.$current
@@ -31,6 +32,7 @@ function time_bottom_bar(t: number, time: number, _mul: number) {
 function color_of_level(lvl: number): string {
   return Settings.editor.sprites['bar_color' + lvl] ?? '#ffffff'
 }
+useUpdateFrameRate('svg-beat-line')
 </script>
 
 <template>

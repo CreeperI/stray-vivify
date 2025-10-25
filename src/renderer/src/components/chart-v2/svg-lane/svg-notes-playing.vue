@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
-import { Charter } from '@renderer/core/charter'
 import { ChartTypeV2 } from '@preload/types'
 import { Settings } from '@renderer/core/settings'
+import { Chart } from '@renderer/core/chart/chart'
 
-const chart = Charter.get_chart()
+const chart = Chart.$current
 const playfield = chart.$playfield
 const lane_width = Settings.editor.lane_width
 

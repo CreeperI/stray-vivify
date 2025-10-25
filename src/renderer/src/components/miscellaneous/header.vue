@@ -1,13 +1,11 @@
 <script lang="ts" setup>
-import { Charter } from '@renderer/core/charter'
 import { modal } from '@renderer/core/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 
-const ipcRenderer = Charter.ipcRenderer
+const ipcRenderer = window.electron.ipcRenderer
 
-const isMax = Charter.refs.window.isMaximized
-
+const isMax = GlobalStat.window_max_state
 async function import_svc() {
   await Invoke('import-zip')
   await GlobalStat.update_all_chart()

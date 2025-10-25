@@ -1,7 +1,6 @@
 import { ChartType, ChartTypeV2 } from '@preload/types'
 import { notify } from '@renderer/core/notify'
 import { computed, ComputedRef, ref, Ref, toValue, triggerRef, watch, WritableComputedRef } from 'vue'
-import { Charter } from '@renderer/core/charter'
 import { Chart_audio } from '@renderer/core/chart/audio'
 import { Chart_song } from '@renderer/core/chart/song'
 import { Chart_diff } from '@renderer/core/chart/diff'
@@ -41,6 +40,9 @@ export class Chart {
 
   playfield: Chart_playfield | null
 
+  sprite_err :Ref<boolean>
+  bg_err: Ref<boolean>
+
   constructor() {
     this.song = new Chart_song(this)
     this.diffs = [Chart_diff.createDiff()]
@@ -51,7 +53,7 @@ export class Chart {
     this.length_end = -1
     this.shown_timing = computed(() => [
       this.audio.refs.current_ms.value,
-      this.audio.refs.current_ms.value + Charter.refs.visible.value
+      this.audio.refs.current_ms.value + Settings.computes.visible.value
     ])
     const me = this
     this.current_bpm = computed({
@@ -69,6 +71,8 @@ export class Chart {
     this.diff = new Chart_diff(this)
     this.id = ''
     this.playfield = null
+    this.sprite_err = ref(false)
+    this.bg_err = ref(false)
   }
 
   static get $current() {
@@ -84,13 +88,13 @@ export class Chart {
 
   set diff_index(v: number) {
     this.ref.diff_index.value = v
-    this.diff = new Chart_diff(this, v)
+    this.diff.bound.value = this.diffs[this.ref.diff_index.value]
     this.set_header_name()
     this._diff_index = v
   }
 
   get visible_timing() {
-    return this.audio.current_time + Charter.refs.visible.value
+    return this.audio.current_time + Settings.computes.visible.value
   }
 
   get chart(): ChartTypeV2.final {
@@ -371,13 +375,18 @@ export class Chart {
     this.length_end = this.length + 3000
     this.set_header_name()
     this.audio.init_on_end()
-    watch(this.ref.diff_index, (v) => {
-      this.diff = new Chart_diff(this, v)
-      this.set_header_name()
-      this.diff.fuck_shown(this.audio.current_time, true)
-      this.diff.calc_density()
-      this.diff.update_timing_list()
-    })
+    watch(
+      this.ref.diff_index,
+      (v) => {
+        this._diff_index = v
+        this.diff.bound.value = this.diffs[v]
+        this.set_header_name()
+        this.diff.fuck_shown(this.audio.current_time, true)
+        this.diff.calc_density()
+        this.diff.update_timing_list()
+      },
+      { flush: 'post' }
+    )
     watch(this.audio.refs.current_ms, () => {
       this.update_on_time_change()
     })
@@ -414,7 +423,7 @@ export class Chart {
         this.diff.notes = []
       })
     else
-      Charter.modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
+      modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
         this.diffs.splice(this.diff_index, 1)
         this.diff_index = 0
         triggerRef(this.ref.diff_index)
@@ -435,6 +444,7 @@ export class Chart {
     })
     // this.diff.set_diff(this.diffs[this.diff_index])
     this.diff_index = 0
+    this.diff.set_diff(this.diffs[this.diff_index])
   }
 
   on_update() {
@@ -641,7 +651,7 @@ export class Chart {
     // new_d.sv = this.diff.sv
 
     this.add_diff(new_d)
-    notify.success("new diffed")
+    notify.success('new diffed')
   }
 }
 

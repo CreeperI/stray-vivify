@@ -1,10 +1,12 @@
 <script lang="ts" setup>
-import { Charter } from '@renderer/core/charter'
+
+
+import { Invoke } from '@renderer/core/ipc'
 
 const { href } = defineProps<{ href: string }>()
 
 function handle() {
-  Charter.invoke('open-url', href)
+  Invoke('open-url', href)
 }
 </script>
 

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
 import HeaderV2 from '@renderer/components/chart-v2/header-v2.vue'
 import LaneLeft from '@renderer/components/chart-v2/chart-tabs/lane-left.vue'
@@ -9,15 +9,22 @@ import ChartTiming from '@renderer/components/chart-v2/chart-tabs/chart-timing.v
 import { GlobalStat } from '@renderer/core/globalStat'
 import Preview from '@renderer/components/chart-v2/preview.vue'
 import Playfield from '@renderer/components/chart-v2/playfield.vue'
+import { onUnmounted } from 'vue'
 
 const active = GlobalStat.refs.chart_tab
 active.value = 2
 
-document.addEventListener('keydown', (e) => {
+function on_keydown(e: KeyboardEvent) {
   if (e.key != 'Tab') return
   e.preventDefault()
   active.value += 1
   if (active.value > 3) active.value = 1
+}
+
+document.addEventListener('keydown', on_keydown)
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', on_keydown)
 })
 
 const _meters = [1, 4, 8, 12, 16, 24, 32, 48, 64]
@@ -38,11 +45,11 @@ const chart_state = GlobalStat.chart_state
 </script>
 
 <template>
-  <div class="chart-v2-wrapper" @wheel="fuck_wheel" :data-cs="chart_state">
+  <div :data-cs="chart_state" class="chart-v2-wrapper" @wheel="fuck_wheel">
     <template v-if="chart_state == 0">
       <header-v2 v-model="active" />
       <song-info v-if="active == 1" />
-      <div class="chart-main" v-else-if="active == 2">
+      <div v-else-if="active == 2" class="chart-main">
         <lane-left class="chart-fn" />
         <svg-lane class="svg-lane" />
         <lane-right class="chart-fn" />
@@ -57,7 +64,7 @@ const chart_state = GlobalStat.chart_state
 <style scoped>
 .chart-v2-wrapper {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;

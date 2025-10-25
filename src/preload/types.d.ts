@@ -368,6 +368,13 @@ export type Invoke = {
     }
     r: void
   }
+  'create-folder': {
+    arg: {
+      id:string,
+      fname:string
+    }
+    r: number
+  }
   'show-file': {
     arg: {
       id: string
@@ -429,6 +436,13 @@ export type Invoke = {
       path: string
     }
     r: string | undefined
+  }
+  "write-blob": {
+    arg: {
+      id: string
+      fname: string,
+      blob: Blob
+    }
   }
 }
 
@@ -539,9 +553,13 @@ export namespace storages {
     }
 
     density_data_count: number
+
+    // debug
     mouse_tracker: boolean
+    debug_window: boolean
 
     hit_sound: boolean
+    hit_volume: number
 
     frame_time: boolean
 
@@ -559,6 +577,7 @@ export namespace storages {
     min_lane: number
 
     bar_or_section: boolean
+
   }
 
   export interface storage_scheme {

@@ -1,7 +1,6 @@
 import { ChartTypeV2 } from '@preload/types'
 import { computed, ComputedRef, nextTick, Ref, ref, watch } from 'vue'
 import { Chart, ms } from './chart'
-import { Charter } from '../charter'
 import { utils } from '../utils'
 import { Settings } from '@renderer/core/settings'
 import { notify } from '@renderer/core/notify'
@@ -58,12 +57,12 @@ class HitSoundSystem {
 
     const FPS = FrameRate.fps.refs.value.avg
     const current = this.chart.audio.current_time - Settings.editor.offset3
-    const delta_time = utils.clamp(1000 / FPS, 20, 30) // in ms
+    const delta_time = utils.clamp(1000 / FPS, 16, 30) // in ms
 
     // Find note in current time window
     const hitNote = this.shown.value.find(
       (x: any) => utils.between(x.time, [current, current + delta_time]) && x['snm'] != 1
-    ) //the time window before may be too small
+    )
 
     if (hitNote && !this.playedNotes.has(hitNote.time)) {
       if (this.activeVoices.length >= this.maxVoices) {
@@ -97,6 +96,10 @@ class HitSoundSystem {
     try {
       this.audioContext = new AudioContext()
       this.gainNode = this.audioContext.createGain()
+      watch(() => Settings.editor.hit_volume, (v) => {
+        if (this.gainNode) this.gainNode.gain.value = v / 100
+        else notify.error("GainNode炸了")
+      })
       this.gainNode.gain.value = 1.0
       this.gainNode.connect(this.audioContext.destination)
 
@@ -454,7 +457,7 @@ export class Chart_diff {
   get visible(): [number, number] {
     return [
       this.chart.audio.current_time - 1000,
-      this.chart.audio.current_time + Charter.refs.visible.value + 2500
+      this.chart.audio.current_time + Settings.computes.visible.value + 2500
     ]
   }
 
@@ -516,11 +519,12 @@ export class Chart_diff {
 
   update_bar_section_list() {
     this.bar_list = []
+    this.section_list = []
     const v = this.timing
     for (let i = 0; i < v.length; i++) {
       const part = v[i]
       const time_per_bar = (60 / part.bpm) * part.num * 1000
-      const time_per_section = (60 / part.bpm) * part.den * 1000
+      const time_per_section = (60 / part.bpm) * part.den * 250
       const part_end = this.timing_end_of(part, v, this.chart.length)
       for (let time = part.time; time < part_end; time += time_per_bar) {
         this.bar_list.push(time)
@@ -599,7 +603,6 @@ export class Chart_diff {
 
   timing_end_of(t: ChartTypeV2.timing, timing: ChartTypeV2.timing[], max = Infinity) {
     const idx = timing.findIndex((v) => t.time == v.time)
-    if (max == Infinity) console.warn('max with Infinity may cause a infinite-loooop!')
     if (idx === -1) throw new Error()
     else if (idx == timing.length - 1) return max
     else return timing[idx + 1].time

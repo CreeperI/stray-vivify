@@ -1,12 +1,12 @@
 import { storages } from '@preload/types'
 import { computed, ref, toRaw, watch } from 'vue'
 import { utils } from '@renderer/core/utils'
-import { Charter } from '@renderer/core/charter'
 import { Invoke } from '@renderer/core/ipc'
+import { GlobalStat } from '@renderer/core/globalStat'
 
 export const Version = {
-  val: 9.1,
-  str: '9s'
+  val: 9.3,
+  str: '9s2'
 }
 
 const note = {
@@ -54,7 +54,7 @@ const note = {
   }
 }
 
-const settings = ref({
+const settings = ref<storages.storage_scheme>({
   settings: {
     scale: 10,
     meter: 4,
@@ -94,6 +94,7 @@ const settings = ref({
     },
     density_data_count: 100,
     mouse_tracker: false,
+    debug_window: false,
     frame_time: true,
     hit_sound: true,
     svg_shown_parts: {
@@ -107,17 +108,18 @@ const settings = ref({
     },
     star_rating: false,
     min_lane: 4,
-    bar_or_section: false
+    bar_or_section: false,
+    hit_volume: 100,
   },
   version: Version.val,
   shortcut: '',
   username: '???',
-} as Required<storages.storage_scheme>)
+})
 
 watch(settings, () => {}, { deep: true })
 const computes = {
   mul: computed(() => (settings.value.settings.scale * 200 + 100) / 1000),
-  visible: computed(() => Math.round(Charter.refs.window.height.value / computes.mul.value)),
+  visible: computed(() => Math.round(GlobalStat.refs.window.height.value / computes.mul.value)),
   mul_sec: computed(() => settings.value.settings.scale * 200 + 100)
 }
 

@@ -1,4 +1,3 @@
-import { Charter } from '@renderer/core/charter'
 import { Settings } from '@renderer/core/settings'
 import { ref } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
@@ -97,17 +96,21 @@ export class ShortCuts {
   }
 
   static handle() {
-    document.addEventListener('keydown', (e) => {
-      if (on_listening.value) return
-      if (e.target instanceof HTMLInputElement) {
-        if (e.target.type == 'text' || e.target.type == 'number') return
-        else e.target.blur()
-      }
-      ShortCuts.all.forEach((x) => {
-        x.handle(e)
-      })
-    }, true)
-    document.addEventListener("keyup", (e) => this.handle_keyup(e), true)
+    document.addEventListener(
+      'keydown',
+      (e) => {
+        if (on_listening.value) return
+        if (e.target instanceof HTMLInputElement) {
+          if (e.target.type == 'text' || e.target.type == 'number') return
+          else e.target.blur()
+        }
+        ShortCuts.all.forEach((x) => {
+          x.handle(e)
+        })
+      },
+      true
+    )
+    document.addEventListener('keyup', (e) => this.handle_keyup(e), true)
   }
 
   static handle_keyup(e: KeyboardEvent) {
@@ -202,7 +205,6 @@ export class ShortCuts {
   set_data(data: SC_save) {
     this.name = data.name
     this.set_key(data.key, data.alt, data.ctrl, data.shift)
-    Charter.update()
   }
 }
 
@@ -228,14 +230,37 @@ new ShortCuts('settings', 'F2', () => {
   modal.SettingModal.show({})
 })
 
-new ShortCuts("dev", "F12", () => {
-  Invoke("open-dev")
+new ShortCuts('dev', 'F12', () => {
+  Invoke('open-dev')
 })
 
-new ShortCuts("copy", "c", () => {GlobalStat.NoteClipboard.copy()}, false, true)
-new ShortCuts("paste", "v", () => {GlobalStat.NoteClipboard.paste()}, false, true)
-new ShortCuts("cut", "x", () => {GlobalStat.NoteClipboard.cut()}, false, true)
-
+new ShortCuts(
+  'copy',
+  'c',
+  () => {
+    GlobalStat.NoteClipboard.copy()
+  },
+  false,
+  true
+)
+new ShortCuts(
+  'paste',
+  'v',
+  () => {
+    GlobalStat.NoteClipboard.paste()
+  },
+  false,
+  true
+)
+new ShortCuts(
+  'cut',
+  'x',
+  () => {
+    GlobalStat.NoteClipboard.cut()
+  },
+  false,
+  true
+)
 
 new ShortCuts('4k1', 'd', () => {
   Chart.current?.handle_key(0)
@@ -250,7 +275,9 @@ new ShortCuts('4k4', 'k', () => {
   Chart.current?.handle_key(3)
 })
 
-new ShortCuts("iexport", "p", () => {modal.IExporterModal.show({})})
+new ShortCuts('iexport', 'p', () => {
+  modal.IExporterModal.show({})
+})
 
 ShortCuts.$fun('4k1').set_keyup(() => Chart.current?.handle_keyup(0))
 ShortCuts.$fun('4k2').set_keyup(() => Chart.current?.handle_keyup(1))
