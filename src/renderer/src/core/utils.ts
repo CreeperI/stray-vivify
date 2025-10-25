@@ -17,8 +17,8 @@ export namespace utils {
     return Math.round(val * 10 ** digit) / 10 ** digit
   }
 
-  export function clamp(val:number,min_val:number,max_val:number) {
-    return Math.min(Math.max(val,min_val),max_val)
+  export function clamp(val: number, min_val: number, max_val: number) {
+    return Math.min(Math.max(val, min_val), max_val)
   }
 
   export function deepCopy<T>(obj: T): T {
@@ -189,9 +189,11 @@ export namespace utils {
   export function range(...args: number[]) {
     return Math.max(...args) - Math.min(...args)
   }
-  export function timer(cb: () => void) {
+  export function timer(cb: () => void, count = 1) {
     const r0 = performance.now()
-    cb()
+    for (let i = 0; i < count; i++) {
+      cb()
+    }
     return performance.now() - r0
   }
   export function nextFrame() {
@@ -292,17 +294,17 @@ export namespace utils {
 
   export function blobToBase64(blob: Blob): Promise<string> {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          resolve(reader.result);
+          resolve(reader.result)
         } else {
-          reject(new Error('Failed to convert Blob to Base64 string.'));
+          reject(new Error('Failed to convert Blob to Base64 string.'))
         }
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(blob)
+    })
   }
 }
 

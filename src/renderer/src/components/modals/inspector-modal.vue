@@ -101,6 +101,8 @@ GlobalStat.ChartSize.update()
               <frame-rate-single :r="FrameRate.playfield_frame" msg="Play Frame" />
               <frame-rate-single :r="FrameRate.update_pending" msg="Pending-note" />
               <frame-rate-single :r="FrameRate.calc_density" msg="calc-density" />
+              <frame-rate-single :r="FrameRate.save" msg="save" />
+
               <frame-rate-single
                 v-if="Settings.editor.star_rating"
                 :r="FrameRate.calc_sr"

@@ -60,6 +60,7 @@ class HitSoundSystem {
     const delta_time = utils.clamp(1000 / FPS, 16, 30) // in ms
 
     // Find note in current time window
+    // here 1.5 as sometimes it shits
     const hitNote = this.shown.value.find(
       (x: any) => utils.between(x.time, [current, current + delta_time]) && x['snm'] != 1
     )
@@ -96,10 +97,13 @@ class HitSoundSystem {
     try {
       this.audioContext = new AudioContext()
       this.gainNode = this.audioContext.createGain()
-      watch(() => Settings.editor.hit_volume, (v) => {
-        if (this.gainNode) this.gainNode.gain.value = v / 100
-        else notify.error("GainNode炸了")
-      })
+      watch(
+        () => Settings.editor.hit_volume,
+        (v) => {
+          if (this.gainNode) this.gainNode.gain.value = v / 100
+          else notify.error('GainNode炸了')
+        }
+      )
       this.gainNode.gain.value = 1.0
       this.gainNode.connect(this.audioContext.destination)
 
@@ -335,6 +339,12 @@ export class Chart_diff {
   sr: Ref<chart_rating_eval>
   max_lane: Ref<number>
 
+  pooling: {
+    next_index: number
+    last_time: number
+    enabled: boolean
+  }
+
   constructor(chart: Chart, ix = 0) {
     this.bound = ref(chart.diffs[ix])
     this.chart = chart
@@ -407,6 +417,12 @@ export class Chart_diff {
 
     this.sr = ref({ sr: 0, chord: 0, stream: 0, burst: 0, tech: 0 })
     this.max_lane = ref(4)
+
+    this.pooling = {
+      next_index: 0,
+      last_time: 0,
+      enabled: false
+    }
   }
 
   get notes() {
@@ -567,8 +583,13 @@ export class Chart_diff {
       }
     }
   }
-
-  update_tick_list() {
+  update_tick_list(promise?: true): Promise<void>
+  update_tick_list(promise?: false): void
+  update_tick_list(promise=false) {
+    if (!promise) this._update_tick_list()
+    return utils.nextFrame().then(() => this._update_tick_list())
+  }
+  private _update_tick_list() {
     this.ticks = []
     const v = this.timing
     const all_times = [...new Set(this.notes.map((v) => v.time))]
@@ -577,10 +598,12 @@ export class Chart_diff {
       // ms
       const time_per_4 = 60000 / part.bpm
       const part_end = this.timing_end_of(part, v)
+      const part_index_start = all_times.findIndex(v => v >= part.time)
+      const part_index_end = all_times.findIndex(v => v >= part_end) - 1
       const part_times =
         i == 0
-          ? all_times.filter((v) => v < part_end)
-          : all_times.filter((v) => v >= part.time && v < part_end)
+          ? all_times.slice(0, part_index_end)
+          : all_times.slice(part_index_start, part_index_end)
 
       // here got a len-1 'c i want to make the last independently fucked
       for (let j = 0; j < part_times.length - 1; j++) {
@@ -594,11 +617,10 @@ export class Chart_diff {
         this.ticks.push([part_times[part_times.length - 1], Math.round(tick)])
     }
   }
-
   update_timing_list() {
     this.update_bar_section_list()
     this.update_beat_list()
-    this.update_tick_list()
+    this.update_tick_list(true)
   }
 
   timing_end_of(t: ChartTypeV2.timing, timing: ChartTypeV2.timing[], max = Infinity) {
@@ -804,13 +826,11 @@ export class Chart_diff {
     if (fns) fns.forEach((fn) => fn())
   }
 
-  floor_time() {
-    this.notes.forEach((x) => (x.time = Math.floor(x.time)))
-  }
-
   fuck_shown(t: number, force = false) {
     if (force ? false : Math.abs(t - this.last_update) < 2000) return
-    this._fuck_shown(t)
+    if (this.pooling.enabled) this.pooling_notes()
+    else this._fuck_shown(t)
+    this.update_t(this.visible)
   }
 
   update_t(visible: [number, number]) {
@@ -975,7 +995,6 @@ export class Chart_diff {
         else return a.time - b.time
       }
     })*/
-    this.update_t(visible)
     this.last_update = t
     FrameRate.fuck_shown.end()
     nextTick().then(() => (this.update_shown_flag.value = false))
@@ -1015,4 +1034,38 @@ export class Chart_diff {
     })
     return parsed
   }*/
+
+  private pooling_notes() {
+    FrameRate.pooling.start()
+    const current = this.chart.audio.current_time
+    const setting = Settings.editor.pooling
+
+    if (current - this.pooling.last_time < setting.interval) return
+
+    const shown = this.shown.value.filter((x) => {
+      if ('len' in x) return x.len + x.time > current - setting.behind
+      return x.time > current - setting.behind
+    })
+
+    let added = 0
+    let i = this.pooling.next_index
+
+    while (i < this.notes.length && added < setting.count) {
+      const note = this.notes[i]
+      if (note.time > current + setting.ahead) break
+      if (!shown.includes(note)) {
+        shown.push(note)
+        added++
+      }
+      i++
+    }
+    this.pooling.next_index = i
+    this.shown.value = shown
+    this.pooling.last_time = current
+  }
+
+  reset_pooling() {
+    this.pooling.next_index = 0
+    this.pooling.last_time = -Infinity
+  }
 }

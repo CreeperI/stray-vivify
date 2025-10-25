@@ -113,8 +113,6 @@ export namespace ChartTypeV2 {
   }
   export type note = normal_note | hold_note
 
-  export type all_things = ChartType.note
-
   export type SV = {
     time: number
     eff: number
@@ -468,6 +466,10 @@ export type Send = {
     }
     r: void
   }
+  'im-closing': {
+    arg: {}
+    r: void
+  }
 }
 type dic2arr<T> = T extends { [K in keyof T]: T[K] } ? { [K in keyof T]: T[K] }[keyof T][] : never
 
@@ -528,6 +530,7 @@ export namespace storages {
     sprites: {
       bar_length: number
       bar_op: number
+      bar_dy: number
 
       bar_color1: string
       bar_color2: string
@@ -578,6 +581,14 @@ export namespace storages {
 
     bar_or_section: boolean
 
+    pooling: {
+      ahead: number
+      behind: number
+      count: number
+      interval: number
+    }
+
+    auto_save: boolean
   }
 
   export interface storage_scheme {

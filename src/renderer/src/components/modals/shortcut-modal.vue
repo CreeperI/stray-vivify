@@ -27,6 +27,7 @@ import ShortcutModalHeader from '@renderer/components/modals/shortcut-modal-head
         <shortcut-modal-single msg="复制" :short="ShortCuts.$fun('copy')" />
         <shortcut-modal-single msg="剪切" :short="ShortCuts.$fun('cut')"/>
         <shortcut-modal-single msg="粘贴" :short="ShortCuts.$fun('paste')"/>
+        <shortcut-modal-single msg="保存" :short="ShortCuts.$fun('save')"/>
 
         <shortcut-modal-header msg="Modals"/>
         <shortcut-modal-single msg="Inspector" :short="ShortCuts.$fun('log')"/>

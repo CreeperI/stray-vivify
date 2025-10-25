@@ -57,6 +57,27 @@ const r = Settings.settings
           <word-helper msg="小节号或拍号" dec="仿照malody，不使用小节来标注，而是每一个四分音符（按timing设置）标一个。勾选这个=启用malody。" />
           <a-checkbox v-model="r.settings.bar_or_section" />
         </div>
+        <div>
+          <div>Auto Save</div>
+          <a-checkbox v-model="r.settings.auto_save" />
+        </div>
+        <setting-header msg="note分组"  />
+        <div>
+          <div>向后ms</div>
+          <a-number-input class="in" v-model="r.settings.pooling.ahead" />
+        </div>
+        <div>
+          <div>向前ms</div>
+          <a-number-input class="in" v-model="r.settings.pooling.behind" />
+        </div>
+        <div>
+          <div>最小pooling间隔</div>
+          <a-number-input v-model="r.settings.pooling.interval" min="16" />
+        </div>
+        <div>
+          <div>最大note数</div>
+          <a-number-input v-model="r.settings.pooling.count" min="20" />
+        </div>
         <setting-header msg="打击音" />
         <div>
           <div>打击音</div>
@@ -114,12 +135,16 @@ const r = Settings.settings
         </div>
 
         <div>
-          <div>小节线透明度</div>
+          <div>小节线<b class="rainbow-text-color">不</b>透明度</div>
           <a-number-input v-model="r.settings.sprites.bar_op" max="100" min="0" step="1" />
         </div>
         <div>
           <div>小节线宽度</div>
           <a-number-input v-model="r.settings.sprites.bar_length" min="0" />
+        </div>
+        <div>
+          <div>小节线偏移</div>
+          <a-number-input v-model="r.settings.sprites.bar_dy"/>
         </div>
         <setting-header msg="游玩" />
         <div>

@@ -61,6 +61,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'save-chart': function (_, id, data) {
       chart_manager.write_chart(id, JSON.parse(data))
+      console.log('saved chart: ' + id)
     },
     'import-song': async function (_, music_path: string) {
       const id = (await ask_id()) as string | undefined
@@ -214,7 +215,6 @@ const Handler = (mw: Electron.BrowserWindow) => {
       const _app = await folder_size(app.getPath('userData'))
       const _exe = await folder_size(path.dirname(app.getPath('module')))
       const _total = await folder_size(file_paths.charts)
-      console.log(114514)
       return {
         detail: detail,
         detail_sf: detailsf,
@@ -223,7 +223,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
         total: _total
       }
     },
-    "ask-file":(_, f) => {
+    'ask-file': (_, f) => {
       const fp = dialog.showOpenDialogSync({
         properties: ['openFile'],
         filters: [{ name: f[0], extensions: f.slice(1) }]
@@ -235,14 +235,14 @@ const Handler = (mw: Electron.BrowserWindow) => {
       if (!fs.existsSync(fp)) return
       return fs.readFileSync(fp, 'utf-8')
     },
-    "create-folder": (_, id, name) => {
+    'create-folder': (_, id, name) => {
       if (fs.existsSync(path.join(file_paths.charts, id)))
         if (fs.existsSync(path.join(file_paths.charts, id, name))) return 1
       return 0
     },
-    "write-blob": (_, id:string, _name:string, _blob:string) => {
+    'write-blob': (_, id: string, _name: string, _blob: string) => {
       if (fs.existsSync(path.join(file_paths.charts, id))) {
-        fs.writeFileSync(path.join(file_paths.charts, id, _name), Buffer.from(_blob), "binary")
+        fs.writeFileSync(path.join(file_paths.charts, id, _name), Buffer.from(_blob), 'binary')
       }
     }
   } as Required<IpcHandlers.invoke.handler>

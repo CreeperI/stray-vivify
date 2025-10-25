@@ -119,6 +119,8 @@ export const FrameRate = {
   calc_density: new _FrameRateClass(),
   sv_base: new _FrameRateClass(),
   calc_sr: new _FrameRateClass(),
+  pooling: new _FrameRateClass(),
+  save: new _FrameRateClass(),
   Updates: {} as Record<string, _FrameRateClass>
 }
 

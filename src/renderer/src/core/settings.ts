@@ -81,7 +81,8 @@ const settings = ref<storages.storage_scheme>({
       bar_color4: '#4a5dff',
       bar_color5: '#f64eff',
       bar_length: 6,
-      bar_op: 0
+      bar_op: 0,
+      bar_dy: 0,
     },
     delete_no_confirm: false,
     time_max_length: 50,
@@ -110,6 +111,13 @@ const settings = ref<storages.storage_scheme>({
     min_lane: 4,
     bar_or_section: false,
     hit_volume: 100,
+    pooling: {
+      ahead: 5000,
+      behind: 500,
+      count: 200,
+      interval: 2000
+    },
+    auto_save: false
   },
   version: Version.val,
   shortcut: '',

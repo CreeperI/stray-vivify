@@ -108,6 +108,7 @@ export class Chart_audio {
     this.refs.current_ms.value = v
     if (v < 0) this.from_negative = true
     if (this.paused) this.set_ele_time(v)
+    this.chart.diff.reset_pooling()
   }
 
   set_and_play() {

@@ -1,6 +1,6 @@
 import { ChartType, ChartTypeV2 } from '@preload/types'
 import { notify } from '@renderer/core/notify'
-import { computed, ComputedRef, ref, Ref, toValue, triggerRef, watch, WritableComputedRef } from 'vue'
+import { computed, ComputedRef, ref, Ref, toRaw, triggerRef, watch, WritableComputedRef } from 'vue'
 import { Chart_audio } from '@renderer/core/chart/audio'
 import { Chart_song } from '@renderer/core/chart/song'
 import { Chart_diff } from '@renderer/core/chart/diff'
@@ -40,7 +40,7 @@ export class Chart {
 
   playfield: Chart_playfield | null
 
-  sprite_err :Ref<boolean>
+  sprite_err: Ref<boolean>
   bg_err: Ref<boolean>
 
   constructor() {
@@ -393,7 +393,7 @@ export class Chart {
   }
 
   sync_from_diff() {
-    this.diffs[this.ref.diff_index.value] = toValue(this.diff.bound)
+    this.diffs[this.ref.diff_index.value] = toRaw(this.diff.bound.value)
   }
 
   update_on_time_change() {
@@ -453,8 +453,6 @@ export class Chart {
 
   async save() {
     if (this.audio.ele) {
-      this.diff.floor_time()
-      await nextFrame()
       this.diff.validate_chart()
       await nextFrame()
       Invoke('save-chart', this.id, JSON.stringify(this.chart))

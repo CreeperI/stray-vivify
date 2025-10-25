@@ -22,6 +22,7 @@ const functions = [
   'log',
   'settings',
   'iexport',
+  'save',
 
   '4k1',
   '4k2',
@@ -283,3 +284,5 @@ ShortCuts.$fun('4k1').set_keyup(() => Chart.current?.handle_keyup(0))
 ShortCuts.$fun('4k2').set_keyup(() => Chart.current?.handle_keyup(1))
 ShortCuts.$fun('4k3').set_keyup(() => Chart.current?.handle_keyup(2))
 ShortCuts.$fun('4k4').set_keyup(() => Chart.current?.handle_keyup(3))
+
+new ShortCuts("save", "s", () => Chart.current?.save(), false, true)

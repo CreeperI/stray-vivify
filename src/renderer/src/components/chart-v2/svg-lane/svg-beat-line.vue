@@ -26,7 +26,7 @@ const _show_beat_line = computed(
 const offset1 = Settings.editor.offset1
 const bar_offset = (((lane_width - 130) / 130) * 43) / 4
 function time_bottom_bar(t: number, time: number, _mul: number) {
-  return view_port[3] - (time - t - offset1) * _mul - 80 - bar_offset
+  return view_port[3] - (time - t - offset1) * _mul - 80 - bar_offset - Settings.editor.sprites.bar_dy
 }
 
 function color_of_level(lvl: number): string {

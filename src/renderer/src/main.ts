@@ -51,7 +51,7 @@ async function main() {
   GlobalStat.MouseTracker.init()
 
   GlobalStat.Intervals.on(1e4, () => {
-    Chart.current?.save()
+    if (Settings.editor.auto_save) Chart.current?.save()
     Chart.current?.diff.update_tick_list()
     Chart.current?.diff.update_sr()
   })
