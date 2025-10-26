@@ -1,10 +1,11 @@
 import { ChartTypeV2 } from '@preload/types'
-import { computed, ComputedRef, nextTick, Ref, ref, watch } from 'vue'
+import { computed, ComputedRef, nextTick, Ref, ref, toRaw, watch } from 'vue'
 import { Chart, ms } from './chart'
 import { utils } from '../utils'
 import { Settings } from '@renderer/core/settings'
 import { notify } from '@renderer/core/notify'
 import { FrameRate } from '@renderer/core/frame-rates'
+import { Chart_Diff_SV } from '@renderer/core/chart/diff-sv'
 
 function parse_type(v: string) {
   switch (v) {
@@ -345,6 +346,8 @@ export class Chart_diff {
     enabled: boolean
   }
 
+  sv_bind: Chart_Diff_SV
+
   constructor(chart: Chart, ix = 0) {
     this.bound = ref(chart.diffs[ix])
     this.chart = chart
@@ -423,6 +426,7 @@ export class Chart_diff {
       last_time: 0,
       enabled: false
     }
+    this.sv_bind = new Chart_Diff_SV(this)
   }
 
   get notes() {
@@ -585,42 +589,19 @@ export class Chart_diff {
   }
   update_tick_list(promise?: true): Promise<void>
   update_tick_list(promise?: false): void
-  update_tick_list(promise=false) {
+  update_tick_list(promise = false) {
     if (!promise) this._update_tick_list()
     return utils.nextFrame().then(() => this._update_tick_list())
   }
-  private _update_tick_list() {
-    this.ticks = []
-    const v = this.timing
-    const all_times = [...new Set(this.notes.map((v) => v.time))]
-    for (let i = 0; i < v.length; i++) {
-      const part = v[i]
-      // ms
-      const time_per_4 = 60000 / part.bpm
-      const part_end = this.timing_end_of(part, v)
-      const part_index_start = all_times.findIndex(v => v >= part.time)
-      const part_index_end = all_times.findIndex(v => v >= part_end) - 1
-      const part_times =
-        i == 0
-          ? all_times.slice(0, part_index_end)
-          : all_times.slice(part_index_start, part_index_end)
 
-      // here got a len-1 'c i want to make the last independently fucked
-      for (let j = 0; j < part_times.length - 1; j++) {
-        const tick = (time_per_4 / (part_times[j + 1] - part_times[j])) * 4
-        // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
-        if (tick < 3) continue
-        this.ticks.push([part_times[j], Math.round(tick)])
-      }
-      const tick = (time_per_4 / (part_end - part_times[part_times.length - 1])) * 4
-      if (tick > 2 && tick < 256)
-        this.ticks.push([part_times[part_times.length - 1], Math.round(tick)])
-    }
-  }
   update_timing_list() {
     this.update_bar_section_list()
     this.update_beat_list()
     this.update_tick_list(true)
+  }
+
+  sort_notes() {
+    this.notes = this.notes.toSorted(utils.sort_notes)
   }
 
   timing_end_of(t: ChartTypeV2.timing, timing: ChartTypeV2.timing[], max = Infinity) {
@@ -827,9 +808,12 @@ export class Chart_diff {
   }
 
   fuck_shown(t: number, force = false) {
+    if (this.pooling.enabled) {
+      this.pooling_notes()
+      return
+    }
     if (force ? false : Math.abs(t - this.last_update) < 2000) return
-    if (this.pooling.enabled) this.pooling_notes()
-    else this._fuck_shown(t)
+    this._fuck_shown(t)
     this.update_t(this.visible)
   }
 
@@ -977,6 +961,41 @@ export class Chart_diff {
     this.sr.value = calculateStarRating(this.notes)
   }
 
+  // trigger on time change
+  reset_pooling() {
+    this.pooling.next_index = -1
+    this.pooling.last_time = -Infinity
+  }
+
+  private _update_tick_list() {
+    this.ticks = []
+    const v = this.timing
+    const all_times = [...new Set(this.notes.map((v) => v.time))]
+    for (let i = 0; i < v.length; i++) {
+      const part = v[i]
+      // ms
+      const time_per_4 = 60000 / part.bpm
+      const part_end = this.timing_end_of(part, v)
+      const part_index_start = all_times.findIndex((v) => v >= part.time)
+      const part_index_end = all_times.findIndex((v) => v >= part_end) - 1
+      const part_times =
+        i == 0
+          ? all_times.slice(0, part_index_end)
+          : all_times.slice(part_index_start, part_index_end)
+
+      // here got a len-1 'c i want to make the last independently fucked
+      for (let j = 0; j < part_times.length - 1; j++) {
+        const tick = (time_per_4 / (part_times[j + 1] - part_times[j])) * 4
+        // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
+        if (tick < 3) continue
+        this.ticks.push([part_times[j], Math.round(tick)])
+      }
+      const tick = (time_per_4 / (part_end - part_times[part_times.length - 1])) * 4
+      if (tick > 2 && tick < 256)
+        this.ticks.push([part_times[part_times.length - 1], Math.round(tick)])
+    }
+  }
+
   private _fuck_shown(t: number) {
     FrameRate.fuck_shown.start()
     this.update_shown_flag.value = true
@@ -1004,47 +1023,27 @@ export class Chart_diff {
     this.hit_sounder.play_hit()
   }
 
-  /*private parse_sv_aq(f: ChartTypeV2.SV_Factory.SV_aq): ChartTypeV2.parsed_sv[] {
-    let _times = this.notes.map((x) => x.time).filter((x) => utils.between(x, [f.time, f.end]))
-    const times = [...new Set(_times)]
-    times.sort((a, b) => a - b)
-
-    const parsed: ChartTypeV2.parsed_sv[] = []
-    for (let i = 0; i < times.length; i++) {
-      const time = times[i]
-      parsed.push({
-        time: time - 1,
-        eff: f.eff1,
-        line: false,
-        base: 0
-      })
-      parsed.push({
-        time: time + 1,
-        eff: f.eff2,
-        line: false,
-        base: 0
-      })
-    }
-    parsed.pop()
-    parsed.push({
-      time: f.end,
-      eff: 1,
-      line: true,
-      base: 0
-    })
-    return parsed
-  }*/
-
-  private pooling_notes() {
+ /* private pooling_notes() {
     FrameRate.pooling.start()
     const current = this.chart.audio.current_time
     const setting = Settings.editor.pooling
 
     if (current - this.pooling.last_time < setting.interval) return
 
+    let min = current
+    let max = current
+
+    const windowStart = current - setting.behind
+    const windowEnd = current + setting.ahead
+
     const shown = this.shown.value.filter((x) => {
-      if ('len' in x) return x.len + x.time > current - setting.behind
-      return x.time > current - setting.behind
+      const xEndTime = 'len' in x && x.len > 0 ? x.time + x.len : x.time
+      if (xEndTime >= windowStart && x.time <= windowEnd) {
+        min = Math.min(min, x.time)
+        max = Math.max(max, xEndTime)
+        return true
+      }
+      return false
     })
 
     let added = 0
@@ -1052,20 +1051,62 @@ export class Chart_diff {
 
     while (i < this.notes.length && added < setting.count) {
       const note = this.notes[i]
-      if (note.time > current + setting.ahead) break
-      if (!shown.includes(note)) {
+      const noteEndTime = 'len' in note && note.len > 0 ? note.time + note.len : note.time
+
+      const shouldShow = noteEndTime >= windowStart && note.time <= windowEnd
+      if (shouldShow && !shown.includes(note)) {
         shown.push(note)
+        min = Math.min(min, note.time)
+        max = Math.max(max, noteEndTime)
         added++
       }
       i++
     }
+
     this.pooling.next_index = i
     this.shown.value = shown
     this.pooling.last_time = current
-  }
+    this.last_update = current
 
-  reset_pooling() {
-    this.pooling.next_index = 0
-    this.pooling.last_time = -Infinity
+    this.sv_bind.updateRenderRange(min, max)
+    FrameRate.pooling.end()
+    this.update_t(this.visible)
+  }*/
+  private pooling_notes() {
+    FrameRate.pooling.start();
+    const current = this.chart.audio.current_time;
+    const setting = Settings.editor.pooling;
+
+    if (current - this.pooling.last_time < setting.interval) return;
+
+    const windowStart = current - setting.behind;
+    const windowEnd = current + setting.ahead;
+
+    let min = current;
+    let max = current;
+    const shown: ChartTypeV2.note[] = [];
+
+    // 直接遍历所有 notes，无需 next_index
+    const notes = toRaw(this.notes)
+    for (let i = 0; i < notes.length; i++) {
+      const note = notes[i];
+      const noteEnd = ('len' in note && note.len > 0) ? note.time + note.len : note.time;
+
+      if (noteEnd >= windowStart && note.time <= windowEnd) {
+        shown.push(note);
+        if (note.time < min) min = note.time;
+        if (noteEnd > max) max = noteEnd;
+      }
+    }
+
+    this.shown.value = shown;
+    this.pooling.last_time = current;
+    this.last_update = current;
+
+    this.sv_bind.updateRenderRange(min, max);
+    FrameRate.pooling.end();
   }
 }
+
+// @ts-expect-error
+window.toRaw = toRaw;

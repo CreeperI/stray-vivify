@@ -49,10 +49,15 @@ function zix() {
 
 function style() {
   if ('len' in note) {
-    return `${zix()};height:${height()};width: ${size()}; left: ${left()}; ${border()};`
+    return `${zix()};height:${height()};width: ${size()}; left: ${left()}; ${border()};
+    bottom:${time_bottom(note)}`
   } else {
-    return `${zix()};width: ${size()}; left: ${left()}`
+    return `${zix()};width: ${size()}; left: ${left()};bottom:${time_bottom(note)}`
   }
+}
+
+function time_bottom(note: { time: number }) {
+  return (note.time - Chart.$current.audio.refs.current_ms.value - Settings.editor.offset1) * mul.value + 'px'
 }
 
 const _src = computed(urlOf)

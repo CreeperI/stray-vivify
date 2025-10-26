@@ -10,6 +10,9 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import Preview from '@renderer/components/chart-v2/preview.vue'
 import Playfield from '@renderer/components/chart-v2/playfield.vue'
 import { onUnmounted } from 'vue'
+import SvLeft from '@renderer/components/chart-v2/chart-tabs/sv-left.vue'
+import SvgNotesSv from '@renderer/components/chart-v2/svg-lane/svg-notes-sv.vue'
+import SvRight from '@renderer/components/chart-v2/chart-tabs/sv-right.vue'
 
 const active = GlobalStat.refs.chart_tab
 active.value = 2
@@ -18,7 +21,7 @@ function on_keydown(e: KeyboardEvent) {
   if (e.key != 'Tab') return
   e.preventDefault()
   active.value += 1
-  if (active.value > 3) active.value = 1
+  if (active.value > 4) active.value = 1
 }
 
 document.addEventListener('keydown', on_keydown)
@@ -54,7 +57,14 @@ const chart_state = GlobalStat.chart_state
         <svg-lane class="svg-lane" />
         <lane-right class="chart-fn" />
       </div>
-      <chart-timing v-if="active == 3"></chart-timing>
+      <chart-timing v-if="active == 3" />
+      <div v-else-if="active == 4" class="chart-main">
+        <sv-left class="chart-fn" />
+        <svg-lane class="svg-lane">
+          <svg-notes-sv />
+        </svg-lane>
+        <sv-right class="chart-fn" />
+      </div>
     </template>
     <preview v-if="chart_state == 1" />
     <playfield v-if="chart_state == 2" />

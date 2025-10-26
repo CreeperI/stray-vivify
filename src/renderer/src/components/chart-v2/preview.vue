@@ -6,7 +6,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Settings, Version } from '@renderer/core/settings'
 import AImg from '@renderer/components/a-elements/a-img.vue'
-import FnCounter from '@renderer/components/chart-v2/chart-tabs/fn-counter.vue'
+import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter.vue'
 import { notify } from '@renderer/core/notify'
 import { Invoke } from '@renderer/core/ipc'
 

@@ -143,7 +143,7 @@ export namespace utils {
   }
 
   export function sort_notes(a: ChartTypeV2.note, b: ChartTypeV2.note) {
-    return a.time - b.time // 按时间排序
+    return a.time - b.time
   }
 
   export function around(v1: number, v2: number, gap = 20) {
@@ -205,6 +205,7 @@ export namespace utils {
   export function getSrc(note: ChartTypeV2.note, max = 4): string {
     if (note.width == 0) return ''
     let str = note_style + '/' + note.width
+    if (note.width == max) return str + ".png"
     if ('snm' in note) {
       if (note.snm == 1) return str + 'b.png'
       if (note.snm == 2 && note.width != 1) str += 's'

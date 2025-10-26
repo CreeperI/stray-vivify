@@ -421,7 +421,6 @@ const pointer_class = computed(() => {
         :data-is-selected="am_i_selected(selected, note)"
         :note="note"
         :style="{
-          bottom: time_bottom(current_time, note, mul),
           left: x_of(note)
         }"
         data-shown-note
@@ -435,7 +434,6 @@ const pointer_class = computed(() => {
           v-for="note in pending_note"
           :note="note"
           :style="{
-            bottom: time_bottom(current_time, note, mul),
             left: x_of(note),
             opacity: opacity
           }"

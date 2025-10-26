@@ -285,4 +285,13 @@ ShortCuts.$fun('4k2').set_keyup(() => Chart.current?.handle_keyup(1))
 ShortCuts.$fun('4k3').set_keyup(() => Chart.current?.handle_keyup(2))
 ShortCuts.$fun('4k4').set_keyup(() => Chart.current?.handle_keyup(3))
 
-new ShortCuts("save", "s", () => Chart.current?.save(), false, true)
+new ShortCuts(
+  'save',
+  's',
+  () => {
+    Chart.current?.save()
+    notify.success('保存成功!!!')
+  },
+  false,
+  true
+)

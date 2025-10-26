@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import SongInfoSingle from '@renderer/components/chart-v2/chart-tabs/song-info-single.vue'
+import SongInfoSingle from '@renderer/components/chart-v2/chart-tabs/small/song-info-single.vue'
 import ASelect from '@renderer/components/a-elements/a-select.vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { utils } from '@renderer/core/utils'

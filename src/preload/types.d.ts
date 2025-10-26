@@ -137,7 +137,6 @@ export namespace ChartTypeV2 {
     eff: number
     // whether to display a line for it
     line: boolean
-    base: number
   }
 
   export type timing = {

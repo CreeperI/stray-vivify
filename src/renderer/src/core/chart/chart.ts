@@ -170,6 +170,7 @@ export class Chart {
       chart.set_name(data.data.song.name)
       chart.diff.calc_max_lane()
       chart.diff.update_timing_list()
+      chart.diff.sort_notes()
     }
     chart.id = id
     this.current = chart
@@ -384,6 +385,7 @@ export class Chart {
         this.diff.fuck_shown(this.audio.current_time, true)
         this.diff.calc_density()
         this.diff.update_timing_list()
+        this.diff.sort_notes()
       },
       { flush: 'post' }
     )

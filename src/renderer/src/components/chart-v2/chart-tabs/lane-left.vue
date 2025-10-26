@@ -4,8 +4,8 @@ import { Settings } from '@renderer/core/settings'
 import { ChartTypeV2 } from '@preload/types'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
-import FnCounter from '@renderer/components/chart-v2/chart-tabs/fn-counter.vue'
-import FnDensity from '@renderer/components/chart-v2/chart-tabs/fn-density.vue'
+import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter.vue'
+import FnDensity from '@renderer/components/chart-v2/chart-tabs/small/fn-density.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { utils } from '@renderer/core/utils'
 
@@ -104,7 +104,7 @@ const select_chip = computed(() => select.value.length - select_ln.value)
         </div>
       </div>
       <div class="note-pending">
-        <note-v2 :note="pending_note" />
+        <note-v2 :note="pending_note" style="position:static;" />
       </div>
     </div>
     <fn-counter />

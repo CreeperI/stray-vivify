@@ -9,16 +9,6 @@ const playfield = chart.$playfield
 const lane_width = Settings.editor.lane_width
 
 const shown = playfield.shown
-const mul = Settings.computes.mul
-const current_time = chart.audio.refs.current_ms
-const offset = Settings.settings.value.settings.offset3
-
-function time_bottom(t: number, note: ChartTypeV2.note, _mul: number) {
-  // if (note.n == 'h')
-  //   return (note.t + note.h / 2 - t) * _mul + 'px'
-  // else
-  return (note.time - t - offset) * _mul + 'px'
-}
 
 function x_of(note: ChartTypeV2.note) {
   return note.lane * lane_width + 6 + 'px'
@@ -33,7 +23,6 @@ const refs = playfield.refs
         v-for="note in shown"
         :note="note"
         :style="{
-          bottom: time_bottom(current_time, note, mul),
           left: x_of(note)
         }"
       />

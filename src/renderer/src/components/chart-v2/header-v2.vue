@@ -62,6 +62,9 @@ function is_active(i: number, i1: number) {
       <div :class="is_active(on, 3)" class="header-menu-ul" @click="active = 3">
         <div class="h-menu-btn-text">时轴</div>
       </div>
+      <div :class="is_active(on, 4)" class="header-menu-ul" @click="active = 4">
+        <div class="h-menu-btn-text">SV</div>
+      </div>
       <div class="header-menu-ul" @click="start_preview">
         <div class="h-menu-btn-text">预览</div>
       </div>
