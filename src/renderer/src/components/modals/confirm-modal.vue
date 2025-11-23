@@ -9,7 +9,7 @@ const { msg } = defineProps<{
 </script>
 
 <template>
-  <SimpleModal :show-close="false" size="sm">
+  <SimpleModal :show-close="false" size="1">
     <span v-html="msg"></span>
     <template #footer>
       <a-button class="btn btn-primary" msg="确定" @click="confirmModal()" />

@@ -19,7 +19,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <SimpleModal :show-close="false" size="sm">
+  <SimpleModal :show-close="false" size="1">
     <div>请输入一个id以识别该曲目</div>
     <a-text-input @keydown.enter.capture="confirmModal(pending)"
       v-model="pending" placeholder="这里输入哦" id="id-input-box"></a-text-input>

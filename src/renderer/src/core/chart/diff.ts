@@ -63,7 +63,7 @@ class HitSoundSystem {
     // Find note in current time window
     // here 1.5 as sometimes it shits
     const hitNote = this.shown.value.find(
-      (x: any) => utils.between(x.time, [current, current + delta_time]) && x['snm'] != 1
+      (x: any) => utils.between(x.time, [current, current + delta_time * 1.4]) && x['snm'] != 1
     )
 
     if (hitNote && !this.playedNotes.has(hitNote.time)) {
@@ -764,7 +764,11 @@ export class Chart_diff {
     if ('len' in v) {
       if (v.len == 0) v = { time: v.time, lane: v.lane, width: 1, ani: [], snm: 0 }
     }
-    this.notes.push(v)
+    const nearest = this.shown.value.find(x => Math.abs(x.time - v.time) <= Settings.editor.nearest)
+    if (nearest) {v.time = nearest.time}
+    // 使用二分查找找到合适的插入位置
+    const index = this.binarySearchNotePosition(v.time)
+    this.notes.splice(index, 0, v)
     this.fuck_shown(this.chart.audio.current_time, fuck)
     return true
   }
@@ -818,12 +822,15 @@ export class Chart_diff {
   }
 
   update_t(visible: [number, number]) {
+    const is_circle = Settings.editor.record_field.show_circles
     this.shown_t.value = {
       bar_list: this.bar_list
         .map((x, dx) => [x, dx] as [number, number])
         .filter((x) => utils.between(x[0], visible)),
       beat_list: this.beat_list.filter((x) => utils.between(x[0], visible)),
-      ticks: this.ticks.filter((x) => utils.between(x[0], visible)),
+      ticks: this.ticks.filter((x) =>
+        utils.between(x[0], is_circle ? [visible[0], visible[1] + 3000] : visible)
+      ),
       section_list: this.section_list
         .map((x, dx) => [x, dx] as [number, number])
         .filter((x) => utils.between(x[0], visible))
@@ -839,10 +846,9 @@ export class Chart_diff {
     return false
   }
 
-  to_vsc() {
-    this.validate_chart()
+  static to_vsc(diff: ChartTypeV2.diff) {
     const strs: string[] = []
-    const parsed_notes = this.notes.map((note) => {
+    const parsed_notes = diff.notes.map((note) => {
       if ('len' in note) {
         return {
           time: note.time,
@@ -865,7 +871,7 @@ export class Chart_diff {
     })
     const all_the_notes = [
       parsed_notes,
-      this.timing.map((x) => {
+      diff.timing.map((x) => {
         return { time: x.time, bpm: x.bpm, n: 'p', lane: 0 }
       })
     ]
@@ -967,6 +973,53 @@ export class Chart_diff {
     this.pooling.last_time = -Infinity
   }
 
+  /**
+   * 使用二分查找确定 note 应该插入的位置
+   * @param time note的时间
+   * @returns 插入索引
+   */
+  private binarySearchNotePosition(time: number): number {
+    let start = 0
+    let end = this.notes.length - 1
+
+    while (start <= end) {
+      const mid = Math.floor((start + end) / 2)
+      if (this.notes[mid].time === time) {
+        return mid
+      } else if (this.notes[mid].time < time) {
+        start = mid + 1
+      } else {
+        end = mid - 1
+      }
+    }
+
+    return start
+  }
+
+  /**
+   * 使用二分查找找到指定时间点的 note 索引
+   * @param time 时间点
+   * @param startIndex 可选的起始搜索索引
+   * @returns note 数组中的索引
+   */
+  private binarySearchNoteIndex(time: number, startIndex = 0): number {
+    let start = startIndex
+    let end = this.notes.length - 1
+
+    while (start <= end) {
+      const mid = Math.floor((start + end) / 2)
+      if (this.notes[mid].time === time) {
+        return mid
+      } else if (this.notes[mid].time < time) {
+        start = mid + 1
+      } else {
+        end = mid - 1
+      }
+    }
+
+    return end >= 0 ? end : 0
+  }
+
   private _update_tick_list() {
     this.ticks = []
     const v = this.timing
@@ -985,9 +1038,11 @@ export class Chart_diff {
 
       // here got a len-1 'c i want to make the last independently fucked
       for (let j = 0; j < part_times.length - 1; j++) {
-        const tick = (time_per_4 / (part_times[j + 1] - part_times[j])) * 4
+        let tick =  (4 * time_per_4) / (part_times[j + 1] - part_times[j])
         // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
-        if (tick < 3) continue
+        if (tick < 3) tick = 0
+        if (tick > 47 && tick < 49) tick = 48
+        if (tick > 11 && tick < 13) tick = 12
         this.ticks.push([part_times[j], Math.round(tick)])
       }
       const tick = (time_per_4 / (part_end - part_times[part_times.length - 1])) * 4
@@ -1084,22 +1139,43 @@ export class Chart_diff {
 
     let min = current;
     let max = current;
-    const shown: ChartTypeV2.note[] = [];
 
-    // 直接遍历所有 notes，无需 next_index
-    const notes = toRaw(this.notes)
-    for (let i = 0; i < notes.length; i++) {
+    // 移除不应该显示的 note
+    this.shown.value = this.shown.value.filter(note => {
+      const noteEnd = ('len' in note && note.len > 0) ? note.time + note.len : note.time;
+      const shouldKeep = noteEnd >= windowStart && note.time <= windowEnd;
+
+      if (shouldKeep) {
+        min = Math.min(min, note.time);
+        max = Math.max(max, noteEnd);
+      }
+
+      return shouldKeep;
+    });
+
+    // 使用二分查找找到需要添加的 note 的起始和结束索引
+    const startIndex = this.binarySearchNoteIndex(windowStart);
+    const endIndex = this.binarySearchNoteIndex(windowEnd, startIndex);
+
+    // 添加新显示的 note
+    const notes = toRaw(this.notes);
+    for (let i = startIndex; i <= endIndex && i < notes.length; i++) {
       const note = notes[i];
       const noteEnd = ('len' in note && note.len > 0) ? note.time + note.len : note.time;
 
-      if (noteEnd >= windowStart && note.time <= windowEnd) {
-        shown.push(note);
-        if (note.time < min) min = note.time;
-        if (noteEnd > max) max = noteEnd;
+      // 检查 note 是否已经在 shown 中
+      const alreadyShown = this.shown.value.some(shownNote =>
+        shownNote.time === note.time &&
+        shownNote.lane === note.lane &&
+        shownNote.width === note.width);
+
+      if (!alreadyShown && noteEnd >= windowStart && note.time <= windowEnd) {
+        this.shown.value.push(note);
+        min = Math.min(min, note.time);
+        max = Math.max(max, noteEnd);
       }
     }
 
-    this.shown.value = shown;
     this.pooling.last_time = current;
     this.last_update = current;
 

@@ -8,10 +8,11 @@ import CreditsModal from '@renderer/components/modals/credits-modal.vue'
 import AskIdModal from '@renderer/components/modals/ask-id-modal.vue'
 import ShortcutModal from '@renderer/components/modals/shortcut-modal.vue'
 import InspectorModal from '@renderer/components/modals/inspector-modal.vue'
-import IexportModal from '@renderer/components/modals/iexport-modal.vue'
+import IexporterModal from '@renderer/components/modals/iexporter-modal.vue'
 import MissingSkinModal from '@renderer/components/modals/missing-skin-modal.vue'
 import LoadOszModal from '@renderer/components/modals/load-osz-modal.vue'
 import ChartPreviewModal from '@renderer/components/modals/chart-preview-modal.vue'
+import ExportCustomSong from '@renderer/components/modals/export-custom-song.vue'
 
 export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal, true)
@@ -22,10 +23,11 @@ export class modal<T extends Component> {
   static AskIdModal = new modal(AskIdModal)
   static ShortcutModal = new modal(ShortcutModal, true)
   static InspectorModal = new modal(InspectorModal, true)
-  static IExporterModal = new modal(IexportModal, true)
+  static IExporterModal = new modal(IexporterModal, true)
   static MissingSkinModal = new modal(MissingSkinModal, true)
   static LoadOszModal = new modal(LoadOszModal, true)
   static ChartPreviewModal = new modal(ChartPreviewModal, true)
+  static ExportCustomModal = new modal(ExportCustomSong, true)
 
   component: T
   priority: number
@@ -47,7 +49,7 @@ export class modal<T extends Component> {
     return openModal(this.component, this.props)
   }
 
-  close_all() {
+  static close_all() {
     closeAllModals(true)
   }
 }

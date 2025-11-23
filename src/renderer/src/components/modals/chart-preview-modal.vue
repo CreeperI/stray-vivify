@@ -18,7 +18,7 @@ const is_dev = GlobalStat.is_dev
 </script>
 
 <template>
-  <SimpleModal size="lg">
+  <SimpleModal size="3">
     <div class="chart-preview-wrapper">
       <div class="chart-preview-top">
         <a-label label="曲绘">

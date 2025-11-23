@@ -175,6 +175,7 @@ export class Chart {
     chart.id = id
     this.current = chart
     GlobalStat.route.change('editor')
+    Invoke('set-process-name', `${chart.song.name} - stray/vivify`)
     watch(
       GlobalStat.route.route,
       () => {
@@ -474,9 +475,12 @@ export class Chart {
   }
 
   write_current_vsc() {
-    Invoke('write-vsc', this.id, this.diff.to_vsc().join('\n'), this.diff.diff1).then(() =>
-      notify.success('已导出为vsc!!!!!!!')
-    )
+    Invoke(
+      'write-vsc',
+      this.id,
+      Chart_diff.to_vsc(this.diff.bound.value).join('\n'),
+      this.diff.diff1
+    ).then(() => notify.success('已导出为vsc!!!!!!!'))
   }
 
   async export_chart(ext: 'svc' | 'zip') {

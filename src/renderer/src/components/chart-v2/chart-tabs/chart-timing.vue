@@ -79,6 +79,11 @@ function switcher(t: number) {
 onMounted(() => {
   chart.diff.sort_timing()
 })
+
+function bpm_change(e: Event) {
+  bpm_comp.value = parseFloat((e.target as HTMLInputElement).value)
+
+}
 </script>
 
 <template>
@@ -111,7 +116,8 @@ onMounted(() => {
         </div>
         <div>
           <span>BPM</span>
-          <input ref="bpm_input" class="timing-input" type="number" min="1" v-model="bpm_comp" />
+          <input ref="bpm_input" class="timing-input" type="number" min="1"
+                 :value="bpm_comp" @change="bpm_change" />
         </div>
         <div style="display: flex; justify-content: center; align-items: center">
           <span>拍号</span>

@@ -231,6 +231,13 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <div>Inspector添加了Frame Rate - Update Rate</div>
       <div>调整了部分程序结构</div>
     </Build>
+    <Build build="9.4" y="2025" m="11" d="23" title="Pre 10">
+      <div>更改了bpm修改时同步计算的逻辑。</div>
+      <div>添加了Custom Song导出</div>
+      <div>将note插入 删除逻辑改为二分法</div>
+      <div>添加了节奏谱选项，在预览模式中可用</div>
+      <div>添加了未完成的SV页面。</div>
+    </Build>
   </div>
 </template>
 

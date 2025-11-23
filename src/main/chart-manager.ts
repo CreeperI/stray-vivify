@@ -1,4 +1,4 @@
-import path from 'node:path'
+import path, { extname } from 'node:path'
 import fs from 'fs'
 import { charts_data, ChartType, ChartTypeV2, IpcHandlers } from '../preload/types'
 import * as electron from 'electron'
@@ -6,6 +6,12 @@ import { dialog, ipcMain, shell } from 'electron'
 import { file_paths } from './fp-parser'
 import AdmZip from 'adm-zip'
 import { find_png, find_song } from './stray'
+import * as child_process from 'node:child_process'
+
+function timestr() {
+  const date = new Date()
+  return `${date.getHours()}${date.getMinutes()}${date.getSeconds()}`
+}
 
 export default class ChartManager {
   private readonly charts_folder: string
@@ -331,12 +337,90 @@ export default class ChartManager {
     const img = electron.nativeImage.createFromDataURL(text)
     const png_buffer = img.toPNG()
 
-    const date = new Date()
-    const fname = `preview-${id}-${date.getHours()}${date.getMinutes()}${date.getSeconds()}`
+    const fname = `preview-${id}-${timestr()}`
 
     fs.writeFileSync(path.join(this.charts_folder, id, fname + '.png'), png_buffer)
     shell.showItemInFolder(path.join(this.charts_folder, id, fname + '.png'))
   }
+
+  export_for_custom(data: {
+    id: string
+    diffs: (string | 0)[]
+    crop?: boolean
+    gml: string
+    as_id?: string
+    sv?:boolean
+  }) {
+    const { id, diffs, crop = false, gml, as_id = -1, sv=false} = data
+    // if all is 0
+    if (!diffs.some((v) => v != 0)) return
+    const chart = this.data.find((v) => v.id === id)
+    if (!chart) return
+
+    const exported_path =
+      as_id == -1
+        ? path.join(this.charts_folder, id, `exported-${timestr()}`)
+        : path.join(this.charts_folder, id, as_id)
+    if (as_id != -1) {
+      try {
+        fs.rmSync(exported_path, {force: true, recursive: true})
+        console.log('removed old')
+      } catch (e) {
+        console.log(e)
+      }
+    }
+    fs.mkdirSync(exported_path)
+
+    const vsc_names = ['OPENING', 'MIDDLE', 'FINALE', 'ENCORE']
+    for (let i = 0; i < diffs.length; i++) {
+      const diff = diffs[i]
+      if (diff == 0) continue
+      try {
+        fs.writeFileSync(path.join(exported_path, vsc_names[i] + '.vsc'), diff)
+      } catch (e) {
+        // pass
+      }
+    }
+
+    fs.writeFileSync(path.join(exported_path, 'songinfo.json'), gml)
+    const png = find_png(path.join(this.charts_folder, id), 'song')
+    if (png && crop !== undefined) {
+      try {
+        const imagePath = path.join(this.charts_folder, id, png)
+        const image = electron.nativeImage.createFromPath(imagePath)
+        const { width, height } = image.getSize()
+        let processedImage: Electron.NativeImage
+        if (crop) {
+          // Crop to square (centered)
+          const size = Math.min(width, height)
+          const x = (width - size) / 2
+          const y = (height - size) / 2
+          processedImage = image.crop({ x, y, width: size, height: size })
+        } else {
+          // Stretch to square
+          const size = Math.max(width, height)
+          processedImage = image.resize({ width: size, height: size })
+        }
+        fs.writeFileSync(path.join(exported_path, `jacket.png`), processedImage.toPNG())
+      } catch (e) {
+        // pass
+      }
+    }
+    if (sv) {
+      fs.copyFileSync(path.join(this.charts_folder, id, "vs-chart.json"), path.join(exported_path, "vs-chart.json"))
+      const _png = find_png(path.join(this.charts_folder, id), "song")
+      if (_png) {
+        fs.copyFileSync(path.join(this.charts_folder, id, _png), path.join(exported_path, "song.png"))
+      }
+      const _song = find_song(path.join(this.charts_folder, id), "song")
+      if (_song) {
+        fs.copyFileSync(path.join(this.charts_folder, id, _song), path.join(exported_path, `song${extname(_song)}`))
+      }
+    }
+    child_process.exec("ls")
+    shell.showItemInFolder(path.join(exported_path, "songinfo.json"))
+  }
+
 
   private _export_chart(id: string, ext: string) {
     const chart = this.data.find((v) => v.id === id)

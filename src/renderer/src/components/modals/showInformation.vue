@@ -6,7 +6,7 @@ const { msg } = defineProps<{ msg: string }>()
 </script>
 
 <template>
-  <simple-modal size="m">
+  <simple-modal size="2">
     {{ msg }}
     <template #footer>
       <a-button2 msg="ok" @click="$emit('close')"/>

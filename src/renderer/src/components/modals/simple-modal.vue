@@ -5,13 +5,13 @@ import { closeModal } from '@kolirt/vue-modal'
 
 const slots = useSlots()
 const props = defineProps({
-  title: {},
+  title: {type: String, default: ''},
   showClose: { type: Boolean, default: true },
   size: {
     type: String,
     default: 'sm',
     validator(value: string): boolean {
-      return ['sm', 'md', 'lg', 'xl', 'xxl'].includes(value)
+      return ['1', '2', '3', '4', '5'].includes(value)
     }
   }
 })
@@ -48,27 +48,27 @@ const props = defineProps({
   font-family: inherit;
   color: black;
 
-  &.size-sm {
+  &.size-1 {
     width: 100%;
     max-width: 576px;
   }
 
-  &.size-md {
+  &.size-2 {
     width: 100%;
     max-width: 768px;
   }
 
-  &.size-lg {
+  &.size-3 {
     width: 100%;
     max-width: 992px;
   }
 
-  &.size-xl {
+  &.size-4 {
     width: 100%;
     max-width: 1200px;
   }
 
-  &.size-xxl {
+  &.size-5 {
     width: 100%;
     max-width: 1400px;
   }

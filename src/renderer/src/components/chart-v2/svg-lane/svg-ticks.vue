@@ -18,7 +18,12 @@ const current_time = chart.audio.refs.current_ms
 const bar_offset = 0
 const minus =
   view_port[3] - 80 - bar_offset - parseFloat(getComputedStyle(document.documentElement).fontSize)
-const show_ticks = computed(() => Settings.editor.show_ticks)
+const show_ticks = computed(() => {
+  if (GlobalStat.chart_state.value == 0) return Settings.editor.show_ticks
+  else if (GlobalStat.chart_state.value == 1) {
+    return Settings.editor.record_field.show_circles ? false : Settings.editor.record_field.show_ticks
+  } else return false
+})
 function time_bottom_bar(t: number, time: number, _mul: number) {
   return minus - (time - t - offset1) * _mul
 }
@@ -27,15 +32,17 @@ const shown_t = chart.diff.shown_t
 
 <template>
   <g v-if="show_ticks">
-    <text
-      v-for="[tm, tick] in shown_t.ticks"
-      :x="x"
-      :y="time_bottom_bar(current_time, tm, mul)"
-      fill="gray"
-      text-anchor="middle"
-    >
+    <template v-for="[tm, tick] in shown_t.ticks">
+      <text
+        :x="x"
+        :y="time_bottom_bar(current_time, tm, mul)"
+        fill="gray"
+        text-anchor="middle"
+        v-if="tick != 0"
+      >
       .{{ tick }}
     </text>
+    </template>
   </g>
 </template>
 

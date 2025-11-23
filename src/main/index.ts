@@ -112,6 +112,7 @@ function createWindow(): void {
 
   listen(mainWindow)
   load_ipc_handlers(mainWindow)
+  mainWindow.title = "stray/vivify"
 }
 
 // This method will be called when Electron has finished
@@ -138,7 +139,6 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 
-  process.title = 'stray/vivify'
   protocol.handle('stray', stray_handler())
 })
 

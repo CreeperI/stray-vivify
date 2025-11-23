@@ -4,7 +4,7 @@ import Versions from '@renderer/components/credits/versions.vue'
 </script>
 
 <template>
-  <SimpleModal size="xl" title="Versions">
+  <SimpleModal size="4" title="Versions">
     <div class="versions-wrapper">
       <Versions />
     </div>

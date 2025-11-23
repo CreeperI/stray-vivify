@@ -14,7 +14,7 @@ const missings = utils.keyof(status).filter(x => status[x] == 1)
 </script>
 
 <template>
-  <SimpleModal size="sm" title="where R U?">
+  <SimpleModal size="1" title="where R U?">
     <div class="wrapper">
       <div>下列skin贴图未能加载，请检查skin中是否有这个贴图。</div>
       <p></p>

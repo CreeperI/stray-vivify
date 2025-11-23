@@ -21,6 +21,7 @@ const {msg} = defineProps<{
   transition: all 0.1s linear;
   padding: 2px 5px;
   z-index: var(--z-highest);
+  text-align: center;
 }
 .a-button:hover {
   transform: scale(1.1);

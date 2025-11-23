@@ -28,7 +28,7 @@ function load_song(s: ChartTypeV2.song) {
 </script>
 
 <template>
-  <simple-modal size="lg" title="importing osz">
+  <simple-modal size="3" title="importing osz">
     <div class="wrapper">
       <Hide title="谱面">
         <div v-if="diff" class="osz-diffs">

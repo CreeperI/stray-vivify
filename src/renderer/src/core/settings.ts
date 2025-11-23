@@ -5,8 +5,8 @@ import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 
 export const Version = {
-  val: 9.3,
-  str: '9s2'
+  val: 9.4,
+  str: 'Pre 10'
 }
 
 const note = {
@@ -72,7 +72,9 @@ const settings = ref<storages.storage_scheme>({
       show_bpm_bottom: true,
       show_bpm_left: true,
       detail: 3,
-      sprite: true
+      sprite: true,
+      show_ticks:true,
+      show_circles: false,
     },
     sprites: {
       bar_color1: '#ffffff',
@@ -117,7 +119,12 @@ const settings = ref<storages.storage_scheme>({
       count: 200,
       interval: 2000
     },
-    auto_save: false
+    auto_save: false,
+    exporter: {
+      sv: false,
+      crop: false
+    },
+    nearest: 2
   },
   version: Version.val,
   shortcut: '',

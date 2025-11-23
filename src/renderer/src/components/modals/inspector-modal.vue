@@ -8,6 +8,7 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Settings } from '@renderer/core/settings'
 import { utils } from '@renderer/core/utils'
+import ATab from '@renderer/components/a-elements/a-tab.vue'
 
 const func_state = ref(0)
 
@@ -41,22 +42,14 @@ GlobalStat.ChartSize.update()
 </script>
 
 <template>
-  <SimpleModal size="lg" title="Log">
+  <SimpleModal size="3" title="Log">
     <div class="inspector-wrapper">
-      <div class="state-select">
-        <div :class="func_state == 0 ? 'chosen' : ''" class="state-option" @click="func_state = 0">
-          Log
-        </div>
-        <div :class="func_state == 1 ? 'chosen' : ''" class="state-option" @click="func_state = 1">
-          Performance
-        </div>
-        <div :class="func_state == 2 ? 'chosen' : ''" class="state-option" @click="func_state = 2">
-          Needed Images
-        </div>
-        <div :class="func_state == 3 ? 'chosen' : ''" class="state-option" @click="func_state = 3">
-          谱面占用空间
-        </div>
-      </div>
+      <ATab v-model="func_state">
+        <div>Log</div>
+        <div>Performance</div>
+        <div>Lack Img</div>
+        <div>Disk Usage</div>
+      </ATab>
       <template v-if="func_state == 0">
         <template class="counter">
           <div @click="level = 'debug'">Debug: {{ count.debug }}</div>
@@ -228,28 +221,6 @@ GlobalStat.ChartSize.update()
   padding: 5px;
   gap: 5px;
   flex-grow: 1;
-}
-.state-select {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  margin-bottom: 5px;
-}
-.state-option {
-  flex-grow: 1;
-  text-align: center;
-  border: 2px solid #b8dcee;
-  padding: 3px;
-  border-right: 2px transparent;
-  background: #0d1418;
-  cursor: pointer;
-  transition: background-color 0.2s linear;
-}
-.state-option:last-child {
-  border-right: 2px solid #b8dcee;
-}
-.chosen {
-  background: #3b4652;
 }
 .counter {
   display: grid;

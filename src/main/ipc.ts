@@ -244,6 +244,12 @@ const Handler = (mw: Electron.BrowserWindow) => {
       if (fs.existsSync(path.join(file_paths.charts, id))) {
         fs.writeFileSync(path.join(file_paths.charts, id, _name), Buffer.from(_blob), 'binary')
       }
+    },
+    'export-for-custom': (_, data) => {
+      chart_manager.export_for_custom(data)
+    },
+    'set-process-name': (_, name) => {
+      mw.title = name
     }
   } as Required<IpcHandlers.invoke.handler>
 }

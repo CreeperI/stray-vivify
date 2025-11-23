@@ -2,7 +2,7 @@
 import { GlobalStat } from '@renderer/core/globalStat'
 import { modal } from '@renderer/core/modal'
 import { Chart } from '@renderer/core/chart/chart'
-import { Send } from '@renderer/core/ipc'
+import { Invoke, Send } from '@renderer/core/ipc'
 
 const active = defineModel<number>()
 
@@ -19,9 +19,13 @@ function close_chart() {
   }
   Chart.current = undefined
   GlobalStat.route.change('start')
+  Invoke("set-process-name", "stray/vivify")
 }
 function open_exporter() {
   modal.IExporterModal.show({})
+}
+function open_custom() {
+  modal.ExportCustomModal.show({})
 }
 
 function start_play() {
@@ -47,6 +51,7 @@ function is_active(i: number, i1: number) {
         <div class="h-menu-btn-text">工具</div>
         <div class="h-menu-btn-i">
           <div class="h-menu-btn-text" @click="open_exporter">导入/导出</div>
+          <div class="h-menu-btn-text" @click="open_custom">Custom</div>
           <div class="h-menu-btn-text h-menu-btn-i-sep" @click="modal.SettingModal.show({})">
             设置
           </div>

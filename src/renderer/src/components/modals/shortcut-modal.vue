@@ -6,7 +6,7 @@ import ShortcutModalHeader from '@renderer/components/modals/shortcut-modal-head
 </script>
 
 <template>
-  <SimpleModal size="sm" title="快捷键设置">
+  <SimpleModal size="1" title="快捷键设置">
     <div style="text-align: center">点击右侧的键位以输入</div>
     <table class="sc-table">
       <tbody>

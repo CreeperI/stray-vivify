@@ -441,6 +441,25 @@ export type Invoke = {
       blob: Blob
     }
   }
+  'export-for-custom': {
+    arg:{
+      data: {
+        id: string
+        diffs: (string|0)[]
+        crop?: boolean
+        gml: string
+        as_id?: string
+        sv?: boolean
+      }
+    }
+    r: void
+  },
+  'set-process-name': {
+    arg: {
+      name: string
+    }
+    r: void
+  }
 }
 
 export type Send = {
@@ -524,6 +543,8 @@ export namespace storages {
       show_bpm_bottom: boolean
       detail: number
       sprite: boolean
+      show_ticks: boolean
+      show_circles: boolean
     }
 
     sprites: {
@@ -588,6 +609,12 @@ export namespace storages {
     }
 
     auto_save: boolean
+
+    exporter: {
+      sv: boolean
+      crop:boolean
+    }
+    nearest: number
   }
 
   export interface storage_scheme {

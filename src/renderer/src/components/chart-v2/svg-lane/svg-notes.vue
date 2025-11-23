@@ -343,13 +343,6 @@ function change_my_select(n: ChartTypeV2.note) {
   if (ix == -1) selected.value.push(n)
   else selected.value.splice(ix, 1)
 }
-// ------------------ renderer functions -------------
-function time_bottom(t: number, note: { time: number }, _mul: number) {
-  // if (note.n == 'h')
-  //   return (note.t + note.h / 2 - t) * _mul + 'px'
-  // else
-  return (note.time - t - offset1) * _mul + 'px'
-}
 
 function x_of(note: ChartTypeV2.note) {
   return note.lane * lane_width + 56 + 'px'

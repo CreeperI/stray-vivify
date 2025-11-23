@@ -15,13 +15,13 @@ const r = Settings.settings
 </script>
 
 <template>
-  <SimpleModal title="设置" size="sm">
+  <SimpleModal size="1" title="设置">
     <div class="settings-wrapper">
       <div style="width: 100%; text-align: center">编辑数字可以使用键盘上下和滚轮哦。</div>
       <div class="contain">
         <setting-header msg="欢迎来到stray-vivify！" />
         <div>
-          <word-helper msg="设定一个名字吧！" dec="会帮你自动填到谱师栏"/>
+          <word-helper dec="会帮你自动填到谱师栏" msg="设定一个名字吧！"/>
           <a-text-input v-model="r.username" />
         </div>
         <setting-header msg="编辑器" />
@@ -43,19 +43,23 @@ const r = Settings.settings
         </div>
         <div>
           <div>lane-width (px)</div>
-          <a-number-input class="in" min="1" v-model="r.settings.lane_width" />
+          <a-number-input v-model="r.settings.lane_width" class="in" min="1" />
         </div>
         <div>
           <div>延迟（视觉）</div>
-          <a-number-input class="in" v-model="r.settings.offset1" />
+          <a-number-input v-model="r.settings.offset1" class="in" />
         </div>
         <div>
-          <word-helper msg="密度采样间隔" dec="密度折线的采样数，也即折线的数据点数" />
-          <a-number-input class="in" v-model="r.settings.density_data_count" min="10" />
+          <word-helper dec="密度折线的采样数，也即折线的数据点数" msg="密度采样间隔" />
+          <a-number-input v-model="r.settings.density_data_count" class="in" min="10" />
         </div>
         <div>
-          <word-helper msg="小节号或拍号" dec="仿照malody，不使用小节来标注，而是每一个四分音符（按timing设置）标一个。勾选这个=启用malody。" />
+          <word-helper dec="仿照malody，不使用小节来标注，而是每一个四分音符（按timing设置）标一个。勾选这个=启用malody。" msg="小节号或拍号" />
           <a-checkbox v-model="r.settings.bar_or_section" />
+        </div>
+        <div>
+          <word-helper dec="摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间" msg="note吸附范围" />
+          <a-number-input v-model="r.settings.nearest" />
         </div>
         <div>
           <div>Auto Save</div>
@@ -64,11 +68,11 @@ const r = Settings.settings
         <setting-header msg="note分组"  />
         <div>
           <div>向后ms</div>
-          <a-number-input class="in" v-model="r.settings.pooling.ahead" />
+          <a-number-input v-model="r.settings.pooling.ahead" class="in" />
         </div>
         <div>
           <div>向前ms</div>
-          <a-number-input class="in" v-model="r.settings.pooling.behind" />
+          <a-number-input v-model="r.settings.pooling.behind" class="in" />
         </div>
         <div>
           <div>最小pooling间隔</div>
@@ -85,11 +89,11 @@ const r = Settings.settings
         </div>
         <div>
           <div>打击音延迟</div>
-          <a-number-input class="in" v-model="r.settings.offset3" />
+          <a-number-input v-model="r.settings.offset3" class="in" />
         </div>
         <div>
           <div>打击音音量</div>
-          <a-number-input class="in" v-model="r.settings.hit_volume" max="100" min="0" step="1"/>
+          <a-number-input v-model="r.settings.hit_volume" class="in" max="100" min="0" step="1"/>
         </div>
         <setting-header msg="预览模式" />
         <div>
@@ -109,8 +113,12 @@ const r = Settings.settings
           <a-checkbox v-model="r.settings.record_field.show_bpm_bottom" />
         </div>
         <div>
+          <div>球ticks</div>
+          <a-checkbox v-model="r.settings.record_field.show_circles" />
+        </div>
+        <div>
           <div>右侧信息密度</div>
-          <a-number-input min="0" max="5" v-model="r.settings.record_field.detail" />
+          <a-number-input v-model="r.settings.record_field.detail" max="5" min="0" />
         </div>
         <setting-header msg="小节线" />
         <div>
@@ -169,11 +177,21 @@ const r = Settings.settings
         </div>
         <div>
           <div>延迟（游玩）</div>
-          <a-number-input class="in" v-model="r.settings.offset2" />
+          <a-number-input v-model="r.settings.offset2" class="in" />
         </div>
         <div>
           <div>延迟（视觉）</div>
-          <a-number-input class="in" v-model="r.settings.offset3" />
+          <a-number-input v-model="r.settings.offset3" class="in" />
+        </div>
+        <setting-header msg="导出：Custom Song" />
+        <div>
+          <div>剪裁图片</div>
+          <a-checkbox v-model="r.settings.exporter.crop" />
+        </div>
+        <div>
+          <div>导出stray/vivify文件
+          </div>
+          <a-checkbox v-model="r.settings.exporter.sv" />
         </div>
         <setting-header msg="debug"/>
         <div>
