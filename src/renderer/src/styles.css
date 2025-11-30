@@ -1,3 +1,15 @@
+* {
+  color: #b8dcee;
+  user-select: none;
+  scrollbar-width: thin;
+  scrollbar-color: #b8dcee transparent;
+}
+
+::-webkit-scrollbar-button {
+  appearance: none;
+  display: none;
+}
+
 .fn-wrapper {
   display: flex;
   flex: 1 1 320px;
@@ -84,6 +96,7 @@ input:invalid {
   background: #ff000088;
   font-style: italic;
 }
+
 @keyframes note-particle-ani {
   0% {
     scale: 0;

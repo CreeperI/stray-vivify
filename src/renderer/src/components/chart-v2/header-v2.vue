@@ -12,6 +12,10 @@ const isMax = GlobalStat.window_max_state
 
 const song_name = GlobalStat.refs.header_display
 
+function do_refresh() {
+  GlobalStat.RefreshAll.fuck()
+}
+
 function close_chart() {
   if (Chart.current) {
     Chart.current.save()
@@ -55,6 +59,7 @@ function is_active(i: number, i1: number) {
           <div class="h-menu-btn-text h-menu-btn-i-sep" @click="modal.SettingModal.show({})">
             设置
           </div>
+          <div class="h-menu-btn-text" @click="do_refresh">刷新</div>
           <div class="h-menu-btn-text" @click="close_chart">关闭文件</div>
         </div>
       </div>

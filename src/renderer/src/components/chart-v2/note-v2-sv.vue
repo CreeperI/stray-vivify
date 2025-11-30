@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ChartTypeV2 } from '@preload/types'
 import { Settings } from '@renderer/core/settings'
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
 
@@ -11,7 +11,7 @@ const { note } = defineProps<{
 
 const chart = Chart.$current
 const max_width = chart.diff.max_lane.value
-const lane_width = Settings.editor.lane_width
+const lane_width = inject<number>('lane_width') ?? Settings.editor.lane_width
 const current_ms = chart.audio.refs.current_ms
 const time_bottom = chart.diff.sv_bind.time_bottom
 
@@ -47,13 +47,10 @@ const _styleBase = computed(() => {
   }
 })
 
-function _time_bottom(note: { time: number }) {
-  return (note.time - Chart.$current.audio.refs.current_ms.value - Settings.editor.offset1) * Settings.computes.mul.value
-}
 const _dynamicStyle = computed(() => {
   const currentTime = current_ms.value
   // const bottom = time_bottom.value(currentTime, note)
-  const bottom = _time_bottom(note)
+  const bottom = time_bottom.value(currentTime, note)
 
   if (!('len' in note)) {
     return `bottom: ${bottom}px;`

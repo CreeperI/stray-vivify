@@ -9,14 +9,11 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       Creator
     </div>
     <div class="credits-col">
-      <a-href href="https://space.bilibili.com/517691213">TerminalFlow</a-href>
       <a-href href="https://space.bilibili.com/517691213">Allesta</a-href>
-      <a-href href="https://space.bilibili.com/517691213">Ts. Final</a-href>
-      <a-href href="https://space.bilibili.com/517691213">CharaX</a-href>
-      <a-href href="https://space.bilibili.com/517691213">Terminal Society Inc.</a-href>
+      <a-href href="https://github.com/Ts-Final">TerminalFlow (github)</a-href>
     </div>
     <div class="credits-head">
-      Pilot Assistants/Contributors
+      先锋测试员
     </div>
     <div class="credits-3col">
       <span>chichiga</span>
@@ -35,6 +32,13 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <span>-Re-Again-</span>
     </div>
     <div class="credits-head">
+      开发帮助
+    </div>
+    <div class="credits-2col">
+      <span>Custom Song</span>
+      <span>And_why, <a-href href="https://github.com/CreeperI">Creeper_001</a-href></span>
+    </div>
+    <div class="credits-head">
       Special Thanks
     </div>
     <div class="credits-4col">
@@ -43,10 +47,8 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <a-href href="https://vitejs.cn/">Vite</a-href>
       <a-href href="https://github.com/kolirt/vue-modal">kolirt (vue-modal)</a-href>
       <a-href href="https://vite.electron.js.cn/">Electron-Vite</a-href>
-      <s>
-        <a-href href="https://arcwiki.mcd.blue/">Arcaea中文维基</a-href>
-      </s>
       <a-href href="https://wiki.rotaeno.cn/">Rotaeno中文维基</a-href>
+      <a-href href="https://github.com/leezng/vue-json-pretty/">leezng (vue-json-pretty)</a-href>
     </div>
   </div>
 </template>
@@ -71,7 +73,7 @@ a:visited {
   text-align: center;
   margin-bottom: 10px;
   font-size: 1.5rem;
-  text-shadow: #16ccae 2px 2px;
+  text-shadow: #16b7cc 1px 1px;
   font-weight: bolder;
 }
 .credits-head:not(:first-child) {

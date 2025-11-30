@@ -78,9 +78,9 @@ function start_phase_1() {
   for (let i = 0; i < 4; i++) {
     if (diff_indexs.value[i] == -1) continue
     const the_index = diff_indexs.value[i]
-    info_data.value[`difficulty_constant_${i}`] = possible_difficulty(the_index)
-    info_data.value[`note_designer_${i}`] = chart.diffs[the_index].meta.charter
-    info_data.value[`difficulty_display_${i}`] = possible_difficulty(the_index).toString()
+    info_data.value[`difficulty_constant_${i + 1}`] = possible_difficulty(the_index)
+    info_data.value[`note_designer_${i + 1}`] = chart.diffs[the_index].meta.charter
+    info_data.value[`difficulty_display_${i + 1}`] = possible_difficulty(the_index).toString()
   }
   phase.value = 1
 }
@@ -154,15 +154,18 @@ function do_export() {
   )
   const _arg = {
     crop: args.value.crop,
-    as_id: args.value.as_id == "" ? undefined : args.value.as_id,
+    as_id: args.value.as_id == '' ? undefined : args.value.as_id,
     sv: args.value.sv,
     diffs: diffs,
     gml: JSON.stringify(gml),
     id: chart.id
   }
-  Invoke('export-for-custom', _arg).then(() => {
-    modal.close_all()
-  })
+  chart
+    .save()
+    .then(() => Invoke('export-for-custom', _arg))
+    .then(() => {
+      modal.close_all()
+    })
 }
 </script>
 
@@ -233,11 +236,15 @@ function do_export() {
             <template v-for="ix in filter_STR()">
               <div class="grid-2-header">{{ STR[ix] }}</div>
               <div>定数</div>
-              <a-number-input v-model="info_data[`difficulty_constant_${ix}`]" min="0" step="0.1" />
+              <a-number-input
+                v-model="info_data[`difficulty_constant_${ix + 1}`]"
+                min="0"
+                step="0.1"
+              />
               <div>定数显示</div>
-              <a-text-input v-model="info_data[`difficulty_display_${ix}`]" />
+              <a-text-input v-model="info_data[`difficulty_display_${ix + 1}`]" />
               <div>Charter</div>
-              <a-text-input v-model="info_data[`note_designer_${ix}`]" />
+              <a-text-input v-model="info_data[`note_designer_${ix + 1}`]" />
             </template>
             <template v-if="diff_indexs[3] != -1">
               <div>Backstage?</div>

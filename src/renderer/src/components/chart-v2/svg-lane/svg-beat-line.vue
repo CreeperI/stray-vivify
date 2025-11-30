@@ -8,25 +8,31 @@ import { useUpdateFrameRate } from '@renderer/core/frame-rates'
 const chart_state = GlobalStat.chart_state
 const chart = Chart.$current
 
-const sizing = GlobalStat.SvgSizing
-const lane_width = sizing.lane_width
-const bar_length = sizing.bar_length
+const {view_port, bar_length} = GlobalStat.useSvgSizing()
 const current_time = chart.audio.refs.current_ms
 const mul = Settings.computes.mul
-const view_port = sizing.view_port
 const bb_list = chart.diff.shown_t
 
-const __bar_length = computed(() => Settings.data.value.settings.sprites.bar_length)
-const __bar_op = computed(() => Settings.data.value.settings.sprites.bar_op / 100)
-const _show_beat_line = computed(
-  () =>
-    chart_state.value == 0 ||
-    (chart_state.value == 1 && Settings.editor.record_field.show_beat_line)
-)
+const __bar_length = computed(() => {
+  if (chart.diff.sv_bind.on_sv.value) return Settings.editor.sv.beat_line_width
+  return Settings.editor.sprites.bar_length
+})
+const __bar_op = computed(() => {
+  if (chart.diff.sv_bind.on_sv.value) return Settings.editor.sv.beat_line_opacity / 100
+  return Settings.editor.sprites.bar_op / 100
+})
+const _show_beat_line = computed(() => {
+  if (chart_state.value == 0) {
+    if (chart.diff.sv_bind.on_sv.value) return Settings.editor.sv.show_beat_line
+    return true
+  } else if (chart_state.value == 1) {
+    if (Settings.editor.record_field.show_beat_line) return true
+  }
+  return false
+})
 const offset1 = Settings.editor.offset1
-const bar_offset = (((lane_width - 130) / 130) * 43) / 4
 function time_bottom_bar(t: number, time: number, _mul: number) {
-  return view_port[3] - (time - t - offset1) * _mul - 80 - bar_offset - Settings.editor.sprites.bar_dy
+  return view_port[3] - (time - t - offset1) * _mul - 80 - Settings.editor.sprites.bar_dy
 }
 
 function color_of_level(lvl: number): string {

@@ -56,7 +56,7 @@ function load_song(s: ChartTypeV2.song) {
 .wrapper {
   width: 100%;
   max-height: 50vh;
-  overflow: scroll;
+  overflow: hidden scroll;
 }
 .osz-diffs {
   display: flex;

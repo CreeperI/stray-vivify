@@ -7,7 +7,7 @@ import { useUpdateFrameRate } from '@renderer/core/frame-rates'
 
 const chart_state = GlobalStat.chart_state
 
-const view_port = GlobalStat.SvgSizing.view_port
+const {view_port} = GlobalStat.useSvgSizing()
 const offset1 = Settings.editor.offset1
 
 const chart = Chart.$current

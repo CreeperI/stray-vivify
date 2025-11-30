@@ -65,6 +65,10 @@ const r = Settings.settings
           <div>Auto Save</div>
           <a-checkbox v-model="r.settings.auto_save" />
         </div>
+        <div>
+          <div>Stats面板</div>
+          <a-checkbox v-model="r.settings.star_rating" />
+        </div>
         <setting-header msg="note分组"  />
         <div>
           <div>向后ms</div>
@@ -119,6 +123,43 @@ const r = Settings.settings
         <div>
           <div>右侧信息密度</div>
           <a-number-input v-model="r.settings.record_field.detail" max="5" min="0" />
+        </div>
+        <setting-header msg="SV编辑" />
+        <div>
+          <div>显示小节线</div>
+          <a-checkbox v-model="r.settings.sv.show_beat_line" />
+        </div>
+        <div>
+          <div>小节线透明度</div>
+          <a-number-input v-model="r.settings.sv.beat_line_opacity" max="100" min="0" step="1" />
+        </div>
+        <div>
+          <div>小节线宽度</div>
+          <a-number-input v-model="r.settings.sv.beat_line_width" min="0" step="1" />
+        </div>
+        <div>
+          <div>时间指针宽度</div>
+          <a-number-input v-model="r.settings.sv.pointer_width" min="0" step="1" />
+        </div>
+        <div>
+          <div>时间指针颜色</div>
+          <a-color-input v-model="r.settings.sv.pointer_color" />
+        </div>
+        <div>
+          <div>lane_width</div>
+          <a-number-input v-model="r.settings.sv.lane_width" min="0" step="1" />
+        </div>
+        <div>
+          <div>lane_width2</div>
+          <a-number-input v-model="r.settings.sv.lane_width2" min="0" step="1" />
+        </div>
+        <div>
+          <div>Factory颜色</div>
+          <a-color-input v-model="r.settings.sv.factory_color" />
+        </div>
+        <div>
+          <div>Factory不透明度</div>
+          <a-number-input v-model="r.settings.sv.factory_opacity" max="100" min="0" step="1" />
         </div>
         <setting-header msg="小节线" />
         <div>
@@ -214,33 +255,13 @@ const r = Settings.settings
 </template>
 
 <style scoped>
-.setting-list {
-  display: flex;
-  flex-basis: 1.8rem;
-  margin-bottom: 10px;
-  user-select: none;
-}
-
-.setting-list > div {
-  cursor: pointer;
-  border-bottom: 3px solid transparent;
-  transition: all 0.2s linear;
-  width: 70px;
-  text-align: center;
-  padding: 0;
-}
-
-.active-tab {
-  border-bottom-color: #b8dcee !important;
-}
-
 .settings-wrapper {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   max-height: 60vh;
-  overflow: scroll;
+  overflow: hidden scroll;
 }
 
 .contain {

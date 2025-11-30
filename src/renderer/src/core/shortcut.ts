@@ -18,6 +18,7 @@ const functions = [
 
   'scale-up',
   'scale-down',
+  'refresh',
 
   'log',
   'settings',
@@ -35,7 +36,9 @@ const functions = [
   'w4',
   's',
   'mine',
-  'hold'
+  'hold',
+  "sv-eff",
+  "sv-fct"
 ] as const
 
 type SC_save = {
@@ -295,3 +298,7 @@ new ShortCuts(
   false,
   true
 )
+
+new ShortCuts('refresh', 'r', () => GlobalStat.RefreshAll.fuck(), false, true)
+new ShortCuts("sv-eff", "1", () => Chart.current?.diff.sv_bind.set_eff())
+new ShortCuts("sv-fct", "2", () => Chart.current?.diff.sv_bind.set_fct())

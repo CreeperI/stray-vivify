@@ -8,11 +8,19 @@ const chart_state = GlobalStat.chart_state
 const chart = Chart.$current
 const current_timing = chart.diff.current_timing
 
-const _show_bottom_bpm = computed(
-  () =>
-    (chart_state.value == 0 && Settings.data.value.settings.show_bpm_bottom) ||
-    (chart_state.value == 1 && Settings.data.value.settings.record_field.show_bpm_bottom)
-)
+// const _show_bottom_bpm = computed(
+//   () =>
+//     (chart_state.value == 0 && Settings.data.value.settings.show_bpm_bottom) ||
+//     (chart_state.value == 1 && Settings.data.value.settings.record_field.show_bpm_bottom)
+// )
+const _show_bottom_bpm = computed(() => {
+  if (chart_state.value == 0) {
+    if (chart.diff.sv_bind.on_sv.value) return false
+    return Settings.data.value.settings.show_bpm_bottom
+  } else {
+    return Settings.data.value.settings.record_field.show_bpm_bottom
+  }
+})
 </script>
 
 <template>

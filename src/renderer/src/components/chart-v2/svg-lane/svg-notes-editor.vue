@@ -1,14 +1,15 @@
 <script lang="ts" setup>
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
 import { Settings } from '@renderer/core/settings'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
 import { useUpdateFrameRate } from '@renderer/core/frame-rates'
+import { notify } from '@renderer/core/notify'
 
-useUpdateFrameRate("svg-notes")
+useUpdateFrameRate('svg-notes')
 const chart = Chart.$current
 // const force_playing = ref(false)
 const not_playing_class = computed(
@@ -16,7 +17,8 @@ const not_playing_class = computed(
     // chart.audio.refs.paused.value && !force_playing.value ? 'not-playing' : ''
     ''
 )
-const lane_width = Settings.editor.lane_width
+
+const lane_width = inject<number>('lane_width') ?? Settings.editor.lane_width
 const svg_width = 4 * lane_width + 2 * 50 + 12
 const offset1 = Settings.editor.offset1
 
@@ -91,7 +93,7 @@ function update_pending_display(_trigger: 'enter' | 'leave' | 'note') {
   } else if (_trigger == 'enter') pending_display.value = true
   else if (_trigger == 'leave') {
     pending_display.value = false
-    pending_hold_fixed = false
+    fuck_hold()
   }
 }
 
@@ -148,7 +150,7 @@ function on_click() {
 
   if (Settings.note.hold.value) {
     if (pending_hold_fixed) {
-      chart.diff.add_notes(pending_note.value)
+      if (!chart.diff.add_notes(pending_note.value)) notify.error('添加note失败。')
       pending_len.value = 0
       pending_hold_fixed = false
     } else {
@@ -156,7 +158,9 @@ function on_click() {
       pending_hold_fixed_time = pending_time.value
     }
     return
-  } else chart.diff.add_notes(pending_note.value)
+  } else {
+    if (!chart.diff.add_notes(pending_note.value)) notify.error('添加note失败。')
+  }
 }
 
 function del_note(n: ChartTypeV2.note) {
@@ -164,7 +168,13 @@ function del_note(n: ChartTypeV2.note) {
     chart.diff.remove_notes(selected.value)
     return
   }
-  chart.diff.remove_note(n)
+  if (!chart.diff.remove_note(n)) notify.error('删除note失败。')
+}
+
+function fuck_hold() {
+  pending_hold_fixed = false
+  pending_len.value = 0
+  pending_hold_fixed_time = 0
 }
 
 // ------------------- Dragging -------------------
@@ -370,9 +380,10 @@ function fuck_wheel(e: WheelEvent) {
   })
   if (is_selecting) select_mouse_move(move_event)
 }
+const top_id = inject<string>('lane_id', '')
 onMounted(() => {
   let id = setInterval(() => {
-    const lw = document.getElementById('lane-wrapper')
+    const lw = document.getElementById(top_id)
     if (!lw) return
     lw.addEventListener('wheel', fuck_wheel)
     clearInterval(id)
@@ -381,12 +392,13 @@ onMounted(() => {
   chart.diff.fuck_shown(chart.audio.current_time, true)
 })
 onUnmounted(() => {
-  document.getElementById('lane-wrapper')?.removeEventListener('wheel', fuck_wheel)
+  document.getElementById(top_id)?.removeEventListener('wheel', fuck_wheel)
 })
 
 const pointer_class = computed(() => {
   return (dragging.value != undefined ? 'pt-dragging' : '') + (is_selecting ? ' pt-selecting' : '')
 })
+const d_height = inject<number>('d_height') ?? 0
 </script>
 
 <template>
@@ -399,14 +411,15 @@ const pointer_class = computed(() => {
     <foreignObject
       id="lane-notes"
       :class="pointer_class"
+      :y="-80 + d_height"
       height="100%"
       width="100%"
-      y="-80"
       @click="on_click"
       @drop="ondrop"
       @mousedown="(e) => on_mouse_down(e)"
       @mousemove.capture="update_pending"
       @dragover.prevent="update_pending"
+      @contextmenu="fuck_hold"
     >
       <note-v2
         v-for="note in shown"

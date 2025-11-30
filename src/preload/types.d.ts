@@ -127,7 +127,8 @@ export namespace ChartTypeV2 {
       eff2: number
     }
 
-    export type all = SV_aq & { type: number; time: number; end: number }
+    export type list = [SV_aq]
+    export type all = list[number] | { type: number; time: number; end: number }
   }
 
   export type sv_all = SV | SV_Factory.all
@@ -196,6 +197,15 @@ export namespace ChartTypeV2 {
      * 5 for boooomb!
      *  */
     lvl: number
+  }
+  export interface SongStats {
+    note: number
+    speed: number
+    tech: number
+    fill: number
+    multi: number
+    total_v2: number
+    total_v3: number
   }
 }
 
@@ -615,6 +625,19 @@ export namespace storages {
       crop:boolean
     }
     nearest: number
+
+    sv: {
+      show_beat_line: boolean
+      beat_line_opacity: number
+      pointer_color: string
+      pointer_width: number
+      beat_line_width: number
+      lane_width: number
+      lane_width2: number
+      threshold: number
+      factory_color: string
+      factory_opacity: number
+    }
   }
 
   export interface storage_scheme {

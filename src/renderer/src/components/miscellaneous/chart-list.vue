@@ -194,7 +194,7 @@ function detail(id: string) {
   flex-direction: column;
   gap: 10px;
   height: calc(100vh - 7rem - 20px);
-  overflow: visible auto;
+  overflow: hidden auto;
   transform: translateX(calc(0 - var(--ch-transform-len)));
   border: 4px solid transparent;
   width: calc(100% - 10px);

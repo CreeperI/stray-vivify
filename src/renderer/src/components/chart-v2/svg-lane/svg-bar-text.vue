@@ -8,9 +8,7 @@ import { useUpdateFrameRate } from '@renderer/core/frame-rates'
 const chart_state = GlobalStat.chart_state
 const offset1 = Settings.editor.offset1
 
-const sizing = GlobalStat.SvgSizing
-const lane_width = sizing.lane_width
-const view_port = sizing.view_port
+const { view_port } = GlobalStat.useSvgSizing()
 
 const chart = Chart.$current
 const mul = Settings.computes.mul
@@ -21,9 +19,8 @@ const _show_bar_text = computed(
     chart_state.value == 0 || (chart_state.value == 1 && Settings.editor.record_field.show_bar_text)
 )
 
-const bar_offset = (((lane_width - 130) / 130) * 43) / 4
 function time_bottom_bar(t: number, time: number, _mul: number) {
-  return view_port[3] - (time - t - offset1) * _mul - 80 - bar_offset
+  return view_port[3] - (time - t - offset1) * _mul - 80
 }
 const bb_list = computed(() => chart.diff.shown_t.value)
 useUpdateFrameRate('svg-bar-text')

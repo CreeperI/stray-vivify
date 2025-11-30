@@ -6,9 +6,9 @@ import { GlobalStat } from '@renderer/core/globalStat'
 
 const offset1 = Settings.editor.offset1
 
-const sizing = GlobalStat.SvgSizing
-const view_port = sizing.view_port
-const x = sizing.svg_width - 25
+const {view_port, svg_width} = GlobalStat.useSvgSizing()
+
+const x = svg_width - 25
 
 const chart = Chart.$current
 const mul = Settings.computes.mul

@@ -5,7 +5,7 @@ import Credits from '@renderer/components/credits/credits.vue'
 </script>
 
 <template>
-  <SimpleModal size="3" title="Credits">
+  <SimpleModal size="2" title="Credits">
     <div class="credits-wrapper">
       <Credits />
     </div>

@@ -48,6 +48,7 @@ const on_click = (val: T) => {
   border: 1px solid;
   margin: 0 10px;
   padding-right: 20px;
+  height: min-content;
 }
 
 .a-select-value:after {

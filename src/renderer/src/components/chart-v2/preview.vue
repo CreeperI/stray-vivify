@@ -9,6 +9,7 @@ import AImg from '@renderer/components/a-elements/a-img.vue'
 import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter.vue'
 import { notify } from '@renderer/core/notify'
 import { Invoke } from '@renderer/core/ipc'
+import SvgNotesDisplay from '@renderer/components/chart-v2/svg-lane/svg-notes-display.vue'
 
 const chart = Chart.$current
 
@@ -154,7 +155,9 @@ onUnmounted(() => {
         <a-img :src="img_src" alt="" />
       </div>
       <slot>
-        <svg-lane />
+        <svg-lane>
+          <svg-notes-display />
+        </svg-lane>
       </slot>
 
       <div class="pf-inf">

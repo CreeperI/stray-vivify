@@ -3,8 +3,9 @@ import { Chart } from '@renderer/core/chart/chart'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Settings } from '@renderer/core/settings'
 
-const counts = Chart.$current.diff.counts
-const sr = Chart.$current.diff.sr
+const chart = Chart.$current
+const counts = chart.diff.counts
+const sr = chart.diff.sr
 </script>
 <template>
   <div style="user-select: none">
@@ -23,7 +24,7 @@ const sr = Chart.$current.diff.sr
       <div>s</div>
       <div>{{ counts.s }}</div>
       <div>总计</div>
-      <div>{{ counts.total }} ({{counts.total1}})</div>
+      <div>{{ counts.total }} ({{ counts.total1 }})</div>
       <div>平均密度</div>
       <div>{{ counts.avg_density.toFixed(2) }}</div>
       <div>BPM</div>
@@ -32,17 +33,23 @@ const sr = Chart.$current.diff.sr
       <div>{{ counts.main_bpm }})</div>
     </div>
     <div v-if="Settings.editor.star_rating" class="counter-sr">
-      <div>
-        <word-helper :msg="`SR ${sr.sr.toFixed(2)}*`" dec="开玩笑的"></word-helper>
+      <div @click="chart.diff.update_sr()">
+        <word-helper :msg="`SR ${(sr.total_v2/75).toFixed(2)}*`" dec="开玩笑的"></word-helper>
       </div>
-      <div>Chord</div>
-      <div>{{ sr.chord }}</div>
-      <div>Burst</div>
-      <div>{{ sr.burst }}</div>
-      <div>Tech</div>
-      <div>{{ sr.tech }}</div>
-      <div>Stream</div>
-      <div>{{ sr.stream }}</div>
+      <div>Note</div>
+      <div>{{ sr.note.toFixed(2) }}</div>
+      <div>speed</div>
+      <div>{{ sr.speed.toFixed(2) }}</div>
+      <div>tech</div>
+      <div>{{ sr.tech.toFixed(2) }}</div>
+      <div>fill</div>
+      <div>{{ sr.fill.toFixed(2) }}</div>
+      <div>multi</div>
+      <div>{{ sr.multi.toFixed(2) }}</div>
+      <div>total-v2</div>
+      <div>{{ sr.total_v2.toFixed(2) }}</div>
+      <div>total-v3</div>
+      <div>{{ sr.total_v3.toFixed(2) }}</div>
     </div>
   </div>
 </template>

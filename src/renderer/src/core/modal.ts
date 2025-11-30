@@ -33,6 +33,7 @@ export class modal<T extends Component> {
   priority: number
   props: ComponentProps<T> | undefined
   should_catch: boolean
+  opened: boolean
 
   constructor(component: T, should_catch = false, priority = 0) {
     this.component = component
@@ -40,13 +41,21 @@ export class modal<T extends Component> {
     this.props = undefined
     this.priority = priority
     this.should_catch = should_catch
+    this.opened = false
   }
 
   show(props: ComponentProps<T>) {
+    if (this.opened) return Promise.reject("opened")
     this.props = Object.assign({}, props)
     if (!this.props) throw new Error()
-    if (this.should_catch) return openModal(this.component, this.props).catch(() => {})
-    return openModal(this.component, this.props)
+    this.opened = true
+    if (this.should_catch) return openModal(this.component, this.props).catch(() => {
+    }).finally(() => {
+      this.opened = false
+    })
+    return openModal(this.component, this.props).finally(() => {
+      this.opened = false
+    })
   }
 
   static close_all() {

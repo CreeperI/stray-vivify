@@ -6,6 +6,8 @@ import { Settings } from '@renderer/core/settings'
 import { notify } from '@renderer/core/notify'
 import { FrameRate } from '@renderer/core/frame-rates'
 import { Chart_Diff_SV } from '@renderer/core/chart/diff-sv'
+import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
+import { calculateChartStats } from '@renderer/core/chart/calc-stats'
 
 function parse_type(v: string) {
   switch (v) {
@@ -29,263 +31,6 @@ function parse_type(v: string) {
 }
 function isNote(v: ChartTypeV2.note): v is ChartTypeV2.normal_note {
   return 'snm' in v
-}
-
-class HitSoundSystem {
-  private hit_error = false
-  private audioContext: AudioContext | null = null
-  private audioBuffer: AudioBuffer | null = null
-  private playedNotes = new Set<number>()
-  private gainNode: GainNode | null = null
-  private maxVoices = 64
-  private activeVoices: Array<{ source: AudioBufferSourceNode; endTime: number }> = []
-  private chart: Chart
-  private shown: Ref<ChartTypeV2.note[]>
-
-  constructor(chart: Chart, shown: Ref<ChartTypeV2.note[]>) {
-    this.chart = chart
-    this.shown = shown
-    this.initWebAudio()
-  }
-
-  public async play_hit() {
-    if (this.hit_error || !this.audioBuffer || !this.audioContext || !this.gainNode) {
-      return
-    }
-
-    const now = this.audioContext.currentTime
-    this.activeVoices = this.activeVoices.filter((v) => v.endTime > now)
-
-    const FPS = FrameRate.fps.refs.value.avg
-    const current = this.chart.audio.current_time - Settings.editor.offset3
-    const delta_time = utils.clamp(1000 / FPS, 16, 30) // in ms
-
-    // Find note in current time window
-    // here 1.5 as sometimes it shits
-    const hitNote = this.shown.value.find(
-      (x: any) => utils.between(x.time, [current, current + delta_time * 1.4]) && x['snm'] != 1
-    )
-
-    if (hitNote && !this.playedNotes.has(hitNote.time)) {
-      if (this.activeVoices.length >= this.maxVoices) {
-        this.activeVoices.shift()
-      }
-
-      try {
-        const source = this.audioContext.createBufferSource()
-        source.buffer = this.audioBuffer
-        source.connect(this.gainNode)
-        source.start(now)
-
-        // Track active voice
-        this.activeVoices.push({
-          source,
-          endTime: now + (this.audioBuffer.duration || 0.5)
-        })
-
-        // Mark note as played
-        this.playedNotes.add(hitNote.time)
-
-        // Clean up played note marker after it's definitely passed
-        setTimeout(() => this.playedNotes.delete(hitNote.time), 200)
-      } catch (e) {
-        console.error('Failed to play sound:', e)
-      }
-    }
-  }
-
-  private async initWebAudio() {
-    try {
-      this.audioContext = new AudioContext()
-      this.gainNode = this.audioContext.createGain()
-      watch(
-        () => Settings.editor.hit_volume,
-        (v) => {
-          if (this.gainNode) this.gainNode.gain.value = v / 100
-          else notify.error('GainNode炸了')
-        }
-      )
-      this.gainNode.gain.value = 1.0
-      this.gainNode.connect(this.audioContext.destination)
-
-      const response = await fetch('stray:/__hit__/')
-      if (!response.ok) {
-        throw new Error(`Failed to fetch audio: ${response.status}`)
-      }
-
-      const arrayBuffer = await response.arrayBuffer()
-      this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer)
-    } catch (error) {
-      this.hit_error = true
-    }
-  }
-}
-
-function isHoldNote(note: ChartTypeV2.note): note is ChartTypeV2.hold_note {
-  return 'len' in note
-}
-
-function isNormalNote(note: ChartTypeV2.note): note is ChartTypeV2.normal_note {
-  return !isHoldNote(note)
-}
-
-type chart_rating_eval = {
-  sr: number
-  chord: number
-  stream: number
-  burst: number
-  tech: number
-}
-function calculateStarRating(rawNotes: ChartTypeV2.note[]): chart_rating_eval {
-  if (rawNotes.length < 2) {
-    return { sr: 0.1, chord: 0, stream: 0, burst: 0, tech: 0 }
-  }
-
-  FrameRate.calc_sr.start()
-
-  // 第一步：过滤 mine 并排序（只保留有效 note）
-  const notes: ChartTypeV2.note[] = []
-  for (const n of rawNotes) {
-    if (isNormalNote(n) && n.snm === 1) continue // 跳过 mine
-    notes.push(n)
-  }
-  if (notes.length < 2) {
-    return { sr: 0.1, chord: 0, stream: 0, burst: 0, tech: 0 }
-  }
-  notes.sort((a, b) => a.time - b.time)
-
-  // 第二步：预计算每个 note 的“事件类型”
-  type NoteEvent = {
-    time: number
-    lane: number
-    isWide: boolean
-    isPrecisionWide: boolean
-  }
-  const events: NoteEvent[] = []
-  for (const n of notes) {
-    const isWide = n.width > 1
-    const isPrecisionWide = isNormalNote(n) && n.snm === 2 && isWide
-    for (let i = 0; i < n.width && n.lane + i < 4; i++) {
-      events.push({
-        time: n.time,
-        lane: n.lane + i,
-        isWide,
-        isPrecisionWide
-      })
-    }
-  }
-  if (events.length === 0) {
-    return { sr: 0.1, chord: 0, stream: 0, burst: 0, tech: 0 }
-  }
-  events.sort((a, b) => a.time - b.time)
-
-  // 第三步：滑动窗口 + 双指针（O(n)）
-  const WINDOW_SIZE = 600 // ms
-  const STEP = 100 // ms
-  const strains: { total: number; chord: number; stream: number; burst: number; tech: number }[] =
-    []
-
-  let left = 0
-  let t = notes[0].time
-  const endTime = notes[notes.length - 1].time
-
-  while (t <= endTime) {
-    const windowStart = t - WINDOW_SIZE
-    const windowEnd = t
-
-    // 移除过期事件
-    while (left < events.length && events[left].time <= windowStart) {
-      left++
-    }
-
-    // 扫描窗口内事件
-    let noteCount = 0
-    let wideCount = 0
-    let precisionCount = 0
-    let minInterval = Infinity
-    const laneLast: number[] = Array(4).fill(-Infinity)
-    const chordMap = new Map<number, number>()
-
-    let i = left
-    while (i < events.length && events[i].time <= windowEnd) {
-      const e = events[i]
-      noteCount++
-      if (e.isWide) wideCount++
-      if (e.isPrecisionWide) precisionCount++
-
-      const dt = e.time - laneLast[e.lane]
-      if (dt > 0 && dt < 500) {
-        minInterval = Math.min(minInterval, dt)
-      }
-      laneLast[e.lane] = e.time
-
-      chordMap.set(e.time, (chordMap.get(e.time) || 0) + 1)
-      i++
-    }
-
-    if (noteCount === 0) {
-      t += STEP
-      continue
-    }
-
-    // === 子维度计算 ===
-    const density = noteCount / (WINDOW_SIZE / 1000)
-    const interval = minInterval === Infinity ? 300 : minInterval
-
-    // burst: 极短间隔（<100ms）
-    const burstStrain = interval < 100 ? Math.pow(100 / interval, 0.8) : 0
-    // stream: 中等高速流（100~250ms）
-    const streamStrain = interval >= 100 && interval <= 250 ? Math.sqrt(density) * 1.2 : 0
-    // tech: 协调 + 准度
-    const techStrain = (wideCount / noteCount) * 1.5 + (precisionCount / noteCount) * 2.5
-    // chord: 同时按
-    const maxChord = chordMap.size > 0 ? Math.max(...chordMap.values()) : 1
-    const chordStrain = maxChord > 1 ? Math.log2(maxChord) : 0
-
-    // 总 strain（用于 sr）
-    const speedStrain = Math.pow(150 / Math.max(interval, 25), 0.6)
-    const densityStrain = Math.sqrt(density) * 0.7
-    const coordStrain = (wideCount / noteCount) * 2.0
-    const precisionStrain = (precisionCount / noteCount) * 3.0
-    const totalStrain =
-      speedStrain + densityStrain + coordStrain * 0.8 + precisionStrain * 1.2 + chordStrain * 0.7
-
-    strains.push({
-      total: totalStrain,
-      chord: chordStrain,
-      stream: streamStrain,
-      burst: burstStrain,
-      tech: techStrain
-    })
-
-    t += STEP
-  }
-
-  if (strains.length === 0) {
-    return { sr: 0.1, chord: 0, stream: 0, burst: 0, tech: 0 }
-  }
-
-  // 取 top 12% 峰值平均
-  const k = Math.max(1, Math.floor(strains.length * 0.12))
-  const topK = strains
-    .map((x, i) => ({ x, i }))
-    .sort((a, b) => b.x.total - a.x.total)
-    .slice(0, k)
-
-  const avgTotal = topK.reduce((sum, { x }) => sum + x.total, 0) / k
-  const avgChord = topK.reduce((sum, { x }) => sum + x.chord, 0) / k
-  const avgStream = topK.reduce((sum, { x }) => sum + x.stream, 0) / k
-  const avgBurst = topK.reduce((sum, { x }) => sum + x.burst, 0) / k
-  const avgTech = topK.reduce((sum, { x }) => sum + x.tech, 0) / k
-
-  const sr = Math.max(0.1, Math.min(10, parseFloat((Math.sqrt(avgTotal) * 1.6).toFixed(2))))
-
-  const chord = parseFloat((Math.sqrt(avgChord) * 5.5).toFixed(2))
-  const stream = parseFloat((Math.sqrt(avgStream) * 4.4).toFixed(2))
-  const burst = parseFloat((Math.sqrt(avgBurst) * 4.6).toFixed(2))
-  const tech = parseFloat((Math.sqrt(avgTech) * 5.0).toFixed(2))
-
-  return { sr, chord, stream, burst, tech }
 }
 
 export class Chart_diff {
@@ -337,14 +82,8 @@ export class Chart_diff {
 
   hit_sounder: HitSoundSystem
 
-  sr: Ref<chart_rating_eval>
+  sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
-
-  pooling: {
-    next_index: number
-    last_time: number
-    enabled: boolean
-  }
 
   sv_bind: Chart_Diff_SV
 
@@ -418,14 +157,16 @@ export class Chart_diff {
     this.hit_error = false
     this.hit_sounder = new HitSoundSystem(chart, this.shown)
 
-    this.sr = ref({ sr: 0, chord: 0, stream: 0, burst: 0, tech: 0 })
+    this.sr = ref({
+      note: 0,
+      speed: 0,
+      tech: 0,
+      fill: 0,
+      multi: 0,
+      total_v2: 0,
+      total_v3: 0
+    })
     this.max_lane = ref(4)
-
-    this.pooling = {
-      next_index: 0,
-      last_time: 0,
-      enabled: false
-    }
     this.sv_bind = new Chart_Diff_SV(this)
   }
 
@@ -530,6 +271,54 @@ export class Chart_diff {
       .sort((a, b) => a.time - b.time)
   }
 
+  static to_vsc(diff: ChartTypeV2.diff) {
+    const strs: string[] = []
+    const parsed_notes = diff.notes.map((note) => {
+      if ('len' in note) {
+        return {
+          time: note.time,
+          lane: note.lane,
+          len: note.len,
+          n: 'h'
+        }
+      } else {
+        // then its a note
+        if (note.snm == 1) {
+          if (note.width == 1) return { time: note.time, lane: note.lane, n: 'm' }
+          return { time: note.time, lane: note.lane, n: 'mb' }
+        } else if (note.snm == 2) {
+          return { time: note.time, lane: note.lane, n: 's' }
+        } else {
+          if (note.width == 1) return { time: note.time, lane: note.lane, n: 'n' }
+          else return { time: note.time, lane: note.lane, n: 'b' }
+        }
+      }
+    })
+    const all_the_notes = [
+      parsed_notes,
+      diff.timing.map((x) => {
+        return { time: x.time, bpm: x.bpm, n: 'p', lane: 0 }
+      })
+    ]
+      .flat()
+      .toSorted((a, b) => a.time - b.time)
+    for (const note of all_the_notes) {
+      let str = note.time.toFixed(2)
+      str += ',' + parse_type(note.n)
+      str += ',' + note.lane
+      if ('len' in note) {
+        str += ','
+        // @ts-expect-error why there's fucking me at *note.len* is number|undef
+        str += (note.len + note.time).toFixed(2)
+      } else if ('bpm' in note) {
+        str += ','
+        str += `b:${note.bpm}|t:${note.time.toFixed(2)}|v:undefined|s:undefined`
+      }
+      strs.push(str)
+    }
+    return strs
+  }
+
   calc_max_lane() {
     this.max_lane.value = Math.max(
       Settings.editor.min_lane,
@@ -587,8 +376,11 @@ export class Chart_diff {
       }
     }
   }
+
   update_tick_list(promise?: true): Promise<void>
+
   update_tick_list(promise?: false): void
+
   update_tick_list(promise = false) {
     if (!promise) this._update_tick_list()
     return utils.nextFrame().then(() => this._update_tick_list())
@@ -764,8 +556,12 @@ export class Chart_diff {
     if ('len' in v) {
       if (v.len == 0) v = { time: v.time, lane: v.lane, width: 1, ani: [], snm: 0 }
     }
-    const nearest = this.shown.value.find(x => Math.abs(x.time - v.time) <= Settings.editor.nearest)
-    if (nearest) {v.time = nearest.time}
+    const nearest = this.shown.value.find(
+      (x) => Math.abs(x.time - v.time) <= Settings.editor.nearest
+    )
+    if (nearest) {
+      v.time = nearest.time
+    }
     // 使用二分查找找到合适的插入位置
     const index = this.binarySearchNotePosition(v.time)
     this.notes.splice(index, 0, v)
@@ -780,6 +576,12 @@ export class Chart_diff {
     const per_beat = (240 / (bpm.bpm * Settings.editor.meter)) * 1000
     if (round) return Math.round(Math.round(passed / per_beat) * per_beat + bpm.time)
     else return Math.round(Math.floor(passed / per_beat) * per_beat + bpm.time)
+  }
+
+  nearest_threshold(t: ms, threshold: ms) {
+    const nearest = this.nearest(t)
+    if (Math.abs(t - nearest) <= threshold) return nearest
+    else return t
   }
 
   bpm_of_time(time: ms) {
@@ -812,13 +614,13 @@ export class Chart_diff {
   }
 
   fuck_shown(t: number, force = false) {
-    if (this.pooling.enabled) {
-      this.pooling_notes()
-      return
-    }
+    if (this.sv_bind.on_sv.value) this.sv_bind.updateRenderRange(...this.visible)
     if (force ? false : Math.abs(t - this.last_update) < 2000) return
     this._fuck_shown(t)
     this.update_t(this.visible)
+    if (this.sv_bind.on_sv.value) {
+      this.sv_bind.fuck_shown()
+    }
   }
 
   update_t(visible: [number, number]) {
@@ -844,54 +646,6 @@ export class Chart_diff {
       return n.time < visible[0] && n.time + n.len > visible[0]
     }
     return false
-  }
-
-  static to_vsc(diff: ChartTypeV2.diff) {
-    const strs: string[] = []
-    const parsed_notes = diff.notes.map((note) => {
-      if ('len' in note) {
-        return {
-          time: note.time,
-          lane: note.lane,
-          len: note.len,
-          n: 'h'
-        }
-      } else {
-        // then its a note
-        if (note.snm == 1) {
-          if (note.width == 1) return { time: note.time, lane: note.lane, n: 'm' }
-          return { time: note.time, lane: note.lane, n: 'mb' }
-        } else if (note.snm == 2) {
-          return { time: note.time, lane: note.lane, n: 's' }
-        } else {
-          if (note.width == 1) return { time: note.time, lane: note.lane, n: 'n' }
-          else return { time: note.time, lane: note.lane, n: 'b' }
-        }
-      }
-    })
-    const all_the_notes = [
-      parsed_notes,
-      diff.timing.map((x) => {
-        return { time: x.time, bpm: x.bpm, n: 'p', lane: 0 }
-      })
-    ]
-      .flat()
-      .toSorted((a, b) => a.time - b.time)
-    for (const note of all_the_notes) {
-      let str = note.time.toFixed(2)
-      str += ',' + parse_type(note.n)
-      str += ',' + note.lane
-      if ('len' in note) {
-        str += ','
-        // @ts-expect-error why there's fucking me at *note.len* is number|undef
-        str += (note.len + note.time).toFixed(2)
-      } else if ('bpm' in note) {
-        str += ','
-        str += `b:${note.bpm}|t:${note.time.toFixed(2)}|v:undefined|s:undefined`
-      }
-      strs.push(str)
-    }
-    return strs
   }
 
   add_timing(timing: ChartTypeV2.timing) {
@@ -964,13 +718,25 @@ export class Chart_diff {
 
   update_sr() {
     if (!Settings.editor.star_rating) return
-    this.sr.value = calculateStarRating(this.notes)
+    this.sr.value = calculateChartStats(toRaw(this.bound.value), this.chart.length)
   }
 
-  // trigger on time change
-  reset_pooling() {
-    this.pooling.next_index = -1
-    this.pooling.last_time = -Infinity
+  get_beat_string(time: number) {
+    const x = this.bar_list.findLastIndex(v => v <= time) ?? 0
+    const t = this.bar_list[x]
+
+    // 2. 获取该小节的 timing 信息（使用小节起始时刻）
+    const { bpm, num, den } = this.bpm_of_time(t)
+
+    const quarterNoteMs = 60_000 / bpm
+    const beatMs = quarterNoteMs * (4 / den) // 一拍（den 分音符）的毫秒数
+
+    const offsetMs = Math.abs(time - t)
+    const beatOffset = offsetMs / beatMs
+
+    const yClean = parseFloat(beatOffset.toFixed(2))
+
+    return `${x +1 }:${yClean}/${num}`
   }
 
   /**
@@ -996,30 +762,6 @@ export class Chart_diff {
     return start
   }
 
-  /**
-   * 使用二分查找找到指定时间点的 note 索引
-   * @param time 时间点
-   * @param startIndex 可选的起始搜索索引
-   * @returns note 数组中的索引
-   */
-  private binarySearchNoteIndex(time: number, startIndex = 0): number {
-    let start = startIndex
-    let end = this.notes.length - 1
-
-    while (start <= end) {
-      const mid = Math.floor((start + end) / 2)
-      if (this.notes[mid].time === time) {
-        return mid
-      } else if (this.notes[mid].time < time) {
-        start = mid + 1
-      } else {
-        end = mid - 1
-      }
-    }
-
-    return end >= 0 ? end : 0
-  }
-
   private _update_tick_list() {
     this.ticks = []
     const v = this.timing
@@ -1038,7 +780,8 @@ export class Chart_diff {
 
       // here got a len-1 'c i want to make the last independently fucked
       for (let j = 0; j < part_times.length - 1; j++) {
-        let tick =  (4 * time_per_4) / (part_times[j + 1] - part_times[j])
+        let tick = (4 * time_per_4) / (part_times[j + 1] - part_times[j])
+        if (tick > 128) continue
         // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
         if (tick < 3) tick = 0
         if (tick > 47 && tick < 49) tick = 48
@@ -1077,112 +820,7 @@ export class Chart_diff {
   private play_hit() {
     this.hit_sounder.play_hit()
   }
-
- /* private pooling_notes() {
-    FrameRate.pooling.start()
-    const current = this.chart.audio.current_time
-    const setting = Settings.editor.pooling
-
-    if (current - this.pooling.last_time < setting.interval) return
-
-    let min = current
-    let max = current
-
-    const windowStart = current - setting.behind
-    const windowEnd = current + setting.ahead
-
-    const shown = this.shown.value.filter((x) => {
-      const xEndTime = 'len' in x && x.len > 0 ? x.time + x.len : x.time
-      if (xEndTime >= windowStart && x.time <= windowEnd) {
-        min = Math.min(min, x.time)
-        max = Math.max(max, xEndTime)
-        return true
-      }
-      return false
-    })
-
-    let added = 0
-    let i = this.pooling.next_index
-
-    while (i < this.notes.length && added < setting.count) {
-      const note = this.notes[i]
-      const noteEndTime = 'len' in note && note.len > 0 ? note.time + note.len : note.time
-
-      const shouldShow = noteEndTime >= windowStart && note.time <= windowEnd
-      if (shouldShow && !shown.includes(note)) {
-        shown.push(note)
-        min = Math.min(min, note.time)
-        max = Math.max(max, noteEndTime)
-        added++
-      }
-      i++
-    }
-
-    this.pooling.next_index = i
-    this.shown.value = shown
-    this.pooling.last_time = current
-    this.last_update = current
-
-    this.sv_bind.updateRenderRange(min, max)
-    FrameRate.pooling.end()
-    this.update_t(this.visible)
-  }*/
-  private pooling_notes() {
-    FrameRate.pooling.start();
-    const current = this.chart.audio.current_time;
-    const setting = Settings.editor.pooling;
-
-    if (current - this.pooling.last_time < setting.interval) return;
-
-    const windowStart = current - setting.behind;
-    const windowEnd = current + setting.ahead;
-
-    let min = current;
-    let max = current;
-
-    // 移除不应该显示的 note
-    this.shown.value = this.shown.value.filter(note => {
-      const noteEnd = ('len' in note && note.len > 0) ? note.time + note.len : note.time;
-      const shouldKeep = noteEnd >= windowStart && note.time <= windowEnd;
-
-      if (shouldKeep) {
-        min = Math.min(min, note.time);
-        max = Math.max(max, noteEnd);
-      }
-
-      return shouldKeep;
-    });
-
-    // 使用二分查找找到需要添加的 note 的起始和结束索引
-    const startIndex = this.binarySearchNoteIndex(windowStart);
-    const endIndex = this.binarySearchNoteIndex(windowEnd, startIndex);
-
-    // 添加新显示的 note
-    const notes = toRaw(this.notes);
-    for (let i = startIndex; i <= endIndex && i < notes.length; i++) {
-      const note = notes[i];
-      const noteEnd = ('len' in note && note.len > 0) ? note.time + note.len : note.time;
-
-      // 检查 note 是否已经在 shown 中
-      const alreadyShown = this.shown.value.some(shownNote =>
-        shownNote.time === note.time &&
-        shownNote.lane === note.lane &&
-        shownNote.width === note.width);
-
-      if (!alreadyShown && noteEnd >= windowStart && note.time <= windowEnd) {
-        this.shown.value.push(note);
-        min = Math.min(min, note.time);
-        max = Math.max(max, noteEnd);
-      }
-    }
-
-    this.pooling.last_time = current;
-    this.last_update = current;
-
-    this.sv_bind.updateRenderRange(min, max);
-    FrameRate.pooling.end();
-  }
 }
 
 // @ts-expect-error
-window.toRaw = toRaw;
+window.toRaw = toRaw

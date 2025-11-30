@@ -124,7 +124,19 @@ const settings = ref<storages.storage_scheme>({
       sv: false,
       crop: false
     },
-    nearest: 2
+    nearest: 2,
+    sv: {
+      show_beat_line : true,
+      beat_line_opacity: 100,
+      pointer_color: "#ffffff",
+      pointer_width: 3,
+      beat_line_width: 2,
+      lane_width: 20,
+      lane_width2: 90,
+      threshold: 20,
+      factory_color: "#00ff00",
+      factory_opacity: 70,
+    }
   },
   version: Version.val,
   shortcut: '',

@@ -1,4 +1,4 @@
-import { reactive, Ref, ref, watch } from 'vue'
+import { inject, reactive, Ref, ref, watch } from 'vue'
 import { charts_data, ChartTypeV2 } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
 import { Settings } from '@renderer/core/settings'
@@ -235,8 +235,34 @@ export namespace GlobalStat {
     lane_width: 130,
     svg_width: 520,
     bar_length: 500,
-    view_port: [0,0,520, window.screen.height],
-    taskBarHeight: screen.height - screen.availHeight,
+    view_port: [0, 0, 520, window.screen.height],
+    taskBarHeight: screen.height - screen.availHeight
+  }
+  export function useSvgSizing() {
+    const lane_width = inject<number>('lane_width', 130)
+    const max_lane = SvgSizing.max_lane
+    const svg_width = max_lane * lane_width + 2 * 50 + 12
+    const bar_length = max_lane * lane_width + 12
+    const view_port = [0, 0, svg_width, window.screen.height]
+    return {
+      lane_width,
+      svg_width,
+      bar_length,
+      view_port,
+      taskBarHeight: screen.height - screen.availHeight,
+      max_lane: SvgSizing.max_lane
+    }
+  }
+
+  export namespace RefreshAll {
+    import nextFrame = utils.nextFrame
+    export const __key = ref(0)
+    export function fuck() {
+      __key.value++
+      nextFrame().then(() => {
+        __key.value++
+      })
+    }
   }
 }
 

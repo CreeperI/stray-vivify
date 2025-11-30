@@ -5,9 +5,7 @@ import { Chart } from '@renderer/core/chart/chart'
 
 const offset1 = Settings.editor.offset1
 
-const sizing = GlobalStat.SvgSizing
-const lane_width = sizing.lane_width
-const view_port = sizing.view_port
+const {lane_width, view_port} = GlobalStat.useSvgSizing()
 
 const chart = Chart.$current
 const mul = Settings.computes.mul

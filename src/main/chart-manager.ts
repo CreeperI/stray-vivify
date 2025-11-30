@@ -349,9 +349,9 @@ export default class ChartManager {
     crop?: boolean
     gml: string
     as_id?: string
-    sv?:boolean
+    sv?: boolean
   }) {
-    const { id, diffs, crop = false, gml, as_id = -1, sv=false} = data
+    const { id, diffs, crop = false, gml, as_id = -1, sv = false } = data
     // if all is 0
     if (!diffs.some((v) => v != 0)) return
     const chart = this.data.find((v) => v.id === id)
@@ -363,7 +363,7 @@ export default class ChartManager {
         : path.join(this.charts_folder, id, as_id)
     if (as_id != -1) {
       try {
-        fs.rmSync(exported_path, {force: true, recursive: true})
+        fs.rmSync(exported_path, { force: true, recursive: true })
         console.log('removed old')
       } catch (e) {
         console.log(e)
@@ -382,7 +382,7 @@ export default class ChartManager {
       }
     }
 
-    fs.writeFileSync(path.join(exported_path, 'songinfo.json'), gml)
+    fs.writeFileSync(path.join(exported_path, 'info.json'), gml)
     const png = find_png(path.join(this.charts_folder, id), 'song')
     if (png && crop !== undefined) {
       try {
@@ -406,21 +406,29 @@ export default class ChartManager {
         // pass
       }
     }
+    const _song = find_song(path.join(this.charts_folder, id), 'song')
     if (sv) {
-      fs.copyFileSync(path.join(this.charts_folder, id, "vs-chart.json"), path.join(exported_path, "vs-chart.json"))
-      const _png = find_png(path.join(this.charts_folder, id), "song")
+      fs.copyFileSync(
+        path.join(this.charts_folder, id, 'vs-chart.json'),
+        path.join(exported_path, 'vs-chart.json')
+      )
+      const _png = find_png(path.join(this.charts_folder, id), 'song')
       if (_png) {
-        fs.copyFileSync(path.join(this.charts_folder, id, _png), path.join(exported_path, "song.png"))
+        fs.copyFileSync(
+          path.join(this.charts_folder, id, _png),
+          path.join(exported_path, 'song.png')
+        )
       }
-      const _song = find_song(path.join(this.charts_folder, id), "song")
       if (_song) {
-        fs.copyFileSync(path.join(this.charts_folder, id, _song), path.join(exported_path, `song${extname(_song)}`))
+        fs.copyFileSync(
+          path.join(this.charts_folder, id, _song),
+          path.join(exported_path, `song${extname(_song)}`)
+        )
       }
     }
-    child_process.exec("ls")
-    shell.showItemInFolder(path.join(exported_path, "songinfo.json"))
+    if (_song) child_process.exec(`ffmpeg -i ${path.join(this.charts_folder, id, _song)} ${path.join(exported_path, `music.ogg`)}`)
+    shell.showItemInFolder(path.join(exported_path, 'info.json'))
   }
-
 
   private _export_chart(id: string, ext: string) {
     const chart = this.data.find((v) => v.id === id)

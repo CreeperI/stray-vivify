@@ -5,20 +5,37 @@ import { Settings } from '@renderer/core/settings'
 import { utils } from '@renderer/core/utils'
 import { ref, Ref } from 'vue'
 
+export const factory_strings = ['Astral Quantization']
+export const factory_keys: {
+  [K in keyof ChartTypeV2.SV_Factory.list as K extends `${number}` ? K : never]: Record<
+    keyof Omit<ChartTypeV2.SV_Factory.list[K], 'type' | 'time' | 'end'>,
+    string
+  >
+} = [
+  { eff1: 'note上的eff', eff2: 'note之间的eff' }
+]
 export class Chart_Diff_SV {
   chart: Chart
   diff: Chart_diff
   time_bottom: Ref<(cur: number, n: { time: number }) => number>
+  on_sv: Ref<boolean>
+  shown: Ref<ChartTypeV2.sv_all[]>
+  sv_data: Ref<{ is_factory: boolean; type: number; ix: number }>
   private renderStartTime: number = -Infinity
   private renderEndTime: number = Infinity
   private breakpoints: number[] = []
   private cumDists: number[] = []
   private segments: { t: number; mul: number }[] = []
+  private last_parsed: ChartTypeV2.parsed_sv[]
 
   constructor(diff: Chart_diff) {
     this.diff = diff
     this.chart = diff.chart
     this.time_bottom = ref((_1, _2) => 0)
+    this.last_parsed = []
+    this.on_sv = ref(false)
+    this.shown = ref([])
+    this.sv_data = ref({ is_factory: false, type: 0, ix: 0 })
   }
 
   get sv() {
@@ -26,6 +43,7 @@ export class Chart_Diff_SV {
   }
 
   get parsed() {
+    if (this.last_parsed.length > 0) return this.last_parsed
     const p: ChartTypeV2.parsed_sv[] = []
     this.diff.bound.value.sv.forEach((x) => {
       if ('type' in x) {
@@ -40,6 +58,86 @@ export class Chart_Diff_SV {
     return Settings.computes.mul.value
   }
 
+  static new_sv(type: number) {
+    switch (type) {
+      case 0:
+        return {
+          type: 0,
+          time: 0,
+          end: 0,
+          eff1: 10,
+          eff2: 0.1
+        }
+      default:
+        return {
+          type: -1,
+          time: 0,
+          end: 0
+        }
+    }
+  }
+
+  set_eff() {
+    this.sv_data.value.is_factory = false
+  }
+  set_fct() {
+    this.sv_data.value.is_factory = true
+  }
+
+  invalidate() {
+    this.last_parsed = []
+  }
+
+  fuck_shown() {
+    const visible = this.diff.visible
+    this.shown.value = this.sv.filter((x) => {
+      if (utils.between(x.time, visible)) return true
+      if ('type' in x) return x.time < visible[0] && x.end > visible[0]
+      return false
+    })
+  }
+
+  check_overlap(v: ChartTypeV2.sv_all): boolean {
+    const vHasType = 'type' in v
+    return this.sv.some((x) => {
+      const xHasType = 'type' in x
+      if (xHasType && vHasType) {
+        return x.time < v.end && v.time < x.end
+      } else if (xHasType && !vHasType) {
+        return v.time >= x.time && v.time < x.end
+      } else if (!xHasType && vHasType) {
+        return x.time >= v.time && x.time < v.end
+      } else {
+        return x.time === v.time
+      }
+    })
+  }
+
+  add_sv(v: ChartTypeV2.sv_all) {
+    const ix = this.sv.findIndex((x) => x.time == v.time)
+    if (ix >= 0) return false
+    if (this.check_overlap(v)) return false
+    this.sv.push(v)
+    this.sv_data.value.ix = this.shown.value.push(v) - 1
+    this.invalidate()
+    return true
+  }
+
+  remove_sv(v: { time: number }) {
+    const ix = this.sv.findIndex((x) => x.time == v.time)
+    if (ix > -1) {
+      this.sv.splice(ix, 1)
+      this.invalidate()
+      this.shown.value.splice(
+        this.shown.value.findIndex((x) => x.time === v.time),
+        1
+      )
+      this.sv_data.value.ix = -1
+      return true
+    }
+    return false
+  }
+
   updateRenderRange(renderStartTime: number, renderEndTime: number): void {
     // Avoid unnecessary rebuild
     if (
@@ -47,6 +145,7 @@ export class Chart_Diff_SV {
       renderEndTime === this.renderEndTime &&
       this.breakpoints.length > 0
     ) {
+      console.log("no change render")
       return
     }
 
@@ -150,7 +249,7 @@ export class Chart_Diff_SV {
     for (let i = 0; i < times.length; i++) {
       const time = times[i]
       parsed.push({
-        time: time - 1,
+        time: time,
         eff: f.eff1,
         line: false
       })
@@ -167,5 +266,9 @@ export class Chart_Diff_SV {
       line: true
     })
     return parsed
+  }
+
+  new_sv(type: number) {
+    return Chart_Diff_SV.new_sv(type)
   }
 }

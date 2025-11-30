@@ -1,8 +1,5 @@
 <script lang="ts" setup>
-import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
 import HeaderV2 from '@renderer/components/chart-v2/header-v2.vue'
-import LaneLeft from '@renderer/components/chart-v2/chart-tabs/lane-left.vue'
-import LaneRight from '@renderer/components/chart-v2/chart-tabs/lane-right.vue'
 import SongInfo from '@renderer/components/chart-v2/chart-tabs/song-info.vue'
 import { Settings } from '@renderer/core/settings'
 import ChartTiming from '@renderer/components/chart-v2/chart-tabs/chart-timing.vue'
@@ -10,9 +7,8 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import Preview from '@renderer/components/chart-v2/preview.vue'
 import Playfield from '@renderer/components/chart-v2/playfield.vue'
 import { onUnmounted } from 'vue'
-import SvLeft from '@renderer/components/chart-v2/chart-tabs/sv-left.vue'
-import SvgNotesSv from '@renderer/components/chart-v2/svg-lane/svg-notes-sv.vue'
-import SvRight from '@renderer/components/chart-v2/chart-tabs/sv-right.vue'
+import ChartMain from '@renderer/components/chart-v2/chart-tabs/chart-main.vue'
+import ChartSv from '@renderer/components/chart-v2/chart-tabs/chart-sv.vue'
 
 const active = GlobalStat.refs.chart_tab
 active.value = 2
@@ -52,19 +48,9 @@ const chart_state = GlobalStat.chart_state
     <template v-if="chart_state == 0">
       <header-v2 v-model="active" />
       <song-info v-if="active == 1" />
-      <div v-else-if="active == 2" class="chart-main">
-        <lane-left class="chart-fn" />
-        <svg-lane class="svg-lane" />
-        <lane-right class="chart-fn" />
-      </div>
+      <chart-main v-if="active == 2" />
       <chart-timing v-if="active == 3" />
-      <div v-else-if="active == 4" class="chart-main">
-        <sv-left class="chart-fn" />
-        <svg-lane class="svg-lane">
-          <svg-notes-sv />
-        </svg-lane>
-        <sv-right class="chart-fn" />
-      </div>
+      <chart-sv v-if="active == 4" />
     </template>
     <preview v-if="chart_state == 1" />
     <playfield v-if="chart_state == 2" />
@@ -80,35 +66,4 @@ const chart_state = GlobalStat.chart_state
   position: relative;
 }
 
-.chart-main {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  flex-grow: 1;
-  justify-content: space-around;
-  position: relative;
-}
-
-.svg-lane {
-  z-index: 2;
-}
-
-.chart-fn {
-  z-index: 1;
-}
-
-@media screen and (max-width: 650px) {
-  .chart-fn {
-    display: none;
-  }
-}
-.footer {
-  z-index: 3;
-  width: 100%;
-  height: 80px;
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  background: var(--dark-bgi);
-}
 </style>

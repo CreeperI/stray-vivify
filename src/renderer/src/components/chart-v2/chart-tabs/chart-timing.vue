@@ -187,7 +187,7 @@ function bpm_change(e: Event) {
   height: 100%;
 }
 .timing-list-inner {
-  overflow-y: scroll;
+  overflow-y: auto;
   max-height: calc(100% - 60px - 2rem);
   height: 100%;
 }

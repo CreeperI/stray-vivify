@@ -171,6 +171,7 @@ export class Chart {
       chart.diff.calc_max_lane()
       chart.diff.update_timing_list()
       chart.diff.sort_notes()
+      chart.diff.update_sr()
     }
     chart.id = id
     this.current = chart

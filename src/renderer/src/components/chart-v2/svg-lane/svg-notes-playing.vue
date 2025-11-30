@@ -3,6 +3,7 @@ import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import { ChartTypeV2 } from '@preload/types'
 import { Settings } from '@renderer/core/settings'
 import { Chart } from '@renderer/core/chart/chart'
+import { inject } from 'vue'
 
 const chart = Chart.$current
 const playfield = chart.$playfield
@@ -14,11 +15,12 @@ function x_of(note: ChartTypeV2.note) {
   return note.lane * lane_width + 6 + 'px'
 }
 const refs = playfield.refs
+const d_height = inject<number>('d_height') ?? 0
 </script>
 
 <template>
   <g id="svg-notes">
-    <foreignObject id="lane-notes" height="100%" width="100%" x="50" y="-80">
+    <foreignObject id="lane-notes" :y="-80 + d_height" height="100%" width="100%" x="50">
       <note-v2
         v-for="note in shown"
         :note="note"
@@ -31,38 +33,38 @@ const refs = playfield.refs
   <g class="laser" transform="translate(56)">
     <transition-group name="laser">
       <rect
-        fill-opacity="0.1"
         v-if="refs.key_pressed[0]"
         :width="lane_width"
         :x="0"
         fill="#ccc"
+        fill-opacity="0.1"
         height="100%"
         y="-80"
       />
       <rect
-        fill-opacity="0.1"
         v-if="refs.key_pressed[1]"
         :width="lane_width"
         :x="lane_width"
         fill="#ccc"
+        fill-opacity="0.1"
         height="100%"
         y="-80"
       />
       <rect
-        fill-opacity="0.1"
         v-if="refs.key_pressed[2]"
         :width="lane_width"
         :x="lane_width * 2"
         fill="#ccc"
+        fill-opacity="0.1"
         height="100%"
         y="-80"
       />
       <rect
-        fill-opacity="0.1"
         v-if="refs.key_pressed[3]"
         :width="lane_width"
         :x="lane_width * 3"
         fill="#ccc"
+        fill-opacity="0.1"
         height="100%"
         y="-80"
       />

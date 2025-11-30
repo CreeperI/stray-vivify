@@ -11,22 +11,25 @@ import MouseTracker from '@renderer/components/miscellaneous/mouse-tracker.vue'
 import { modal } from '@renderer/core/modal'
 
 const state = GlobalStat.route.route
+const key = GlobalStat.RefreshAll.__key
 </script>
 
 <template>
-  <Header v-if="state != 'editor'" />
-  <ChartList v-if="state == 'start'" />
-  <ChartV2 v-if="state == 'editor'" />
-  <div id="n-c" class="notify-container" />
-  <ModalTarget />
-  <a-button
-    v-if="state != 'editor'"
-    :msg="`Version: ${Version.str}`"
-    class="--build"
-    @click="modal.VersionsModal.show({})"
-  />
-  <WordHelperOverlay />
-  <MouseTracker />
+  <template v-if="key % 2 == 0">
+    <Header v-if="state != 'editor'" />
+    <ChartList v-if="state == 'start'" />
+    <ChartV2 v-if="state == 'editor'" />
+    <div id="n-c" class="notify-container" />
+    <ModalTarget />
+    <a-button
+      v-if="state != 'editor'"
+      :msg="`Version: ${Version.str}`"
+      class="--build"
+      @click="modal.VersionsModal.show({})"
+    />
+    <WordHelperOverlay />
+    <MouseTracker />
+  </template>
 </template>
 <style scoped>
 .--build {
@@ -162,12 +165,6 @@ body {
   --button-base: #000;
   --button-hover: #444;
 }
-
-* {
-  color: #b8dcee;
-  user-select: none;
-}
-
 #app {
   height: 100%;
   width: 100%;
@@ -176,9 +173,5 @@ body {
 code {
   line-height: 1em;
   font-size: 1rem;
-}
-
-::-webkit-scrollbar {
-  display: none;
 }
 </style>
