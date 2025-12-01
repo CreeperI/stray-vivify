@@ -4,7 +4,6 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Settings } from '@renderer/core/settings'
 import { reactive } from 'vue'
 import { utils } from '@renderer/core/utils'
-import { ref } from 'vue'
 
 const chart = Chart.$current
 const counts = chart.diff.counts
