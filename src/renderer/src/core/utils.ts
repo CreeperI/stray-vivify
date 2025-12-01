@@ -133,6 +133,17 @@ export namespace utils {
     return to
   }
 
+  //LOL copied from a blog
+
+  export function GML_style_hsv_to_hsl(h:number, s:number, v:number):object{
+    h*=24/17
+    s/=255
+    v/=255
+    const t = (2 - s) * v
+    s = (v === 0) || s === 0 ? 0 : (s * v) / (t > 1 ? 2 - t : t)
+    return { h:h, s: s*100, l: (t / 2)*100}//h,s,v∈[0,100]
+  }
+
   export function guard<T>(val: any, ini: T): T {
     if (typeof val != typeof ini) return ini
     else return val

@@ -607,6 +607,7 @@ export namespace storages {
     }
 
     star_rating: boolean
+    colorize_star_rating:boolean
     min_lane: number
 
     bar_or_section: boolean

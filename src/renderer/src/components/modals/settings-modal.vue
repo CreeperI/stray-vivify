@@ -21,7 +21,7 @@ const r = Settings.settings
       <div class="contain">
         <setting-header msg="欢迎来到stray-vivify！" />
         <div>
-          <word-helper dec="会帮你自动填到谱师栏" msg="设定一个名字吧！"/>
+          <word-helper dec="会帮你自动填到谱师栏" msg="设定一个名字吧！" />
           <a-text-input v-model="r.username" />
         </div>
         <setting-header msg="编辑器" />
@@ -69,7 +69,11 @@ const r = Settings.settings
           <div>Stats面板</div>
           <a-checkbox v-model="r.settings.star_rating" />
         </div>
-        <setting-header msg="note分组"  />
+        <div>
+          <div>彩色Stats</div>
+          <a-checkbox v-model="r.settings.colorize_star_rating" />
+        </div>
+        <setting-header msg="note分组" />
         <div>
           <div>向后ms</div>
           <a-number-input v-model="r.settings.pooling.ahead" class="in" />
@@ -97,7 +101,7 @@ const r = Settings.settings
         </div>
         <div>
           <div>打击音音量</div>
-          <a-number-input v-model="r.settings.hit_volume" class="in" max="100" min="0" step="1"/>
+          <a-number-input v-model="r.settings.hit_volume" class="in" max="100" min="0" step="1" />
         </div>
         <setting-header msg="预览模式" />
         <div>
@@ -193,7 +197,7 @@ const r = Settings.settings
         </div>
         <div>
           <div>小节线偏移</div>
-          <a-number-input v-model="r.settings.sprites.bar_dy"/>
+          <a-number-input v-model="r.settings.sprites.bar_dy" />
         </div>
         <setting-header msg="游玩" />
         <div>
@@ -234,7 +238,7 @@ const r = Settings.settings
           </div>
           <a-checkbox v-model="r.settings.exporter.sv" />
         </div>
-        <setting-header msg="debug"/>
+        <setting-header msg="debug" />
         <div>
           <div>Mouse Tracker</div>
           <a-checkbox v-model="r.settings.mouse_tracker" />
@@ -267,11 +271,13 @@ const r = Settings.settings
 .contain {
   width: 80%;
 }
-.contain > div {
+
+.contain>div {
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
-.contain > div > *:first-child {
+
+.contain>div>*:first-child {
   text-align: center;
 }
 
@@ -288,6 +294,7 @@ select {
 option {
   color: black;
 }
+
 .in ::-webkit-inner-spin-button,
 .in ::-webkit-outer-spin-button {
   appearance: none;

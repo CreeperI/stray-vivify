@@ -2,10 +2,51 @@
 import { Chart } from '@renderer/core/chart/chart'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Settings } from '@renderer/core/settings'
+import { reactive } from 'vue'
+import { utils } from '@renderer/core/utils'
+import { ref } from 'vue'
 
 const chart = Chart.$current
 const counts = chart.diff.counts
 const sr = chart.diff.sr
+
+function statSetNotRainbowColor(val) {
+  const colObj = utils.GML_style_hsv_to_hsl(55 + (200 * (val / 200)), 200, 255)
+  const statNotRainbowStyle =
+  {
+    color: `hsl(${colObj.h},${colObj.s}%,${colObj.l}%)`
+  }
+  return statNotRainbowStyle
+}
+
+function judgeStatStyle(val) {
+  if (!Settings.settings.value.settings.colorize_star_rating) {
+    return {}
+  }
+
+  if (val < 200) {
+    console.log(statSetNotRainbowColor(val))
+    return statSetNotRainbowColor(val)
+  }
+  else if (200 <= val && val < 400) {
+    console.log("rb style")
+    return {}
+
+  }
+  else {
+    console.log("white")
+    return { color: "white" }
+
+  }
+}
+
+function judgeRainbowStat(val) {
+  return (200 <= val) && (val < 400) && Settings.settings.value.settings.colorize_star_rating
+}
+
+//console.log("test")
+
+
 </script>
 <template>
   <div style="user-select: none">
@@ -34,18 +75,34 @@ const sr = chart.diff.sr
     </div>
     <div v-if="Settings.editor.star_rating" class="counter-sr">
       <div @click="chart.diff.update_sr()">
-        <word-helper :msg="`SR ${(sr.total_v2/75).toFixed(2)}*`" dec="开玩笑的"></word-helper>
+        <word-helper :msg="`SR ${(sr.total_v2 / 75).toFixed(2)}*`" dec="开玩笑的"></word-helper>
       </div>
-      <div>Note</div>
-      <div>{{ sr.note.toFixed(2) }}</div>
-      <div>speed</div>
-      <div>{{ sr.speed.toFixed(2) }}</div>
-      <div>tech</div>
-      <div>{{ sr.tech.toFixed(2) }}</div>
-      <div>fill</div>
-      <div>{{ sr.fill.toFixed(2) }}</div>
-      <div>multi</div>
-      <div>{{ sr.multi.toFixed(2) }}</div>
+
+      <div>CHIP</div>
+      <label :style="judgeStatStyle(sr.note)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.note) }">
+        {{ sr.note.toFixed(2) }}
+      </label>
+
+      <div>STREAM</div>
+      <label :style="judgeStatStyle(sr.speed)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.speed) }">
+        {{ sr.speed.toFixed(2) }}
+      </label>
+
+      <div>TECH</div>
+      <label :style="judgeStatStyle(sr.tech)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.tech) }">
+        {{ sr.tech.toFixed(2) }}
+      </label>
+
+      <div>BURST</div>
+      <label :style="judgeStatStyle(sr.fill)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.fill) }">
+        {{ sr.fill.toFixed(2) }}
+      </label>
+
+      <div>CHORD</div>
+      <label :style="judgeStatStyle(sr.multi)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.multi) }">
+        {{ sr.multi.toFixed(2) }}
+      </label>
+
       <div>total-v2</div>
       <div>{{ sr.total_v2.toFixed(2) }}</div>
       <div>total-v3</div>
@@ -54,21 +111,21 @@ const sr = chart.diff.sr
   </div>
 </template>
 <style scoped>
-.note-width > div,
-.note-width > span,
-.note-snb > div,
-.note-snb > s {
+.note-width>div,
+.note-width>span,
+.note-snb>div,
+.note-snb>s {
   text-align: center;
   line-height: 1.5rem;
   height: 1.5rem;
 }
 
-.note-width > div {
+.note-width>div {
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
-.note-pending > img {
+.note-pending>img {
   position: relative;
   max-width: 90%;
 }

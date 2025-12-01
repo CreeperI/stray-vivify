@@ -1,5 +1,5 @@
 import { ChartTypeV2 } from '@preload/types'
-import { computed, ComputedRef, nextTick, Ref, ref, toRaw, watch } from 'vue'
+import { computed, ComputedRef, nextTick, Ref, ref, toRaw, vModelText, watch } from 'vue'
 import { Chart, ms } from './chart'
 import { utils } from '../utils'
 import { Settings } from '@renderer/core/settings'
@@ -84,7 +84,6 @@ export class Chart_diff {
 
   sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
-
   sv_bind: Chart_Diff_SV
 
   constructor(chart: Chart, ix = 0) {
