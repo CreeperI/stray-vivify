@@ -7,7 +7,7 @@ import { notify } from '@renderer/core/notify'
 import { FrameRate } from '@renderer/core/frame-rates'
 import { Chart_Diff_SV } from '@renderer/core/chart/diff-sv'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
-import { calculateChartStats } from '@renderer/core/chart/calc-stats'
+import { calculateChartStats } from '@renderer/core/chart/calc-stat-new'
 
 function parse_type(v: string) {
   switch (v) {
