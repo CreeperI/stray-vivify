@@ -6,6 +6,7 @@ import { utils } from '@renderer/core/utils'
 ///类型别名///
 type bpm=number;
 type time_ms=number;
+type time_sec=number
 type lane=number;
 ////////////
 
@@ -100,12 +101,13 @@ export function calculateChartStats(
 function GetAverageBPM(bpmList):bpm{
     let maxLength=-1
     let averageBPM=0
-    for (let i=0;i<bpmList.lenght-1;i++){
+    for (let i=0;i<bpmList.length-1;i++){
         if(bpmList[i+1][0]-bpmList[i][0]>maxLength){
             averageBPM=bpmList[i][1]
-            maxLength=bpmList[i][0]
+            maxLength=bpmList[i+1][0]-bpmList[i][0]
         }
     }
+    console.log("AVERAGE BPM "+averageBPM)
     return averageBPM
 }
 
@@ -159,10 +161,11 @@ class SongData{
     songLength = 0
     isMulti:boolean=false
 
-    constructor(bpmList){
+    constructor(bpmList:ChartTypeV2.diff["timing"]){
         this.bpmList=bpmList
     }
-    
+    //原GML逻辑是读到bpm类型的语句就将this.BPM变成读到的BPM
+    //转换一下，也就是寻找一个noteTime在哪个bpm的区间......对吗/
     FindTimeAtBPM (bpmList:ChartTypeV2.diff["timing"],time:time_ms):bpm{
         for(let i=0;i<bpmList.length;i++){
             if(time<bpmList[0].time){
@@ -178,18 +181,14 @@ class SongData{
         return bpmList[bpmList.length-1].bpm;
     }
 
-    SetBucketLength (BPM:bpm, songLength:time_ms)
+    SetBucketLength (BPM:bpm, songLength:time_sec)
     {
         if (BPM >= 300)
             BPM /= 2;
         this.songLength = songLength;
         this.bucketLength = 1000;
-        this.buckets = new Array(this.songLength)
-        this.allBeatBuckets = new Array(this.songLength)
-        for (let i=0;i<this.songLength;i++){
-            this.buckets[i]=0
-            this.allBeatBuckets[i]=0
-        }
+        this.buckets = new Array(this.songLength).fill(0)
+        this.allBeatBuckets = new Array(this.songLength).fill(0)
     }
     
     //I have no idea what arg1 stands for
@@ -242,7 +241,7 @@ class SongData{
         
         if (this.holdNoteTimings.length> 0)
         {
-            var newTimings:number[][] = [];
+            let  newTimings:number[][] = [];
             
             for (var i = 0; i < this.holdNoteTimings.length; i++)
             {
@@ -288,14 +287,14 @@ class SongData{
         this.CalculateDensity(noteMs, 0.85);
         this.allNotesNoHold.push( [noteLane, noteMs]);
         this.holdNoteTimings.push( [noteMs, holdEndMs]);
-        var msPerNote=this.FindTimeAtBPM(this.bpmList,noteMs)
-        var noteDurationMs = holdEndMs - noteMs - msPerNote;
-        var notes = noteDurationMs / msPerNote;
-        var parts = Math.ceil(notes);
+        let msPerBeat=60000/this.FindTimeAtBPM(this.bpmList,noteMs)
+        let noteDurationMs = holdEndMs - noteMs - msPerBeat;
+        let notes = noteDurationMs / msPerBeat;
+        let parts = Math.ceil(notes);
         
-        for (var i = 0; i < parts; i++)
+        for (let i = 0; i < parts; i++)
         {
-            var partMs = noteMs + ((i + 1) * msPerNote);
+            let partMs = noteMs + ((i + 1) * msPerBeat);
             
             if (partMs <= (holdEndMs - 150))
             {
@@ -305,12 +304,13 @@ class SongData{
         }
     }
 
+    //fuck the jacks and chains and TECH stat calculation,why these can't work properly???
     CalculateJacks (notHoldNotes:number[][])
     {
         this.jackCount = 0;
         this.jackTimings = [];
         
-        for (var i = 0; i < ((notHoldNotes.length) - 1); i++)
+        for (let i = 0; i < ((notHoldNotes.length) - 1); i++)
         {
             if (notHoldNotes[i][0] == notHoldNotes[i + 1][0])
             {
@@ -322,7 +322,7 @@ class SongData{
             }
         }
         
-        for (var i = 0; i < (this.jackTimings.length); i++)
+        for (let i = 0; i < (this.jackTimings.length); i++)
             this.jackStat += Math.max(0, 1000 - this.jackTimings[i]);
     };
 
@@ -331,11 +331,11 @@ class SongData{
         this.chainCount = 0;
         this.chainTimings = [];
         
-        for (var i = 0; i < ((notHoldNotes.length) - 1); i++)
+        for (let i = 0; i < (notHoldNotes.length - 1); i++)
         {
             if (notHoldNotes[i][0] < 4)
             {
-                var lane = notHoldNotes[i][0];
+                let lane = notHoldNotes[i][0];
                 
                 if (lane == 0 || lane == 1)
                 {
@@ -357,7 +357,7 @@ class SongData{
             }
         }
         
-        for (var i = 0; i < (this.chainTimings.length); i++)
+        for (let i = 0; i < (this.chainTimings.length); i++)
             this.chainStat += Math.max(0, 1000 - this.chainTimings[i]);
     };
 }

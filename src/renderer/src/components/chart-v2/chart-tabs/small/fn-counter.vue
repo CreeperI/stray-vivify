@@ -10,6 +10,9 @@ const counts = chart.diff.counts
 const sr = chart.diff.sr
 
 function getTotalStyle(name) {
+  if (!Settings.settings.value.settings.colorize_star_rating) {
+    return { style: {} }
+  }
   const val = this.sr[name]
   const colObj = utils.GML_style_hsv_to_hsl(utils.clamp(55 + val / 4, 0, 255), 200, 255)
   const styleObj = {
@@ -24,7 +27,7 @@ function getStatStyle(statName) {
   const val = this.sr[statName]
 
   if (!Settings.settings.value.settings.colorize_star_rating) {
-    return { style: styleObj, isRainbow: false }
+    return { style: {}, isRainbow: false }
   }
 
   if (val < 200) {
