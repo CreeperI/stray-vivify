@@ -9,38 +9,56 @@ const chart = Chart.$current
 const counts = chart.diff.counts
 const sr = chart.diff.sr
 
-function statSetNotRainbowColor(val) {
-  const colObj = utils.GML_style_hsv_to_hsl(55 + (200 * (val / 200)), 200, 255)
-  const statNotRainbowStyle =
-  {
-    color: `hsl(${colObj.h},${colObj.s}%,${colObj.l}%)`
-  }
-  return statNotRainbowStyle
+function getTotalStyle(name) {
+  const val = this.sr[name]
+  const colObj = utils.GML_style_hsv_to_hsl(utils.clamp(55 + val / 4, 0, 255), 200, 255)
+  const styleObj = {
+    stat_style: { color: `hsl(${colObj.h},${colObj.s}%,${colObj.l}%)` },
+  };
+  // console.log("VAL<200")
+  // console.log(styleObj)
+  return styleObj
 }
 
-function judgeStatStyle(val) {
+function getStatStyle(statName) {
+  const val = this.sr[statName]
+
   if (!Settings.settings.value.settings.colorize_star_rating) {
-    return {}
+    return { style: styleObj, isRainbow: false }
   }
 
   if (val < 200) {
-    console.log(statSetNotRainbowColor(val))
-    return statSetNotRainbowColor(val)
+    const colObj = utils.GML_style_hsv_to_hsl(55 + (200 * (val / 200)), 200, 255)
+    const styleObj = {
+      stat_style: { color: `hsl(${colObj.h},${colObj.s}%,${colObj.l}%)` },
+      isRainbow: false
+    };
+    // console.log("VAL<200")
+    // console.log(styleObj)
+    return styleObj
+
   }
-  else if (200 <= val && val < 400) {
-    console.log("rb style")
-    return {}
+  else if (val >= 200 && val < 400) {
+    const lightness = 50 + 50 * ((val - 200) / 200);
+    const styleObj = {
+      //用于控制hsl循环内的lightness
+      stat_style: { '--stat-lightness': lightness + "%" },
+      isRainbow: true
+    };
+    // console.log("200<=VAL<400")
+    // console.log(styleObj)
+    return styleObj
 
   }
   else {
-    console.log("white")
-    return { color: "white" }
+    const styleObj = {
+      stat_style: { color: "white" },
+      isRainbow: false
+    }
+    //console.log(styleObj)
 
+    return styleObj
   }
-}
-
-function judgeRainbowStat(val) {
-  return (200 <= val) && (val < 400) && Settings.settings.value.settings.colorize_star_rating
 }
 
 //console.log("test")
@@ -78,34 +96,40 @@ function judgeRainbowStat(val) {
       </div>
 
       <div>CHIP</div>
-      <label :style="judgeStatStyle(sr.note)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.note) }">
+      <label :style="getStatStyle('note').stat_style"
+        :class="{ 'rainbow-text-color-stat': getStatStyle('note').isRainbow }">
         {{ sr.note.toFixed(2) }}
       </label>
 
       <div>STREAM</div>
-      <label :style="judgeStatStyle(sr.speed)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.speed) }">
+      <label :style="getStatStyle('speed').stat_style"
+        :class="{ 'rainbow-text-color-stat': getStatStyle('speed').isRainbow }">
         {{ sr.speed.toFixed(2) }}
       </label>
 
       <div>TECH</div>
-      <label :style="judgeStatStyle(sr.tech)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.tech) }">
+      <label :style="getStatStyle('tech').stat_style"
+        :class="{ 'rainbow-text-color-stat': getStatStyle('tech').isRainbow }">
         {{ sr.tech.toFixed(2) }}
       </label>
 
       <div>BURST</div>
-      <label :style="judgeStatStyle(sr.fill)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.fill) }">
+      <label :style="getStatStyle('fill').stat_style"
+        :class="{ 'rainbow-text-color-stat': getStatStyle('fill').isRainbow }">
         {{ sr.fill.toFixed(2) }}
       </label>
 
       <div>CHORD</div>
-      <label :style="judgeStatStyle(sr.multi)" :class="{ 'rainbow-text-color': judgeRainbowStat(sr.multi) }">
+      <label :style="getStatStyle('multi').stat_style"
+        :class="{ 'rainbow-text-color-stat': getStatStyle('multi').isRainbow }">
         {{ sr.multi.toFixed(2) }}
       </label>
 
-      <div>total-v2</div>
-      <div>{{ sr.total_v2.toFixed(2) }}</div>
-      <div>total-v3</div>
-      <div>{{ sr.total_v3.toFixed(2) }}</div>
+      <!-- total-v2在实际游戏中已经被完全废弃了，所以改成total-OLD；v3在本体只存在于制谱器界面，且将其记作stat_total，所以这里也记成total-->
+      <div>Total_OLD</div>
+      <div :style="getTotalStyle('total_v2').stat_style">{{ sr.total_v2.toFixed(2) }}</div>
+      <div>Total</div>
+      <label :style="getTotalStyle('total_v3').stat_style">{{ sr.total_v3.toFixed(2) }}</label>
     </div>
   </div>
 </template>
@@ -159,5 +183,64 @@ function judgeRainbowStat(val) {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 0 15px;
+}
+
+/* hsl循环 */
+@keyframes rainbow-cycle-stat {
+  0% {
+    color: hsl(0, 100%, var(--stat-lightness, 50%));
+  }
+
+  8.3% {
+    color: hsl(30, 100%, var(--stat-lightness, 50%));
+  }
+
+  16.7% {
+    color: hsl(60, 100%, var(--stat-lightness, 50%));
+  }
+
+  25% {
+    color: hsl(90, 100%, var(--stat-lightness, 50%));
+  }
+
+  33.3% {
+    color: hsl(120, 100%, var(--stat-lightness, 50%));
+  }
+
+  41.7% {
+    color: hsl(150, 100%, var(--stat-lightness, 50%));
+  }
+
+  50% {
+    color: hsl(180, 100%, var(--stat-lightness, 50%));
+  }
+
+  58.3% {
+    color: hsl(210, 100%, var(--stat-lightness, 50%));
+  }
+
+  66.7% {
+    color: hsl(240, 100%, var(--stat-lightness, 50%));
+  }
+
+  75% {
+    color: hsl(270, 100%, var(--stat-lightness, 50%));
+  }
+
+  83.3% {
+    color: hsl(300, 100%, var(--stat-lightness, 50%));
+  }
+
+  91.7% {
+    color: hsl(330, 100%, var(--stat-lightness, 50%));
+  }
+
+  100% {
+    color: hsl(360, 100%, var(--stat-lightness, 50%));
+  }
+}
+
+.rainbow-text-color-stat {
+  animation: rainbow-cycle-stat 0.7s infinite linear;
 }
 </style>
