@@ -170,3 +170,58 @@ div[data-is-current-version=true] {
     background-position: 100% 50%;
   }
 }
+
+/* hsl循环 */
+@keyframes a-rainbow-cycle-stat {
+  0% {
+    color: hsl(0, 100%, var(--stat-lightness, 50%));
+  }
+
+  8.3% {
+    color: hsl(30, 100%, var(--stat-lightness, 50%));
+  }
+
+  16.7% {
+    color: hsl(60, 100%, var(--stat-lightness, 50%));
+  }
+
+  25% {
+    color: hsl(90, 100%, var(--stat-lightness, 50%));
+  }
+
+  33.3% {
+    color: hsl(120, 100%, var(--stat-lightness, 50%));
+  }
+
+  41.7% {
+    color: hsl(150, 100%, var(--stat-lightness, 50%));
+  }
+
+  50% {
+    color: hsl(180, 100%, var(--stat-lightness, 50%));
+  }
+
+  58.3% {
+    color: hsl(210, 100%, var(--stat-lightness, 50%));
+  }
+
+  66.7% {
+    color: hsl(240, 100%, var(--stat-lightness, 50%));
+  }
+
+  75% {
+    color: hsl(270, 100%, var(--stat-lightness, 50%));
+  }
+
+  83.3% {
+    color: hsl(300, 100%, var(--stat-lightness, 50%));
+  }
+
+  91.7% {
+    color: hsl(330, 100%, var(--stat-lightness, 50%));
+  }
+
+  100% {
+    color: hsl(360, 100%, var(--stat-lightness, 50%));
+  }
+}

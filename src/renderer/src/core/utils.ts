@@ -135,7 +135,7 @@ export namespace utils {
 
   //LOL copied from a blog
 
-  export function GML_style_hsv_to_hsl(h:number, s:number, v:number):object{
+  export function GML_style_hsv_to_hsl(h:number, s:number, v:number): {h:number, s:number, l:number} {
     h*=24/17
     s/=255
     v/=255

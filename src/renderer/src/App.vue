@@ -164,6 +164,8 @@ body {
 
   --button-base: #000;
   --button-hover: #444;
+
+  --stat-lightness: 50%;
 }
 #app {
   height: 100%;
