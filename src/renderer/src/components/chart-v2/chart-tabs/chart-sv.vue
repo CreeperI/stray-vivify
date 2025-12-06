@@ -5,11 +5,11 @@ import SvRight from '@renderer/components/chart-v2/chart-tabs/sv-right.vue'
 import SvLeft from '@renderer/components/chart-v2/chart-tabs/sv-left.vue'
 import { computed } from 'vue'
 import SvgNotesDisplay from '@renderer/components/chart-v2/svg-lane/svg-notes-display.vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import SvgSvLine from '@renderer/components/chart-v2/svg-lane/svg-sv-line.vue'
 
-const lane_width = computed(() => Settings.editor.sv.lane_width)
-const lane_width2 = computed(() => Settings.editor.sv.lane_width2)
+const lane_width = computed(() => Storage.settings.sv.lane_width)
+const lane_width2 = computed(() => Storage.settings.sv.lane_width2)
 </script>
 
 <template>

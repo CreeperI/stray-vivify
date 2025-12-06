@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ComputedRef } from 'vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { ChartTypeV2 } from '@preload/types'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
@@ -9,7 +9,7 @@ import FnDensity from '@renderer/components/chart-v2/chart-tabs/small/fn-density
 import { GlobalStat } from '@renderer/core/globalStat'
 import { utils } from '@renderer/core/utils'
 
-const { width, s, hold, b } = Settings.note
+const { width, s, hold, b } = Storage.note
 
 const pending_note = computed(() => {
   if (hold.value) {
@@ -25,7 +25,7 @@ const pending_note = computed(() => {
       lane: 0,
       width: width.value,
       ani: [],
-      snm: Settings.note.snm
+      snm: Storage.note.snm
     }
   }
 }) as ComputedRef<ChartTypeV2.note>
@@ -44,28 +44,28 @@ const select_chip = computed(() => select.value.length - select_ln.value)
         <div
           class="note-width-btn"
           :class="width == 1 ? 'chosen' : ''"
-          @click="Settings.note.set_width(1)"
+          @click="Storage.note.set_width(1)"
         >
           1
         </div>
         <div
           class="note-width-btn"
           :class="width == 2 ? 'chosen' : ''"
-          @click="Settings.note.set_width(2)"
+          @click="Storage.note.set_width(2)"
         >
           2
         </div>
         <div
           class="note-width-btn"
           :class="width == 3 ? 'chosen' : ''"
-          @click="Settings.note.set_width(3)"
+          @click="Storage.note.set_width(3)"
         >
           3
         </div>
         <div
           class="note-width-btn"
           :class="width == 4 ? 'chosen' : ''"
-          @click="Settings.note.set_width(4)"
+          @click="Storage.note.set_width(4)"
         >
           4
         </div>

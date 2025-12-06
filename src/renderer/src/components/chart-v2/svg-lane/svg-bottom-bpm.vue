@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 
@@ -16,9 +16,9 @@ const current_timing = chart.diff.current_timing
 const _show_bottom_bpm = computed(() => {
   if (chart_state.value == 0) {
     if (chart.diff.sv_bind.on_sv.value) return false
-    return Settings.data.value.settings.show_bpm_bottom
+    return Storage.data.value.settings.show_bpm_bottom
   } else {
-    return Settings.data.value.settings.record_field.show_bpm_bottom
+    return Storage.data.value.settings.record_field.show_bpm_bottom
   }
 })
 </script>

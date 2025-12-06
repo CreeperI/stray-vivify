@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import HeaderV2 from '@renderer/components/chart-v2/header-v2.vue'
 import SongInfo from '@renderer/components/chart-v2/chart-tabs/song-info.vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import ChartTiming from '@renderer/components/chart-v2/chart-tabs/chart-timing.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import Preview from '@renderer/components/chart-v2/preview.vue'
@@ -29,13 +29,13 @@ onUnmounted(() => {
 const _meters = [1, 4, 8, 12, 16, 24, 32, 48, 64]
 function fuck_wheel(e: WheelEvent) {
   if (e.ctrlKey) {
-    Settings.data.value.settings.scale = Number(
-      Math.max(1, Math.min(Settings.editor.scale - 0.001 * e.deltaY, 20)).toFixed(1)
+    Storage.data.value.settings.scale = Number(
+      Math.max(1, Math.min(Storage.settings.scale - 0.001 * e.deltaY, 20)).toFixed(1)
     )
   } else if (e.altKey) {
-    const current_meter_left = _meters.findIndex((v) => v >= Settings.editor.meter)
+    const current_meter_left = _meters.findIndex((v) => v >= Storage.settings.meter)
     if (current_meter_left == -1) return
-    Settings.data.value.settings.meter =
+    Storage.data.value.settings.meter =
       _meters[Math.max(current_meter_left - (e.deltaY > 0 ? 1 : -1), 0)] ?? 64
   }
 }

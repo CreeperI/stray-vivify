@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { computed, h, ref, VNode } from 'vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
@@ -8,7 +8,7 @@ import { factory_strings } from '@renderer/core/chart/diff-sv'
 
 const chart = Chart.$current
 const chart_sv = chart.diff.sv_bind
-const mul = Settings.computes.mul
+const mul = Storage.computes.mul
 const current_time = chart.audio.refs.current_ms
 const shown = chart.diff.sv_bind.shown
 const sv_data = chart_sv.sv_data
@@ -25,7 +25,7 @@ const text_time = computed(() => {
 })
 const there_is = computed(() => {
   return shown.value.find((x) => {
-    return Math.abs(x.time - pending_time.value) < Settings.editor.nearest
+    return Math.abs(x.time - pending_time.value) < Storage.settings.nearest
   })
 })
 const pending_text_dx = computed(() => {
@@ -55,7 +55,7 @@ function mouseleave() {
   pending_display.value = false
 }
 function nearest_in_shown(t: number) {
-  return shown.value.find((x) => Math.abs(x.time - t) < Settings.editor.sv.threshold)?.time ?? t
+  return shown.value.find((x) => Math.abs(x.time - t) < Storage.settings.sv.threshold)?.time ?? t
 }
 
 function update_pending(e: MouseEvent) {
@@ -71,7 +71,7 @@ function update_pending(e: MouseEvent) {
   const time = nearest_in_shown(
     chart.diff.nearest_threshold(
       bottom / mul.value + current_time.value,
-      Settings.editor.sv.threshold
+      Storage.settings.sv.threshold
     )
   )
   if (pending_fixed.value) {
@@ -121,7 +121,7 @@ function on_right() {
 // -------------- Renderer -------------------
 const { bar_length } = GlobalStat.useSvgSizing()
 function time_bottom(t: number) {
-  return view_port[3] - (t - current_time.value) * mul.value - 80 - Settings.editor.sprites.bar_dy
+  return view_port[3] - (t - current_time.value) * mul.value - 80 - Storage.settings.sprites.bar_dy
 }
 function sv_single(x: ChartTypeV2.sv_all): VNode[] {
   if ('type' in x) {
@@ -133,8 +133,8 @@ function sv_single(x: ChartTypeV2.sv_all): VNode[] {
         y: y + height,
         width: bar_length,
         height: Math.abs(height),
-        fill: Settings.editor.sv.factory_color,
-        'fill-opacity': Settings.editor.sv.factory_opacity / 100
+        fill: Storage.settings.sv.factory_color,
+        'fill-opacity': Storage.settings.sv.factory_opacity / 100
       }),
       h(
         'text',
@@ -155,8 +155,8 @@ function sv_single(x: ChartTypeV2.sv_all): VNode[] {
       x2: bar_length + 50,
       y1: time_bottom(x.time),
       y2: time_bottom(x.time),
-      stroke: Settings.editor.sv.pointer_color,
-      'stroke-width': Settings.editor.sv.pointer_width
+      stroke: Storage.settings.sv.pointer_color,
+      'stroke-width': Storage.settings.sv.pointer_width
     }),
     h(
       'text',

@@ -2,10 +2,10 @@
 import { computed, ref } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
 import { Chart } from '@renderer/core/chart/chart'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 
-const shown_parts = computed(() => Settings.data.value.settings.svg_shown_parts)
+const shown_parts = computed(() => Storage.data.value.settings.svg_shown_parts)
 
 type normal_note = ChartTypeV2.normal_note
 

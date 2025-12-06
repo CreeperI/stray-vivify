@@ -2,11 +2,11 @@
 
 import { GlobalStat } from '@renderer/core/globalStat'
 import { computed } from 'vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 
 const pos = GlobalStat.MouseTracker.mouse_pos
 const sty = computed(() => `top: ${pos.value.y}px; left: ${pos.value.x}px;`)
-const shown = computed(() => Settings.data.value.settings.mouse_tracker)
+const shown = computed(() => Storage.data.value.settings.mouse_tracker)
 </script>
 
 <template>

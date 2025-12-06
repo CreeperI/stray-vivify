@@ -7,13 +7,13 @@ import { toRef } from 'vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import ALabel from '@renderer/components/a-elements/a-label.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 
 function write_png() {
   Chart.current?.write_png()
 }
 
-const shown_ticks = toRef(Settings.data.value.settings.svg_shown_parts)
+const shown_ticks = toRef(Storage.data.value.settings.svg_shown_parts)
 const is_dev = GlobalStat.is_dev
 </script>
 

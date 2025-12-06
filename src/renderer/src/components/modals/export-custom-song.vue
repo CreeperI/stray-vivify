@@ -15,7 +15,7 @@ import { Invoke } from '@renderer/core/ipc'
 import { modal } from '@renderer/core/modal'
 import 'vue-json-pretty/lib/styles.css'
 import VueJsonPretty from 'vue-json-pretty'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 
 const chart = Chart.$current
 
@@ -142,9 +142,9 @@ function start_phase_2() {
   phase.value = 2
 }
 const args = ref({
-  crop: Settings.editor.exporter.crop,
+  crop: Storage.settings.exporter.crop,
   as_id: chart.id,
-  sv: Settings.editor.exporter.sv
+  sv: Storage.settings.exporter.sv
 })
 function do_export() {
   const gml = info_data.value

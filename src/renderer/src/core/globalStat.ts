@@ -1,7 +1,7 @@
 import { inject, reactive, Ref, ref, watch } from 'vue'
 import { charts_data, ChartTypeV2 } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { modal } from '@renderer/core/modal'
 
@@ -67,7 +67,7 @@ export namespace GlobalStat {
     }
     export function init() {
       watch(
-        () => Settings.data.value.settings.mouse_tracker,
+        () => Storage.data.value.settings.mouse_tracker,
         (v) => {
           if (v) {
             document.addEventListener('mousemove', listener)

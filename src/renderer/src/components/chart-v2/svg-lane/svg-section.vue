@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 
-const offset1 = Settings.editor.offset1
+const offset1 = Storage.settings.offset1
 
 const {lane_width, view_port} = GlobalStat.useSvgSizing()
 
 const chart = Chart.$current
-const mul = Settings.computes.mul
+const mul = Storage.computes.mul
 const current_time = chart.audio.refs.current_ms
 
 const bb_list = chart.diff.shown_t

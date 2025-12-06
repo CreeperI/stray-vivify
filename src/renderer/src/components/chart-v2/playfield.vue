@@ -4,7 +4,7 @@ import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { utils } from '@renderer/core/utils'
-import { Settings, Version } from '@renderer/core/settings'
+import { Storage, Version } from '@renderer/core/storage'
 import AImg from '@renderer/components/a-elements/a-img.vue'
 import { notify } from '@renderer/core/notify'
 import SvgNotesPlaying from '@renderer/components/chart-v2/svg-lane/svg-notes-playing.vue'
@@ -45,7 +45,7 @@ function restart() {
     })
 }
 
-const setting = computed(() => Settings.data.value.settings.record_field)
+const setting = computed(() => Storage.data.value.settings.record_field)
 const current_time = chart.audio.refs.current_ms
 const length = chart.length
 const current_timing = chart.diff.current_timing
@@ -122,7 +122,7 @@ onMounted(() => {
   chart.audio.set_current_time(-3000)
   notify.normal('按空格以开始游玩。')
   start_record()
-  Settings.data.value.settings.meter = 1
+  Storage.data.value.settings.meter = 1
   document.addEventListener('keydown', onkeydown)
 })
 

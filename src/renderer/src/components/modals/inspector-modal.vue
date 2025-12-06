@@ -6,7 +6,7 @@ import { FrameRate } from '@renderer/core/frame-rates'
 import FrameRateSingle from '@renderer/components/modals/frame-rate-single.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import ATab from '@renderer/components/a-elements/a-tab.vue'
 
@@ -97,7 +97,7 @@ GlobalStat.ChartSize.update()
               <frame-rate-single :r="FrameRate.save" msg="save" />
 
               <frame-rate-single
-                v-if="Settings.editor.star_rating"
+                v-if="Storage.settings.star_rating"
                 :r="FrameRate.calc_sr"
                 msg="Star Rating"
               />

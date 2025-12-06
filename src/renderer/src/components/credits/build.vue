@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Version } from '@renderer/core/settings'
+import { Version } from '@renderer/core/storage'
 
 defineProps<{
   build: number | string

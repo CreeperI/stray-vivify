@@ -1,22 +1,22 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { useUpdateFrameRate } from '@renderer/core/frame-rates'
 
 const chart_state = GlobalStat.chart_state
-const offset1 = Settings.editor.offset1
+const offset1 = Storage.settings.offset1
 
 const { view_port } = GlobalStat.useSvgSizing()
 
 const chart = Chart.$current
-const mul = Settings.computes.mul
+const mul = Storage.computes.mul
 const current_time = chart.audio.refs.current_ms
 
 const _show_bar_text = computed(
   () =>
-    chart_state.value == 0 || (chart_state.value == 1 && Settings.editor.record_field.show_bar_text)
+    chart_state.value == 0 || (chart_state.value == 1 && Storage.settings.record_field.show_bar_text)
 )
 
 function time_bottom_bar(t: number, time: number, _mul: number) {

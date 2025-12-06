@@ -2,7 +2,7 @@
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import { inject, onMounted, onUnmounted } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { Chart } from '@renderer/core/chart/chart'
 import { useUpdateFrameRate } from '@renderer/core/frame-rates'
 import { GlobalStat } from '@renderer/core/globalStat'
@@ -12,7 +12,7 @@ const chart = Chart.$current
 
 const shown = chart.diff.shown
 
-const lane_width = inject<number>('lane_width') ?? Settings.editor.lane_width
+const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
 function x_of(note: ChartTypeV2.note) {
   return note.lane * lane_width + 56 + 'px'
 }
@@ -23,12 +23,12 @@ function fuck_wheel(e: WheelEvent) {
   if (!e.target) return
 
   const current_time = chart.audio.current_time
-  const meter = Settings.editor.meter
+  const meter = Storage.settings.meter
   const current_bpm = chart.diff.bpm_of_time(current_time)?.bpm ?? 120
 
   chart.audio.set_current_time(chart.diff.nearest(current_time))
   const scr = Math.round((4 / meter) * (60 / current_bpm) * Math.sign(e.deltaY) * 1000)
-  if (Settings.editor.reverse_scroll) {
+  if (Storage.settings.reverse_scroll) {
     chart.audio.set_current_time(chart.audio.current_time + scr)
   } else {
     chart.audio.set_current_time(chart.audio.current_time - scr)

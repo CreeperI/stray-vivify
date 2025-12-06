@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { Chart } from '@renderer/core/chart/chart'
 import { inject } from 'vue'
 
 const chart = Chart.$current
 const playfield = chart.$playfield
-const lane_width = Settings.editor.lane_width
+const lane_width = Storage.settings.lane_width
 
 const shown = playfield.shown
 

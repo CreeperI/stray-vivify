@@ -43,20 +43,9 @@ protocol.registerSchemesAsPrivileged([
   }
 ])
 
-async function on_closing(mw: BrowserWindow) {
-  mw.webContents.send('im-closing')
-  await new Promise<void>((r) => {
-    setTimeout(r, 1000)
-    ipcMain.once('can-close', () => {
-      r()
-    })
-  })
-}
 function listen(win: BrowserWindow) {
   ipcMain.on('window-close', () => {
-    on_closing(win).then(() => {
-      win.close()
-    })
+    win.close()
   })
 
   ipcMain.on('window-min', () => {

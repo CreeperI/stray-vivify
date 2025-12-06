@@ -6,7 +6,7 @@ import { Chart_song } from '@renderer/core/chart/song'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Chart_playfield } from './playfield'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { modal } from '@renderer/core/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { utils } from '@renderer/core/utils'
@@ -53,7 +53,7 @@ export class Chart {
     this.length_end = -1
     this.shown_timing = computed(() => [
       this.audio.refs.current_ms.value,
-      this.audio.refs.current_ms.value + Settings.computes.visible.value
+      this.audio.refs.current_ms.value + Storage.computes.visible.value
     ])
     const me = this
     this.current_bpm = computed({
@@ -94,14 +94,14 @@ export class Chart {
   }
 
   get visible_timing() {
-    return this.audio.current_time + Settings.computes.visible.value
+    return this.audio.current_time + Storage.computes.visible.value
   }
 
   get chart(): ChartTypeV2.final {
     return {
       song: this.song.save(),
       diffs: this.diffs,
-      version: Settings.version
+      version: Storage.version
     }
   }
 
@@ -138,7 +138,7 @@ export class Chart {
         sprite: '???'
       },
       diffs: [Chart_diff.createDiff()],
-      version: Settings.version
+      version: Storage.version
     }
   }
 

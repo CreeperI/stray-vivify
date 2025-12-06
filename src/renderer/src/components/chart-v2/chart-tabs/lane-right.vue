@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { Chart } from '@renderer/core/chart/chart'
 import FnEditor from '@renderer/components/chart-v2/chart-tabs/small/fn-editor.vue'
 import FnTime from '@renderer/components/chart-v2/chart-tabs/small/fn-time.vue'
@@ -11,7 +11,7 @@ const chart = Chart.$current
   <div class="fn-wrapper">
     <fn-editor />
     <fn-time />
-    <div v-if="Settings.editor.debug_window" class="fn-right-debugger">
+    <div v-if="Storage.settings.debug_window" class="fn-right-debugger">
       <div>Active Notes</div>
       <div>{{ chart.diff.shown.value.length }}x</div>
     </div>

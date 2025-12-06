@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { computed, inject } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
@@ -9,8 +9,8 @@ const { note } = defineProps<{
   note: ChartTypeV2.note
 }>()
 const max_width = Chart.$current.diff.max_lane.value
-const mul = Settings.computes.mul
-const lane_width = inject<number>('lane_width') ?? Settings.editor.lane_width
+const mul = Storage.computes.mul
+const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
 
 const borderSrc = () => utils.borderSrc(note, max_width)
 const getSrc = () => utils.getSrc(note, max_width)
@@ -58,7 +58,7 @@ function style() {
 
 function time_bottom(note: { time: number }) {
   return (
-    (note.time - Chart.$current.audio.refs.current_ms.value - Settings.editor.offset1) * mul.value +
+    (note.time - Chart.$current.audio.refs.current_ms.value - Storage.settings.offset1) * mul.value +
     'px'
   )
 }

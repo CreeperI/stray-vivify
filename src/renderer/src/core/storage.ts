@@ -142,6 +142,10 @@ const settings = ref<storages.storage_scheme>({
   version: Version.val,
   shortcut: '',
   username: '???',
+  statistics: {
+    used_time: 0,
+    first_open: Date.now(),
+  }
 })
 
 watch(settings, () => {}, { deep: true })
@@ -151,10 +155,10 @@ const computes = {
   mul_sec: computed(() => settings.value.settings.scale * 200 + 100)
 }
 
-export const Settings = {
+export const Storage = {
   data: settings,
-  settings,
-  get editor(): storages.storage_scheme['settings'] {
+  _ref: settings,
+  get settings(): storages.storage_scheme['settings'] {
     return settings.value.settings
   },
   /**
@@ -178,7 +182,7 @@ export const Settings = {
   },
   init_interval() {
     setInterval(() => {
-      Settings.save()
+      Storage.save()
     }, 10000)
   },
   computes: computes,
@@ -186,4 +190,4 @@ export const Settings = {
 }
 
 // @ts-ignore
-window.settings = Settings
+window.settings = Storage

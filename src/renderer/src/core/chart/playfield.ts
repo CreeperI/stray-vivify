@@ -1,6 +1,6 @@
 import { ChartTypeV2, storages } from '@preload/types'
 import { Ref, ref, shallowRef } from 'vue'
-import { Settings } from '../settings'
+import { Storage } from '../storage'
 import { utils } from '../utils'
 import { Chart } from './chart'
 import { Chart_diff } from './diff'
@@ -46,12 +46,12 @@ export class Chart_playfield {
     this._click_time = []
     this.keydown_count = [0, 0, 0, 0]
     this.empty_key = 0
-    this.offset = Settings.editor.offset2
+    this.offset = Storage.settings.offset2
 
     this.shown = shallowRef([])
     this.key_pressed = [false, false, false, false]
     this.holding = []
-    this.timing = Settings.editor.judgement
+    this.timing = Storage.settings.judgement
 
     this.max_cps = 0
     this.max_combo = 0
@@ -120,7 +120,7 @@ export class Chart_playfield {
 
   fuck_shown(t: number) {
     if (Math.abs(t - this.last_update) < 1000) return
-    const visible = [t - 1000, t + Settings.computes.visible.value + 1500] as [number, number]
+    const visible = [t - 1000, t + Storage.computes.visible.value + 1500] as [number, number]
     this.shown.value = this.notes.filter((x) => {
       if (utils.between(x.time, visible)) return true
       if ('len' in x) return x.time < visible[0] && x.time + x.len > visible[0]
@@ -432,7 +432,7 @@ export class Chart_playfield {
   spawn_particle(lvl: number, width: number, lane: number) {
     const container = document.getElementById('svg-particle') as SVGGElement | null
     if (container == null) return
-    const lane_width = Settings.editor.lane_width
+    const lane_width = Storage.settings.lane_width
     const color = ['#ff0', '#ff0', '#7f3', '#54b9ff', '#f00'][Math.abs(lvl)]
     const particle = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
     particle.id = Math.floor(Math.random() * 1000).toFixed(0)

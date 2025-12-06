@@ -1,7 +1,7 @@
 import { Chart } from '@renderer/core/chart/chart'
 import { Ref, watch } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { notify } from '@renderer/core/notify'
 
@@ -37,7 +37,7 @@ export class HitSoundSystem {
     this.activeVoices = this.activeVoices.filter((v) => v.endTime > now)
 
     const last = this.last_trigger
-    const current = this.chart.audio.current_time - Settings.editor.offset3
+    const current = this.chart.audio.current_time - Storage.settings.offset3
 
     // Find note in current time window
     const hitNote = this.shown.value.find(
@@ -78,7 +78,7 @@ export class HitSoundSystem {
       this.audioContext = new AudioContext()
       this.gainNode = this.audioContext.createGain()
       watch(
-        () => Settings.editor.hit_volume,
+        () => Storage.settings.hit_volume,
         (v) => {
           if (this.gainNode) this.gainNode.gain.value = v / 100
           else notify.error('GainNode炸了')

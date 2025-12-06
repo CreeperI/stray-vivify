@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { useUpdateFrameRate } from '@renderer/core/frame-rates'
@@ -10,33 +10,33 @@ const chart = Chart.$current
 
 const {view_port, bar_length} = GlobalStat.useSvgSizing()
 const current_time = chart.audio.refs.current_ms
-const mul = Settings.computes.mul
+const mul = Storage.computes.mul
 const bb_list = chart.diff.shown_t
 
 const __bar_length = computed(() => {
-  if (chart.diff.sv_bind.on_sv.value) return Settings.editor.sv.beat_line_width
-  return Settings.editor.sprites.bar_length
+  if (chart.diff.sv_bind.on_sv.value) return Storage.settings.sv.beat_line_width
+  return Storage.settings.sprites.bar_length
 })
 const __bar_op = computed(() => {
-  if (chart.diff.sv_bind.on_sv.value) return Settings.editor.sv.beat_line_opacity / 100
-  return Settings.editor.sprites.bar_op / 100
+  if (chart.diff.sv_bind.on_sv.value) return Storage.settings.sv.beat_line_opacity / 100
+  return Storage.settings.sprites.bar_op / 100
 })
 const _show_beat_line = computed(() => {
   if (chart_state.value == 0) {
-    if (chart.diff.sv_bind.on_sv.value) return Settings.editor.sv.show_beat_line
+    if (chart.diff.sv_bind.on_sv.value) return Storage.settings.sv.show_beat_line
     return true
   } else if (chart_state.value == 1) {
-    if (Settings.editor.record_field.show_beat_line) return true
+    if (Storage.settings.record_field.show_beat_line) return true
   }
   return false
 })
-const offset1 = Settings.editor.offset1
+const offset1 = Storage.settings.offset1
 function time_bottom_bar(t: number, time: number, _mul: number) {
-  return view_port[3] - (time - t - offset1) * _mul - 80 - Settings.editor.sprites.bar_dy
+  return view_port[3] - (time - t - offset1) * _mul - 80 - Storage.settings.sprites.bar_dy
 }
 
 function color_of_level(lvl: number): string {
-  return Settings.editor.sprites['bar_color' + lvl] ?? '#ffffff'
+  return Storage.settings.sprites['bar_color' + lvl] ?? '#ffffff'
 }
 useUpdateFrameRate('svg-beat-line')
 </script>

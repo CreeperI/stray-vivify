@@ -5,7 +5,7 @@ import '@renderer/styles.css'
 import { createModal } from '@kolirt/vue-modal'
 import { ShortCuts } from '@renderer/core/shortcut'
 import { Invoke, load_ipc_handlers } from '@renderer/core/ipc'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Log } from '@renderer/core/log'
 import { Chart } from '@renderer/core/chart/chart'
@@ -39,19 +39,19 @@ function update_per_frame() {
   })
 }
 async function main() {
-  const r = await Settings.set_from_storage()
-  ShortCuts.fromJson(Settings.data.value.shortcut)
+  const r = await Storage.set_from_storage()
+  ShortCuts.fromJson(Storage.data.value.shortcut)
   await GlobalStat.update_all_chart()
   await GlobalStat.check_dev()
   await Invoke('leave-fullscreen')
 
-  Settings.init_interval()
+  Storage.init_interval()
   Log.handle()
   ShortCuts.handle()
   GlobalStat.MouseTracker.init()
 
   GlobalStat.Intervals.on(1e4, () => {
-    if (Settings.editor.auto_save) Chart.current?.save()
+    if (Storage.settings.auto_save) Chart.current?.save()
     Chart.current?.diff.update_tick_list()
     Chart.current?.diff.update_sr()
   })

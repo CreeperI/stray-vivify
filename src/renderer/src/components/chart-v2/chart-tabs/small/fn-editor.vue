@@ -1,23 +1,23 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import ARange from '@renderer/components/a-elements/a-range.vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 
 const scale = computed({
   get() {
-    return Settings.editor.scale
+    return Storage.settings.scale
   },
   set(v) {
-    Settings.editor.scale = v
+    Storage.settings.scale = v
   }
 })
 const meter = computed({
   get() {
-    return Settings.editor.meter
+    return Storage.settings.meter
   },
   set(v) {
-    Settings.editor.meter = v
+    Storage.settings.meter = v
   }
 })
 </script>

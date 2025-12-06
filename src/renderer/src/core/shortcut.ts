@@ -1,4 +1,4 @@
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { ref } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
@@ -184,7 +184,7 @@ export class ShortCuts {
     this._ctrl = ctrl
     this._alt = alt
     this._shift = shift
-    Settings.settings.value.shortcut = ShortCuts.to_string()
+    Storage._ref.value.shortcut = ShortCuts.to_string()
   }
 
   is(k: string, alt = false, ctrl = false, shift = false) {
@@ -215,13 +215,13 @@ export class ShortCuts {
 new ShortCuts('redo', 'y', () => Chart.current?.diff.execute_redo(), false, true)
 new ShortCuts('undo', 'z', () => Chart.current?.diff.execute_undo(), false, true)
 
-new ShortCuts('w1', '1', () => Settings.note.set_width(1))
-new ShortCuts('w2', '2', () => Settings.note.set_width(2))
-new ShortCuts('w3', '3', () => Settings.note.set_width(3))
-new ShortCuts('w4', '4', () => Settings.note.set_width(4))
-new ShortCuts('s', 'q', () => Settings.note.change_s())
-new ShortCuts('mine', 'w', () => Settings.note.change_b())
-new ShortCuts('hold', 'e', () => Settings.note.change_hold())
+new ShortCuts('w1', '1', () => Storage.note.set_width(1))
+new ShortCuts('w2', '2', () => Storage.note.set_width(2))
+new ShortCuts('w3', '3', () => Storage.note.set_width(3))
+new ShortCuts('w4', '4', () => Storage.note.set_width(4))
+new ShortCuts('s', 'q', () => Storage.note.change_s())
+new ShortCuts('mine', 'w', () => Storage.note.change_b())
+new ShortCuts('hold', 'e', () => Storage.note.change_hold())
 new ShortCuts('pause', ' ', () => {
   if (GlobalStat.chart_state.value != 0) return
   Chart.current?.audio.play_pause()

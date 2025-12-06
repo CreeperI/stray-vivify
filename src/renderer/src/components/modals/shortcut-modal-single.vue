@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { ShortCuts } from '@renderer/core/shortcut'
 import { ref, watch } from 'vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 
 const { short, msg } = defineProps<{
   msg: string
@@ -14,7 +14,7 @@ const parsed = ref(short.parse())
 watch(data, (v) => {
   short.set_data(v)
   parsed.value = short.parse()
-  Settings.save()
+  Storage.save()
 })
 const is_listen = ref(false)
 function listen_keyboard() {

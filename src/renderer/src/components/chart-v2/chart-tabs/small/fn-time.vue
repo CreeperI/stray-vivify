@@ -3,7 +3,7 @@
 import ARange from '@renderer/components/a-elements/a-range.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 
 const chart = Chart.$current
 const { current_ms, writable_play_rate, play_rate, writable_current_second } = chart.audio.refs
@@ -16,10 +16,10 @@ const { current_ms, writable_play_rate, play_rate, writable_current_second } = c
     <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
     <label @click="writable_play_rate = 1">播放速度:{{ play_rate }}x</label>
     <a-range v-model="writable_play_rate" max="2" min="0.25" step="0.05" />
-    <label v-if="Settings.editor.hit_sound">打击音量: {{ Settings.editor.hit_volume }}</label>
+    <label v-if="Storage.settings.hit_sound">打击音量: {{ Storage.settings.hit_volume }}</label>
     <a-range
-      v-if="Settings.editor.hit_sound"
-      v-model="Settings.editor.hit_volume"
+      v-if="Storage.settings.hit_sound"
+      v-model="Storage.settings.hit_volume"
       max="100"
       min="0"
       step="1"

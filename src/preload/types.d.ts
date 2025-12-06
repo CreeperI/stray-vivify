@@ -639,12 +639,17 @@ export namespace storages {
     }
     color_stats:boolean
   }
+  export interface statistics {
+    first_open: number
+    used_time: number
+  }
 
   export interface storage_scheme {
     settings: settings
     version: number
     shortcut: string
     username: string
+    statistics: statistics
   }
 }
 export type charts_data = {

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { computed, inject } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
@@ -11,7 +11,7 @@ const { note } = defineProps<{
 
 const chart = Chart.$current
 const max_width = chart.diff.max_lane.value
-const lane_width = inject<number>('lane_width') ?? Settings.editor.lane_width
+const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
 const current_ms = chart.audio.refs.current_ms
 const time_bottom = chart.diff.sv_bind.time_bottom
 

@@ -2,7 +2,7 @@
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
@@ -18,12 +18,12 @@ const not_playing_class = computed(
     ''
 )
 
-const lane_width = inject<number>('lane_width') ?? Settings.editor.lane_width
+const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
 const svg_width = 4 * lane_width + 2 * 50 + 12
-const offset1 = Settings.editor.offset1
+const offset1 = Storage.settings.offset1
 
 const shown = chart.diff.shown
-const mul = Settings.computes.mul
+const mul = Storage.computes.mul
 const current_time = chart.audio.refs.current_ms
 
 function same_note(a: ChartTypeV2.note, b: ChartTypeV2.note) {
@@ -59,18 +59,18 @@ const pending_note = computed(() => {
     })
   }
   return [
-    Settings.note.h
+    Storage.note.h
       ? ({
           time: pending_time.value,
           lane: pending_lane.value,
-          width: Settings.note.w,
+          width: Storage.note.w,
           ani: [],
           len: pending_len.value
         } as ChartTypeV2.hold_note)
       : ({
           time: pending_time.value,
           lane: pending_lane.value,
-          width: Settings.note.w,
+          width: Storage.note.w,
           ani: [],
           snm: pending_snm.value
         } as ChartTypeV2.normal_note)
@@ -86,7 +86,7 @@ watch(chart.audio.refs.paused, (v) => {
 
 function update_pending_display(_trigger: 'enter' | 'leave' | 'note') {
   if (GlobalStat.chart_state.value != 0) return
-  if (Settings.note.w == 0) pending_display.value = false
+  if (Storage.note.w == 0) pending_display.value = false
   else if (_trigger == 'note') {
     if (pending_hold_fixed) return
     pending_display.value = false
@@ -119,7 +119,7 @@ function update_pending(e: MouseEvent) {
   let lane: number = Math.min(3, e.offsetX / svg_width)
   const width = dragging.value
     ? utils.range(...dragging.value.map((x) => [x.lane, x.lane + x.width]).flat())
-    : Settings.note.w
+    : Storage.note.w
   switch (width) {
     case 2:
       let lane2 = lane * 4
@@ -138,7 +138,7 @@ function update_pending(e: MouseEvent) {
   }
   pending_time.value = mouse_time
   pending_lane.value = lane
-  pending_snm.value = Settings.note.snm
+  pending_snm.value = Storage.note.snm
 
   pending_display.value = pending_time.value >= 0
 }
@@ -146,9 +146,9 @@ function update_pending(e: MouseEvent) {
 function on_click() {
   if (GlobalStat.chart_state.value != 0) return
   if (clipboard.value.length) return
-  if (Settings.note.w == 0) return
+  if (Storage.note.w == 0) return
 
-  if (Settings.note.hold.value) {
+  if (Storage.note.hold.value) {
     if (pending_hold_fixed) {
       if (!chart.diff.add_notes(pending_note.value)) notify.error('添加note失败。')
       pending_len.value = 0
@@ -239,7 +239,7 @@ const select_rect = ref({
 
 function on_mouse_down(e: MouseEvent) {
   if (e.target instanceof HTMLImageElement) return
-  if (Settings.note.w != 0) return
+  if (Storage.note.w != 0) return
   if (clipboard.value.length) {
     NoteClipboard.paste()
     return
@@ -364,12 +364,12 @@ function fuck_wheel(e: WheelEvent) {
   if (!e.target) return
 
   const current_time = chart.audio.current_time
-  const meter = Settings.editor.meter
+  const meter = Storage.settings.meter
   const current_bpm = chart.diff.bpm_of_time(current_time)?.bpm ?? 120
 
   chart.audio.set_current_time(chart.diff.nearest(current_time))
   const scr = Math.round((4 / meter) * (60 / current_bpm) * Math.sign(e.deltaY) * 1000)
-  if (Settings.editor.reverse_scroll) {
+  if (Storage.settings.reverse_scroll) {
     chart.audio.set_current_time(chart.audio.current_time + scr)
   } else {
     chart.audio.set_current_time(chart.audio.current_time - scr)

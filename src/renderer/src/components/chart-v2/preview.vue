@@ -4,7 +4,7 @@ import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { utils } from '@renderer/core/utils'
-import { Settings, Version } from '@renderer/core/settings'
+import { Storage, Version } from '@renderer/core/storage'
 import AImg from '@renderer/components/a-elements/a-img.vue'
 import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter.vue'
 import { notify } from '@renderer/core/notify'
@@ -18,8 +18,8 @@ function onkeydown(e: KeyboardEvent) {
     GlobalStat.chart_state.value = 0
   }
 }
-const setting = computed(() => Settings.data.value.settings.record_field)
-const editor = computed(() => Settings.editor)
+const setting = computed(() => Storage.data.value.settings.record_field)
+const editor = computed(() => Storage.settings)
 const current_time = chart.audio.refs.current_ms
 const length = chart.length
 const current_timing = chart.diff.current_timing
@@ -88,7 +88,7 @@ onMounted(() => {
   chart.audio.set_current_time(-5000)
   notify.normal('按空格以开始。')
   start_record()
-  Settings.data.value.settings.meter = 1
+  Storage.data.value.settings.meter = 1
   document.addEventListener('keydown', onkeydown)
 
 })

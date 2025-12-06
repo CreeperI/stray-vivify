@@ -2,7 +2,7 @@ import { ChartTypeV2 } from '@preload/types'
 import { computed, ComputedRef, nextTick, Ref, ref, toRaw, watch } from 'vue'
 import { Chart, ms } from './chart'
 import { utils } from '../utils'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { notify } from '@renderer/core/notify'
 import { FrameRate } from '@renderer/core/frame-rates'
 import { Chart_Diff_SV } from '@renderer/core/chart/diff-sv'
@@ -140,7 +140,7 @@ export class Chart_diff {
       }
     )
     watch(
-      () => Settings.editor.meter,
+      () => Storage.settings.meter,
       () => {
         this.update_beat_list()
         this.update_t(this.visible)
@@ -217,7 +217,7 @@ export class Chart_diff {
   get visible(): [number, number] {
     return [
       this.chart.audio.current_time - 1000,
-      this.chart.audio.current_time + Settings.computes.visible.value + 2500
+      this.chart.audio.current_time + Storage.computes.visible.value + 2500
     ]
   }
 
@@ -229,7 +229,7 @@ export class Chart_diff {
         diff_name: '',
         diff1: ['Finale', 'Encore', 'Backstage', 'Terminal'][Math.floor(Math.random() * 4)],
         diff2: Math.floor(Math.random() * 20) + '+',
-        charter: Settings.data.value.username ?? '???'
+        charter: Storage.data.value.username ?? '???'
       },
       ani: [],
       sv: []
@@ -320,7 +320,7 @@ export class Chart_diff {
 
   calc_max_lane() {
     this.max_lane.value = Math.max(
-      Settings.editor.min_lane,
+      Storage.settings.min_lane,
       Math.max(...this.notes.map((n) => n.lane + n.width - 1)) + 1
     )
   }
@@ -350,7 +350,7 @@ export class Chart_diff {
     for (let i = 0; i < v.length; i++) {
       const timing = v[i]
       const end = this.timing_end_of(timing, v, this.chart.length)
-      const den = Settings.editor.meter
+      const den = Storage.settings.meter
 
       // Available snap divisors that are <= den, in order (coarsest to finest)
       const mod = [1, 4, 8, 16, 32].filter((snap) => snap <= den)
@@ -556,7 +556,7 @@ export class Chart_diff {
       if (v.len == 0) v = { time: v.time, lane: v.lane, width: 1, ani: [], snm: 0 }
     }
     const nearest = this.shown.value.find(
-      (x) => Math.abs(x.time - v.time) <= Settings.editor.nearest
+      (x) => Math.abs(x.time - v.time) <= Storage.settings.nearest
     )
     if (nearest) {
       v.time = nearest.time
@@ -572,7 +572,7 @@ export class Chart_diff {
     const bpm = this.bpm_of_time(t)
     if (!bpm) throw new Error('No bpm found???')
     const passed = t - bpm.time
-    const per_beat = (240 / (bpm.bpm * Settings.editor.meter)) * 1000
+    const per_beat = (240 / (bpm.bpm * Storage.settings.meter)) * 1000
     if (round) return Math.round(Math.round(passed / per_beat) * per_beat + bpm.time)
     else return Math.round(Math.floor(passed / per_beat) * per_beat + bpm.time)
   }
@@ -623,7 +623,7 @@ export class Chart_diff {
   }
 
   update_t(visible: [number, number]) {
-    const is_circle = Settings.editor.record_field.show_circles
+    const is_circle = Storage.settings.record_field.show_circles
     this.shown_t.value = {
       bar_list: this.bar_list
         .map((x, dx) => [x, dx] as [number, number])
@@ -665,7 +665,7 @@ export class Chart_diff {
 
   calc_density() {
     FrameRate.calc_density.start()
-    const max_count = Settings.editor.density_data_count
+    const max_count = Storage.settings.density_data_count
     const per_length = this.chart.length / max_count
     const d: number[] = []
     for (let i = 0; i < this.chart.length; i += per_length) {
@@ -681,7 +681,7 @@ export class Chart_diff {
   update() {
     this.fuck_shown(this.chart.audio.current_time)
     if (!this.chart.audio.paused) {
-      if (Settings.editor.hit_sound) this.play_hit()
+      if (Storage.settings.hit_sound) this.play_hit()
     }
   }
 
@@ -716,7 +716,7 @@ export class Chart_diff {
   }
 
   update_sr() {
-    if (!Settings.editor.star_rating) return
+    if (!Storage.settings.star_rating) return
     this.sr.value = calculateChartStats(toRaw(this.bound.value), this.chart.length)
   }
 
@@ -796,7 +796,7 @@ export class Chart_diff {
   private _fuck_shown(t: number) {
     FrameRate.fuck_shown.start()
     this.update_shown_flag.value = true
-    const visible = [t - 2000, t + Settings.computes.visible.value + 2500] as [number, number]
+    const visible = [t - 2000, t + Storage.computes.visible.value + 2500] as [number, number]
     this.shown.value = this.notes.filter((x) => {
       return this.isVisible(x, visible)
     })

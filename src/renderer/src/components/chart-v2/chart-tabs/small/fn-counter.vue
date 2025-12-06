@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { Chart } from '@renderer/core/chart/chart'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { ChartTypeV2 } from '@preload/types'
 import StatLine from '@renderer/components/chart-v2/chart-tabs/small/stat-line.vue'
@@ -11,7 +11,7 @@ const counts = chart.diff.counts
 const sr = chart.diff.sr
 
 function getTotalStyle(name) {
-  if (!Settings.settings.value.settings.colorize_star_rating) {
+  if (!Storage._ref.value.settings.colorize_star_rating) {
     return { style: {} }
   }
   const val = sr.value[name]
@@ -25,7 +25,7 @@ function getTotalStyle(name) {
 function getStatStyle(statName: keyof ChartTypeV2.SongStats) {
   const val = sr.value[statName]
 
-  if (!Settings.settings.value.settings.colorize_star_rating) {
+  if (!Storage._ref.value.settings.colorize_star_rating) {
     return { stat_style: {}, isRainbow: false }
   }
 
@@ -84,7 +84,7 @@ function getStatStyle(statName: keyof ChartTypeV2.SongStats) {
       <div>{{ counts.main_bpm }})</div>
     </div>
 
-    <div v-if="Settings.editor.star_rating" class="counter-sr">
+    <div v-if="Storage.settings.star_rating" class="counter-sr">
       <div @click="chart.diff.update_sr()">
         <word-helper :msg="`SR ${(sr.total_v2 / 75).toFixed(2)}*`" dec="开玩笑的"></word-helper>
       </div>

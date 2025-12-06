@@ -1,17 +1,17 @@
 <script lang="ts" setup>
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { Chart } from '@renderer/core/chart/chart'
 import { computed } from 'vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 
-const offset1 = Settings.editor.offset1
+const offset1 = Storage.settings.offset1
 
 const {view_port, svg_width} = GlobalStat.useSvgSizing()
 
 const x = svg_width - 25
 
 const chart = Chart.$current
-const mul = Settings.computes.mul
+const mul = Storage.computes.mul
 const current_time = chart.audio.refs.current_ms
 
 // const bar_offset = (((lane_width - 130) / 130) * 43) / 4
@@ -19,9 +19,9 @@ const bar_offset = 0
 const minus =
   view_port[3] - 80 - bar_offset - parseFloat(getComputedStyle(document.documentElement).fontSize)
 const show_ticks = computed(() => {
-  if (GlobalStat.chart_state.value == 0) return Settings.editor.show_ticks
+  if (GlobalStat.chart_state.value == 0) return Storage.settings.show_ticks
   else if (GlobalStat.chart_state.value == 1) {
-    return Settings.editor.record_field.show_circles ? false : Settings.editor.record_field.show_ticks
+    return Storage.settings.record_field.show_circles ? false : Storage.settings.record_field.show_ticks
   } else return false
 })
 function time_bottom_bar(t: number, time: number, _mul: number) {

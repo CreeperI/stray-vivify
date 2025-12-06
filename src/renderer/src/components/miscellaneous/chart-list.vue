@@ -7,7 +7,7 @@ import { Chart } from '@renderer/core/chart/chart'
 import { charts_data } from '@preload/types'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { modal } from '@renderer/core/modal'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import AImg from '@renderer/components/a-elements/a-img.vue'
 
 const shown = ref(GlobalStat.all_chart)
@@ -38,7 +38,7 @@ function open_proj(id: string) {
 }
 
 function delete_proj(id: string, name: string) {
-  if (!Settings.settings.value.settings.delete_no_confirm) {
+  if (!Storage._ref.value.settings.delete_no_confirm) {
     modal.ConfirmModal.show({
       msg: `确定要删除${name} (id: ${id})吗？不可以撤销的哦！<br><small>设置中可以关闭此确认。</small>`
     })

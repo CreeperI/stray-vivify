@@ -1,7 +1,7 @@
 import { Chart } from '@renderer/core/chart/chart'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { ref, Ref } from 'vue'
 
@@ -55,7 +55,7 @@ export class Chart_Diff_SV {
   }
 
   get mul() {
-    return Settings.computes.mul.value
+    return Storage.computes.mul.value
   }
 
   static new_sv(type: number) {

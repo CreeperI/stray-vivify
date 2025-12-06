@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
 
@@ -19,7 +19,7 @@ const value = computed(() => {
 function getStatStyle(statName: keyof ChartTypeV2.SongStats) {
   const val = sr.value[statName]
 
-  if (!Settings.settings.value.settings.color_stats) {
+  if (!Storage._ref.value.settings.color_stats) {
     const width = val > 400 ? '100%' : (val % 200) / 2 + '%'
     return {
       isRainbow: false,

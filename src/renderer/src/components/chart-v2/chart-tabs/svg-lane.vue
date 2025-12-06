@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import SvgBarText from '@renderer/components/chart-v2/svg-lane/svg-bar-text.vue'
 import SvgBpmText from '@renderer/components/chart-v2/svg-lane/svg-bpm-text.vue'
 import SvgBeatLine from '@renderer/components/chart-v2/svg-lane/svg-beat-line.vue'
@@ -13,7 +13,7 @@ import SvgSection from '@renderer/components/chart-v2/svg-lane/svg-section.vue'
 import { computed, provide } from 'vue'
 
 const svg_sizing = GlobalStat.SvgSizing
-const { lane_width = Settings.editor.lane_width, only_note = false } = defineProps<{
+const { lane_width = Storage.settings.lane_width, only_note = false } = defineProps<{
   lane_width?: number
   only_note?: boolean
 }>()
@@ -27,7 +27,7 @@ svg_sizing.view_port = [0, 0, svg_sizing.svg_width, window.screen.height]
 const _px = svg_sizing.svg_width + 'px'
 const rkey = utils.refresh_key
 
-const bar_or_section = computed(() => Settings.editor.bar_or_section)
+const bar_or_section = computed(() => Storage.settings.bar_or_section)
 
 provide('lane_width', lane_width)
 provide('d_height', (lane_width / 130 - 1) * 43 * 0.5)

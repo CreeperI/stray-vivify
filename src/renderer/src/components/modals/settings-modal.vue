@@ -2,7 +2,7 @@
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import AButton from '@renderer/components/a-elements/a-button.vue'
-import { Settings } from '@renderer/core/settings'
+import { Storage } from '@renderer/core/storage'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import SettingHeader from '@renderer/components/modals/setting-header.vue'
 import AColorInput from '@renderer/components/a-elements/a-color-input.vue'
@@ -11,7 +11,7 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Invoke } from '@renderer/core/ipc'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 
-const r = Settings.settings
+const r = Storage._ref
 </script>
 
 <template>
