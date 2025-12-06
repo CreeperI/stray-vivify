@@ -607,7 +607,6 @@ export namespace storages {
     }
 
     star_rating: boolean
-    colorize_star_rating:boolean
     min_lane: number
 
     bar_or_section: boolean
@@ -639,6 +638,7 @@ export namespace storages {
       factory_color: string
       factory_opacity: number
     }
+    color_stats:boolean
   }
 
   export interface storage_scheme {

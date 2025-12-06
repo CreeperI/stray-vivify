@@ -1,5 +1,5 @@
 import { ChartTypeV2 } from '@preload/types'
-import { computed, ComputedRef, nextTick, Ref, ref, toRaw, vModelText, watch } from 'vue'
+import { computed, ComputedRef, nextTick, Ref, ref, toRaw, watch } from 'vue'
 import { Chart, ms } from './chart'
 import { utils } from '../utils'
 import { Settings } from '@renderer/core/settings'
@@ -721,7 +721,7 @@ export class Chart_diff {
   }
 
   get_beat_string(time: number) {
-    const x = this.bar_list.findLastIndex(v => v <= time) ?? 0
+    const x = this.bar_list.findLastIndex((v) => v <= time) ?? 0
     const t = this.bar_list[x]
 
     // 2. 获取该小节的 timing 信息（使用小节起始时刻）
@@ -735,7 +735,7 @@ export class Chart_diff {
 
     const yClean = parseFloat(beatOffset.toFixed(2))
 
-    return `${x +1 }:${yClean}/${num}`
+    return `${x + 1}:${yClean}/${num}`
   }
 
   /**

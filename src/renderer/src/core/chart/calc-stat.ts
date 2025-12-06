@@ -15,15 +15,15 @@ export function calculateChartStats(
   songLengthMs: number
 ): ChartTypeV2.SongStats {
   FrameRate.calc_sr.start()
-  let noteStat = 0,
-    speedStat = 0,
-    techStat = 0,
-    fillStat = 0,
-    multiStat = 0,
-    totalV2 = 0,
-    totalV3 = 0
+  let noteStat: number,
+    speedStat :number,
+    techStat :number,
+    fillStat :number,
+    multiStat :number,
+    totalV2 :number,
+    totalV3 :number
   //基础信息声明
-  let bpmList: number[][] = []
+  let bpmList: [number, number][] = []
   for (const bpmObj of diff.timing) {
     bpmList.push([bpmObj.time, bpmObj.bpm])
   }
@@ -66,19 +66,6 @@ export function calculateChartStats(
   let diffmult = GetDiffMult(diff.meta)
   let notesnopiece = combo - holdpiece
   let basepower = (((notesnopiece + data.averageDensity + multi * 0.75) / (length / 3)) * 4) / 1.25
-  // const difficultyData = {
-  //     note: data.normalNotes,
-  //     hold: data.holdNotes,
-  //     bumper: data.bumpers,
-  //     holdPiece: data.holdPieces,
-  //     combo: data.noteCount,
-  //     multi: data.multiNoteCount,
-  //     length: songLengthMs,
-  //     diffMult: GetDiffMult(diff.meta),
-  //     notesNoPiece: notesnopiece,
-  //     basePower: basepower
-  //   };
-  //   console.log(diff)
 
   noteStat = Math.pow(
     Math.max((note / 1.5 - multi / 2.5) / (length / 20) + basepower - 20, 0),
@@ -98,7 +85,6 @@ export function calculateChartStats(
     noteStat * 0.8 + techStat * 0.8 + speedStat + multiStat * 0.5 + fillStat * 0.5,
     1 + diffmult / 100
   )
-  console.log(data)
   FrameRate.calc_sr.end()
   return {
     note: noteStat,
@@ -112,7 +98,7 @@ export function calculateChartStats(
 }
 
 //辅助函数
-function GetAverageBPM(bpmList): bpm {
+function GetAverageBPM(bpmList: [number, number][]): bpm {
   let maxLength = -1
   let averageBPM = 0
   for (let i = 0; i < bpmList.length - 1; i++) {
@@ -193,8 +179,8 @@ class SongData {
     return bpmList[bpmList.length - 1].bpm
   }
 
-  SetBucketLength(BPM: bpm, songLength: time_sec) {
-    if (BPM >= 300) BPM /= 2
+  SetBucketLength(_BPM: bpm, songLength: time_sec) {
+    // if (BPM >= 300) _BPM /= 2
     this.songLength = songLength
     this.bucketLength = 1000
     this.buckets = new Array(this.songLength).fill(0)
@@ -202,12 +188,12 @@ class SongData {
   }
 
   //I have no idea what arg1 stands for
-  CalculateDensity(noteMs: time_ms, arg1) {
+  CalculateDensity(noteMs: time_ms, arg1: number) {
     let index = Math.floor(noteMs / this.bucketLength)
 
     if (index < 0) return
 
-    for (var i = index; i < index + 4; i++) {
+    for (let i = index; i < index + 4; i++) {
       if (i < this.buckets.length) this.buckets[i] += arg1
     }
 
@@ -240,8 +226,8 @@ class SongData {
     if (this.holdNoteTimings.length > 0) {
       let newTimings: number[][] = []
 
-      for (var i = 0; i < this.holdNoteTimings.length; i++) {
-        var timing = this.holdNoteTimings[i]
+      for (let i = 0; i < this.holdNoteTimings.length; i++) {
+        const timing = this.holdNoteTimings[i]
 
         if (timing[1] >= noteTime) newTimings.push(timing)
 

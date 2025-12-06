@@ -110,6 +110,7 @@ const settings = ref<storages.storage_scheme>({
       bar: true
     },
     star_rating: false,
+    color_stats: false,
     min_lane: 4,
     bar_or_section: false,
     hit_volume: 100,
@@ -175,7 +176,7 @@ export const Settings = {
   get version() {
     return settings.value.version
   },
-  init_invertal() {
+  init_interval() {
     setInterval(() => {
       Settings.save()
     }, 10000)

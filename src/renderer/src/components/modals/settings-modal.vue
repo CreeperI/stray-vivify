@@ -71,7 +71,7 @@ const r = Settings.settings
         </div>
         <div>
           <div>彩色Stats</div>
-          <a-checkbox v-model="r.settings.colorize_star_rating" />
+          <a-checkbox v-model="r.settings.color_stats" />
         </div>
         <setting-header msg="note分组" />
         <div>

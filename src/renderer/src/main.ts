@@ -45,7 +45,7 @@ async function main() {
   await GlobalStat.check_dev()
   await Invoke('leave-fullscreen')
 
-  Settings.init_invertal()
+  Settings.init_interval()
   Log.handle()
   ShortCuts.handle()
   GlobalStat.MouseTracker.init()
