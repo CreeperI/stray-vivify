@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { GlobalStat } from '@renderer/core/globalStat'
+import { WordHelper } from '@renderer/core/word-helper'
 
-const { word, shown, position } = GlobalStat.WordHelper
+const { word, shown, position } = WordHelper
 </script>
 
 <template>

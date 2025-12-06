@@ -1,9 +1,7 @@
-import { inject, reactive, Ref, ref, watch } from 'vue'
+import { inject, Ref, ref, watch } from 'vue'
 import { charts_data, ChartTypeV2 } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
 import { Storage } from '@renderer/core/storage'
-import { utils } from '@renderer/core/utils'
-import { modal } from '@renderer/core/modal'
 
 export namespace GlobalStat {
   type routes = 'start' | 'wait' | 'editor'
@@ -43,23 +41,6 @@ export namespace GlobalStat {
     chart_state.value = v
   }
 
-  export namespace WordHelper {
-    export const position = ref([0, 0])
-    export const word = ref('')
-    export const shown = ref(false)
-
-    export function call_helper(pos: [number, number], w: string) {
-      position.value = pos
-      word.value = w
-      shown.value = true
-    }
-
-    export function hide_helper() {
-      shown.value = false
-      word.value = ''
-    }
-  }
-
   export namespace MouseTracker {
     export const mouse_pos = ref({ x: 0, y: 0 })
     function listener(e: MouseEvent) {
@@ -81,96 +62,6 @@ export namespace GlobalStat {
       )
     }
   }
-
-  export namespace CheckSkin {
-    import keyof = utils.keyof
-    export const status = reactive({
-      '1.png': 0,
-      '1b.png': 0,
-      '1lh.png': 0,
-      '1rh.png': 0,
-      '2b.png': 0,
-      '2l.png': 0,
-      '2lh.png': 0,
-      '2m.png': 0,
-      '2mh.png': 0,
-      '2r.png': 0,
-      '2rh.png': 0,
-      '2sl.png': 0,
-      '2sm.png': 0,
-      '2sr.png': 0,
-      '3b.png': 0,
-      '3l.png': 0,
-      '3lh.png': 0,
-      '3r.png': 0,
-      '3rh.png': 0,
-      '3sl.png': 0,
-      '3sr.png': 0,
-      '4.png': 0,
-      '4b.png': 0,
-      '4h.png': 0,
-      '4s.png': 0
-    })
-
-    export async function check_skin() {
-      let is_missing = false
-      for (const key of keyof(status)) {
-        try {
-          await fetch('stray:/__skin__/' + key)
-          status[key] = 2
-        } catch (e) {
-          is_missing = true
-          status[key] = 1
-        }
-      }
-      if (is_missing) {
-        modal.MissingSkinModal.show({})
-      }
-    }
-  }
-
-  class _IntervalClass {
-    func: [number, (() => any)[]][]
-    private time_ids: [number, number][]
-    constructor() {
-      this.func = []
-      this.time_ids = []
-    }
-
-    on(interval: number, fn: () => any) {
-      const funcs = this.func.find((x) => x[0] == interval)
-      if (funcs) funcs[1].push(fn)
-      else {
-        this.func.push([interval, [fn]])
-        this.start_interval(interval)
-      }
-    }
-
-    off(int: number, fn: () => any) {
-      const funcs = this.func.find((x) => x[0] == int)
-      if (funcs) {
-        const index = funcs[1].indexOf(fn)
-        if (index > -1) funcs[1].splice(index, 1)
-      }
-      if (funcs && funcs[1].length == 0) {
-        this.func = this.func.filter((x) => x[0] != int)
-        clearInterval(this.time_ids.find((x) => x[0] == int)?.[1])
-        this.time_ids = this.time_ids.filter((x) => x[0] != int)
-      }
-    }
-
-    private start_interval(interval: number) {
-      this.time_ids.push([
-        interval,
-        // @ts-expect-error fuck you typescript this is a NUMBER
-        setInterval(() => {
-          const f = this.func.find((x) => x[0] == interval)
-          if (f) f[1].forEach((fn) => fn())
-        }, interval)
-      ])
-    }
-  }
-  export const Intervals = new _IntervalClass()
 
   export namespace MemoryUsage {
     export interface MemoryInfo {
@@ -206,6 +97,7 @@ export namespace GlobalStat {
       clipboard.value = []
       selected.value = []
     }
+
     export let copy = () => {}
     export let cut = () => {}
     export let paste = () => {}
@@ -251,17 +143,6 @@ export namespace GlobalStat {
       view_port,
       taskBarHeight: screen.height - screen.availHeight,
       max_lane: SvgSizing.max_lane
-    }
-  }
-
-  export namespace RefreshAll {
-    import nextFrame = utils.nextFrame
-    export const __key = ref(0)
-    export function fuck() {
-      __key.value++
-      nextFrame().then(() => {
-        __key.value++
-      })
     }
   }
 }

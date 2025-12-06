@@ -3,8 +3,8 @@ import { computed, ComputedRef, nextTick, Ref, ref, toRaw, watch } from 'vue'
 import { Chart, ms } from './chart'
 import { utils } from '../utils'
 import { Storage } from '@renderer/core/storage'
-import { notify } from '@renderer/core/notify'
-import { FrameRate } from '@renderer/core/frame-rates'
+import { notify } from '@renderer/core/misc/notify'
+import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { Chart_Diff_SV } from '@renderer/core/chart/diff-sv'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import { calculateChartStats } from '@renderer/core/chart/calc-stat'
@@ -216,8 +216,8 @@ export class Chart_diff {
 
   get visible(): [number, number] {
     return [
-      this.chart.audio.current_time - 1000,
-      this.chart.audio.current_time + Storage.computes.visible.value + 2500
+      this.chart.audio.current_time - Storage.settings.pooling.ahead,
+      this.chart.audio.current_time + Storage.computes.visible.value + Storage.settings.pooling.ahead
     ]
   }
 
@@ -498,8 +498,9 @@ export class Chart_diff {
 
   remove_notes(v: ChartTypeV2.note[]) {
     const undo: (() => void)[] = []
+    const r:boolean[] = []
     for (let i = 0; i < v.length; i++) {
-      this.remove_note_no_undo(v[i])
+      r.push(this.remove_note_no_undo(v[i]))
       undo.push(() => {
         this.add_note_no_undo(v[i])
       })
@@ -507,6 +508,7 @@ export class Chart_diff {
     this.push_undo(() => {
       undo.forEach((v) => v())
     })
+    return r.every(a => a)
   }
 
   undo_add(v: ChartTypeV2.note) {
@@ -533,12 +535,7 @@ export class Chart_diff {
 
   /** @returns if the note is successfully removed */
   remove_note_no_undo(v: ChartTypeV2.note) {
-    this.shown.value = this.shown.value.filter(
-      (n) => !(n.time == v.time && n.lane == v.lane && n.width == v.width)
-    )
-    const index = this.notes.findIndex(
-      (n) => n.time == v.time && n.lane == v.lane && n.width == v.width
-    )
+    const index = this.binaryFindNoteIndex(v)
     if (index == -1) {
       console.log('unexist', v)
       return false
@@ -614,7 +611,7 @@ export class Chart_diff {
 
   fuck_shown(t: number, force = false) {
     if (this.sv_bind.on_sv.value) this.sv_bind.updateRenderRange(...this.visible)
-    if (force ? false : Math.abs(t - this.last_update) < 2000) return
+    if (force ? false : Math.abs(t - this.last_update) < Storage.settings.pooling.ahead) return
     this._fuck_shown(t)
     this.update_t(this.visible)
     if (this.sv_bind.on_sv.value) {
@@ -760,6 +757,45 @@ export class Chart_diff {
 
     return start
   }
+  /**
+   * 使用二分查找确定指定 note 在 notes 数组中的索引位置
+   * @param n 要查找的 note 对象
+   * @returns note 的索引位置，如果未找到则返回 -1
+   */
+  private binaryFindNoteIndex(n: ChartTypeV2.note): number {
+    let start = 0
+    let end = this.notes.length - 1
+
+    while (start <= end) {
+      const mid = Math.floor((start + end) / 2)
+      const midNote = this.notes[mid]
+
+      // 首先比较时间
+      if (midNote.time === n.time) {
+        // 时间相同时，比较 lane
+        if (midNote.lane === n.lane) {
+          // lane 相同时，比较 width
+          if (midNote.width === n.width) {
+            return mid
+          } else if (midNote.width < n.width) {
+            start = mid + 1
+          } else {
+            end = mid - 1
+          }
+        } else if (midNote.lane < n.lane) {
+          start = mid + 1
+        } else {
+          end = mid - 1
+        }
+      } else if (midNote.time < n.time) {
+        start = mid + 1
+      } else {
+        end = mid - 1
+      }
+    }
+
+    return -1 // 未找到匹配的 note
+  }
 
   private _update_tick_list() {
     this.ticks = []
@@ -796,21 +832,13 @@ export class Chart_diff {
   private _fuck_shown(t: number) {
     FrameRate.fuck_shown.start()
     this.update_shown_flag.value = true
-    const visible = [t - 2000, t + Storage.computes.visible.value + 2500] as [number, number]
+    const visible = [
+      t - Storage.settings.pooling.ahead,
+      t + Storage.computes.visible.value + Storage.settings.pooling.ahead
+    ] as [number, number]
     this.shown.value = this.notes.filter((x) => {
       return this.isVisible(x, visible)
     })
-    /*.toSorted((a,b) => {
-      if (isNote(a)) {
-        if (!isNote(b)) return 1
-        if (a.time == b.time) {
-          return b.width - a.width
-        } else return a.time - b.time
-      } else {
-        if (a.time == b.time) return b.width - a.width
-        else return a.time - b.time
-      }
-    })*/
     this.last_update = t
     FrameRate.fuck_shown.end()
     nextTick().then(() => (this.update_shown_flag.value = false))

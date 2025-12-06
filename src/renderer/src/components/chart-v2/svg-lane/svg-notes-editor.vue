@@ -6,8 +6,8 @@ import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
-import { useUpdateFrameRate } from '@renderer/core/frame-rates'
-import { notify } from '@renderer/core/notify'
+import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
+import { notify } from '@renderer/core/misc/notify'
 
 useUpdateFrameRate('svg-notes')
 const chart = Chart.$current
@@ -182,9 +182,6 @@ const opacity = computed(() => {
   if (dragging.value == undefined) return 0.7
   else return 1
 })
-
-const _tp_img = document.createElement('img')
-_tp_img.src = ''
 function ondragstart(e: DragEvent, n: ChartTypeV2.note) {
   dragging.value = [n]
   if (selected.value) {
@@ -200,7 +197,6 @@ function ondragstart(e: DragEvent, n: ChartTypeV2.note) {
   if (e.dataTransfer) {
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.dropEffect = 'move'
-    e.dataTransfer.setDragImage(_tp_img, 0, 0)
   }
 }
 function ondragend() {
@@ -209,9 +205,10 @@ function ondragend() {
 }
 function ondrop() {
   if (!dragging.value) return
-  if (chart.diff.add_notes(pending_note.value)) chart.diff.remove_notes(dragging.value)
 
-  chart.diff.fuck_shown(chart.audio.current_time, true)
+  if (!chart.diff.remove_notes(dragging.value)) console.log("bugged removing")
+
+  chart.diff.add_notes(pending_note.value)
   dragging.value = undefined
 }
 // ----------------- selector ---------------------
@@ -257,7 +254,6 @@ function on_mouse_down(e: MouseEvent) {
   select_start_time = Math.floor(bottom / mul.value + current_time.value)
   select_start_offsetX = e.offsetX
   select_start_delta = select_start_time - current_time.value
-  console.log('select start:', select_start_time)
   document.addEventListener('mouseup', on_mouse_up, { once: true })
   document.addEventListener('mousemove', select_mouse_move, { passive: true })
 }
@@ -276,7 +272,6 @@ function on_mouse_up(e: MouseEvent) {
   }
   const dy = e.screenY - select_start_screenY
   const mouse_time = current_time.value - dy / mul.value + select_start_delta
-  console.log(mouse_time)
 
   // main select logic
   const lane0 = ((e.offsetX - 56) / (svg_width - 112)) * 4

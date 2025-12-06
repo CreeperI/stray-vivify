@@ -2,9 +2,10 @@ import { Storage } from '@renderer/core/storage'
 import { ref } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { modal } from '@renderer/core/modal'
-import { notify } from '@renderer/core/notify'
+import { modal } from '@renderer/core/misc/modal'
+import { notify } from '@renderer/core/misc/notify'
 import { Invoke } from '@renderer/core/ipc'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const functions = [
   'redo',
@@ -299,6 +300,6 @@ new ShortCuts(
   true
 )
 
-new ShortCuts('refresh', 'r', () => GlobalStat.RefreshAll.fuck(), false, true)
+new ShortCuts('refresh', 'r', () => RefreshAll.fuck(), false, true)
 new ShortCuts("sv-eff", "1", () => Chart.current?.diff.sv_bind.set_eff())
 new ShortCuts("sv-fct", "2", () => Chart.current?.diff.sv_bind.set_fct())

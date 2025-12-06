@@ -5,8 +5,9 @@ import { utils } from '@renderer/core/utils'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { Invoke } from '@renderer/core/ipc'
 import { closeModal } from '@kolirt/vue-modal'
+import { CheckSkin } from '@renderer/core/misc/check-skin'
 
-const status = GlobalStat.CheckSkin.status
+const status = CheckSkin.status
 function open_folder() {
   Invoke('open-skin-folder')
 }

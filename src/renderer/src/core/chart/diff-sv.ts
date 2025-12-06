@@ -247,15 +247,15 @@ export class Chart_Diff_SV {
     const parsed: ChartTypeV2.parsed_sv[] = []
     for (let i = 0; i < times.length; i++) {
       const time = times[i]
-      const next = times[i + 1] ?? f.end
+      const last = times[i - 1] ?? f.time
       parsed.push({
         time: time,
-        eff: f.eff,
+        eff: (time - last) / 2 * f.eff,
         line: false
       })
       parsed.push({
         time: time + 1,
-        eff: (next - time - 1) / f.eff,
+        eff: f.eff,
         line: false
       })
     }

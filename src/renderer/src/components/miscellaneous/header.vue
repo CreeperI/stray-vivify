@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { modal } from '@renderer/core/modal'
+import { modal } from '@renderer/core/misc/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 

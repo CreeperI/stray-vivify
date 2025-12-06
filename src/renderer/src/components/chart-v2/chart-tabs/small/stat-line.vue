@@ -89,6 +89,7 @@ const class_line = computed(() => {
 }
 .stat-line-fill {
   height: 100%;
+  transition: width 0.2s ease-in-out;
 }
 .stat-line-str {
   flex-basis: 3rem;

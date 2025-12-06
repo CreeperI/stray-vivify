@@ -2,7 +2,7 @@
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import { Log } from '@renderer/core/log'
 import { computed, ref } from 'vue'
-import { FrameRate } from '@renderer/core/frame-rates'
+import { FrameRate } from '@renderer/core/misc/frame-rates'
 import FrameRateSingle from '@renderer/components/modals/frame-rate-single.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'

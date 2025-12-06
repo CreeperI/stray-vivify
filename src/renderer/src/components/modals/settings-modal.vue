@@ -6,7 +6,7 @@ import { Storage } from '@renderer/core/storage'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import SettingHeader from '@renderer/components/modals/setting-header.vue'
 import AColorInput from '@renderer/components/a-elements/a-color-input.vue'
-import { modal } from '@renderer/core/modal'
+import { modal } from '@renderer/core/misc/modal'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Invoke } from '@renderer/core/ipc'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
@@ -79,8 +79,8 @@ const r = Storage._ref
           <a-number-input v-model="r.settings.pooling.ahead" class="in" />
         </div>
         <div>
-          <div>向前ms</div>
-          <a-number-input v-model="r.settings.pooling.behind" class="in" />
+          <s>向前ms</s>
+          <a-number-input disabled v-model="r.settings.pooling.behind" class="in" />
         </div>
         <div>
           <div>最小pooling间隔</div>

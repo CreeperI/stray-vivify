@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ShortCuts } from '@renderer/core/shortcut'
+import { ShortCuts } from '@renderer/core/misc/shortcut'
 import { ref, watch } from 'vue'
 import { Storage } from '@renderer/core/storage'
 

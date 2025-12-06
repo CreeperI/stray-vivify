@@ -3,14 +3,16 @@ import App from './App.vue'
 import '@renderer/styles.css'
 
 import { createModal } from '@kolirt/vue-modal'
-import { ShortCuts } from '@renderer/core/shortcut'
+import { ShortCuts } from '@renderer/core/misc/shortcut'
 import { Invoke, load_ipc_handlers } from '@renderer/core/ipc'
 import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Log } from '@renderer/core/log'
 import { Chart } from '@renderer/core/chart/chart'
-import { FrameRate } from '@renderer/core/frame-rates'
-import { modal } from '@renderer/core/modal'
+import { FrameRate } from '@renderer/core/misc/frame-rates'
+import { modal } from '@renderer/core/misc/modal'
+import { Intervals } from '@renderer/core/misc/intervals'
+import { CheckSkin } from '@renderer/core/misc/check-skin'
 
 const app = createApp(App).use(
   createModal({
@@ -50,12 +52,11 @@ async function main() {
   ShortCuts.handle()
   GlobalStat.MouseTracker.init()
 
-  GlobalStat.Intervals.on(1e4, () => {
+  Intervals.on(1e4, () => {
     if (Storage.settings.auto_save) Chart.current?.save()
     Chart.current?.diff.update_tick_list()
-    Chart.current?.diff.update_sr()
   })
-  GlobalStat.Intervals.on(1000, () => {
+  Intervals.on(1000, () => {
     FrameRate.refresh()
     Chart.current?.playfield?.refresh()
     Chart.current?.diff.update_diff_counts()
@@ -82,4 +83,4 @@ async function main() {
 
 load_ipc_handlers()
 main()
-GlobalStat.CheckSkin.check_skin()
+CheckSkin.check_skin()

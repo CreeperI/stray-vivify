@@ -4,7 +4,7 @@ import { Storage } from '../storage'
 import { utils } from '../utils'
 import { Chart } from './chart'
 import { Chart_diff } from './diff'
-import { FrameRate } from '@renderer/core/frame-rates'
+import { FrameRate } from '@renderer/core/misc/frame-rates'
 
 export class Chart_playfield {
   judgements: ChartTypeV2.note_judgement[]

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import ShortcutModalSingle from '@renderer/components/modals/shortcut-modal-single.vue'
-import { ShortCuts } from '@renderer/core/shortcut'
+import { ShortCuts } from '@renderer/core/misc/shortcut'
 import ShortcutModalHeader from '@renderer/components/modals/shortcut-modal-header.vue'
 </script>
 

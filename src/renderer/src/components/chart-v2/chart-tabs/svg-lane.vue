@@ -95,6 +95,7 @@ provide('lane_id', id)
   bottom: 0;
   position: absolute;
   height: 100%;
+  
 }
 
 text {

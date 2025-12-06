@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { onUnmounted, useTemplateRef } from 'vue'
-import { GlobalStat } from '@renderer/core/globalStat'
+import { WordHelper } from '@renderer/core/word-helper'
 
 const prop = defineProps<{
   msg: string
@@ -11,15 +11,15 @@ let flag = false
 function _in() {
   if (!r.value) return
   const rect = r.value.getBoundingClientRect()
-  GlobalStat.WordHelper.call_helper([rect.right, rect.bottom], prop.dec)
+  WordHelper.call_helper([rect.right, rect.bottom], prop.dec)
   flag = true
 }
 function _out() {
-  GlobalStat.WordHelper.hide_helper()
+  WordHelper.hide_helper()
   flag = false
 }
 onUnmounted(() => {
-  if (flag) GlobalStat.WordHelper.hide_helper()
+  if (flag) WordHelper.hide_helper()
 })
 </script>
 

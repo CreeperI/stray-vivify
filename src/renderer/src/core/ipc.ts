@@ -1,6 +1,6 @@
 import { IpcHandlers } from '@preload/types'
-import { notify } from '@renderer/core/notify'
-import { modal } from '@renderer/core/modal'
+import { notify } from '@renderer/core/misc/notify'
+import { modal } from '@renderer/core/misc/modal'
 import { Chart } from '@renderer/core/chart/chart'
 
 const ipcRenderer = window.electron.ipcRenderer

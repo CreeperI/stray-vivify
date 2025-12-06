@@ -3,7 +3,7 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import { Storage } from '@renderer/core/storage'
 import { computed } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
-import { useUpdateFrameRate } from '@renderer/core/frame-rates'
+import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
 
 const chart_state = GlobalStat.chart_state
 

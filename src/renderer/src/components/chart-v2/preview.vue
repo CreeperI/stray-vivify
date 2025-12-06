@@ -7,7 +7,7 @@ import { utils } from '@renderer/core/utils'
 import { Storage, Version } from '@renderer/core/storage'
 import AImg from '@renderer/components/a-elements/a-img.vue'
 import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter.vue'
-import { notify } from '@renderer/core/notify'
+import { notify } from '@renderer/core/misc/notify'
 import { Invoke } from '@renderer/core/ipc'
 import SvgNotesDisplay from '@renderer/components/chart-v2/svg-lane/svg-notes-display.vue'
 

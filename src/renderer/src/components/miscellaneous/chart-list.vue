@@ -6,7 +6,7 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { charts_data } from '@preload/types'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
-import { modal } from '@renderer/core/modal'
+import { modal } from '@renderer/core/misc/modal'
 import { Storage } from '@renderer/core/storage'
 import AImg from '@renderer/components/a-elements/a-img.vue'
 

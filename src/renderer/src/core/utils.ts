@@ -173,7 +173,7 @@ export namespace utils {
 
     // 处理秒数部分补零逻辑
     if (minutes == 0) {
-      return (isNegative ? '-' : '') + secs
+      return (isNegative ? '-' : '0:') + secs
     }
     secs = parseFloat(secs) < 10 ? '0' + secs : secs
     // 添加负号标识
@@ -209,6 +209,10 @@ export namespace utils {
   }
   export function nextFrame() {
     return new Promise((resolve) => requestAnimationFrame(resolve))
+  }
+
+  export function wait(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   const note_style = 'stray:/__skin__'
@@ -248,76 +252,13 @@ export namespace utils {
     refresh_key.value = Math.random().toString().slice(0, 7)
   }
 
-  export function makeSquareImage(
-    imageUrl: string,
-    mode: 'crop' | 'stretch' = 'crop'
-  ): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-
-      img.onload = () => {
-        const size = Math.min(img.width, img.height)
-        const canvas = document.createElement('canvas')
-        canvas.width = size
-        canvas.height = size
-        const ctx = canvas.getContext('2d')
-
-        if (!ctx) {
-          reject(new Error('无法获取 Canvas 2D 上下文'))
-          return
-        }
-
-        if (mode === 'stretch') {
-          ctx.drawImage(img, 0, 0, size, size)
-        } else {
-          // 裁剪：居中裁剪出最大的正方形区域
-          const { width, height } = img
-          let srcX = 0
-          let srcY = 0
-          let srcWidth = width
-          let srcHeight = height
-
-          if (width > height) {
-            srcX = (width - height) / 2
-            srcWidth = height
-          } else if (height > width) {
-            srcY = (height - width) / 2
-            srcHeight = width
-          }
-          ctx.drawImage(img, srcX, srcY, srcWidth, srcHeight, 0, 0, size, size)
-        }
-
-        canvas.toBlob((blob) => {
-          if (blob) {
-            resolve(blob)
-          } else {
-            reject(new Error('无法将 Canvas 转换为 Blob'))
-          }
-        })
-      }
-
-      img.onerror = () => {
-        reject(new Error(`加载图片失败: ${imageUrl}`))
-      }
-
-      img.src = imageUrl
-    })
+  export function memset<R extends string,T>(o: Record<R, T>, v:T) {
+    for (const key in o) {
+      o[key] = v
+    }
   }
 
-  export function blobToBase64(blob: Blob): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result)
-        } else {
-          reject(new Error('Failed to convert Blob to Base64 string.'))
-        }
-      }
-      reader.onerror = reject
-      reader.readAsDataURL(blob)
-    })
-  }
+
 }
 
 // @ts-expect-error

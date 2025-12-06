@@ -4,7 +4,7 @@ import { inject, onMounted, onUnmounted } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { Chart } from '@renderer/core/chart/chart'
-import { useUpdateFrameRate } from '@renderer/core/frame-rates'
+import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
 import { GlobalStat } from '@renderer/core/globalStat'
 
 useUpdateFrameRate('svg-notes-display')

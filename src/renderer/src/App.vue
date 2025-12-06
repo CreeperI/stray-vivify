@@ -8,10 +8,11 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import { Version } from '@renderer/core/storage'
 import WordHelperOverlay from '@renderer/components/miscellaneous/word-helper-overlay.vue'
 import MouseTracker from '@renderer/components/miscellaneous/mouse-tracker.vue'
-import { modal } from '@renderer/core/modal'
+import { modal } from '@renderer/core/misc/modal'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const state = GlobalStat.route.route
-const key = GlobalStat.RefreshAll.__key
+const key = RefreshAll.__key
 </script>
 
 <template>

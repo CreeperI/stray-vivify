@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _FrameRateClass } from '@renderer/core/frame-rates'
+import { _FrameRateClass } from '@renderer/core/misc/frame-rates'
 
 const props = defineProps<{ msg: string; r: _FrameRateClass }>()
 const r = props.r.refs

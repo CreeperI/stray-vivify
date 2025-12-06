@@ -5,8 +5,8 @@ import { ref, watch } from 'vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { Invoke } from '@renderer/core/ipc'
 import Hide from '@renderer/components/a-elements/hide.vue'
-import { notify } from '@renderer/core/notify'
-import { modal } from '@renderer/core/modal'
+import { notify } from '@renderer/core/misc/notify'
+import { modal } from '@renderer/core/misc/modal'
 import IexporterGml from '@renderer/components/modals/iexporter-gml.vue'
 
 const chart = Chart.$current

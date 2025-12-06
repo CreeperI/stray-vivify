@@ -3,7 +3,7 @@ import { Ref, watch } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
-import { notify } from '@renderer/core/notify'
+import { notify } from '@renderer/core/misc/notify'
 
 export class HitSoundSystem {
   private hit_error = false
