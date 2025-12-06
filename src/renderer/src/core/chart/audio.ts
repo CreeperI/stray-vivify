@@ -115,6 +115,7 @@ export class Chart_audio {
     if (!this.from_negative) this.ele?.play()
     this.paused = false
     this.last = performance.now()
+    this.chart.diff.hit_sounder.on_unpause()
   }
 
   set_ele_time(v: ms) {

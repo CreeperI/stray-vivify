@@ -123,8 +123,7 @@ export namespace ChartTypeV2 {
       type: 0
       time: number
       end: number
-      eff1: number
-      eff2: number
+      eff: number
     }
 
     export type list = [SV_aq]

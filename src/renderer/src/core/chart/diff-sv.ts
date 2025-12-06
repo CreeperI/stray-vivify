@@ -12,7 +12,7 @@ export const factory_keys: {
     string
   >
 } = [
-  { eff1: 'note上的eff', eff2: 'note之间的eff' }
+  { eff: 'note上的eff' }
 ]
 export class Chart_Diff_SV {
   chart: Chart
@@ -65,8 +65,7 @@ export class Chart_Diff_SV {
           type: 0,
           time: 0,
           end: 0,
-          eff1: 10,
-          eff2: 0.1
+          eff: 0.1,
         }
       default:
         return {
@@ -248,14 +247,15 @@ export class Chart_Diff_SV {
     const parsed: ChartTypeV2.parsed_sv[] = []
     for (let i = 0; i < times.length; i++) {
       const time = times[i]
+      const next = times[i + 1] ?? f.end
       parsed.push({
         time: time,
-        eff: f.eff1,
+        eff: f.eff,
         line: false
       })
       parsed.push({
         time: time + 1,
-        eff: f.eff2,
+        eff: (next - time - 1) / f.eff,
         line: false
       })
     }

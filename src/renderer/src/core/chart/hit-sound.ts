@@ -1,7 +1,6 @@
 import { Chart } from '@renderer/core/chart/chart'
 import { Ref, watch } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
-import { FrameRate } from '@renderer/core/frame-rates'
 import { Settings } from '@renderer/core/settings'
 import { utils } from '@renderer/core/utils'
 import { notify } from '@renderer/core/notify'
@@ -16,11 +15,17 @@ export class HitSoundSystem {
   private activeVoices: Array<{ source: AudioBufferSourceNode; endTime: number }> = []
   private chart: Chart
   private shown: Ref<ChartTypeV2.note[]>
+  private last_trigger: number
 
   constructor(chart: Chart, shown: Ref<ChartTypeV2.note[]>) {
     this.chart = chart
     this.shown = shown
     this.initWebAudio()
+    this.last_trigger = 0
+  }
+
+  on_unpause() {
+    this.last_trigger = this.chart.audio.current_time
   }
 
   public async play_hit() {
@@ -31,15 +36,14 @@ export class HitSoundSystem {
     const now = this.audioContext.currentTime
     this.activeVoices = this.activeVoices.filter((v) => v.endTime > now)
 
-    const FPS = FrameRate.fps.refs.value.avg
+    const last = this.last_trigger
     const current = this.chart.audio.current_time - Settings.editor.offset3
-    const delta_time = utils.clamp(1000 / FPS, 16, 30) // in ms
 
     // Find note in current time window
-    // here 1.5 as sometimes it shits
     const hitNote = this.shown.value.find(
-      (x: any) => utils.between(x.time, [current, current + delta_time * 1.4]) && x['snm'] != 1
+      (x: any) => utils.between(x.time, [last, current]) && x['snm'] != 1
     )
+    this.last_trigger = this.chart.audio.current_time
 
     if (hitNote && !this.playedNotes.has(hitNote.time)) {
       if (this.activeVoices.length >= this.maxVoices) {
