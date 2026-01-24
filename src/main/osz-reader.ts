@@ -2,7 +2,7 @@ import AdmZip from 'adm-zip'
 import { extname } from 'node:path'
 import { ChartTypeV2 } from '../preload/types'
 
-export type diff = ChartTypeV2.diff
+type diff = ChartTypeV2.diff
 
 // Internal interfaces for parsing
 interface OsuTimingPoint {
@@ -35,31 +35,6 @@ interface OsuBeatmap {
   events: string[]
 }
 
-/**
- * Main function to read OSZ file and return difficulties
- */
-export function reader(fp_of_osz: string): diff[] {
-  const zip = new AdmZip(fp_of_osz)
-  const zipEntries = zip.getEntries()
-
-  const diffs: diff[] = []
-
-  // Process all .osu files in the archive
-  zipEntries.forEach((entry) => {
-    if (entry.entryName.endsWith('.osu') && !entry.isDirectory) {
-      const content = entry.getData().toString('utf8')
-      const beatmap = parseOsuFile(content)
-
-      // Only process osu!mania charts (mode 3)
-      if (beatmap.general.Mode === 3) {
-        const difficulty = convertToDiff(beatmap)
-        diffs.push(difficulty)
-      }
-    }
-  })
-
-  return diffs
-}
 
 /**
  * Parse a .osu file content
@@ -295,11 +270,21 @@ export class OszReader {
   private songInfo: song | null = null
   private zipEntries: AdmZip.IZipEntry[] = []
   private zip: AdmZip
+  static current: OszReader | undefined = undefined
 
   constructor(fp_of_osz: string) {
     this.zip = new AdmZip(fp_of_osz)
     this.zipEntries = this.zip.getEntries()
     this.parseBeatmaps()
+  }
+
+  static create(fp_of_osz: string) {
+    const the = new OszReader(fp_of_osz)
+    OszReader.current = the
+    return the
+  }
+  static close() {
+    OszReader.current = undefined
   }
 
   /**
@@ -338,8 +323,10 @@ export class OszReader {
 
     const audioEntry = this.zipEntries.find(
       (entry) =>
-        audioExtensions.some((ext) => entry.entryName.toLowerCase().endsWith(ext)) &&
-        !entry.isDirectory
+        audioExtensions.some((ext) => {
+          const name = entry.entryName.toLowerCase()
+          return name.endsWith(ext) && name.includes("audio")
+        }) && !entry.isDirectory
     )
 
     return audioEntry ? [extname(audioEntry.name), audioEntry.getData()] : null
@@ -416,24 +403,20 @@ export class OszReader {
     if (uninheritedTimingPoints.length > 0) {
       const bpms = uninheritedTimingPoints.map((tp) => 60000 / tp.beatLength)
       const averageBpm = bpms.reduce((sum, bpm) => sum + bpm, 0) / bpms.length
-      avgBpm = Math.round(averageBpm).toString()
+      avgBpm = Math.abs(Math.round(averageBpm)).toString()
     }
 
     return {
       name:
-        (beatmap.metadata.TitleUnicode as string) ||
-        (beatmap.metadata.Title as string) ||
-        'Unknown',
-      name_roman: (beatmap.metadata.Title as string) || '',
+        (beatmap.metadata.TitleUnicode as string) || (beatmap.metadata.Title as string) || 'N/A',
+      name_roman: (beatmap.metadata.Title as string) || 'N/A',
       composer:
-        (beatmap.metadata.ArtistUnicode as string) ||
-        (beatmap.metadata.Artist as string) ||
-        'Unknown',
-      composer_roman: (beatmap.metadata.Artist as string) || '',
+        (beatmap.metadata.ArtistUnicode as string) || (beatmap.metadata.Artist as string) || 'N/A',
+      composer_roman: (beatmap.metadata.Artist as string) || 'N/A',
       bpm: avgBpm,
-      source: (beatmap.metadata.Source as string) || '',
+      source: (beatmap.metadata.Source as string) || 'N/A',
       sprite: backgroundSprite,
-      ref: (beatmap.metadata.BeatmapSetID as string) || ''
+      ref: (beatmap.metadata.BeatmapSetID as string) || 'N/A'
     }
   }
 }

@@ -18,6 +18,25 @@ export const Log = {
   error_list: ref([]) as Ref<log[]>,
   need_img: ref([]) as Ref<[string, number][]>,
   handle() {
+    window.addEventListener(
+      'error',
+      (e) => {
+        let msg = ''
+        if (e.target instanceof HTMLImageElement) {
+          const t = e.target
+          const src = decodeURIComponent(t.src)
+          const ix = this.need_img.value.findIndex((v) => v[0] == src)
+          if (ix >= 0) {
+            this.need_img.value[ix][1] += 1
+          } else {
+            this.need_img.value.push([src, 1])
+          }
+          return
+        }
+        Log.err(msg)
+      },
+      true
+    )
     if (GlobalStat.is_dev) return
     let oldlog = console.log.bind(console)
     console.log = function (...args: any) {
@@ -55,25 +74,6 @@ export const Log = {
       })
       Log.debug(args.join(' '))
     }
-    window.addEventListener(
-      'error',
-      (e) => {
-        let msg = ''
-        if (e.target instanceof HTMLImageElement) {
-          const t = e.target
-          const src = decodeURIComponent(t.src)
-          const ix = this.need_img.value.findIndex((v) => v[0] == src)
-          if (ix >= 0) {
-            this.need_img.value[ix][1] += 1
-          } else {
-            this.need_img.value.push([src, 1])
-          }
-          return
-        }
-        Log.err(msg)
-      },
-      true
-    )
   },
   err(msg: string) {
     this.error_list.value.push({

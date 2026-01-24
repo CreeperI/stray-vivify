@@ -35,7 +35,7 @@ export class Chart_Diff_SV {
     this.last_parsed = []
     this.on_sv = ref(false)
     this.shown = ref([])
-    this.sv_data = ref({ is_factory: false, type: 0, ix: 0 })
+    this.sv_data = ref({ is_factory: false, type: 0, ix: -1 })
   }
 
   get sv() {
@@ -239,7 +239,7 @@ export class Chart_Diff_SV {
 
   parse_sv_0(f: ChartTypeV2.SV_Factory.SV_aq): ChartTypeV2.parsed_sv[] {
     let _times = this.diff.notes
-      .filter((x) => utils.between(x.time, [f.time, f.end]))
+      .filter((x) => utils.between(x.time, [f.time - 1, f.end]))
       .map((x) => x.time)
     const times = [...new Set(_times)]
     times.sort((a, b) => a - b)
@@ -247,21 +247,21 @@ export class Chart_Diff_SV {
     const parsed: ChartTypeV2.parsed_sv[] = []
     for (let i = 0; i < times.length; i++) {
       const time = times[i]
-      const last = times[i - 1] ?? f.time
+      const next = times[i +1] ?? f.end
       parsed.push({
         time: time,
-        eff: (time - last) / 2 * f.eff,
+        eff: (next - time),
         line: false
       })
       parsed.push({
         time: time + 1,
-        eff: f.eff,
+        eff: 0,
         line: false
       })
     }
     parsed.pop()
     parsed.push({
-      time: f.end,
+      time: f.end +1,
       eff: 1,
       line: true
     })

@@ -38,6 +38,8 @@ function parse_chart_name(str: string) {
   return GlobalStat.all_chart.find((c) => c.name == str)?.name || str
 }
 
+const chart_tab = GlobalStat.chart_state
+
 GlobalStat.ChartSize.update()
 </script>
 
@@ -89,9 +91,13 @@ GlobalStat.ChartSize.update()
               </tr>
               <frame-rate-single :r="FrameRate.aniFrame" msg="帧逻辑" />
               <frame-rate-single :r="FrameRate.invalidator" msg="Inspector" />
-              <frame-rate-single :r="FrameRate.next_tick" msg="依赖/渲染" />
+              <frame-rate-single :r="FrameRate.next_tick" msg="渲染" />
               <frame-rate-single :r="FrameRate.fuck_shown" msg="Fuck Shown" />
-              <frame-rate-single :r="FrameRate.playfield_frame" msg="Play Frame" />
+              <frame-rate-single
+                v-if="chart_tab == 2"
+                :r="FrameRate.playfield_frame"
+                msg="Play Frame"
+              />
               <frame-rate-single :r="FrameRate.update_pending" msg="Pending-note" />
               <frame-rate-single :r="FrameRate.calc_density" msg="calc-density" />
               <frame-rate-single :r="FrameRate.save" msg="save" />

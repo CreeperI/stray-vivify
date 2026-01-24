@@ -1,20 +1,20 @@
-<script setup lang="ts">
-
+<script lang="ts" setup>
 import AHref from '@renderer/components/a-elements/a-href.vue'
+import { Storage } from '@renderer/core/storage'
+import { computed } from 'vue'
+import { utils } from '@renderer/core/utils'
+
+const total = computed(() => utils.toTimeStr(Storage.data.value.statistics.used_time / 1000, 0))
 </script>
 
 <template>
   <div class="credits-list">
-    <div class="credits-head">
-      Creator
-    </div>
+    <div class="credits-head">Creator</div>
     <div class="credits-col">
       <a-href href="https://space.bilibili.com/517691213">Allesta</a-href>
       <a-href href="https://github.com/Ts-Final">TerminalFlow (github)</a-href>
     </div>
-    <div class="credits-head">
-      先锋测试员
-    </div>
+    <div class="credits-head">先锋测试员</div>
     <div class="credits-3col">
       <span>chichiga</span>
       <span>Fyato</span>
@@ -31,16 +31,19 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <span>૮ ・ﻌ・ა</span>
       <span>-Re-Again-</span>
     </div>
-    <div class="credits-head">
-      开发帮助
-    </div>
+    <div class="credits-head">开发帮助</div>
     <div class="credits-2col">
       <span>Custom Song</span>
       <span>And_why, <a-href href="https://github.com/CreeperI">Creeper_001</a-href></span>
+      <span>五维Stats统计</span>
+      <span><a-href href="https://github.com/CreeperI">Creeper_001</a-href></span>
+      <span>皮肤制作</span>
+      <span>
+        <a-href href="https://space.bilibili.com/432834039">-Re-Again-</a-href>
+        <a-href href="https://space.bilibili.com/501410744">InvalidData</a-href>
+      </span>
     </div>
-    <div class="credits-head">
-      Special Thanks
-    </div>
+    <div class="credits-head">Special Thanks</div>
     <div class="credits-4col">
       <a-href href="https://www.electronjs.org/">Electron</a-href>
       <a-href href="https://cn.vuejs.org/">Vue</a-href>
@@ -48,7 +51,14 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <a-href href="https://github.com/kolirt/vue-modal">kolirt (vue-modal)</a-href>
       <a-href href="https://vite.electron.js.cn/">Electron-Vite</a-href>
       <a-href href="https://wiki.rotaeno.cn/">Rotaeno中文维基</a-href>
-      <a-href href="https://github.com/leezng/vue-json-pretty/">leezng (vue-json-pretty)</a-href>
+      <a-href href="https://github.com/leezng/vue-json-pretty/"
+        >leezng<br />(vue-json-pretty)
+      </a-href>
+    </div>
+    <div class="credits-head">And You</div>
+    <div class="credits-col">
+      <div>stray/vivify的不断发展，感谢每一个你的帮助。</div>
+      <div>你总计使用了 {{ total }}</div>
     </div>
   </div>
 </template>
@@ -103,6 +113,7 @@ a:visited {
   * {
     flex-basis: 25%;
   }
+  align-items: center;
 }
 .credits-col {
   display: flex;

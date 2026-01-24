@@ -9,11 +9,12 @@ import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { modal } from '@renderer/core/misc/modal'
 import { Storage } from '@renderer/core/storage'
 import AImg from '@renderer/components/a-elements/a-img.vue'
+import { utils } from '@renderer/core/utils'
 
 const shown = ref(GlobalStat.all_chart)
 const search = ref('')
 watch(search, (c) => {
-  shown.value = GlobalStat.all_chart.filter((v) => v.name.includes(c) || v.id.includes(c))
+  shown.value = GlobalStat.all_chart.filter((v) => JSON.stringify(v).includes(c))
 })
 
 watch(GlobalStat.all_chart_ref, () => {
@@ -59,12 +60,21 @@ function detail(id: string) {
   display_id.value = id
   display_data.value = ch
 }
+
+const username = Storage.data.value.username
+const pass_days = (Date.now() - Storage.data.value.statistics.first_open) / (24 * 60 * 60 * 1000)
+const running = Storage.running_time
 </script>
 
 <template>
   <div class="chart-list-wrapper">
     <div class="chart-list-left">
       <div class="su-title">stray/vivify</div>
+      <div class="su-greeting">
+        欢迎，{{ username }}<br>
+        这是你使用stray/vivify的第{{pass_days.toFixed(0)}}天！ <br>
+        已运行：{{ utils.toTimeStr(running/1000, 0) }}
+      </div>
       <div class="su-desc" v-if="!display_id">
         广告位招租 <br />
         一定要请画师来加个看板……？
@@ -124,29 +134,30 @@ function detail(id: string) {
 
 .chart-list-left {
   position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr 1fr 10fr;
+  justify-items: center;
+  gap: 20px;
 }
 
 .su-title {
   font-size: 2.5rem;
   text-align: center;
-  left: 50%;
-  transform: translateX(-50%);
   position: relative;
-  margin-top: 10%;
+  padding-top: 10%;
+}
+.su-greeting {
+  text-align: center;
 }
 
 .su-desc {
   font-size: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  top: 40%;
-  position: absolute;
   width: 100%;
   text-align: center;
 }
 
 .su-display {
-  margin-top: 15%;
   display: flex;
   flex-direction: column;
   align-items: center;

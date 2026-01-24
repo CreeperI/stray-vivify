@@ -217,8 +217,14 @@ export class Chart_diff {
   get visible(): [number, number] {
     return [
       this.chart.audio.current_time - Storage.settings.pooling.ahead,
-      this.chart.audio.current_time + Storage.computes.visible.value + Storage.settings.pooling.ahead
+      this.chart.audio.current_time +
+        Storage.computes.visible.value +
+        Storage.settings.pooling.ahead
     ]
+  }
+
+  get toRaw() {
+    return toRaw(this.notes)
   }
 
   static createDiff(): ChartTypeV2.diff {
@@ -319,10 +325,12 @@ export class Chart_diff {
   }
 
   calc_max_lane() {
-    this.max_lane.value = Math.max(
-      Storage.settings.min_lane,
-      Math.max(...this.notes.map((n) => n.lane + n.width - 1)) + 1
-    )
+    let max = Storage.settings.min_lane
+    const n = this.toRaw
+    for (let i = 0; i < n.length; i++) {
+      max = Math.max(n[i].lane + n[i].width, max)
+    }
+    this.max_lane.value = max
   }
 
   update_bar_section_list() {
@@ -392,7 +400,7 @@ export class Chart_diff {
   }
 
   sort_notes() {
-    this.notes = this.notes.toSorted(utils.sort_notes)
+    this.notes = this.toRaw.toSorted(utils.sort_notes)
   }
 
   timing_end_of(t: ChartTypeV2.timing, timing: ChartTypeV2.timing[], max = Infinity) {
@@ -407,7 +415,7 @@ export class Chart_diff {
   }
 
   update_diff_counts() {
-    const v = this.bound.value
+    const v = toRaw(this.bound.value)
     const count = {
       chip: 0,
       bumper: 0,
@@ -498,7 +506,7 @@ export class Chart_diff {
 
   remove_notes(v: ChartTypeV2.note[]) {
     const undo: (() => void)[] = []
-    const r:boolean[] = []
+    const r: boolean[] = []
     for (let i = 0; i < v.length; i++) {
       r.push(this.remove_note_no_undo(v[i]))
       undo.push(() => {
@@ -508,7 +516,7 @@ export class Chart_diff {
     this.push_undo(() => {
       undo.forEach((v) => v())
     })
-    return r.every(a => a)
+    return r.every((a) => a)
   }
 
   undo_add(v: ChartTypeV2.note) {
@@ -559,7 +567,7 @@ export class Chart_diff {
       v.time = nearest.time
     }
     // 使用二分查找找到合适的插入位置
-    const index = this.binarySearchNotePosition(v.time)
+    const index = this.binarySearchTimePosition(v.time)
     this.notes.splice(index, 0, v)
     this.fuck_shown(this.chart.audio.current_time, fuck)
     return true
@@ -610,13 +618,9 @@ export class Chart_diff {
   }
 
   fuck_shown(t: number, force = false) {
-    if (this.sv_bind.on_sv.value) this.sv_bind.updateRenderRange(...this.visible)
     if (force ? false : Math.abs(t - this.last_update) < Storage.settings.pooling.ahead) return
     this._fuck_shown(t)
     this.update_t(this.visible)
-    if (this.sv_bind.on_sv.value) {
-      this.sv_bind.fuck_shown()
-    }
   }
 
   update_t(visible: [number, number]) {
@@ -664,12 +668,13 @@ export class Chart_diff {
     FrameRate.calc_density.start()
     const max_count = Storage.settings.density_data_count
     const per_length = this.chart.length / max_count
-    const d: number[] = []
-    for (let i = 0; i < this.chart.length; i += per_length) {
-      d.push(
-        (this.notes.filter((x) => utils.between(x.time, [i, i + per_length])).length / per_length) *
-          1000
-      )
+    const d: number[] = Array(max_count).fill(0)
+    const notes = toRaw(this.notes)
+    for (let i = 0; i < notes.length; i++) {
+      d[Math.floor(notes[i].time / per_length)] += 1
+    }
+    for (let i = 0; i < d.length; i++) {
+      d[i] = (d[i] / per_length) * 1000
     }
     this.density_data.value = d
     FrameRate.calc_density.end()
@@ -740,7 +745,7 @@ export class Chart_diff {
    * @param time note的时间
    * @returns 插入索引
    */
-  private binarySearchNotePosition(time: number): number {
+  private binarySearchTimePosition(time: number): number {
     let start = 0
     let end = this.notes.length - 1
 
@@ -757,8 +762,9 @@ export class Chart_diff {
 
     return start
   }
+
   /**
-   * 使用二分查找确定指定 note 在 notes 数组中的索引位置
+   * 草拟吗二分害我删除note失败
    * @param n 要查找的 note 对象
    * @returns note 的索引位置，如果未找到则返回 -1
    */
@@ -767,14 +773,23 @@ export class Chart_diff {
     let end = this.notes.length - 1
 
     while (start <= end) {
+      // 如果当前区间长度小于 10，改用线性查找
+      if (end - start + 1 < 10) {
+        start -= 10 // 以防又出什么bug的，至少我相信0秒内不会有那么多B东西
+        for (let i = start; i <= end; i++) {
+          const note = this.notes[i]
+          if (note.time === n.time && note.lane === n.lane && note.width === n.width) {
+            return i
+          }
+        }
+        return -1 // 未找到
+      }
+
       const mid = Math.floor((start + end) / 2)
       const midNote = this.notes[mid]
 
-      // 首先比较时间
       if (midNote.time === n.time) {
-        // 时间相同时，比较 lane
         if (midNote.lane === n.lane) {
-          // lane 相同时，比较 width
           if (midNote.width === n.width) {
             return mid
           } else if (midNote.width < n.width) {
@@ -836,6 +851,8 @@ export class Chart_diff {
       t - Storage.settings.pooling.ahead,
       t + Storage.computes.visible.value + Storage.settings.pooling.ahead
     ] as [number, number]
+    // @ts-expect-error a fucking way to give out resources
+    this.shown.value = undefined
     this.shown.value = this.notes.filter((x) => {
       return this.isVisible(x, visible)
     })

@@ -169,7 +169,7 @@ export namespace ChartTypeV2 {
     timing: timing[]
     meta: meta
     ani: []
-    sv: (SV | SV_Factory.all)[]
+    sv: (SV | SV_Factory.all)[],
   }
   export type meta = {
     charter: string
@@ -223,7 +223,7 @@ export type Invoke = {
   'save-chart': {
     arg: {
       fp: string
-      data: string
+      data: ChartTypeV2.final
     }
     r: void
   }

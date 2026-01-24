@@ -1,5 +1,6 @@
 import { computed, ref, Ref, WritableComputedRef } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
+import { FrameRate } from '@renderer/core/misc/frame-rates'
 
 type ms = number
 type second = number
@@ -101,6 +102,10 @@ export class Chart_audio {
     return this.ele as HTMLAudioElement
   }
 
+  get length() {
+    return (this.ele?.duration ?? -1) * 1000
+  }
+
   set_current_time(v: ms) {
     v = Math.floor(Math.max(-5000, v))
     this.pause()
@@ -129,19 +134,23 @@ export class Chart_audio {
     else console.warn('Trying to setting can-play-through callback on a empty audio!')
   }
 
-  on_end(cb: () => void, options?: AddEventListenerOptions){
+  on_end(cb: () => void, options?: AddEventListenerOptions) {
     if (this.ele) this.ele.addEventListener('ended', cb, options)
     else console.warn('Trying to setting end callback on a empty audio!')
   }
 
   load_url(url: string) {
     this.ele = new Audio(url)
+    this.ele.addEventListener("timeupdate", () => {
+      if (this.paused) return
+      this.set_current_time_from_updater(this.$ele.currentTime * 1000)
+      FrameRate.audio_sync.immediate()
+    })
   }
 
   pause() {
     this.ele?.pause()
     this.paused = true
-    this.set_ele_time(0)
   }
 
   play_pause() {
@@ -154,19 +163,24 @@ export class Chart_audio {
   }
 
   update() {
-    if (!this.paused) {
-      if (this.current_time <= 0) {
+    if (this.paused) return
+    if (this.current_time <= 0) {
       const now = performance.now()
       this.set_current_time_from_updater(this.current_time + (now - this.last) * this.play_rate)
       this.last = performance.now()
-      } else {
-        this.set_current_time_from_updater(this.$ele.currentTime * 1000)
-      }
-      if (this.from_negative && this.current_time >= 0) {
-        this.from_negative = false
-        this.set_and_play()
-      }
+    } else {
+      this.set_current_time_from_updater(this.$ele.currentTime * 1000)
     }
+    if (this.from_negative && this.current_time >= 0) {
+      this.from_negative = false
+      this.set_and_play()
+    }
+  }
+
+  init_on_end() {
+    this.on_end(() => {
+      this.ended = true
+    })
   }
 
   private set_current_time_from_updater(v: ms) {
@@ -175,9 +189,5 @@ export class Chart_audio {
     this.refs.current_ms.value = v
     if (v < 0) this.from_negative = true
     if (this.paused) this.set_ele_time(v)
-  }
-
-  init_on_end() {
-    this.on_end(() => {this.ended = true})
   }
 }

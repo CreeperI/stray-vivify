@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import Build from '@renderer/components/credits/build.vue'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
+import AHref from '@renderer/components/a-elements/a-href.vue'
 </script>
 
 <template>
@@ -161,7 +162,7 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
         />页面中的导入按钮
       </div>
       <div>调整了Inspector页面中对缺失图片的分类逻辑。现在是单独一面的了。</div>
-      <div style="font-size: 2rem; font-weight: bold">
+      <div style="font-size: 1.5rem; font-weight: bold">
         <word-helper dec="我草我们pre5真王朝了" msg="Pre5还在追我！" />
       </div>
       <div>塞了一些sv的史在里面</div>
@@ -237,6 +238,27 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
       <div>将note插入 删除逻辑改为二分法</div>
       <div>添加了节奏谱选项，在预览模式中可用</div>
       <div>添加了未完成的SV页面。</div>
+    </Build>
+    <Build build="9.5" y="2025" m="12" d="5" title="0.9.5">
+      <template #bugs>
+        <div>修复了在使用任务栏关闭应用时不会触发自动保存的问题</div>
+        <div style="font-size: 1.2rem;color: #ee6666">安全性调整</div>
+        <span>
+          由于使用了vue-json-pretty，其正常工作需要使用到 unsafe-eval script，
+          而这在某些情况下可能导致本应用的网络交互（其实压根没有）被攻击。 <br>
+          未来版本中会引入新的解决方案，也考虑到会添加在线功能api所需的安全需求。<br>
+          总之不以管理员权限打开 stray/vivify应当可以解决现在存在的所有风险。
+        </span>
+      </template>
+      <div>修改了密度计算的逻辑，<s>从~200ms压缩到了~3ms</s></div>
+      <div>为线密度添加了时间跳转功能 和 当前时间的显示</div>
+      <div>修改了stray:/读取文件的逻辑</div>
+      <div>压缩了hold的高度，现在应该不会出现面尾和下一个note过分重叠的情况（如果还有重叠证明你写的是无理）</div>
+      <div>添加了stats展示 from @Creeper_001 <a-href href="https://github.com/Ts-Final/stray-vivify/pull/3">查看PR</a-href></div>
+      <div>添加了使用时间统计，将从这个版本开始计算。</div>
+      <div>更新本版本时会重新打开自动保存</div>
+      <div>调整了版本号逻辑。之前的就不改了……</div>
+      <div>调整了search的逻辑。现在更加宽松了。</div>
     </Build>
   </div>
 </template>

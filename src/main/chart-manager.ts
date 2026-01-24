@@ -1,6 +1,6 @@
 import path, { extname } from 'node:path'
 import fs from 'fs'
-import { charts_data, ChartType, ChartTypeV2, IpcHandlers } from '../preload/types'
+import { charts_data, ChartTypeV2, IpcHandlers } from '../preload/types'
 import * as electron from 'electron'
 import { dialog, ipcMain, shell } from 'electron'
 import { file_paths } from './fp-parser'
@@ -169,7 +169,7 @@ export default class ChartManager {
     throw new Error('???')
   }
 
-  write_chart(id: string, chd: ChartType.Chart) {
+  write_chart(id: string, chd: ChartTypeV2.final) {
     const chart = this.data.find((v) => v.id === id)
     if (chart) {
       fs.writeFileSync(
@@ -218,22 +218,11 @@ export default class ChartManager {
     const song = zip_entry.find((v) => {
       return ['.mp3', '.wav', '.ogg', '.m4a'].includes(path.extname(v.entryName))
     })
-    const sprite = zip_entry.find((v) => {
-      return (
-        ['.png', '.jpg', '.jpeg', '.gif'].includes(path.extname(v.entryName)) &&
-        v.entryName.includes('song')
-      )
-    })
-    const bg = zip_entry.find((v) => {
-      return (
-        ['.png', '.jpg', '.jpeg', '.gif'].includes(path.extname(v.entryName)) &&
-        v.entryName.includes('bg')
-      )
-    })
     if (!json || !song) {
       await sender('notify-error', 'zip corrupted', 1000)
       return
     }
+    const chart_data = JSON.parse(json.getData().toString('utf-8')) as ChartTypeV2.final
     const id = (await new Promise((r) => {
       sender(
         'ask-id',
@@ -255,35 +244,25 @@ export default class ChartManager {
     }
     try {
       fs.mkdirSync(path.join(this.charts_folder, id))
-      fs.writeFileSync(
-        path.join(this.charts_folder, id, 'vs-chart.json'),
-        json.getData().toString('utf-8'),
-        { encoding: 'utf-8' }
-      )
-      fs.writeFileSync(
-        path.join(this.charts_folder, id, path.basename(song.entryName)),
-        song.getData()
-      )
-      if (sprite) {
-        fs.writeFileSync(
-          path.join(this.charts_folder, id, path.basename(sprite.entryName)),
-          sprite.getData()
+      zip.extractAllTo(path.join(this.charts_folder, id))
+      if (chart_data.version)
+        this.add_chart(
+          id,
+          chart_data.song.name,
+          chart_data.song.composer,
+          chart_data.song.bpm,
+          path.extname(song.entryName),
+          chart_data.diffs.map((v) => v.meta.diff1 + ' ' + v.meta.diff2)
         )
-      }
-      if (bg) {
-        fs.writeFileSync(
-          path.join(this.charts_folder, id, path.basename(bg.entryName)),
-          bg.getData()
+      else
+        this.add_chart(
+          id,
+          path.basename(song.entryName, path.extname(song.entryName)),
+          'unknown',
+          'unknown',
+          path.extname(song.entryName),
+          []
         )
-      }
-      this.add_chart(
-        id,
-        path.basename(song.entryName, path.extname(song.entryName)),
-        'unknown',
-        'unknown',
-        path.extname(song.entryName),
-        []
-      )
     } catch (e) {
       sender('notify-error', '导入失败', 1000)
     }
@@ -426,7 +405,11 @@ export default class ChartManager {
         )
       }
     }
-    if (_song) child_process.exec(`ffmpeg -i ${path.join(this.charts_folder, id, _song)} ${path.join(exported_path, `music.ogg`)}`)
+    if (_song)
+      child_process.exec(
+        `ffmpeg -i "${path.join(this.charts_folder, id, _song)}" "${path.join(exported_path, `music.ogg`)}"`,
+        (...a) => console.log(...a)
+      )
     shell.showItemInFolder(path.join(exported_path, 'info.json'))
   }
 

@@ -5,8 +5,8 @@ import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 
 export const Version = {
-  val: 9.4,
-  str: 'Pre 10'
+  val: 9.5,
+  str: '0.9.5'
 }
 
 const note = {
@@ -54,7 +54,7 @@ const note = {
   }
 }
 
-const settings = ref<storages.storage_scheme>({
+const storage = ref<storages.storage_scheme>({
   settings: {
     scale: 10,
     meter: 4,
@@ -141,25 +141,32 @@ const settings = ref<storages.storage_scheme>({
   },
   version: Version.val,
   shortcut: '',
-  username: '???',
+  username: 'newcomer',
   statistics: {
     used_time: 0,
     first_open: Date.now(),
   }
 })
 
-watch(settings, () => {}, { deep: true })
+watch(storage, () => {}, { deep: true })
 const computes = {
-  mul: computed(() => (settings.value.settings.scale * 200 + 100) / 1000),
+  mul: computed(() => (storage.value.settings.scale * 200 + 100) / 1000),
   visible: computed(() => Math.round(GlobalStat.refs.window.height.value / computes.mul.value)),
-  mul_sec: computed(() => settings.value.settings.scale * 200 + 100)
+  mul_sec: computed(() => storage.value.settings.scale * 200 + 100)
+}
+
+function merge(s: storages.storage_scheme) {
+  if (s.version) {
+    if (s.version < 9.5)
+      s.settings.auto_save = true
+  }
 }
 
 export const Storage = {
-  data: settings,
-  _ref: settings,
+  data: storage,
+  _ref: storage,
   get settings(): storages.storage_scheme['settings'] {
-    return settings.value.settings
+    return storage.value.settings
   },
   /**
    * @returns undefined|number positive if switching from future versions,
@@ -169,6 +176,7 @@ export const Storage = {
     const data = await Invoke('get-conf')
     if (!data) return
     const parsed = JSON.parse(data) as storages.storage_scheme
+    merge(parsed)
     utils.less_assign(this.data.value, parsed)
     const d = [Version.val - parsed.version, parsed.version, Version.val]
     this.data.value.version = Version.val
@@ -178,7 +186,7 @@ export const Storage = {
     Invoke('save-conf', JSON.stringify(toRaw(this.data.value)))
   },
   get version() {
-    return settings.value.version
+    return storage.value.version
   },
   init_interval() {
     setInterval(() => {
@@ -186,7 +194,16 @@ export const Storage = {
     }, 10000)
   },
   computes: computes,
-  note: note
+  note: note,
+
+  __start_time: Date.now(),
+  __update_last: Date.now(),
+  running_time: ref(0),
+  update_used_time() {
+    storage.value.statistics.used_time += Date.now() - this.__update_last
+    this.__update_last = Date.now()
+    this.running_time.value = Date.now() - this.__start_time
+  }
 }
 
 // @ts-ignore

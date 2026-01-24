@@ -107,7 +107,6 @@ function GetAverageBPM(bpmList: [number, number][]): bpm {
       maxLength = bpmList[i + 1][0] - bpmList[i][0]
     }
   }
-  console.log('AVERAGE BPM ' + averageBPM)
   return averageBPM
 }
 

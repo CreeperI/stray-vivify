@@ -3,15 +3,15 @@ import { onUnmounted, useTemplateRef } from 'vue'
 import { WordHelper } from '@renderer/core/word-helper'
 
 const prop = defineProps<{
-  msg: string
-  dec: string
+  msg?: string
+  dec?: string
 }>()
 const r = useTemplateRef('wh')
 let flag = false
 function _in() {
   if (!r.value) return
   const rect = r.value.getBoundingClientRect()
-  WordHelper.call_helper([rect.right, rect.bottom], prop.dec)
+  WordHelper.call_helper([rect.right, rect.bottom], prop.dec || "")
   flag = true
 }
 function _out() {
@@ -24,8 +24,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <span>
-    <span ref="wh" class="word-helper" @mouseenter="_in" @mouseleave="_out" v-html="msg" />
+  <span ref="wh">
+    <slot>
+      <span class="word-helper" @mouseenter="_in" @mouseleave="_out" v-html="msg" />
+    </slot>
   </span>
 </template>
 

@@ -62,7 +62,7 @@ const r = Storage._ref
           <a-number-input v-model="r.settings.nearest" />
         </div>
         <div>
-          <div>Auto Save</div>
+          <div style="font-size: 2rem; font-weight: bold" class="rainbow-text-flow">自动保存</div>
           <a-checkbox v-model="r.settings.auto_save" />
         </div>
         <div>
@@ -251,9 +251,10 @@ const r = Storage._ref
     </div>
     <template #footer>
       <a-button msg="DevTools" @click="Invoke('open-dev')" />
+      <a-button msg="查看Version" @click="modal.VersionsModal.show({})" />
       <a-button msg="Inspector" @click="modal.InspectorModal.show({})" />
       <a-button msg="快捷键设置" @click="modal.ShortcutModal.show({})" />
-      <a-button msg="<strong>信用</strong>" @click="modal.CreditsModal.show({})" />
+      <a-button msg="Credits" @click="modal.CreditsModal.show({})" />
     </template>
   </SimpleModal>
 </template>

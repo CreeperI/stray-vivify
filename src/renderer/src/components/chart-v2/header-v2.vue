@@ -88,7 +88,7 @@ function is_active(i: number, i1: number) {
       <div @click="sender('window-min')">0</div>
       <div v-if="isMax" @click="sender('window-max')">2</div>
       <div v-else @click="sender('window-max')">1</div>
-      <div class="header-close" @click="sender('window-close')">r</div>
+      <div class="header-close" @click="GlobalStat.close_app()">r</div>
     </div>
   </div>
 </template>

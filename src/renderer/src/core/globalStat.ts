@@ -2,6 +2,7 @@ import { inject, Ref, ref, watch } from 'vue'
 import { charts_data, ChartTypeV2 } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
 import { Storage } from '@renderer/core/storage'
+import { Chart } from '@renderer/core/chart/chart'
 
 export namespace GlobalStat {
   type routes = 'start' | 'wait' | 'editor'
@@ -144,6 +145,14 @@ export namespace GlobalStat {
       taskBarHeight: screen.height - screen.availHeight,
       max_lane: SvgSizing.max_lane
     }
+  }
+
+  export async function close_app() {
+    const current = Chart.current
+    if (current) {
+      await current.save()
+    }
+    window.electron.ipcRenderer.send("window-close")
   }
 }
 

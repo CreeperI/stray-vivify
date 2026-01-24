@@ -61,6 +61,7 @@ async function main() {
     Chart.current?.playfield?.refresh()
     Chart.current?.diff.update_diff_counts()
     GlobalStat.MemoryUsage.update()
+    Storage.update_used_time()
 
     GlobalStat.refs.window.height.value = window.innerHeight
     GlobalStat.refs.window.width.value = window.innerWidth
@@ -84,3 +85,4 @@ async function main() {
 load_ipc_handlers()
 main()
 CheckSkin.check_skin()
+// app.config.performance = true

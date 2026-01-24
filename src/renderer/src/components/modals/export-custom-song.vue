@@ -14,8 +14,8 @@ import { Chart_diff } from '@renderer/core/chart/diff'
 import { Invoke } from '@renderer/core/ipc'
 import { modal } from '@renderer/core/misc/modal'
 import 'vue-json-pretty/lib/styles.css'
-import VueJsonPretty from 'vue-json-pretty'
 import { Storage } from '@renderer/core/storage'
+import JsonEditor from '@renderer/components/miscellaneous/json-editor.vue'
 
 const chart = Chart.$current
 
@@ -55,6 +55,7 @@ function possible_difficulty(ix: number) {
     return parseFloat(chart.diffs[ix].meta.diff2)
   else return 0
 }
+
 function filter_STR() {
   const fl: number[] = []
   for (let i = 0; i < 4; i++) {
@@ -95,7 +96,7 @@ const info_data = ref({
   version: '9.9.9',
   is_original: false,
   is_published: true,
-  jacket_artist: '',
+  jacket_artist: 'N/A',
   has_encore: false,
   difficulty_constant_1: 0,
   difficulty_display_1: '0',
@@ -108,7 +109,7 @@ const info_data = ref({
   note_designer_3: 'N/A',
   difficulty_constant_4: 0,
   difficulty_display_4: '0',
-  note_designer_4: '',
+  note_designer_4: 'N/A',
   unlock: {
     type: 0,
     enc_type: 0,
@@ -128,13 +129,12 @@ const info_data = ref({
     jacket_designer: 'N/A'
   }
 })
-// -------------- Phase 2
+// -------------- Phase 2 ------------------
 function start_phase_2() {
-  if (diff_indexs.value[3] == -1) {
+  if (!is_backstage.value) {
     // @ts-expect-error
     delete info_data.value.enc_data
-  }
-  if (diff_indexs.value[3] != -1) {
+  } else if (diff_indexs.value[3] != -1) {
     for (const _i of utils.keyof(info_data.value['enc_data'])) {
       if (info_data.value['enc_data'][_i] == '') delete info_data.value['enc_data'][_i]
     }
@@ -149,8 +149,8 @@ const args = ref({
 function do_export() {
   const gml = info_data.value
   if (!gml) return
-  const diffs = filter_STR().map((ix) =>
-    Chart_diff.to_vsc(chart.diffs[diff_indexs.value[ix]]).join('\n')
+  const diffs = diff_indexs.value.map((ix) =>
+    ix == -1 ? 0 : Chart_diff.to_vsc(chart.diffs[ix]).join('\n')
   )
   const _arg = {
     crop: args.value.crop,
@@ -185,7 +185,12 @@ function do_export() {
             </span>
             <template v-for="(ix, i) in STR">
               <div>{{ ix }}</div>
-              <div @click="fuck_diff(i)" @drop="drop(i)($event)" @dragover.prevent>
+              <div
+                style="overflow: hidden"
+                @click="fuck_diff(i)"
+                @drop="drop(i)($event)"
+                @dragover.prevent
+              >
                 {{
                   diff_indexs[i] == -1
                     ? ''
@@ -285,7 +290,7 @@ function do_export() {
             <a-button class="export-btn" msg="Export" @click="do_export" />
           </div>
           <div class="final-textarea">
-            <VueJsonPretty :data="info_data" :editable="true" />
+            <JsonEditor v-model="info_data" :editable="true" />
           </div>
         </div>
       </div>
@@ -386,6 +391,7 @@ function do_export() {
   height: 100%;
   overflow-y: auto;
   min-height: 0;
+  border-left: 2px #b8dcee dotted;
 }
 .export-btn {
   grid-column: span 2;

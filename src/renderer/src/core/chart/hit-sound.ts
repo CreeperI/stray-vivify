@@ -82,9 +82,10 @@ export class HitSoundSystem {
         (v) => {
           if (this.gainNode) this.gainNode.gain.value = v / 100
           else notify.error('GainNode炸了')
+        }, {
+          immediate: true
         }
       )
-      this.gainNode.gain.value = 1.0
       this.gainNode.connect(this.audioContext.destination)
 
       const response = await fetch('stray:/__hit__/')

@@ -4,6 +4,7 @@ import { Storage } from '@renderer/core/storage'
 import { computed, inject } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
+import { FrameRate } from '@renderer/core/misc/frame-rates'
 
 const { note } = defineProps<{
   note: ChartTypeV2.note
@@ -28,9 +29,9 @@ function left() {
 }
 
 function border() {
-  // @ts-expect-error
-  const width = note.len * mul.value
   const sliceHeight = 43 // 贴图实际高度（单位：px），按需替换为实际值
+  // @ts-expect-error
+  const width = note.len * mul.value - 0.5 * sliceHeight
   return `border:none; border-top: transparent solid ${width}px;
     border-image-source: url("${borderSrc()}");
     border-image-slice: ${sliceHeight};
@@ -48,6 +49,7 @@ function zix() {
 }
 
 function style() {
+  FrameRate.note_style.immediate()
   if ('len' in note) {
     return `${zix()};height:${height()};width: ${size()}; left: ${left()}; ${border()};
     bottom:${time_bottom(note)}`

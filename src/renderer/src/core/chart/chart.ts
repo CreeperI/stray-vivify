@@ -1,6 +1,16 @@
 import { ChartType, ChartTypeV2 } from '@preload/types'
 import { notify } from '@renderer/core/misc/notify'
-import { computed, ComputedRef, ref, Ref, toRaw, triggerRef, watch, WritableComputedRef } from 'vue'
+import {
+  computed,
+  ComputedRef,
+  ref,
+  Ref,
+  toRaw,
+  toValue,
+  triggerRef,
+  watch,
+  WritableComputedRef
+} from 'vue'
 import { Chart_audio } from '@renderer/core/chart/audio'
 import { Chart_song } from '@renderer/core/chart/song'
 import { Chart_diff } from '@renderer/core/chart/diff'
@@ -27,19 +37,15 @@ export class Chart {
   path: string
   audio: Chart_audio
   diff: Chart_diff
-  length: ms
   // for audio counting only
   length_end: ms
-
   shown_timing: ComputedRef<[ms, ms]>
   current_bpm: WritableComputedRef<number>
   ref: {
     diff_index: Ref<number>
   }
   id: string
-
   playfield: Chart_playfield | null
-
   sprite_err: Ref<boolean>
   bg_err: Ref<boolean>
 
@@ -49,7 +55,6 @@ export class Chart {
     this._diff_index = 0
     this.audio = new Chart_audio(this)
     this.path = ''
-    this.length = -1
     this.length_end = -1
     this.shown_timing = computed(() => [
       this.audio.refs.current_ms.value,
@@ -78,6 +83,10 @@ export class Chart {
   static get $current() {
     if (!this.current) throw new Error("where's my chart!")
     return this.current
+  }
+
+  get length() {
+    return this.audio.length
   }
 
   _diff_index: number
@@ -159,7 +168,7 @@ export class Chart {
 
   static async open_chart(id: string) {
     const file = await Invoke('open-song', id)
-    const blob_path = URL.createObjectURL(await this.fetch_blob(file.path))
+    const blob_path = URL.createObjectURL(await this.fetch_blob(id))
     const chart = await this.create(id, blob_path)
     if (file.data) {
       const data = this.parse_data(file.data)
@@ -186,8 +195,8 @@ export class Chart {
     )
   }
 
-  static async fetch_blob(path: string) {
-    const r = await fetch('stray:/__song__/' + path)
+  static async fetch_blob(id: string) {
+    const r = await fetch('stray:/__song__/' + id)
     if (r.ok) return await r.blob()
     throw new Error('what fetch failed')
   }
@@ -374,7 +383,6 @@ export class Chart {
   }
 
   post_define() {
-    this.length = (this.audio.ele?.duration ?? -1) * 1000
     this.length_end = this.length + 3000
     this.set_header_name()
     this.audio.init_on_end()
@@ -459,7 +467,7 @@ export class Chart {
     if (this.audio.ele) {
       this.diff.validate_chart()
       await nextFrame()
-      Invoke('save-chart', this.id, JSON.stringify(this.chart))
+      Invoke('save-chart', this.id, toValue(this.chart))
       await nextFrame()
       Invoke(
         'update-chart-data',

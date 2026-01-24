@@ -51,8 +51,11 @@ export function stray_handler() {
     if (decodedUrl.includes('__skin__')) {
       return new Response(fs.readFileSync(join(file_paths.skin, basename(fullPath))))
     } else if (decodedUrl.includes('__song__')) {
-      const song_path = decodedUrl.replace('/__song__/', '')
-      return new Response(fs.readFileSync(song_path), {
+      const id = decodedUrl.replace('/__song__/', '')
+      const audio_name = new URLSearchParams(new URL(request.url).search).get('name') ?? 'song'
+      const song_path = find_song(path.join(file_paths.charts, id), audio_name)
+      if (!song_path) return new Response(null, { status: 404 })
+      return new Response(fs.readFileSync(path.join(file_paths.charts, id, song_path)), {
         headers: {
           'Content-Type': 'audio/' + extname(song_path).slice(1),
           'Content-Disposition': 'inline'

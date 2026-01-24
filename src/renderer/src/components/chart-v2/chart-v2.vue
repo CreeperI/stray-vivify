@@ -65,5 +65,4 @@ const chart_state = GlobalStat.chart_state
   flex-direction: column;
   position: relative;
 }
-
 </style>

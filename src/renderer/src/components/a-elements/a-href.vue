@@ -18,7 +18,8 @@ function handle() {
 
 <style scoped>
 a {
-  text-decoration: 1px underline #b8dcee;
+  text-decoration: 2px underline #b8dcee;
   cursor: pointer;
+  padding: 0 5px;
 }
 </style>

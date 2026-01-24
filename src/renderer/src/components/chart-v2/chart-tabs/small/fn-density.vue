@@ -52,6 +52,9 @@ function mousemove(e: MouseEvent) {
     chart.audio.set_current_time(seeker.value.time)
   }
 }
+const current_x = computed(() => {
+  return chart.audio.refs.current_ms.value / chart.length * width + 20
+})
 function mouseout() {
   seeker.value.display = false
   flag = false
@@ -119,6 +122,16 @@ function click() {
       >
         {{ utils.toTimeStr(seeker.time / 1000, 0) }}
       </text>
+      <line
+        :x1="current_x"
+        :x2="current_x"
+        class="no-event"
+        stroke="white"
+        stroke-opacity="0.3"
+        stroke-width="2"
+        y1="10"
+        y2="240"
+      ></line>
     </svg>
   </div>
 </template>

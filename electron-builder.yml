@@ -11,6 +11,8 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!charts/**'
   - '!skin/**'
+  - "!**/.idea/*"
+  - "!**/node_modules/*"
 asarUnpack:
   - resources/**
   - src/renderer/public/**
@@ -39,7 +41,7 @@ linux:
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
-npmRebuild: false
+npmRebuild: true
 publish:
   provider: generic
   url: https://example.com/auto-updates

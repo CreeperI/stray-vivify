@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
-import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, inject, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
 import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
@@ -150,7 +150,7 @@ function on_click() {
 
   if (Storage.note.hold.value) {
     if (pending_hold_fixed) {
-      if (!chart.diff.add_notes(pending_note.value)) notify.error('添加note失败。')
+      if (!chart.diff.add_notes(toRaw(pending_note.value))) notify.error('添加note失败。')
       pending_len.value = 0
       pending_hold_fixed = false
     } else {
@@ -159,7 +159,7 @@ function on_click() {
     }
     return
   } else {
-    if (!chart.diff.add_notes(pending_note.value)) notify.error('添加note失败。')
+    if (!chart.diff.add_notes(toRaw(pending_note.value))) notify.error('添加note失败。')
   }
 }
 
@@ -169,6 +169,7 @@ function del_note(n: ChartTypeV2.note) {
     return
   }
   if (!chart.diff.remove_note(n)) notify.error('删除note失败。')
+  chart.fuck_shown(true)
 }
 
 function fuck_hold() {
@@ -206,7 +207,7 @@ function ondragend() {
 function ondrop() {
   if (!dragging.value) return
 
-  if (!chart.diff.remove_notes(dragging.value)) console.log("bugged removing")
+  if (!chart.diff.remove_notes(dragging.value)) console.log('bugged removing')
 
   chart.diff.add_notes(pending_note.value)
   dragging.value = undefined
@@ -410,11 +411,11 @@ const d_height = inject<number>('d_height') ?? 0
       height="100%"
       width="100%"
       @click="on_click"
+      @contextmenu="fuck_hold"
       @drop="ondrop"
       @mousedown="(e) => on_mouse_down(e)"
       @mousemove.capture="update_pending"
       @dragover.prevent="update_pending"
-      @contextmenu="fuck_hold"
     >
       <note-v2
         v-for="note in shown"

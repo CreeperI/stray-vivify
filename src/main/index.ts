@@ -59,7 +59,37 @@ function listen(win: BrowserWindow) {
     win.webContents.send('window-resize', win.isMaximized())
   })
 
+  let flag = false
+
+  win.on('close', async (e) => {
+    if (flag) {
+      win.destroy()
+      return
+    }
+    e.preventDefault()
+    win.webContents.send('im-closing')
+    flag = true
+    await new Promise((r) => {
+      ipcMain.on('can-close', r)
+    })
+    win.destroy()
+  })
+
   ipcMain.handle('window-max-state', () => win.isMaximized())
+
+  // fetcher from https://pratikpc.medium.com/bypassing-cors-with-electron-ab7eaf331605
+  win.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+    callback({ requestHeaders: { Origin: '*', ...details.requestHeaders } })
+  })
+
+  win.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        'Access-Control-Allow-Origin': ['*'],
+        ...details.responseHeaders
+      }
+    })
+  })
 }
 
 function createWindow(): void {
@@ -101,7 +131,7 @@ function createWindow(): void {
 
   listen(mainWindow)
   load_ipc_handlers(mainWindow)
-  mainWindow.title = "stray/vivify"
+  mainWindow.title = 'stray/vivify'
 }
 
 // This method will be called when Electron has finished

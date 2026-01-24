@@ -13,6 +13,7 @@ export type _frameRateRef = Ref<{
 
 const recent_max_length = 10
 export class _FrameRateClass {
+  // the use-times recent calls take
   recent: number[]
   // 平均值
   private _avg: number
@@ -22,8 +23,8 @@ export class _FrameRateClass {
   private _cv: number
   private _max: number
   private _min: number
-  private _call_count: number
-  private _call_count_2: number
+  private _call_count_avg: number
+  private _call_count_last: number
   private last_call: number
   private _call_counts: number[]
   refs: _frameRateRef
@@ -34,8 +35,8 @@ export class _FrameRateClass {
     this._avg = 0
     this._max = 0
     this._min = 0
-    this._call_count = 0
-    this._call_count_2 = 0
+    this._call_count_avg = 0
+    this._call_count_last = 0
     this._call_counts = []
     this.last_call = 0
     this.refs = ref({
@@ -65,16 +66,16 @@ export class _FrameRateClass {
       cv: this._cv,
       max: this._max,
       min: this._min,
-      call_count: this._call_count
+      call_count: this._call_count_avg
     }
   }
 
   refresh() {
     this.recent = this.recent.slice(-recent_max_length)
-    this._call_counts.push(this._call_count_2)
+    this._call_counts.push(this._call_count_last)
     this._call_counts = this._call_counts.slice(-10)
-    this._call_count = utils.average(this._call_counts)
-    this._call_count_2 = 0
+    this._call_count_avg = utils.average(this._call_counts)
+    this._call_count_last = 0
     this.calc()
   }
 
@@ -83,22 +84,29 @@ export class _FrameRateClass {
   }
   end() {
     this.recent.push(performance.now() - this.last_call)
-    this._call_count_2++
+    this._call_count_last++
+  }
+  immediate() {
+    this.recent.push(1)
+    this._call_count_last++
   }
 
-  get call_count() {
-    return this._call_count
+  get call_count_avg() {
+    return this._call_count_avg
   }
 }
 
 const aniFrame = new _FrameRateClass()
 class _FPS extends _FrameRateClass {
+  last: Ref<number>
   constructor() {
     super()
     this.recent = []
+    this.last = ref(0)
   }
   refresh() {
-    this.recent.push(aniFrame.call_count)
+    this.recent.push(aniFrame.call_count_avg)
+    this.last.value = aniFrame.call_count_avg
     this.calc()
   }
 }
@@ -121,6 +129,8 @@ export const FrameRate = {
   calc_sr: new _FrameRateClass(),
   pooling: new _FrameRateClass(),
   save: new _FrameRateClass(),
+  audio_sync: new _FrameRateClass(),
+  note_style: new _FrameRateClass(),
   Updates: {} as Record<string, _FrameRateClass>
 }
 

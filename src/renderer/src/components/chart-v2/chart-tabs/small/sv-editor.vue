@@ -26,7 +26,7 @@ const __select_options = factory_strings.map((x, ix) => {
 </script>
 
 <template>
-  <div class="sv-editor" v-if="sv_data.ix > -1">
+  <div class="sv-editor" v-if="sv_data.ix != -1">
     <div class="sv-editor-inner" style="margin-bottom: 15px">
       <div>#{{ sv_data.ix }}</div>
       <div>{{ the_sv.time }}ms - {{ timestr }}</div>

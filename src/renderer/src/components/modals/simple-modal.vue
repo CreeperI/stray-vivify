@@ -5,11 +5,11 @@ import { closeModal } from '@kolirt/vue-modal'
 
 const slots = useSlots()
 const props = defineProps({
-  title: {type: String, default: ''},
+  title: { type: String, default: '' },
   showClose: { type: Boolean, default: true },
   size: {
     type: String,
-    default: 'sm',
+    default: '2',
     validator(value: string): boolean {
       return ['1', '2', '3', '4', '5'].includes(value)
     }
@@ -20,7 +20,9 @@ const props = defineProps({
 <template>
   <div :class="`size-${props.size}`" class="vue-modal-content">
     <div v-if="props.title || props.showClose" class="vue-modal-header">
-      <h1 v-if="props.title" class="vue-modal-title">{{ props.title }}</h1>
+      <slot name="header">
+        <h1 v-if="props.title" class="vue-modal-title">{{ props.title }}</h1>
+      </slot>
       <button
         v-if="props.showClose"
         aria-label="Close"

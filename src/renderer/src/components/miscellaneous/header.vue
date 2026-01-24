@@ -35,7 +35,7 @@ async function import_osz() {
       <div @click="ipcRenderer.send('window-min')">0</div>
       <div v-if="isMax" @click="ipcRenderer.send('window-max')">2</div>
       <div v-else @click="ipcRenderer.send('window-max')">1</div>
-      <div class="header-close" @click="ipcRenderer.send('window-close')">r</div>
+      <div class="header-close" @click="GlobalStat.close_app()">r</div>
     </div>
   </div>
 </template>
