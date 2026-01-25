@@ -89,6 +89,11 @@ const r = Storage._ref
           <div>彩色Stats</div>
           <a-checkbox v-model="r.settings.color_stats" />
         </div>
+        <div>
+          <div>显示Version</div>
+          <a-checkbox v-model="r.settings.always_version" />
+        </div>
+
         <setting-header msg="note分组" />
         <div>
           <div>向后ms</div>

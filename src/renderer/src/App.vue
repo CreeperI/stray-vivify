@@ -5,14 +5,20 @@ import AButton from '@renderer/components/a-elements/a-button.vue'
 import ChartList from '@renderer/components/miscellaneous/chart-list.vue'
 import ChartV2 from '@renderer/components/chart-v2/chart-v2.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Version } from '@renderer/core/storage'
+import { Storage, Version } from '@renderer/core/storage'
 import WordHelperOverlay from '@renderer/components/miscellaneous/word-helper-overlay.vue'
 import MouseTracker from '@renderer/components/miscellaneous/mouse-tracker.vue'
 import { modal } from '@renderer/core/misc/modal'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
+import { computed } from 'vue'
 
 const state = GlobalStat.route.route
 const key = RefreshAll.__key
+
+const show_version = computed(() => {
+  if (Storage.settings.always_version) return true
+  else return state.value != 'editor'
+})
 </script>
 
 <template>
@@ -23,7 +29,7 @@ const key = RefreshAll.__key
     <div id="n-c" class="notify-container" />
     <ModalTarget />
     <a-button
-      v-if="state != 'editor'"
+      v-if="show_version"
       :msg="`Version: ${Version.str}`"
       class="--build"
       @click="modal.VersionsModal.show({})"

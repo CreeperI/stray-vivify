@@ -1,4 +1,4 @@
-import { ChartType, ChartTypeV2, Invoke, IpcHandlers } from '../preload/types'
+import { ChartType, Invoke, IpcHandlers } from '../preload/types'
 import fs, { existsSync, readFileSync } from 'fs'
 import VsbParser from './vsbParser'
 import * as electron from 'electron'
@@ -59,8 +59,8 @@ const Handler = (mw: Electron.BrowserWindow) => {
       const buf = readFileSync(p)
       return new VsbParser(buf).runToNotes()
     },
-    'save-chart': function (_, id:string, data:ChartTypeV2.final) {
-      chart_manager.write_chart(id, data)
+    'save-chart': function (_, id: string, data: string) {
+      chart_manager.write_chart(id, JSON.parse(data))
       console.log('saved chart: ' + id)
     },
     'import-song': async function (_, music_path: string) {
@@ -157,7 +157,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'read-osz': () => {
       const fp = dialog.showOpenDialogSync({
         properties: ['openFile'],
-        filters: [{ name: 'OSZ', extensions: ['osz'] }],
+        filters: [{ name: 'OSZ', extensions: ['osz'] }]
       })
       if (!fp) return
       const osz = OszReader.create(fp[0])

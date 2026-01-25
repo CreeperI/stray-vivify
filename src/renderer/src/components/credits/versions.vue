@@ -214,7 +214,7 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
         </div>
       </template>
     </Build>
-    <Build build="9.2" y="2025" m="10" d="6">
+    <Build build="9.2" d="6" m="10" y="2025">
       <template #bugs>
         <div>修改了导入曲目的bug</div>
       </template>
@@ -222,7 +222,7 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>custom song导出</div>
       <div>回退了diff的编辑逻辑</div>
     </Build>
-    <Build build="9.3" y="2025" m="10" d="18" title="9s2">
+    <Build build="9.3" d="18" m="10" title="9s2" y="2025">
       <template #bugs>
         <div>非全屏状态下，note定位错误的问题</div>
         <div>窗口大小不及时同步的问题，现在采用的是每秒更新一次</div>
@@ -232,36 +232,53 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>Inspector添加了Frame Rate - Update Rate</div>
       <div>调整了部分程序结构</div>
     </Build>
-    <Build build="9.4" y="2025" m="11" d="23" title="Pre 10">
+    <Build build="9.4" d="23" m="11" title="Pre 10" y="2025">
       <div>更改了bpm修改时同步计算的逻辑。</div>
       <div>添加了Custom Song导出</div>
       <div>将note插入 删除逻辑改为二分法</div>
       <div>添加了节奏谱选项，在预览模式中可用</div>
       <div>添加了未完成的SV页面。</div>
     </Build>
-    <Build build="9.5" y="2025" m="12" d="5" title="0.9.5">
+    <Build build="9.5" d="5" m="12" title="0.9.5" y="2025">
       <template #bugs>
         <div>修复了在使用任务栏关闭应用时不会触发自动保存的问题</div>
         <s>安全性调整</s>
         <span style="text-decoration: #b8dcee line-through 1px">
           由于使用了vue-json-pretty，其正常工作需要使用到 unsafe-eval script，
-          而这在某些情况下可能导致本应用的网络交互（其实压根没有）被攻击。 <br>
-          未来版本中会引入新的解决方案，也考虑到会添加在线功能api所需的安全需求。<br>
+          而这在某些情况下可能导致本应用的网络交互（其实压根没有）被攻击。 <br />
+          未来版本中会引入新的解决方案，也考虑到会添加在线功能api所需的安全需求。<br />
           总之不以管理员权限打开 stray/vivify应当可以解决现在存在的所有风险。
         </span>
       </template>
       <div>修改了密度计算的逻辑，<s>从~200ms压缩到了~3ms</s></div>
       <div>为线密度添加了时间跳转功能 和 当前时间的显示</div>
       <div>修改了stray:/读取文件的逻辑</div>
-      <div>压缩了hold的高度，现在应该不会出现面尾和下一个note过分重叠的情况（如果还有重叠证明你写的是无理）</div>
-      <div>添加了stats展示 from @Creeper_001 <a-href href="https://github.com/Ts-Final/stray-vivify/pull/3">查看PR</a-href></div>
+      <div>
+        压缩了hold的高度，现在应该不会出现面尾和下一个note过分重叠的情况（如果还有重叠证明你写的是无理）
+      </div>
+      <div>
+        添加了stats展示 from @Creeper_001
+        <a-href href="https://github.com/Ts-Final/stray-vivify/pull/3">查看PR</a-href>
+      </div>
       <div>添加了使用时间统计，将从这个版本开始计算。</div>
       <div>更新本版本时会重新打开自动保存</div>
       <div>调整了版本号逻辑。之前的就不改了……</div>
-      <div>调整了search的逻辑。现在更加宽松了。</div>
+      <div>调整了谱面列表search的逻辑。现在更加宽松了。</div>
     </Build>
-    <Build build="9.6" title="0.9.6" y="2026" m="0" d="0">
+    <Build build="9.6" d="25" m="1" title="0.9.6" y="2026">
+      <template #bugs>
+        <div>修复了可能存在删除note失败的bug。</div>
+        <span>因为vue会给note套上一个Proxy导致===的匹配失败（这俩的内存指针不一样）</span>
+      </template>
       <div>修改了custom json的编辑控件，回调了安全设置。</div>
+      <div>为时间字符串添加了小时支持。</div>
+      <div>
+        调整了使用时间统计的逻辑。 现在会显示 AppData/stray-vivify的创建时间
+        存放exe的文件夹创建时间和 第一次使用v0.9.5以后的时间 中的最早者来计算。
+      </div>
+      <div>修改了谱面列表的事件逻辑，现在在加载曲目的时候不会触发其他事件。</div>
+      <div>重构了Inspector和custom的modal（代码意义上）。</div>
+      <div>将右下角的Version提示改为一直显示，可以在设置中关闭。</div>
     </Build>
   </div>
 </template>

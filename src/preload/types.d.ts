@@ -223,7 +223,7 @@ export type Invoke = {
   'save-chart': {
     arg: {
       fp: string
-      data: ChartTypeV2.final
+      data: string
     }
     r: void
   }
@@ -644,6 +644,8 @@ export namespace storages {
       factory_opacity: number
     }
     color_stats:boolean
+
+    always_version: boolean
   }
   export interface statistics {
     first_open: number

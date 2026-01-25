@@ -451,7 +451,7 @@ export class Chart {
       FrameRate.save.start()
       this.diff.validate_chart()
       await nextFrame()
-      Invoke('save-chart', this.id, this.chart)
+      Invoke('save-chart', this.id, JSON.stringify(this.chart))
       FrameRate.save.end()
       await nextFrame()
       await Invoke(
