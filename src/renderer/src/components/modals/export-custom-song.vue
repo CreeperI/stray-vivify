@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import ATab from '@renderer/components/a-elements/a-tab.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import AButton from '@renderer/components/a-elements/a-button.vue'
@@ -129,6 +129,7 @@ const info_data = ref({
     jacket_designer: 'N/A'
   }
 })
+watch(info_data,(newv) => console.log(newv))
 // -------------- Phase 2 ------------------
 function start_phase_2() {
   if (!is_backstage.value) {
@@ -401,10 +402,5 @@ function do_export() {
 :deep(input) {
   color: #b8dcee;
   background: transparent;
-}
-</style>
-<style>
-.vjs-tree-node:hover {
-  background-color: #cccccc66 !important;
 }
 </style>

@@ -242,8 +242,8 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
     <Build build="9.5" y="2025" m="12" d="5" title="0.9.5">
       <template #bugs>
         <div>修复了在使用任务栏关闭应用时不会触发自动保存的问题</div>
-        <div style="font-size: 1.2rem;color: #ee6666">安全性调整</div>
-        <span>
+        <s>安全性调整</s>
+        <span style="text-decoration: #b8dcee line-through 1px">
           由于使用了vue-json-pretty，其正常工作需要使用到 unsafe-eval script，
           而这在某些情况下可能导致本应用的网络交互（其实压根没有）被攻击。 <br>
           未来版本中会引入新的解决方案，也考虑到会添加在线功能api所需的安全需求。<br>
@@ -259,6 +259,9 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>更新本版本时会重新打开自动保存</div>
       <div>调整了版本号逻辑。之前的就不改了……</div>
       <div>调整了search的逻辑。现在更加宽松了。</div>
+    </Build>
+    <Build build="9.6" title="0.9.6" y="2026" m="0" d="0">
+      <div>修改了custom json的编辑控件，回调了安全设置。</div>
     </Build>
   </div>
 </template>
