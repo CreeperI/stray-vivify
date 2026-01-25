@@ -55,10 +55,10 @@ const d_height = inject<number>('d_height') ?? 0
   <g id="svg-notes">
     <foreignObject id="lane-notes" :y="-80 + d_height" height="100%" width="100%">
       <note-v2
-        v-for="note in shown"
-        :note="note"
+        v-for="ix in shown"
+        :note="chart.diff.notes[ix]"
         :style="{
-          left: x_of(note)
+          left: x_of(chart.diff.notes[ix])
         }"
       />
     </foreignObject>

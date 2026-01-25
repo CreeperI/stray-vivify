@@ -1,5 +1,5 @@
 import { ChartTypeV2 } from '@preload/types'
-import { computed, ComputedRef, nextTick, Ref, ref, toRaw, watch } from 'vue'
+import { computed, ComputedRef, Ref, ref, toRaw, watch } from 'vue'
 import { Chart, ms } from './chart'
 import { utils } from '../utils'
 import { Storage } from '@renderer/core/storage'
@@ -32,9 +32,23 @@ function parse_type(v: string) {
 function isNote(v: ChartTypeV2.note): v is ChartTypeV2.normal_note {
   return 'snm' in v
 }
+function fix_note(v: ChartTypeV2.note) {
+  if ('len' in v) {
+    if (v.len == 0) {
+      // @ts-expect-error
+      delete v.len
+      // @ts-expect-error
+      v.snm = 0
+    }
+  } else {
+    if (v.width == 1) {
+      // fix for note {width1 but S}
+      if (v.snm == 2) v.snm = 0
+    }
+  }
+}
 
 export class Chart_diff {
-  bound: Ref<ChartTypeV2.diff>
   chart: Chart
   counts: Ref<{
     chip: number
@@ -53,8 +67,7 @@ export class Chart_diff {
   }>
   undo: (() => void)[][]
   redo: (() => void)[][]
-  shown: Ref<ChartTypeV2.note[]>
-  update_shown_flag: Ref<boolean>
+  shown: Ref<number[]>
   last_update: number
   // 小节线
   bar_list: ms[]
@@ -62,7 +75,7 @@ export class Chart_diff {
   beat_list: [ms, number][]
   ticks: [ms, number][]
   section_list: ms[]
-  shown_t: Ref<{
+  shown_bar_ticks: Ref<{
     // 小节
     bar_list: [ms, number][]
     // 分音线
@@ -86,8 +99,7 @@ export class Chart_diff {
   max_lane: Ref<number>
   sv_bind: Chart_Diff_SV
 
-  constructor(chart: Chart, ix = 0) {
-    this.bound = ref(chart.diffs[ix])
+  constructor(chart: Chart) {
     this.chart = chart
     this.counts = ref({
       chip: 0,
@@ -104,22 +116,14 @@ export class Chart_diff {
       max_bpm: 0,
       main_bpm: 0
     })
-    watch(
-      this.bound,
-      () => {
-        this.chart.sync_from_diff()
-      },
-      { deep: true }
-    )
     this.undo = []
     this.redo = []
     this.shown = ref([])
-    this.update_shown_flag = ref(false)
     this.last_update = 0
     this.bar_list = []
     this.beat_list = []
     this.section_list = []
-    this.shown_t = ref({
+    this.shown_bar_ticks = ref({
       bar_list: [],
       beat_list: [],
       ticks: [],
@@ -134,15 +138,9 @@ export class Chart_diff {
     )
     this.density_data = ref([0])
     watch(
-      () => this.bound.value.timing,
-      () => {
-        this.update_timing_list()
-      }
-    )
-    watch(
       () => Storage.settings.meter,
       () => {
-        this.update_beat_list()
+        this.update_beat_line_list()
         this.update_t(this.visible)
       }
     )
@@ -169,49 +167,53 @@ export class Chart_diff {
     this.sv_bind = new Chart_Diff_SV(this)
   }
 
+  get diff() {
+    return this.chart.diffs[this.chart.ref.diff_index.value]
+  }
+
   get notes() {
-    return this.bound.value.notes
+    return this.diff.notes
   }
 
   set notes(v: ChartTypeV2.note[]) {
-    this.bound.value.notes = v
+    this.diff.notes = v
     this.update_diff_counts()
   }
 
   get diff1() {
-    return this.bound.value.meta.diff1
+    return this.diff.meta.diff1
   }
 
   set diff1(v: string) {
-    this.bound.value.meta.diff1 = v
+    this.diff.meta.diff1 = v
     this.chart.set_header_name()
     utils.refresh()
   }
 
   get diff2() {
-    return this.bound.value.meta.diff2
+    return this.diff.meta.diff2
   }
 
   set diff2(v: string) {
-    this.bound.value.meta.diff2 = v
+    this.diff.meta.diff2 = v
     this.chart.set_header_name()
     utils.refresh()
   }
 
   get charter() {
-    return this.bound.value.meta.charter
+    return this.diff.meta.charter
   }
 
   set charter(v: string) {
-    this.bound.value.meta.charter = v
+    this.diff.meta.charter = v
   }
 
   get timing() {
-    return this.bound.value.timing
+    return this.diff.timing
   }
 
   set timing(v: ChartTypeV2.timing[]) {
-    this.bound.value.timing = v.toSorted((a, b) => a.time - b.time)
+    this.diff.timing = v.toSorted((a, b) => a.time - b.time)
   }
 
   get visible(): [number, number] {
@@ -225,6 +227,23 @@ export class Chart_diff {
 
   get toRaw() {
     return toRaw(this.notes)
+  }
+
+  get current_density() {
+    return this.shown.value.filter((x) => {
+      const n = this.notes[x]
+      if (n['snm'] == 1) return false
+      return 'len' in n
+        ? n.time + n.len > this.chart.audio.current_time && n.time < this.chart.audio.current_time
+        : Math.abs(this.chart.audio.current_time - n.time) < 500
+    }).length
+  }
+
+  get get_note() {
+    const x = this
+    return function (ix: number): ChartTypeV2.note {
+      return x.notes[ix]
+    }
   }
 
   static createDiff(): ChartTypeV2.diff {
@@ -351,7 +370,7 @@ export class Chart_diff {
     }
   }
 
-  update_beat_list() {
+  update_beat_line_list() {
     this.beat_list = []
     const v = this.timing
 
@@ -384,19 +403,14 @@ export class Chart_diff {
     }
   }
 
-  update_tick_list(promise?: true): Promise<void>
-
-  update_tick_list(promise?: false): void
-
-  update_tick_list(promise = false) {
-    if (!promise) this._update_tick_list()
-    return utils.nextFrame().then(() => this._update_tick_list())
-  }
-
+  /**
+   * Update bar/beat/ticks
+   * should be called when diff.timing changed
+   */
   update_timing_list() {
     this.update_bar_section_list()
-    this.update_beat_list()
-    this.update_tick_list(true)
+    this.update_beat_line_list()
+    this.update_tick_list()
   }
 
   sort_notes() {
@@ -415,7 +429,7 @@ export class Chart_diff {
   }
 
   update_diff_counts() {
-    const v = toRaw(this.bound.value)
+    const v = this.diff
     const count = {
       chip: 0,
       bumper: 0,
@@ -470,8 +484,8 @@ export class Chart_diff {
     this.calc_max_lane()
   }
 
-  add_note(v: ChartTypeV2.note) {
-    const r = this.add_note_no_undo(v)
+  add_note_with_undo(v: ChartTypeV2.note) {
+    const r = this.add_note(v)
     if (r)
       this.push_undo(() => {
         this.undo_add(v)
@@ -479,13 +493,13 @@ export class Chart_diff {
     return r
   }
 
-  add_notes(v: ChartTypeV2.note[]) {
+  add_notes_with_undo(v: ChartTypeV2.note[]) {
     const r: boolean[] = []
     const undo: (() => void)[] = []
     for (let i = 0; i < v.length; i++) {
-      r.push(this.add_note_no_undo(v[i], false))
+      r.push(this.add_note(v[i], false))
       undo.push(() => {
-        this.remove_note_no_undo(v[i])
+        this.remove_note(v[i])
       })
     }
     this.push_undo(() => {
@@ -495,8 +509,8 @@ export class Chart_diff {
     return r.every((v) => v)
   }
 
-  remove_note(v: ChartTypeV2.note) {
-    const r = this.remove_note_no_undo(v)
+  remove_note_with_undo(v: ChartTypeV2.note) {
+    const r = this.remove_note(v)
     if (r)
       this.push_undo(() => {
         this.undo_remove(v)
@@ -504,13 +518,13 @@ export class Chart_diff {
     return r
   }
 
-  remove_notes(v: ChartTypeV2.note[]) {
+  remove_notes_with_undo(v: ChartTypeV2.note[]) {
     const undo: (() => void)[] = []
     const r: boolean[] = []
     for (let i = 0; i < v.length; i++) {
-      r.push(this.remove_note_no_undo(v[i]))
+      r.push(this.remove_note(v[i]))
       undo.push(() => {
-        this.add_note_no_undo(v[i])
+        this.add_note(v[i])
       })
     }
     this.push_undo(() => {
@@ -520,55 +534,62 @@ export class Chart_diff {
   }
 
   undo_add(v: ChartTypeV2.note) {
-    this.remove_note_no_undo(v)
+    this.remove_note(v)
     this.push_redo(() => {
       this.redo_add(v)
     })
   }
 
   undo_remove(v: ChartTypeV2.note) {
-    this.add_note_no_undo(v)
+    this.add_note(v)
     this.push_redo(() => {
       this.redo_remove(v)
     })
   }
 
   redo_add(v: ChartTypeV2.note) {
-    this.add_note(v)
+    this.add_note_with_undo(v)
   }
 
   redo_remove(v: ChartTypeV2.note) {
-    this.remove_note(v)
+    this.remove_note_with_undo(v)
   }
 
   /** @returns if the note is successfully removed */
-  remove_note_no_undo(v: ChartTypeV2.note) {
+  remove_note(v: ChartTypeV2.note) {
     const index = this.binaryFindNoteIndex(v)
     if (index == -1) {
       console.log('unexist', v)
       return false
     }
     this.notes.splice(index, 1)
+    console.log(this.notes.length)
     return true
   }
 
-  /** @returns if the note is successfully added */
-  add_note_no_undo(v: ChartTypeV2.note, fuck = true): boolean {
-    v.time = Math.floor(v.time)
-    if (this.notes.find((x) => x.time == v.time && x.lane == v.lane && x.width == x.width))
+  /**
+   * Adding a note to the diff.
+   * @param note note literally
+   * @param fuck whether to update shown notes
+   * @returns if the note is successfully added
+   */
+  add_note(note: ChartTypeV2.note, fuck = true): boolean {
+    note.time = Math.floor(note.time)
+    if (this.notes.find((x) => x.time == note.time && x.lane == note.lane && x.width == x.width))
       return false
-    if ('len' in v) {
-      if (v.len == 0) v = { time: v.time, lane: v.lane, width: 1, ani: [], snm: 0 }
-    }
+
+    fix_note(note)
+
     const nearest = this.shown.value.find(
-      (x) => Math.abs(x.time - v.time) <= Storage.settings.nearest
+      (x) => Math.abs(this.notes[x].time - note.time) <= Storage.settings.nearest
     )
     if (nearest) {
-      v.time = nearest.time
+      note.time = this.notes[nearest].time
     }
-    // 使用二分查找找到合适的插入位置
-    const index = this.binarySearchTimePosition(v.time)
-    this.notes.splice(index, 0, v)
+
+    const pos = this.binarySearchTimePosition(note.time)
+    this.notes.splice(pos, 0, note)
+    console.log(this.notes.length)
     this.fuck_shown(this.chart.audio.current_time, fuck)
     return true
   }
@@ -619,15 +640,24 @@ export class Chart_diff {
 
   fuck_shown(t: number, force = false) {
     if (force ? false : Math.abs(t - this.last_update) < Storage.settings.pooling.ahead) return
-    this._fuck_shown(t)
+    FrameRate.fuck_shown.start()
+    const visible = [
+      t - Storage.settings.pooling.ahead,
+      t + Storage.computes.visible.value + Storage.settings.pooling.ahead
+    ] as [number, number]
+    this.shown.value = utils.indexes_of(this.notes, (n) => {
+      return this.isVisible(n, visible)
+    })
+    this.last_update = t
+    FrameRate.fuck_shown.end()
     this.update_t(this.visible)
   }
 
   update_t(visible: [number, number]) {
     const is_circle = Storage.settings.record_field.show_circles
-    this.shown_t.value = {
+    this.shown_bar_ticks.value = {
       bar_list: this.bar_list
-        .map((x, dx) => [x, dx] as [number, number])
+        .map((x, ix) => [x, ix] as [number, number])
         .filter((x) => utils.between(x[0], visible)),
       beat_list: this.beat_list.filter((x) => utils.between(x[0], visible)),
       ticks: this.ticks.filter((x) =>
@@ -714,20 +744,20 @@ export class Chart_diff {
     }
     this.timing[idx].time += delta
     this.update_bar_section_list()
-    this.update_beat_list()
+    this.update_beat_line_list()
   }
 
   update_sr() {
     if (!Storage.settings.star_rating) return
-    this.sr.value = calculateChartStats(toRaw(this.bound.value), this.chart.length)
+    this.sr.value = calculateChartStats(this.diff, this.chart.length)
   }
 
   get_beat_string(time: number) {
-    const x = this.bar_list.findLastIndex((v) => v <= time) ?? 0
-    const t = this.bar_list[x]
+    const t = this.timing[0].time
+    time = Math.max(t, time)
 
     // 2. 获取该小节的 timing 信息（使用小节起始时刻）
-    const { bpm, num, den } = this.bpm_of_time(t)
+    const { bpm, den } = this.bpm_of_time(t)
 
     const quarterNoteMs = 60_000 / bpm
     const beatMs = quarterNoteMs * (4 / den) // 一拍（den 分音符）的毫秒数
@@ -735,9 +765,44 @@ export class Chart_diff {
     const offsetMs = Math.abs(time - t)
     const beatOffset = offsetMs / beatMs
 
-    const yClean = parseFloat(beatOffset.toFixed(2))
+    let str = ''
+    if (Storage.settings.bar_from_0) str = `${beatOffset.toFixed(2)}`
+    else str = `${(beatOffset + 1).toFixed()}`
+    if (den != 4) str += `/${den}`
+    return str
 
-    return `${x + 1}:${yClean}/${num}`
+  }
+
+  update_tick_list() {
+    this.ticks = []
+    const v = this.timing
+    const all_times = [...new Set(this.notes.map((v) => v.time))]
+    for (let i = 0; i < v.length; i++) {
+      const part = v[i]
+      // ms
+      const time_per_4 = 60000 / part.bpm
+      const part_end = this.timing_end_of(part, v)
+      const part_index_start = all_times.findIndex((v) => v >= part.time)
+      const part_index_end = all_times.findIndex((v) => v >= part_end) - 1
+      const part_times =
+        i == 0
+          ? all_times.slice(0, part_index_end)
+          : all_times.slice(part_index_start, part_index_end)
+
+      // here got a len-1 'c i want to make the last independently fucked
+      for (let j = 0; j < part_times.length - 1; j++) {
+        let tick = (4 * time_per_4) / (part_times[j + 1] - part_times[j])
+        if (tick > 128) continue
+        // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
+        if (tick < 3) tick = 0
+        if (tick > 47 && tick < 49) tick = 48
+        if (tick > 11 && tick < 13) tick = 12
+        this.ticks.push([part_times[j], Math.round(tick)])
+      }
+      const tick = (time_per_4 / (part_end - part_times[part_times.length - 1])) * 4
+      if (tick > 2 && tick < 256)
+        this.ticks.push([part_times[part_times.length - 1], Math.round(tick)])
+    }
   }
 
   /**
@@ -810,55 +875,6 @@ export class Chart_diff {
     }
 
     return -1 // 未找到匹配的 note
-  }
-
-  private _update_tick_list() {
-    this.ticks = []
-    const v = this.timing
-    const all_times = [...new Set(this.notes.map((v) => v.time))]
-    for (let i = 0; i < v.length; i++) {
-      const part = v[i]
-      // ms
-      const time_per_4 = 60000 / part.bpm
-      const part_end = this.timing_end_of(part, v)
-      const part_index_start = all_times.findIndex((v) => v >= part.time)
-      const part_index_end = all_times.findIndex((v) => v >= part_end) - 1
-      const part_times =
-        i == 0
-          ? all_times.slice(0, part_index_end)
-          : all_times.slice(part_index_start, part_index_end)
-
-      // here got a len-1 'c i want to make the last independently fucked
-      for (let j = 0; j < part_times.length - 1; j++) {
-        let tick = (4 * time_per_4) / (part_times[j + 1] - part_times[j])
-        if (tick > 128) continue
-        // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
-        if (tick < 3) tick = 0
-        if (tick > 47 && tick < 49) tick = 48
-        if (tick > 11 && tick < 13) tick = 12
-        this.ticks.push([part_times[j], Math.round(tick)])
-      }
-      const tick = (time_per_4 / (part_end - part_times[part_times.length - 1])) * 4
-      if (tick > 2 && tick < 256)
-        this.ticks.push([part_times[part_times.length - 1], Math.round(tick)])
-    }
-  }
-
-  private _fuck_shown(t: number) {
-    FrameRate.fuck_shown.start()
-    this.update_shown_flag.value = true
-    const visible = [
-      t - Storage.settings.pooling.ahead,
-      t + Storage.computes.visible.value + Storage.settings.pooling.ahead
-    ] as [number, number]
-    // @ts-expect-error a fucking way to give out resources
-    this.shown.value = undefined
-    this.shown.value = this.notes.filter((x) => {
-      return this.isVisible(x, visible)
-    })
-    this.last_update = t
-    FrameRate.fuck_shown.end()
-    nextTick().then(() => (this.update_shown_flag.value = false))
   }
 
   private play_hit() {

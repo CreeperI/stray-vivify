@@ -17,6 +17,7 @@ const not_playing_class = computed(
     // chart.audio.refs.paused.value && !force_playing.value ? 'not-playing' : ''
     ''
 )
+const get_note = chart.diff.get_note
 
 const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
 const svg_width = 4 * lane_width + 2 * 50 + 12
@@ -150,7 +151,7 @@ function on_click() {
 
   if (Storage.note.hold.value) {
     if (pending_hold_fixed) {
-      if (!chart.diff.add_notes(toRaw(pending_note.value))) notify.error('添加note失败。')
+      if (!chart.diff.add_notes_with_undo(toRaw(pending_note.value))) notify.error('添加note失败。')
       pending_len.value = 0
       pending_hold_fixed = false
     } else {
@@ -159,16 +160,16 @@ function on_click() {
     }
     return
   } else {
-    if (!chart.diff.add_notes(toRaw(pending_note.value))) notify.error('添加note失败。')
+    if (!chart.diff.add_notes_with_undo(toRaw(pending_note.value))) notify.error('添加note失败。')
   }
 }
 
 function del_note(n: ChartTypeV2.note) {
   if (selected.value.some((x) => same_note(x, n))) {
-    chart.diff.remove_notes(selected.value)
+    chart.diff.remove_notes_with_undo(selected.value)
     return
   }
-  if (!chart.diff.remove_note(n)) notify.error('删除note失败。')
+  if (!chart.diff.remove_note_with_undo(n)) notify.error('删除note失败。')
   chart.fuck_shown(true)
 }
 
@@ -207,9 +208,9 @@ function ondragend() {
 function ondrop() {
   if (!dragging.value) return
 
-  if (!chart.diff.remove_notes(dragging.value)) console.log('bugged removing')
+  if (!chart.diff.remove_notes_with_undo(dragging.value)) console.log('bugged removing')
 
-  chart.diff.add_notes(pending_note.value)
+  chart.diff.add_notes_with_undo(pending_note.value)
   dragging.value = undefined
 }
 // ----------------- selector ---------------------
@@ -251,7 +252,7 @@ function on_mouse_down(e: MouseEvent) {
   select_start_screenY = e.screenY
   select_start_screenX = e.screenX
 
-  const bottom = screen.availHeight - 100 - e.offsetY
+  const bottom = screen.availHeight - 125 - e.offsetY
   select_start_time = Math.floor(bottom / mul.value + current_time.value)
   select_start_offsetX = e.offsetX
   select_start_delta = select_start_time - current_time.value
@@ -283,11 +284,22 @@ function on_mouse_up(e: MouseEvent) {
   const time0 = Math.min(mouse_time, select_start_time)
   const time1 = Math.max(mouse_time, select_start_time)
 
-  selected.value = chart.diff.notes.filter((n) => {
-    if (n.time >= time0 && n.time <= time1)
-      if (n.lane + 0.25 >= lane_min && n.lane - 0.25 <= lane_max) return true
-    return false
-  })
+  if (e.ctrlKey) {
+    selected.value.push(
+      ...chart.diff.notes.filter((n) => {
+        if (n.time >= time0 && n.time <= time1) {
+          if (selected.value.some((x) => same_note(x, n))) return false
+          if (n.lane + 0.25 >= lane_min && n.lane - 0.25 <= lane_max) return true
+        }
+        return false
+      })
+    )
+  } else
+    selected.value = chart.diff.notes.filter((n) => {
+      if (n.time >= time0 && n.time <= time1)
+        if (n.lane + 0.25 >= lane_min && n.lane - 0.25 <= lane_max) return true
+      return false
+    })
 
   NoteClipboard.copy = () => {
     const min = Math.min(...selected.value.map((x) => x.time))
@@ -303,14 +315,14 @@ function on_mouse_up(e: MouseEvent) {
     clipboard.value = selected.value.map((x) => {
       return { ...x, time: x.time - min }
     })
-    chart.diff.remove_notes(selected.value)
+    chart.diff.remove_notes_with_undo(selected.value)
     selected.value = []
     NoteClipboard.copy = () => {}
     NoteClipboard.cut = () => {}
   }
 
   NoteClipboard.paste = () => {
-    chart.diff.add_notes(pending_note.value)
+    chart.diff.add_notes_with_undo(pending_note.value)
     clipboard.value = []
     NoteClipboard.paste = () => {}
   }
@@ -344,7 +356,6 @@ function am_i_selected(s: ChartTypeV2.note[], n: ChartTypeV2.note) {
   return s.some((x) => same_note(x, n))
 }
 function change_my_select(n: ChartTypeV2.note) {
-  if (!is_selecting) return
   const ix = selected.value.findIndex((x) => same_note(x, n))
   if (ix == -1) selected.value.push(n)
   else selected.value.splice(ix, 1)
@@ -419,17 +430,17 @@ const d_height = inject<number>('d_height') ?? 0
     >
       <note-v2
         v-for="note in shown"
-        :data-is-dragged="dragging?.some((x) => same_note(x, note))"
-        :data-is-selected="am_i_selected(selected, note)"
-        :note="note"
+        :data-is-dragged="dragging?.some((x) => same_note(x, get_note(note)))"
+        :data-is-selected="am_i_selected(selected, get_note(note))"
+        :note="get_note(note)"
         :style="{
-          left: x_of(note)
+          left: x_of(get_note(note))
         }"
         data-shown-note
         @dragend="ondragend"
-        @dragstart="(e) => ondragstart(e, note)"
-        @click.right="del_note(note)"
-        @click.ctrl="change_my_select(note)"
+        @dragstart="(e) => ondragstart(e, get_note(note))"
+        @click.right="del_note(get_note(note))"
+        @click.ctrl="change_my_select(get_note(note))"
       />
       <template v-if="pending_display">
         <note-v2

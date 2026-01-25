@@ -11,9 +11,7 @@ export const factory_keys: {
     keyof Omit<ChartTypeV2.SV_Factory.list[K], 'type' | 'time' | 'end'>,
     string
   >
-} = [
-  { eff: 'note上的eff' }
-]
+} = [{ eff: 'note上的eff' }]
 export class Chart_Diff_SV {
   chart: Chart
   diff: Chart_diff
@@ -39,13 +37,13 @@ export class Chart_Diff_SV {
   }
 
   get sv() {
-    return this.diff.bound.value.sv
+    return this.diff.diff.sv
   }
 
   get parsed() {
     if (this.last_parsed.length > 0) return this.last_parsed
     const p: ChartTypeV2.parsed_sv[] = []
-    this.diff.bound.value.sv.forEach((x) => {
+    this.diff.diff.sv.forEach((x) => {
       if ('type' in x) {
         p.push(...this[`parse_sv_${x.type}`](x))
       } else p.push({ time: x.time, eff: x.eff, line: true })
@@ -65,7 +63,7 @@ export class Chart_Diff_SV {
           type: 0,
           time: 0,
           end: 0,
-          eff: 0.1,
+          eff: 0.1
         }
       default:
         return {
@@ -144,7 +142,7 @@ export class Chart_Diff_SV {
       renderEndTime === this.renderEndTime &&
       this.breakpoints.length > 0
     ) {
-      console.log("no change render")
+      console.log('no change render')
       return
     }
 
@@ -247,10 +245,10 @@ export class Chart_Diff_SV {
     const parsed: ChartTypeV2.parsed_sv[] = []
     for (let i = 0; i < times.length; i++) {
       const time = times[i]
-      const next = times[i +1] ?? f.end
+      const next = times[i + 1] ?? f.end
       parsed.push({
         time: time,
-        eff: (next - time),
+        eff: next - time,
         line: false
       })
       parsed.push({
@@ -261,7 +259,7 @@ export class Chart_Diff_SV {
     }
     parsed.pop()
     parsed.push({
-      time: f.end +1,
+      time: f.end + 1,
       eff: 1,
       line: true
     })

@@ -11,7 +11,7 @@ const chart = Chart.$current
 const {view_port, bar_length} = GlobalStat.useSvgSizing()
 const current_time = chart.audio.refs.current_ms
 const mul = Storage.computes.mul
-const bb_list = chart.diff.shown_t
+const bb_list = chart.diff.shown_bar_ticks
 
 const __bar_length = computed(() => {
   if (chart.diff.sv_bind.on_sv.value) return Storage.settings.sv.beat_line_width

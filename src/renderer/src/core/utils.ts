@@ -271,6 +271,20 @@ export namespace utils {
       o[key] = v
     }
   }
+
+  /**
+   * Find all indexes of values that satisfies the given predicate.
+   * O(n)? maybe
+   * @param arr The Array to be executed
+   * @param fn The predicate function
+   */
+  export function indexes_of<T>(arr: T[], fn: (v: T) => boolean) {
+    const r: number[] = []
+    for (let i = 0; i < arr.length; i++) {
+      if (fn(arr[i])) r.push(i)
+    }
+    return r
+  }
 }
 
 // @ts-expect-error

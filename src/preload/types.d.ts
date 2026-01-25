@@ -613,6 +613,8 @@ export namespace storages {
     min_lane: number
 
     bar_or_section: boolean
+    bar_from_0: boolean
+    beat_fn_time: boolean
 
     pooling: {
       ahead: number

@@ -10,8 +10,8 @@ const r = useTemplateRef('wh')
 let flag = false
 function _in() {
   if (!r.value) return
-  const rect = r.value.getBoundingClientRect()
-  WordHelper.call_helper([rect.right, rect.bottom], prop.dec || "")
+  const rect = r.value.children[0].getBoundingClientRect()
+  WordHelper.call_helper([rect.right, rect.bottom], prop.dec || '')
   flag = true
 }
 function _out() {

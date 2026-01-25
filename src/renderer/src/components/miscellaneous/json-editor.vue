@@ -48,15 +48,6 @@ export default defineComponent({
       return 'json-value-other'
     }
 
-    const getNestedValue = (obj: any, path: (string | number)[]): any => {
-      let current = obj
-      for (const p of path) {
-        if (current == null) return undefined
-        current = current[p]
-      }
-      return current
-    }
-
     const updateNestedValue = (newValue: any, path: (string | number)[]) => {
       if (path.length === 0) {
         emit('update:modelValue', newValue)

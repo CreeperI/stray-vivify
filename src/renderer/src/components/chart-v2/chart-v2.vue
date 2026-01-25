@@ -8,7 +8,6 @@ import Preview from '@renderer/components/chart-v2/preview.vue'
 import Playfield from '@renderer/components/chart-v2/playfield.vue'
 import { onUnmounted } from 'vue'
 import ChartMain from '@renderer/components/chart-v2/chart-tabs/chart-main.vue'
-import ChartSv from '@renderer/components/chart-v2/chart-tabs/chart-sv.vue'
 
 const active = GlobalStat.refs.chart_tab
 active.value = 2
@@ -17,7 +16,7 @@ function on_keydown(e: KeyboardEvent) {
   if (e.key != 'Tab') return
   e.preventDefault()
   active.value += 1
-  if (active.value > 4) active.value = 1
+  if (active.value > 3) active.value = 1
 }
 
 document.addEventListener('keydown', on_keydown)
@@ -50,7 +49,6 @@ const chart_state = GlobalStat.chart_state
       <song-info v-if="active == 1" />
       <chart-main v-if="active == 2" />
       <chart-timing v-if="active == 3" />
-      <chart-sv v-if="active == 4" />
     </template>
     <preview v-if="chart_state == 1" />
     <playfield v-if="chart_state == 2" />

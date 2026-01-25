@@ -49,6 +49,7 @@ const time = computed({
     if (move2.value) chart.diff.push_timing_all(index.value, delta)
     else if (move1.value) chart.diff.push_timing(index.value, delta)
     else diff.timing[index.value].time = value
+    diff.update_timing_list()
   }
 })
 
@@ -146,7 +147,7 @@ function bpm_change(e: Event) {
       <div class="timing-placeholder" v-else-if="diff.timing.length == 0">
         为什么这里一个timing都没有，我代码哪里炸了？
       </div>
-      <div class="timing-placeholder" v-else>啊啊好多bpm看不懂变奏谱……谁能教我打变奏</div>
+      <div class="timing-placeholder" v-else>古希腊掌管变奏的神。</div>
     </div>
   </div>
 </template>

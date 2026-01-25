@@ -73,8 +73,8 @@ const storage = ref<storages.storage_scheme>({
       show_bpm_left: true,
       detail: 3,
       sprite: true,
-      show_ticks:true,
-      show_circles: false,
+      show_ticks: true,
+      show_circles: false
     },
     sprites: {
       bar_color1: '#ffffff',
@@ -84,7 +84,7 @@ const storage = ref<storages.storage_scheme>({
       bar_color5: '#f64eff',
       bar_length: 6,
       bar_op: 0,
-      bar_dy: 0,
+      bar_dy: 0
     },
     delete_no_confirm: false,
     time_max_length: 50,
@@ -113,6 +113,8 @@ const storage = ref<storages.storage_scheme>({
     color_stats: false,
     min_lane: 4,
     bar_or_section: false,
+    beat_fn_time: false,
+    bar_from_0: true,
     hit_volume: 100,
     pooling: {
       ahead: 5000,
@@ -127,16 +129,16 @@ const storage = ref<storages.storage_scheme>({
     },
     nearest: 2,
     sv: {
-      show_beat_line : true,
+      show_beat_line: true,
       beat_line_opacity: 100,
-      pointer_color: "#ffffff",
+      pointer_color: '#ffffff',
       pointer_width: 3,
       beat_line_width: 2,
       lane_width: 20,
       lane_width2: 90,
       threshold: 20,
-      factory_color: "#00ff00",
-      factory_opacity: 70,
+      factory_color: '#00ff00',
+      factory_opacity: 70
     }
   },
   version: Version.val,
@@ -144,7 +146,7 @@ const storage = ref<storages.storage_scheme>({
   username: 'newcomer',
   statistics: {
     used_time: 0,
-    first_open: Date.now(),
+    first_open: Date.now()
   }
 })
 
@@ -157,8 +159,7 @@ const computes = {
 
 function merge(s: storages.storage_scheme) {
   if (s.version) {
-    if (s.version < 9.5)
-      s.settings.auto_save = true
+    if (s.version < 9.5) s.settings.auto_save = true
   }
 }
 
@@ -183,8 +184,8 @@ export const Storage = {
     this.update_join_time()
     return d
   },
-  async update_join_time(){
-    const time = await Invoke("joined-time")
+  async update_join_time() {
+    const time = await Invoke('joined-time')
     this.data.value.statistics.first_open = Math.min(time, this.data.value.statistics.first_open)
   },
   save() {

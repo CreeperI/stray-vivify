@@ -1,6 +1,5 @@
 import { Chart } from '@renderer/core/chart/chart'
 import { Ref, watch } from 'vue'
-import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { notify } from '@renderer/core/misc/notify'
@@ -14,10 +13,10 @@ export class HitSoundSystem {
   private maxVoices = 64
   private activeVoices: Array<{ source: AudioBufferSourceNode; endTime: number }> = []
   private chart: Chart
-  private shown: Ref<ChartTypeV2.note[]>
+  private shown: Ref<number[]>
   private last_trigger: number
 
-  constructor(chart: Chart, shown: Ref<ChartTypeV2.note[]>) {
+  constructor(chart: Chart, shown: Ref<number[]>) {
     this.chart = chart
     this.shown = shown
     this.initWebAudio()
@@ -41,11 +40,11 @@ export class HitSoundSystem {
 
     // Find note in current time window
     const hitNote = this.shown.value.find(
-      (x: any) => utils.between(x.time, [last, current]) && x['snm'] != 1
+      (x: number) => utils.between(this.chart.diff.notes[x].time, [last, current]) && x['snm'] != 1
     )
     this.last_trigger = this.chart.audio.current_time
 
-    if (hitNote && !this.playedNotes.has(hitNote.time)) {
+    if (hitNote && !this.playedNotes.has(this.chart.diff.notes[hitNote].time)) {
       if (this.activeVoices.length >= this.maxVoices) {
         this.activeVoices.shift()
       }
@@ -63,10 +62,10 @@ export class HitSoundSystem {
         })
 
         // Mark note as played
-        this.playedNotes.add(hitNote.time)
+        this.playedNotes.add(this.chart.diff.notes[hitNote].time)
 
         // Clean up played note marker after it's definitely passed
-        setTimeout(() => this.playedNotes.delete(hitNote.time), 200)
+        setTimeout(() => this.playedNotes.delete(this.chart.diff.notes[hitNote].time), 200)
       } catch (e) {
         console.error('Failed to play sound:', e)
       }
@@ -81,8 +80,9 @@ export class HitSoundSystem {
         () => Storage.settings.hit_volume,
         (v) => {
           if (this.gainNode) this.gainNode.gain.value = v / 100
-          else notify.error('GainNode炸了')
-        }, {
+          else notify.error('打击音炸了！')
+        },
+        {
           immediate: true
         }
       )

@@ -1,6 +1,6 @@
 import { ChartType, ChartTypeV2 } from '@preload/types'
 import { notify } from '@renderer/core/misc/notify'
-import { computed, ComputedRef, ref, Ref, toRaw, toValue, triggerRef, watch, WritableComputedRef } from 'vue'
+import { computed, ComputedRef, ref, Ref, triggerRef, watch, WritableComputedRef } from 'vue'
 import { Chart_audio } from '@renderer/core/chart/audio'
 import { Chart_song } from '@renderer/core/chart/song'
 import { Chart_diff } from '@renderer/core/chart/diff'
@@ -10,8 +10,8 @@ import { Storage } from '@renderer/core/storage'
 import { modal } from '@renderer/core/misc/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { utils } from '@renderer/core/utils'
-import nextFrame = utils.nextFrame
 import { FrameRate } from '@renderer/core/misc/frame-rates'
+import nextFrame = utils.nextFrame
 
 function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
@@ -163,7 +163,6 @@ export class Chart {
 
   set diff_index(v: number) {
     this.ref.diff_index.value = v
-    this.diff.bound.value = this.diffs[this.ref.diff_index.value]
     this.set_header_name()
     this._diff_index = v
   }
@@ -379,7 +378,6 @@ export class Chart {
       this.ref.diff_index,
       (v) => {
         this._diff_index = v
-        this.diff.bound.value = this.diffs[v]
         this.set_header_name()
         this.diff.fuck_shown(this.audio.current_time, true)
         this.diff.calc_density()
@@ -391,10 +389,6 @@ export class Chart {
     watch(this.audio.refs.current_ms, () => {
       this.update_on_time_change()
     })
-  }
-
-  sync_from_diff() {
-    this.diffs[this.ref.diff_index.value] = toRaw(this.diff.bound.value)
   }
 
   update_on_time_change() {
@@ -457,7 +451,7 @@ export class Chart {
       FrameRate.save.start()
       this.diff.validate_chart()
       await nextFrame()
-      Invoke('save-chart', this.id, toValue(this.chart))
+      Invoke('save-chart', this.id, this.chart)
       FrameRate.save.end()
       await nextFrame()
       await Invoke(
@@ -477,7 +471,7 @@ export class Chart {
     Invoke(
       'write-vsc',
       this.id,
-      Chart_diff.to_vsc(this.diff.bound.value).join('\n'),
+      Chart_diff.to_vsc(this.diff.diff).join('\n'),
       this.diff.diff1
     ).then(() => notify.success('已导出为vsc!!!!!!!'))
   }

@@ -27,7 +27,7 @@ const show_ticks = computed(() => {
 function time_bottom_bar(t: number, time: number, _mul: number) {
   return minus - (time - t - offset1) * _mul
 }
-const shown_t = chart.diff.shown_t
+const shown_t = chart.diff.shown_bar_ticks
 </script>
 
 <template>

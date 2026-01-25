@@ -50,12 +50,7 @@ const show_lanes = ref(false)
 let interval_id = -1
 const current_density = ref(0)
 function calc_density() {
-  current_density.value = chart.diff.shown.value.filter((x) => {
-    if (x['snm'] == 1) return false
-    return 'len' in x
-      ? x.time + x.len > chart.audio.current_time && x.time < chart.audio.current_time
-      : Math.abs(chart.audio.current_time - x.time) < 500
-  }).length
+  current_density.value = chart.diff.current_density
 }
 const show_result = ref(false)
 

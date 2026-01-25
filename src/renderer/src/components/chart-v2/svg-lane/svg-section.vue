@@ -2,16 +2,18 @@
 import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
+import { computed } from 'vue'
 
 const offset1 = Storage.settings.offset1
 
-const {lane_width, view_port} = GlobalStat.useSvgSizing()
+const { lane_width, view_port } = GlobalStat.useSvgSizing()
 
 const chart = Chart.$current
 const mul = Storage.computes.mul
+const plus1 = computed(() => !Storage.settings.bar_from_0)
 const current_time = chart.audio.refs.current_ms
 
-const bb_list = chart.diff.shown_t
+const bb_list = chart.diff.shown_bar_ticks
 
 const bar_offset = (((lane_width - 130) / 130) * 43) / 4
 function time_bottom_bar(t: number, time: number, _mul: number) {
@@ -32,7 +34,7 @@ function time_bottom_bar(t: number, time: number, _mul: number) {
       text-anchor="middle"
       x="25"
     >
-      {{ idx + 1 }}
+      {{ plus1 ? idx + 1 : idx }}
     </text>
   </g>
 </template>

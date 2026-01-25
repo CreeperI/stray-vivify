@@ -4,14 +4,22 @@ import ARange from '@renderer/components/a-elements/a-range.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
 import { Storage } from '@renderer/core/storage'
+import { computed } from 'vue'
 
 const chart = Chart.$current
 const { current_ms, writable_play_rate, play_rate, writable_current_second } = chart.audio.refs
+const show_beat_time = computed(() => Storage.settings.beat_fn_time || Storage.settings.bar_or_section)
 </script>
 <template>
   <div class="fn-right-inner">
     <label>
-      {{ utils.toTimeStr(current_ms / 1000) }}/{{ utils.toTimeStr(chart.length / 1000) }}
+      <span>{{ utils.toTimeStr(current_ms / 1000) }}</span>
+      <span style="font-size: 0.8rem; color: gray">/{{ utils.toTimeStr(chart.length / 1000) }}</span>
+      <template v-if="show_beat_time">
+        <br>
+        <span>{{ chart.diff.get_beat_string(current_ms)}}</span>
+        <span style="font-size: 0.8rem; color: gray">/{{ chart.diff.section_list.length - 1 }}</span>
+      </template>
     </label>
     <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
     <label @click="writable_play_rate = 1">播放速度:{{ play_rate }}x</label>
@@ -38,8 +46,10 @@ td {
 
 .fn-right-inner {
   display: grid;
-  grid-template-columns: 1fr 2fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 2fr 3fr;
+  grid-template-rows: 2fr 1fr 1fr;
+  align-items: center;
+  justify-items: center;
   gap: 15px 0;
   text-align: center;
 }

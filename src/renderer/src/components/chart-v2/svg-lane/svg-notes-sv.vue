@@ -8,6 +8,7 @@ import { inject, onMounted, onUnmounted } from 'vue'
 
 const chart = Chart.$current
 const diff = chart.diff
+const get_note = diff.get_note
 
 const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
 
@@ -58,9 +59,9 @@ const d_height = inject<number>('d_height') ?? 0
     <foreignObject id="lane-notes" :y="-80 + d_height" height="100%" width="100%" x="50">
       <note-v2-sv
         v-for="note in shown"
-        :note="note"
+        :note="get_note(note)"
         :style="{
-          left: x_of(note)
+          left: x_of(get_note(note))
         }"
       />
     </foreignObject>

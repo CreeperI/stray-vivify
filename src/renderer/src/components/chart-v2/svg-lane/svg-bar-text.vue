@@ -22,7 +22,7 @@ const _show_bar_text = computed(
 function time_bottom_bar(t: number, time: number, _mul: number) {
   return view_port[3] - (time - t - offset1) * _mul - 80
 }
-const bb_list = computed(() => chart.diff.shown_t.value)
+const bb_list = computed(() => chart.diff.shown_bar_ticks.value)
 useUpdateFrameRate('svg-bar-text')
 </script>
 

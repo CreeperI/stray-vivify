@@ -54,15 +54,31 @@ const r = Storage._ref
           <a-number-input v-model="r.settings.density_data_count" class="in" min="10" />
         </div>
         <div>
-          <word-helper dec="仿照malody，不使用小节来标注，而是每一个四分音符（按timing设置）标一个。勾选这个=启用malody。" msg="小节号或拍号" />
+          <word-helper
+            dec="仿照malody，不使用小节来标注，而是每一个四分音符（按timing设置）标一个。<br>勾选这个=启用beat。"
+            msg="小节号或拍号"
+          />
           <a-checkbox v-model="r.settings.bar_or_section" />
         </div>
         <div>
-          <word-helper dec="摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间" msg="note吸附范围" />
+          <div>
+            <word-helper dec="在启用Beat的时候自动开启。">显示Beat时间</word-helper>
+          </div>
+          <a-checkbox v-model="r.settings.beat_fn_time" class="in" />
+        </div>
+        <div>
+          <div>Beat从0开始</div>
+          <a-checkbox v-model="r.settings.bar_from_0" />
+        </div>
+        <div>
+          <word-helper
+            dec="摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间"
+            msg="note吸附范围"
+          />
           <a-number-input v-model="r.settings.nearest" />
         </div>
         <div>
-          <div style="font-size: 2rem; font-weight: bold" class="rainbow-text-flow">自动保存</div>
+          <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
           <a-checkbox v-model="r.settings.auto_save" />
         </div>
         <div>
@@ -80,7 +96,7 @@ const r = Storage._ref
         </div>
         <div>
           <s>向前ms</s>
-          <a-number-input disabled v-model="r.settings.pooling.behind" class="in" />
+          <a-number-input v-model="r.settings.pooling.behind" class="in" disabled />
         </div>
         <div>
           <div>最小pooling间隔</div>
@@ -234,8 +250,7 @@ const r = Storage._ref
           <a-checkbox v-model="r.settings.exporter.crop" />
         </div>
         <div>
-          <div>导出stray/vivify文件
-          </div>
+          <div>导出stray/vivify文件</div>
           <a-checkbox v-model="r.settings.exporter.sv" />
         </div>
         <setting-header msg="debug" />
@@ -273,12 +288,12 @@ const r = Storage._ref
   width: 80%;
 }
 
-.contain>div {
+.contain > div {
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
 
-.contain>div>*:first-child {
+.contain > div > *:first-child {
   text-align: center;
 }
 

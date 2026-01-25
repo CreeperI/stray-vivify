@@ -76,12 +76,7 @@ const show_lanes = ref(false)
 let interval_id = -1
 const current_density = ref(0)
 function calc_density() {
-  current_density.value = chart.diff.shown.value.filter((x) => {
-    if (x['snm'] == 1) return false
-    return 'len' in x
-      ? x.time + x.len > chart.audio.current_time && x.time < chart.audio.current_time
-      : Math.abs(chart.audio.current_time - x.time) < 500
-  }).length
+  current_density.value = chart.diff.current_density
 }
 const show_result = ref(false)
 
@@ -142,8 +137,8 @@ const final = ref(playfield.final_stats)
   <div
     id="playfield"
     ref="top-div"
-    class="playfield"
     :style="{ cursor: paused ? 'default' : 'none' }"
+    class="playfield"
   >
     <img v-if="bg_error == 0" :src="bg_src" alt="" class="playfield-bg" @error="bg_error = 1" />
     <transition name="fadeout">
@@ -220,12 +215,12 @@ const final = ref(playfield.final_stats)
         <br />
         {{ refs.combo }}
       </div>
-      <div class="pf-pause" v-if="paused">
+      <div v-if="paused" class="pf-pause">
         <div class="pf-pause-header">暂停ing</div>
         <div class="pf-pause-functions">
-          <a-button2 @click="continue_play" msg="resume" />
-          <a-button2 @click="restart" msg="restart" />
-          <a-button2 @click="exit_play" msg="exit" />
+          <a-button2 msg="resume" @click="continue_play" />
+          <a-button2 msg="restart" @click="restart" />
+          <a-button2 msg="exit" @click="exit_play" />
         </div>
       </div>
     </template>
@@ -251,80 +246,80 @@ const final = ref(playfield.final_stats)
             <div>
               <div>{{ final.counts.pn4 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.pn4 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Miss-</div>
             </div>
             <div>
               <div>{{ final.counts.pn3 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.pn3 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Good-</div>
             </div>
             <div>
               <div>{{ final.counts.pn2 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.pn2 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Great-</div>
             </div>
             <div>
               <div>{{ final.counts.pn1 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.pn1 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Perfect-</div>
             </div>
             <div>
               <div>{{ final.counts.p0 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.p0 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Pure</div>
             </div>
             <div>
               <div>{{ final.counts.p1 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.p1 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Perfect+</div>
             </div>
             <div>
               <div>{{ final.counts.p2 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.p2 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Great+</div>
             </div>
             <div>
               <div>{{ final.counts.p3 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.p3 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Good+</div>
             </div>
             <div>
               <div>{{ final.counts.p4 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.p4 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Miss+</div>
             </div>
             <div>
               <div>{{ final.counts.p5 }}</div>
               <div
-                class="pr-portion"
                 :style="{ height: (final.counts.p5 / final.total) * 250 + 'px' }"
+                class="pr-portion"
               />
               <div>Boom!</div>
             </div>
