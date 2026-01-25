@@ -1,16 +1,6 @@
 import { ChartType, ChartTypeV2 } from '@preload/types'
 import { notify } from '@renderer/core/misc/notify'
-import {
-  computed,
-  ComputedRef,
-  ref,
-  Ref,
-  toRaw,
-  toValue,
-  triggerRef,
-  watch,
-  WritableComputedRef
-} from 'vue'
+import { computed, ComputedRef, ref, Ref, toRaw, toValue, triggerRef, watch, WritableComputedRef } from 'vue'
 import { Chart_audio } from '@renderer/core/chart/audio'
 import { Chart_song } from '@renderer/core/chart/song'
 import { Chart_diff } from '@renderer/core/chart/diff'
@@ -21,12 +11,88 @@ import { modal } from '@renderer/core/misc/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { utils } from '@renderer/core/utils'
 import nextFrame = utils.nextFrame
+import { FrameRate } from '@renderer/core/misc/frame-rates'
 
 function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
   return ['b', 's', 'mb'].includes(n.n)
 }
-
+function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
+  const new_diff = Chart_diff.createDiff()
+  new_diff.timing = []
+  dif.notes.forEach((note) => {
+    switch (note.n) {
+      case 'p':
+        new_diff.timing.push({
+          time: note.t,
+          bpm: note.v,
+          num: 4,
+          den: 4
+        })
+        break
+      case 'h':
+        new_diff.notes.push({
+          time: note.t,
+          lane: note.l,
+          len: note.h,
+          width: 1,
+          ani: []
+        })
+        break
+      case 'n':
+        new_diff.notes.push({
+          time: note.t,
+          lane: note.l,
+          width: 1,
+          ani: [],
+          snm: 0
+        })
+        break
+      case 'b':
+        new_diff.notes.push({
+          time: note.t,
+          lane: note.l,
+          width: 2,
+          ani: [],
+          snm: 0
+        })
+        break
+      case 's':
+        new_diff.notes.push({
+          time: note.t,
+          lane: note.l,
+          width: 2,
+          ani: [],
+          snm: 2
+        })
+        break
+      case 'm':
+        new_diff.notes.push({
+          time: note.t,
+          lane: note.l,
+          width: 1,
+          ani: [],
+          snm: 1
+        })
+        break
+      case 'mb':
+        new_diff.notes.push({
+          time: note.t,
+          lane: note.l,
+          width: 2,
+          ani: [],
+          snm: 1
+        })
+        break
+      default:
+        console.log('waht')
+    }
+  })
+  new_diff.meta.diff1 = dif.name
+  new_diff.meta.diff2 = dif.hard
+  new_diff.meta.charter = dif.charter
+  return new_diff
+}
 export type ms = number
 
 export class Chart {
@@ -213,7 +279,7 @@ export class Chart {
       const new_data = this.createChart()
       new_data.diffs.pop()
 
-      parsed.diffs.forEach((d) => new_data.diffs.push(this.parse_old_diff(d)))
+      parsed.diffs.forEach((d) => new_data.diffs.push(parse_old_diff(d)))
       new_data.song.name = parsed.song.name
       new_data.song.name_roman = parsed.song.name
       new_data.song.composer = parsed.song.composer
@@ -224,83 +290,6 @@ export class Chart {
         status: 'converted'
       }
     }
-  }
-
-  static parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
-    const new_diff = Chart_diff.createDiff()
-    new_diff.timing = []
-    dif.notes.forEach((note) => {
-      switch (note.n) {
-        case 'p':
-          new_diff.timing.push({
-            time: note.t,
-            bpm: note.v,
-            num: 4,
-            den: 4
-          })
-          break
-        case 'h':
-          new_diff.notes.push({
-            time: note.t,
-            lane: note.l,
-            len: note.h,
-            width: 1,
-            ani: []
-          })
-          break
-        case 'n':
-          new_diff.notes.push({
-            time: note.t,
-            lane: note.l,
-            width: 1,
-            ani: [],
-            snm: 0
-          })
-          break
-        case 'b':
-          new_diff.notes.push({
-            time: note.t,
-            lane: note.l,
-            width: 2,
-            ani: [],
-            snm: 0
-          })
-          break
-        case 's':
-          new_diff.notes.push({
-            time: note.t,
-            lane: note.l,
-            width: 2,
-            ani: [],
-            snm: 2
-          })
-          break
-        case 'm':
-          new_diff.notes.push({
-            time: note.t,
-            lane: note.l,
-            width: 1,
-            ani: [],
-            snm: 1
-          })
-          break
-        case 'mb':
-          new_diff.notes.push({
-            time: note.t,
-            lane: note.l,
-            width: 2,
-            ani: [],
-            snm: 1
-          })
-          break
-        default:
-          console.log('waht')
-      }
-    })
-    new_diff.meta.diff1 = dif.name
-    new_diff.meta.diff2 = dif.hard
-    new_diff.meta.charter = dif.charter
-    return new_diff
   }
 
   load_vsb(r: [ChartTypeV2.note[], ChartTypeV2.timing[]] | undefined) {
@@ -465,20 +454,21 @@ export class Chart {
 
   async save() {
     if (this.audio.ele) {
+      FrameRate.save.start()
       this.diff.validate_chart()
       await nextFrame()
       Invoke('save-chart', this.id, toValue(this.chart))
+      FrameRate.save.end()
       await nextFrame()
-      Invoke(
+      await Invoke(
         'update-chart-data',
         this.id,
         JSON.stringify({
           song: this.song.save(),
           diffs: this.diffs.map((x) => x.meta.diff1 + ' ' + x.meta.diff2)
         })
-      ).then(() => {
-        return GlobalStat.update_all_chart()
-      })
+      )
+      GlobalStat.update_all_chart()
     }
     return
   }

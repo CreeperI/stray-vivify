@@ -130,6 +130,7 @@ export const FrameRate = {
   pooling: new _FrameRateClass(),
   save: new _FrameRateClass(),
   audio_sync: new _FrameRateClass(),
+  note_bottom: new _FrameRateClass(),
   note_style: new _FrameRateClass(),
   Updates: {} as Record<string, _FrameRateClass>
 }

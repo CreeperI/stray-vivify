@@ -51,26 +51,24 @@ function zix() {
 function style() {
   FrameRate.note_style.immediate()
   if ('len' in note) {
-    return `${zix()};height:${height()};width: ${size()}; left: ${left()}; ${border()};
-    bottom:${time_bottom(note)}`
+    return `${zix()};height:${height()};width: ${size()}; left: ${left()}; ${border()};`
   } else {
-    return `${zix()};width: ${size()}; left: ${left()};bottom:${time_bottom(note)}`
+    return `${zix()};width: ${size()}; left: ${left()};`
   }
 }
 
-function time_bottom(note: { time: number }) {
-  return (
-    (note.time - Chart.$current.audio.refs.current_ms.value - Storage.settings.offset1) * mul.value +
-    'px'
-  )
+function time_bottom(note: { time: number }, t: number) {
+  FrameRate.note_bottom.immediate()
+  return `bottom: ${(note.time - t - Storage.settings.offset1) * mul.value}px`
 }
 
 const _src = computed(urlOf)
 const _style = computed(style)
+const current_time = Chart.$current.audio.refs.current_ms
 </script>
 
 <template>
-  <img alt="" :src="_src" :style="_style" />
+  <img :src="_src" :style="[_style, time_bottom(note, current_time)]" alt="" />
 </template>
 
 <style scoped>

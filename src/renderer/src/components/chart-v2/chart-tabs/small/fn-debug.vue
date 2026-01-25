@@ -11,13 +11,13 @@ const nextT = FrameRate.next_tick.refs
 <template>
   <div v-if="Storage.settings.debug_window" class="fn-right-debugger">
     <div>Active Notes</div>
-    <div>{{ chart.diff.shown.value.length }}</div>
+    <div>{{ chart.diff.shown.value.length }}x</div>
     <div>FPS</div>
     <div>{{fps.toFixed(1)}}</div>
-    <div>Timeupdate</div>
-    <div>{{sync.call_count.toFixed(1)}}</div>
+    <div>audio sync</div>
+    <div>{{sync.call_count.toFixed(1)}}/s</div>
     <div>NextTick</div>
-    <div>{{nextT.avg.toFixed(2)}}</div>
+    <div>{{nextT.avg.toFixed(2)}}ms</div>
   </div>
 </template>
 
