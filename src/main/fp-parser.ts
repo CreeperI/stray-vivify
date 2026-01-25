@@ -17,7 +17,8 @@ export const file_paths = {
   skin: get_base_path('skin'),
   config: get_base_path('charts/config.json'),
   skin_setting: get_base_path('skin/setting.json'),
-  charts: get_base_path('charts')
+  charts: get_base_path('charts'),
+  module: get_base_path("")
 }
 
 export async function folder_size(folderPath: string): Promise<number> {

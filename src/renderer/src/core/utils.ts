@@ -135,13 +135,17 @@ export namespace utils {
 
   //LOL copied from a blog
 
-  export function GML_style_hsv_to_hsl(h:number, s:number, v:number): {h:number, s:number, l:number} {
-    h*=24/17
-    s/=255
-    v/=255
+  export function GML_style_hsv_to_hsl(
+    h: number,
+    s: number,
+    v: number
+  ): { h: number; s: number; l: number } {
+    h *= 24 / 17
+    s /= 255
+    v /= 255
     const t = (2 - s) * v
-    s = (v === 0) || s === 0 ? 0 : (s * v) / (t > 1 ? 2 - t : t)
-    return { h:h, s: s*100, l: (t / 2)*100}//h,s,v∈[0,100]
+    s = v === 0 || s === 0 ? 0 : (s * v) / (t > 1 ? 2 - t : t)
+    return { h: h, s: s * 100, l: (t / 2) * 100 } //h,s,v∈[0,100]
   }
 
   export function guard<T>(val: any, ini: T): T {
@@ -168,16 +172,26 @@ export namespace utils {
   export function toTimeStr(seconds: number, fix = 3) {
     const isNegative = seconds < 0
     const absSeconds = Math.abs(seconds)
-    const minutes = Math.floor(absSeconds / 60)
-    let secs = (absSeconds % 60).toFixed(fix)
+    const hours = Math.floor(absSeconds / 3600)
+    const remainingSeconds = absSeconds % 3600
+    const minutes = Math.floor(remainingSeconds / 60)
+    const secs = (remainingSeconds % 60).toFixed(fix)
 
-    // 处理秒数部分补零逻辑
-    if (minutes == 0) {
-      return (isNegative ? '-' : '0:') + secs
+    const formattedHours = hours.toString().padStart(2, '0')
+    const formattedMinutes = minutes.toString().padStart(2, '0')
+    const formattedSeconds = parseFloat(secs) < 10 ? '0' + secs : secs
+
+    if (hours > 0) {
+      return (
+        (isNegative ? '-' : '') + formattedHours + ':' + formattedMinutes + ':' + formattedSeconds
+      )
+    } else {
+      // 如果没有小时，则按照原来的格式返回（分钟:秒）
+      if (minutes === 0) {
+        return (isNegative ? '-' : '') + '0:' + formattedSeconds
+      }
+      return (isNegative ? '-' : '') + formattedMinutes + ':' + formattedSeconds
     }
-    secs = parseFloat(secs) < 10 ? '0' + secs : secs
-    // 添加负号标识
-    return (isNegative ? '-' : '') + minutes + ':' + secs
   }
 
   export function ms2str(ms: number, fix = 3) {
@@ -220,7 +234,7 @@ export namespace utils {
   export function getSrc(note: ChartTypeV2.note, max = 4): string {
     if (note.width == 0) return ''
     let str = note_style + '/' + note.width
-    if (note.width == max) return str + ".png"
+    if (note.width == max) return str + '.png'
     if ('snm' in note) {
       if (note.snm == 1) return str + 'b.png'
       if (note.snm == 2 && note.width != 1) str += 's'
@@ -252,13 +266,11 @@ export namespace utils {
     refresh_key.value = Math.random().toString().slice(0, 7)
   }
 
-  export function memset<R extends string,T>(o: Record<R, T>, v:T) {
+  export function memset<R extends string, T>(o: Record<R, T>, v: T) {
     for (const key in o) {
       o[key] = v
     }
   }
-
-
 }
 
 // @ts-expect-error

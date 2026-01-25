@@ -468,6 +468,10 @@ export type Invoke = {
       name: string
     }
     r: void
+  },
+  'joined-time': {
+    arg: {}
+    r: number
   }
 }
 

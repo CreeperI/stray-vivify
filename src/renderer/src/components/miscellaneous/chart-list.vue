@@ -24,8 +24,10 @@ watch(GlobalStat.all_chart_ref, () => {
 
 const display_id = ref<string>()
 const display_data = ref<charts_data[number]>()
+let state = false
 
 async function import_chart() {
+  if (state) return
   const song = await Invoke('ask-song')
   if (!song) return
   const r = await Invoke('import-song', song.path)
@@ -35,10 +37,13 @@ async function import_chart() {
 }
 
 function open_proj(id: string) {
+  if (state) return
+  state = true
   Chart.open_chart(id)
 }
 
 function delete_proj(id: string, name: string) {
+  if (state) return
   if (!Storage._ref.value.settings.delete_no_confirm) {
     modal.ConfirmModal.show({
       msg: `确定要删除${name} (id: ${id})吗？不可以撤销的哦！<br><small>设置中可以关闭此确认。</small>`
@@ -55,6 +60,7 @@ function delete_proj(id: string, name: string) {
 }
 
 function detail(id: string) {
+  if (state) return
   const ch = GlobalStat.all_chart.find((v) => v.id == id)
   if (!ch) return
   display_id.value = id

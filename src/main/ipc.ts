@@ -250,6 +250,11 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'set-process-name': (_, name) => {
       mw.title = name
+    },
+    'joined-time': (_) => {
+      const moduleT = fs.statSync(file_paths.module).birthtimeMs
+      const appT = fs.statSync(app.getPath('userData')).birthtimeMs
+      return Math.min(moduleT, appT)
     }
   } as Required<IpcHandlers.invoke.handler>
 }

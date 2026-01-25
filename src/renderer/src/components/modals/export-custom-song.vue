@@ -13,7 +13,6 @@ import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Invoke } from '@renderer/core/ipc'
 import { modal } from '@renderer/core/misc/modal'
-import 'vue-json-pretty/lib/styles.css'
 import { Storage } from '@renderer/core/storage'
 import JsonEditor from '@renderer/components/miscellaneous/json-editor.vue'
 
