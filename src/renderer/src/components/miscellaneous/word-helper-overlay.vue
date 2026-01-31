@@ -18,7 +18,7 @@ const { word, shown, position } = WordHelper
 <style scoped>
 .word-helper-overlay {
   position: absolute;
-  z-index: 201; /* because the vue-modal is 200*/
+  z-index: var(--z-word-helper);
   background: var(--darker-bgi);
   padding: 5px 15px;
   border: 2px solid #b8dcee;

@@ -14,7 +14,7 @@ const shown = computed(() => Storage.data.value.settings.mouse_tracker)
 
 <style scoped>
 .mouse-tracker {
-  z-index: 202;
+  z-index: var(--z-mouse-tracker);
   position: absolute;
   transform: translate(-50%, -50%);
   border: 6px solid #ff6363;

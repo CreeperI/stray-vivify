@@ -109,7 +109,7 @@ div {
   box-shadow: #0d1418 0 0 5px;
   font-size: 1.2rem;
   line-height: 2rem;
-  z-index: 999;
+  z-index: var(--z-header);
   height: 2rem;
 }
 
