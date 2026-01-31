@@ -173,11 +173,10 @@ function on_click() {
 
 function del_note(n: number) {
   if (selected.value.includes(n)) {
-    chart.diff.remove_notes_with_undo(utils.from_indexes(chart.diff.notes, selected.value))
+    chart.diff.remove_note_with_undo(...selected.value)
     return
   }
   if (!chart.diff.remove_note_with_undo(to_note(n))) notify.error('删除note失败。')
-  chart.fuck_shown(true)
 }
 
 function fuck_hold() {
@@ -215,8 +214,7 @@ function ondragend() {
 function ondrop() {
   if (!dragging.value) return
 
-  if (!chart.diff.remove_notes_with_undo(utils.from_indexes(chart.diff.notes, dragging.value)))
-    console.log('bugged removing')
+  if (!chart.diff.remove_note_with_undo(...dragging.value)) console.log('bugged removing')
 
   chart.diff.add_notes_with_undo(pending_note.value)
   dragging.value = undefined
@@ -326,7 +324,7 @@ function on_mouse_up(e: MouseEvent) {
       const x = to_note(ix)
       return { ...x, time: x.time - min }
     })
-    chart.diff.remove_notes_with_undo(utils.from_indexes(chart.diff.notes, selected.value))
+    chart.diff.remove_note_with_undo(...selected.value)
     selected.value = []
     NoteClipboard.copy = () => {}
     NoteClipboard.cut = () => {}

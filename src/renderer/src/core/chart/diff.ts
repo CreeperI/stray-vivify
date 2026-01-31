@@ -505,7 +505,7 @@ export class Chart_diff {
     const r: boolean[] = []
     const undo: (() => void)[] = []
     for (let i = 0; i < v.length; i++) {
-      r.push(this.add_note(v[i], false))
+      r.push(this.add_note(v[i]))
       undo.push(() => {
         this.remove_note(v[i])
       })
@@ -517,27 +517,26 @@ export class Chart_diff {
     return r.every((v) => v)
   }
 
-  remove_note_with_undo(v: ChartTypeV2.note) {
-    const r = this.remove_note(v)
-    if (r)
-      this.push_undo(() => {
-        this.undo_remove(v)
-      })
-    return r
-  }
-
-  remove_notes_with_undo(v: ChartTypeV2.note[]) {
+  remove_note_with_undo(...v: ChartTypeV2.note[] | number[]) {
     const undo: (() => void)[] = []
     const r: boolean[] = []
-    for (let i = 0; i < v.length; i++) {
-      r.push(this.remove_note(v[i]))
-      undo.push(() => {
-        this.add_note(v[i])
-      })
+    for (const ele of v) {
+      if (typeof ele == 'number') {
+        r.push(this.remove_ix(ele))
+        undo.push(() => {
+          this.add_note(this.notes[ele])
+        })
+      } else {
+        r.push(this.remove_note(ele))
+        undo.push(() => {
+          this.add_note(ele)
+        })
+      }
     }
     this.push_undo(() => {
       undo.forEach((v) => v())
     })
+    this.fuck_shown(this.chart.audio.current_time, true)
     return r.every((a) => a)
   }
 
@@ -561,45 +560,6 @@ export class Chart_diff {
 
   redo_remove(v: ChartTypeV2.note) {
     this.remove_note_with_undo(v)
-  }
-
-  /** @returns if the note is successfully removed */
-  remove_note(v: ChartTypeV2.note) {
-    const index = this.binaryFindNoteIndex(v)
-    if (index == -1) {
-      console.log('unexist', v)
-      return false
-    }
-    this.notes.splice(index, 1)
-    console.log(this.notes.length)
-    return true
-  }
-
-  /**
-   * Adding a note to the diff.
-   * @param note note literally
-   * @param fuck whether to update shown notes
-   * @returns if the note is successfully added
-   */
-  add_note(note: ChartTypeV2.note, fuck = true): boolean {
-    note.time = Math.floor(note.time)
-    if (this.notes.find((x) => x.time == note.time && x.lane == note.lane && x.width == x.width))
-      return false
-
-    fix_note(note)
-
-    const nearest = this.shown.value.find(
-      (x) => Math.abs(this.notes[x].time - note.time) <= Storage.settings.nearest
-    )
-    if (nearest) {
-      note.time = this.notes[nearest].time
-    }
-
-    const pos = this.binarySearchTimePosition(note.time)
-    this.notes.splice(pos, 0, note)
-    console.log(this.notes.length)
-    this.fuck_shown(this.chart.audio.current_time, fuck)
-    return true
   }
 
   nearest(t: ms, round = true): ms {
@@ -810,6 +770,50 @@ export class Chart_diff {
       if (tick > 2 && tick < 256)
         this.ticks.push([part_times[part_times.length - 1], Math.round(tick)])
     }
+  }
+
+  /** @returns if the note is successfully removed */
+  private remove_note(v: ChartTypeV2.note) {
+    const index = this.binaryFindNoteIndex(v)
+    if (index == -1) {
+      console.log('unexist', v)
+      return false
+    }
+    this.notes.splice(index, 1)
+    return true
+  }
+
+  private remove_ix(v: number) {
+    if (v < 0) {
+      console.log('trying to remove note with neg ix given')
+      return false
+    }
+    this.notes.splice(v, 1)
+    return true
+  }
+
+  /**
+   * Adding a note to the diff.
+   * @param note note literally
+   * @returns if the note is successfully added
+   */
+  private add_note(note: ChartTypeV2.note): boolean {
+    note.time = Math.floor(note.time)
+    if (this.notes.find((x) => x.time == note.time && x.lane == note.lane && x.width == x.width))
+      return false
+
+    fix_note(note)
+
+    const nearest = this.shown.value.find(
+      (x) => Math.abs(this.notes[x].time - note.time) <= Storage.settings.nearest
+    )
+    if (nearest) {
+      note.time = this.notes[nearest].time
+    }
+
+    const pos = this.binarySearchTimePosition(note.time)
+    this.notes.splice(pos, 0, note)
+    return true
   }
 
   /**
