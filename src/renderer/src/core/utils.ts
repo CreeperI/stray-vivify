@@ -278,10 +278,23 @@ export namespace utils {
    * @param arr The Array to be executed
    * @param fn The predicate function
    */
-  export function indexes_of<T>(arr: T[], fn: (v: T) => boolean) {
+  export function indexes_of<T>(arr: T[], fn: (v: T, ix:number) => boolean) {
     const r: number[] = []
     for (let i = 0; i < arr.length; i++) {
-      if (fn(arr[i])) r.push(i)
+      if (fn(arr[i], i)) r.push(i)
+    }
+    return r
+  }
+
+  /**
+   * Generate a slice of array on given indexes
+   * @param arr
+   * @param indexes {number}
+   */
+  export function from_indexes<T>(arr:T[], indexes: number[]) {
+    const r: T[] = []
+    for (let i = 0; i < indexes.length; i++) {
+      r.push(arr[indexes[i]])
     }
     return r
   }

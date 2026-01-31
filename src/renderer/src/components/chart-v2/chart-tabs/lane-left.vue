@@ -8,9 +8,11 @@ import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter
 import FnDensity from '@renderer/components/chart-v2/chart-tabs/small/fn-density.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { utils } from '@renderer/core/utils'
+import { Chart } from '@renderer/core/chart/chart'
 
 const { width, s, hold, b } = Storage.note
 
+const to_note = Chart.$current.diff.to_note
 const pending_note = computed(() => {
   if (hold.value) {
     return {
@@ -30,9 +32,9 @@ const pending_note = computed(() => {
   }
 }) as ComputedRef<ChartTypeV2.note>
 const select = GlobalStat.NoteClipboard.selected
-const select_max = computed(() => Math.max(...select.value.map((x) => x.time)))
-const select_min = computed(() => Math.min(...select.value.map((x) => x.time)))
-const select_ln = computed(() => select.value.filter((x) => 'len' in x).length)
+const select_max = computed(() => Math.max(...select.value.map((x) => to_note(x).time)))
+const select_min = computed(() => Math.min(...select.value.map((x) => to_note(x).time)))
+const select_ln = computed(() => select.value.filter((x) => 'len' in to_note(x)).length)
 const select_chip = computed(() => select.value.length - select_ln.value)
 </script>
 

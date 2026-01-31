@@ -91,7 +91,7 @@ export namespace GlobalStat {
   }
 
   export namespace NoteClipboard {
-    export const selected = ref<ChartTypeV2.note[]>([])
+    export const selected = ref<number[]>([])
     export const clipboard = ref<ChartTypeV2.note[]>([])
 
     export function clear() {
@@ -152,9 +152,6 @@ export namespace GlobalStat {
     if (current) {
       await current.save()
     }
-    window.electron.ipcRenderer.send("window-close")
+    window.electron.ipcRenderer.send('window-close')
   }
 }
-
-//@ts-ignore
-window.globalstats = GlobalStat

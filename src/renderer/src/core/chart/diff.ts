@@ -246,6 +246,14 @@ export class Chart_diff {
     }
   }
 
+  get to_note() {
+    const x = this
+    return function (v: number | ChartTypeV2.note) {
+      if (typeof v == "number") return x.notes[v]
+      else return v
+    }
+  }
+
   static createDiff(): ChartTypeV2.diff {
     return {
       notes: [],
@@ -881,6 +889,3 @@ export class Chart_diff {
     this.hit_sounder.play_hit()
   }
 }
-
-// @ts-expect-error
-window.toRaw = toRaw
