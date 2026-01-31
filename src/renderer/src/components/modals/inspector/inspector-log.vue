@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { computed, ref } from 'vue'
-import { Log } from '@renderer/core/log'
+
+import { Log } from '@renderer/core/misc/inspector'
 
 const level = ref('all' as 'all' | 'debug' | 'msg' | 'warn' | 'err')
 
@@ -23,7 +24,7 @@ function toLocalDate(t: number) {
     <div @click="level = 'warn'">Warn: {{ count.warn }}</div>
     <div @click="level = 'err'">Error: {{ count.err }}</div>
     <div @click="level = 'all'">All: {{ count.all }}</div>
-    <div title="切换信息等级">信息等级：{{ level }}</div>
+    <div title="点我！">信息等级：{{ level }}</div>
   </div>
   <div class="log-wrapper">
     <div v-for="l in logs" :class="l.level">

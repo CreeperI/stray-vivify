@@ -7,12 +7,13 @@ import { ShortCuts } from '@renderer/core/misc/shortcut'
 import { Invoke, load_ipc_handlers } from '@renderer/core/ipc'
 import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Log } from '@renderer/core/log'
 import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { modal } from '@renderer/core/misc/modal'
 import { Intervals } from '@renderer/core/misc/intervals'
 import { CheckSkin } from '@renderer/core/misc/check-skin'
+import { Log, MemoryUsage, MouseTracker } from '@renderer/core/misc/inspector'
+import { expose_variables } from '@renderer/core/misc/inspector-exposer'
 
 const app = createApp(App).use(
   createModal({
@@ -50,7 +51,8 @@ async function main() {
   Storage.init_interval()
   Log.handle()
   ShortCuts.handle()
-  GlobalStat.MouseTracker.init()
+  MouseTracker.init()
+  expose_variables()
 
   Intervals.on(1e4, () => {
     if (Storage.settings.auto_save) Chart.current?.save()
@@ -60,7 +62,7 @@ async function main() {
     FrameRate.refresh()
     Chart.current?.playfield?.refresh()
     Chart.current?.diff.update_diff_counts()
-    GlobalStat.MemoryUsage.update()
+    MemoryUsage.update()
     Storage.update_used_time()
 
     GlobalStat.refs.window.height.value = window.innerHeight

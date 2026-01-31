@@ -5,10 +5,11 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
+import { MemoryUsage } from '@renderer/core/misc/inspector'
 
 const _fps_r = FrameRate.fps.refs
-const frontend = GlobalStat.MemoryUsage.frontend
-const backend = GlobalStat.MemoryUsage.backend
+const frontend =MemoryUsage.frontend
+const backend = MemoryUsage.backend
 const chart_tab = GlobalStat.chart_state
 
 function parse_size(size: number) {

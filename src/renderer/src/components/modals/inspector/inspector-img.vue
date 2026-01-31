@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { Log } from '@renderer/core/log'
+
+import { Log } from '@renderer/core/misc/inspector'
 
 const needed = Log.need_img
 </script>

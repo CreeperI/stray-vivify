@@ -1,16 +1,15 @@
-<script setup lang="ts">
-
-import { GlobalStat } from '@renderer/core/globalStat'
+<script lang="ts" setup>
 import { computed } from 'vue'
 import { Storage } from '@renderer/core/storage'
+import { MouseTracker } from '@renderer/core/misc/inspector'
 
-const pos = GlobalStat.MouseTracker.mouse_pos
+const pos = MouseTracker.mouse_pos
 const sty = computed(() => `top: ${pos.value.y}px; left: ${pos.value.x}px;`)
 const shown = computed(() => Storage.data.value.settings.mouse_tracker)
 </script>
 
 <template>
-  <div class="mouse-tracker" :style="sty" v-if="shown"></div>
+  <div v-if="shown" :style="sty" class="mouse-tracker"></div>
 </template>
 
 <style scoped>

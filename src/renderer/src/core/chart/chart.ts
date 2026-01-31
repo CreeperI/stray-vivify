@@ -651,6 +651,3 @@ export class Chart {
     notify.success('new diffed')
   }
 }
-
-// @ts-ignore
-window.chart = Chart

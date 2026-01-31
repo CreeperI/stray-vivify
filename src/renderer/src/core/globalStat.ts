@@ -1,7 +1,6 @@
-import { inject, Ref, ref, watch } from 'vue'
+import { inject, Ref, ref } from 'vue'
 import { charts_data, ChartTypeV2 } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
-import { Storage } from '@renderer/core/storage'
 import { Chart } from '@renderer/core/chart/chart'
 
 export namespace GlobalStat {
@@ -42,54 +41,6 @@ export namespace GlobalStat {
     chart_state.value = v
   }
 
-  export namespace MouseTracker {
-    export const mouse_pos = ref({ x: 0, y: 0 })
-    function listener(e: MouseEvent) {
-      mouse_pos.value = { x: e.clientX, y: e.clientY }
-    }
-    export function init() {
-      watch(
-        () => Storage.data.value.settings.mouse_tracker,
-        (v) => {
-          if (v) {
-            document.addEventListener('mousemove', listener)
-            document.documentElement.classList.add('no-cursor')
-          } else {
-            document.removeEventListener('mousemove', listener)
-            document.documentElement.classList.remove('no-cursor')
-          }
-        },
-        { immediate: true }
-      )
-    }
-  }
-
-  export namespace MemoryUsage {
-    export interface MemoryInfo {
-      jsHeapSizeLimit: number
-      totalJSHeapSize: number
-      usedJSHeapSize: number
-    }
-    export const backend = ref({
-      rss: 0,
-      heapTotal: 0,
-      heapUsed: 0,
-      external: 0,
-      arrayBuffers: 0
-    })
-    export const frontend = ref({
-      jsHeapSizeLimit: 0,
-      totalJSHeapSize: 0,
-      usedJSHeapSize: 0
-    })
-    export function update() {
-      Invoke('memory-backend').then((r) => {
-        backend.value = r
-      })
-      frontend.value = (performance as any).memory as MemoryInfo
-    }
-  }
-
   export namespace NoteClipboard {
     export const selected = ref<number[]>([])
     export const clipboard = ref<ChartTypeV2.note[]>([])
@@ -107,20 +58,6 @@ export namespace GlobalStat {
   export let is_dev = false
   export async function check_dev() {
     is_dev = await Invoke('is-dev')
-  }
-
-  export namespace ChartSize {
-    export const data = ref({
-      total: 0,
-      detail: [] as [number, string][],
-      detail_sf: [] as [number, string][],
-      exe: 0,
-      app: 0
-    })
-
-    export async function update() {
-      data.value = await Invoke('charts-size')
-    }
   }
 
   export const SvgSizing = {

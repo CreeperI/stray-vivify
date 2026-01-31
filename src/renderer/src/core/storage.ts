@@ -212,6 +212,3 @@ export const Storage = {
     this.running_time.value = Date.now() - this.__start_time
   }
 }
-
-// @ts-ignore
-window.settings = Storage

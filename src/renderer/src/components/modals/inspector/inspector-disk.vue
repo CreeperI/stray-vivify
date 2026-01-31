@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { GlobalStat } from '@renderer/core/globalStat'
+import { ChartSize } from '@renderer/core/misc/inspector'
 
-const size = GlobalStat.ChartSize.data
+const size = ChartSize.data
 
 function parse_size(size: number) {
   if (size < 1024) return `${size}B`
@@ -12,7 +13,7 @@ function parse_size(size: number) {
 function parse_chart_name(str: string) {
   return GlobalStat.all_chart.find((c) => c.name === str)?.name || str
 }
-GlobalStat.ChartSize.update()
+ChartSize.update()
 </script>
 
 <template>

@@ -62,10 +62,3 @@ export class modal<T extends Component> {
     closeAllModals(true)
   }
 }
-
-declare global {
-  interface Window {
-    modal: typeof modal
-  }
-}
-window.modal = modal
