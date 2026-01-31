@@ -23,8 +23,8 @@ function getStatStyle(statName: keyof ChartTypeV2.SongStats) {
     const width = val > 400 ? '100%' : (val % 200) / 2 + '%'
     return {
       width: width,
-      bg: "white",
-      class_line: "stat-white",
+      bg: 'white',
+      class_line: 'stat-white'
     }
   }
   if (val < 200) {
@@ -32,21 +32,21 @@ function getStatStyle(statName: keyof ChartTypeV2.SongStats) {
     const width = val / 2 + '%'
 
     return {
-      bg: `hsl(${colObj.h}, ${colObj.s}%, ${colObj.l}%)` ,
-      class_line: "",
+      bg: `hsl(${colObj.h}, ${colObj.s}%, ${colObj.l}%)`,
+      class_line: '',
       width: width
     }
   } else if (val >= 200 && val < 400) {
     const width = (val - 200) / 2 + '%'
     return {
       //用于控制hsl循环内的lightness
-      class_line: "stat-rainbow",
+      class_line: 'stat-rainbow',
       width: width,
-      bg: "white"
+      bg: 'white'
     }
   } else {
     return {
-      class_line: "",
+      class_line: '',
       width: '100%',
       bg: `linear-gradient(to right, red, orange, yellow, green)`
     }

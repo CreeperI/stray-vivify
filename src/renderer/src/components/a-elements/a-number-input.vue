@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 const model = defineModel<number>({required: true})
 
 function wheel(e: WheelEvent) {
@@ -11,7 +11,7 @@ function wheel(e: WheelEvent) {
 </script>
 
 <template>
-  <input @wheel.prevent="wheel" v-model="model" type="number" />
+  <input v-model="model" type="number" @wheel.prevent="wheel" />
 </template>
 
 <style scoped>

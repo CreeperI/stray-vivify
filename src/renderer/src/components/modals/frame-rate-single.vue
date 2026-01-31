@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { _FrameRateClass } from '@renderer/core/misc/frame-rates'
 
 const props = defineProps<{ msg: string; r: _FrameRateClass }>()

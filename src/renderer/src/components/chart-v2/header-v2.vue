@@ -24,7 +24,7 @@ function close_chart() {
   }
   Chart.current = undefined
   GlobalStat.route.change('start')
-  Invoke("set-process-name", "stray/vivify")
+  Invoke('set-process-name', 'stray/vivify')
 }
 function open_exporter() {
   modal.IExporterModal.show({})

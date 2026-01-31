@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
 import LaneLeft from '@renderer/components/chart-v2/chart-tabs/lane-left.vue'
 import LaneRight from '@renderer/components/chart-v2/chart-tabs/lane-right.vue'

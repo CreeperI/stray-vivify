@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { WordHelper } from '@renderer/core/word-helper'
 
 const { word, shown, position } = WordHelper
@@ -7,10 +7,10 @@ const { word, shown, position } = WordHelper
 <template>
   <transition name="fade-0.2">
     <div
-      class="word-helper-overlay"
-      v-html="word"
       v-if="shown"
       :style="{ left: position[0] + 'px', top: position[1] + 'px' }"
+      class="word-helper-overlay"
+      v-html="word"
     />
   </transition>
 </template>
@@ -19,7 +19,7 @@ const { word, shown, position } = WordHelper
 .word-helper-overlay {
   position: absolute;
   z-index: 201; /* because the vue-modal is 200*/
-  background:var(--darker-bgi);
+  background: var(--darker-bgi);
   padding: 5px 15px;
   border: 2px solid #b8dcee;
   user-select: none;

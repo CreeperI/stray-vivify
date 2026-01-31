@@ -16,12 +16,12 @@ export function calculateChartStats(
 ): ChartTypeV2.SongStats {
   FrameRate.calc_sr.start()
   let noteStat: number,
-    speedStat :number,
-    techStat :number,
-    fillStat :number,
-    multiStat :number,
-    totalV2 :number,
-    totalV3 :number
+    speedStat: number,
+    techStat: number,
+    fillStat: number,
+    multiStat: number,
+    totalV2: number,
+    totalV3: number
   //基础信息声明
   let bpmList: [number, number][] = []
   for (const bpmObj of diff.timing) {

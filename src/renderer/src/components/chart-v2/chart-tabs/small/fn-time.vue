@@ -1,5 +1,4 @@
-<script setup lang="ts">
-
+<script lang="ts" setup>
 import ARange from '@renderer/components/a-elements/a-range.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
@@ -8,17 +7,23 @@ import { computed } from 'vue'
 
 const chart = Chart.$current
 const { current_ms, writable_play_rate, play_rate, writable_current_second } = chart.audio.refs
-const show_beat_time = computed(() => Storage.settings.beat_fn_time || Storage.settings.bar_or_section)
+const show_beat_time = computed(
+  () => Storage.settings.beat_fn_time || Storage.settings.bar_or_section
+)
 </script>
 <template>
   <div class="fn-right-inner">
     <label>
       <span>{{ utils.toTimeStr(current_ms / 1000) }}</span>
-      <span style="font-size: 0.8rem; color: gray">/{{ utils.toTimeStr(chart.length / 1000) }}</span>
+      <span style="font-size: 0.8rem; color: gray"
+        >/{{ utils.toTimeStr(chart.length / 1000) }}</span
+      >
       <template v-if="show_beat_time">
-        <br>
-        <span>{{ chart.diff.get_beat_string(current_ms)}}</span>
-        <span style="font-size: 0.8rem; color: gray">/{{ chart.diff.section_list.length - 1 }}</span>
+        <br />
+        <span>{{ chart.diff.get_beat_string(current_ms) }}</span>
+        <span style="font-size: 0.8rem; color: gray"
+          >/{{ chart.diff.section_list.length - 1 }}</span
+        >
       </template>
     </label>
     <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
@@ -35,7 +40,6 @@ const show_beat_time = computed(() => Storage.settings.beat_fn_time || Storage.s
   </div>
 </template>
 <style scoped>
-
 input {
   width: 100%;
 }
@@ -72,7 +76,7 @@ td {
   width: 100%;
 }
 
-.fn-right-debugger > div:nth-child(2n+1) {
+.fn-right-debugger > div:nth-child(2n + 1) {
   text-align: right;
 }
 </style>

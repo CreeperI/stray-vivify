@@ -38,8 +38,8 @@ const functions = [
   's',
   'mine',
   'hold',
-  "sv-eff",
-  "sv-fct"
+  'sv-eff',
+  'sv-fct'
 ] as const
 
 type SC_save = {
@@ -301,5 +301,5 @@ new ShortCuts(
 )
 
 new ShortCuts('refresh', 'r', () => RefreshAll.fuck(), false, true)
-new ShortCuts("sv-eff", "1", () => Chart.current?.diff.sv_bind.set_eff())
-new ShortCuts("sv-fct", "2", () => Chart.current?.diff.sv_bind.set_fct())
+new ShortCuts('sv-eff', '1', () => Chart.current?.diff.sv_bind.set_eff())
+new ShortCuts('sv-fct', '2', () => Chart.current?.diff.sv_bind.set_fct())

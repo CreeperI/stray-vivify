@@ -1,21 +1,20 @@
-type events = "resize" | "update"
+type events = 'resize' | 'update'
 
 export const Listener = {
-  handlers: {} as Partial<Record<events,(()=> void)[]>>,
-  on(event:events, fn: () => void) {
+  handlers: {} as Partial<Record<events, (() => void)[]>>,
+  on(event: events, fn: () => void) {
     if (this.handlers[event]) {
       this.handlers[event].push(fn)
-    }
-    else this.handlers[event] = [fn]
+    } else this.handlers[event] = [fn]
   },
-  trigger(e:events) {
+  trigger(e: events) {
     if (this.handlers[e]) {
-      this.handlers[e]?.forEach(x => x())
+      this.handlers[e]?.forEach((x) => x())
     }
   },
-  off(event:events, fn: () => void) {
+  off(event: events, fn: () => void) {
     if (this.handlers[event]) {
-      this.handlers[event] = this.handlers[event].filter(x => x != fn)
+      this.handlers[event] = this.handlers[event].filter((x) => x != fn)
     }
   }
 }

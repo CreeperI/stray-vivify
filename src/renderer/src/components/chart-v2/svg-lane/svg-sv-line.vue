@@ -30,10 +30,10 @@ const there_is = computed(() => {
 })
 const pending_text_dx = computed(() => {
   if (there_is.value) {
-    if ('type' in there_is.value) return "0"
-    return "3rem"
+    if ('type' in there_is.value) return '0'
+    return '3rem'
   }
-  return "0"
+  return '0'
 })
 const sv_pending = computed<ChartTypeV2.sv_all>(() => {
   if (sv_data.value.is_factory)
@@ -169,7 +169,6 @@ function sv_single(x: ChartTypeV2.sv_all): VNode[] {
     )
   ]
 }
-
 </script>
 
 <template>
@@ -189,8 +188,8 @@ function sv_single(x: ChartTypeV2.sv_all): VNode[] {
     <component :is="sv_single(sv_pending)[0]" v-if="pending_display" />
     <text
       v-if="pending_display"
-      :y="time_bottom(text_time)"
       :dx="pending_text_dx"
+      :y="time_bottom(text_time)"
       dy="-0.5rem"
       fill="white"
       text-anchor="start"

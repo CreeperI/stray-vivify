@@ -23,7 +23,6 @@ export class Chart_song {
     this._sprite = ''
     this.need_roman = ref([false, false])
 
-
     this.refs = ref({
       name: '',
       name_roman: '',
@@ -49,7 +48,7 @@ export class Chart_song {
         this.composer_roman = v.composer.replace(/[^\u0000-\u007F]/gu, '')
         ch.set_header_name()
       },
-      { deep: true, flush: 'sync' },
+      { deep: true, flush: 'sync' }
     )
   }
 

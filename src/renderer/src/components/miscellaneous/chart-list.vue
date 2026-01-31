@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref, watch } from 'vue'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 import { Invoke } from '@renderer/core/ipc'
@@ -77,15 +77,15 @@ const running = Storage.running_time
     <div class="chart-list-left">
       <div class="su-title">stray/vivify</div>
       <div class="su-greeting">
-        欢迎，{{ username }}<br>
-        这是你使用stray/vivify的第{{pass_days.toFixed(0)}}天！ <br>
-        已运行：{{ utils.toTimeStr(running/1000, 0) }}
+        欢迎，{{ username }}<br />
+        这是你使用stray/vivify的第{{ pass_days.toFixed(0) }}天！ <br />
+        已运行：{{ utils.toTimeStr(running / 1000, 0) }}
       </div>
-      <div class="su-desc" v-if="!display_id">
+      <div v-if="!display_id" class="su-desc">
         广告位招租 <br />
         一定要请画师来加个看板……？
       </div>
-      <div class="su-display" v-if="display_data">
+      <div v-if="display_data" class="su-display">
         <div class="sd-title">{{ display_data.name }}</div>
         <div class="sd-composer">by {{ display_data.composer }}</div>
         <div>-bpm: {{ display_data.bpm }} -id: {{ display_data.id }}</div>
@@ -99,7 +99,7 @@ const running = Storage.running_time
     <div class="chart-list-right">
       <div class="charts-func">
         <div class="search-wrapper">
-          <a-text-input v-model="search" placeholder="点击输入文字！" class="charts-input" />
+          <a-text-input v-model="search" class="charts-input" placeholder="点击输入文字！" />
           <div>{{ shown.length }} 结果</div>
         </div>
         <div class="importer">
@@ -112,15 +112,14 @@ const running = Storage.running_time
             v-for="chart in shown"
             :key="chart.id"
             class="chart-unit"
-            @mouseenter="detail(chart.id)"
             @click="open_proj(chart.id)"
             @contextmenu="delete_proj(chart.id, chart.name)"
+            @mouseenter="detail(chart.id)"
           >
             <div class="chart-unit-name">{{ chart.name }}</div>
             <div class="chart-unit-cid">
-
-            <div class="chart-unit-composer">{{ chart.composer }}</div>
-            <div class="chart-unit-id">id: {{ chart.id }}</div>
+              <div class="chart-unit-composer">{{ chart.composer }}</div>
+              <div class="chart-unit-id">id: {{ chart.id }}</div>
             </div>
             <a-img :src="`stray:///__sprite__/${chart.id}`" class="chart-unit-bg"></a-img>
           </div>
@@ -240,9 +239,9 @@ const running = Storage.running_time
 .chart-unit > div {
   user-select: none;
 }
-.chart-unit:hover .chart-unit-name{
+.chart-unit:hover .chart-unit-name {
   box-shadow: 0 0 2px black;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.4);
   color: #e2f2ff;
 }
 

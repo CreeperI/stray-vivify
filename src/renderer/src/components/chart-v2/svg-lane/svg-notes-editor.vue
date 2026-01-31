@@ -326,7 +326,7 @@ function on_mouse_up(e: MouseEvent) {
       const x = to_note(ix)
       return { ...x, time: x.time - min }
     })
-    chart.diff.remove_notes_with_undo(utils.from_indexes(chart.diff.notes,selected.value))
+    chart.diff.remove_notes_with_undo(utils.from_indexes(chart.diff.notes, selected.value))
     selected.value = []
     NoteClipboard.copy = () => {}
     NoteClipboard.cut = () => {}
@@ -447,12 +447,12 @@ const d_height = inject<number>('d_height') ?? 0
         :style="{
           left: x_of(get_note(ix))
         }"
+        :title="ix"
         data-shown-note
         @dragend="ondragend"
         @dragstart="(e) => ondragstart(e, ix)"
         @click.right="del_note(ix)"
         @click.ctrl="change_my_select(ix)"
-        :title="ix"
       />
       <template v-if="pending_display">
         <note-v2

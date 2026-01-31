@@ -6,9 +6,7 @@ import { Version } from '@renderer/core/storage'
 
 <template>
   <SimpleModal size="4">
-    <template #header>
-      版本更新日志 （当前版本： {{Version.str}}
-    </template>
+    <template #header> 版本更新日志 （当前版本： {{ Version.str }} </template>
     <div class="versions-wrapper">
       <Versions />
     </div>

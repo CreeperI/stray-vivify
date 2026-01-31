@@ -1,4 +1,3 @@
-
 class _IntervalClass {
   func: [number, (() => any)[]][]
   private time_ids: [number, number][]

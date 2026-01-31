@@ -1,7 +1,7 @@
 import { onBeforeUpdate, onUnmounted, onUpdated, ref, Ref } from 'vue'
 import { utils } from '@renderer/core/utils'
 
-const all :_FrameRateClass[] = []
+const all: _FrameRateClass[] = []
 export type _frameRateRef = Ref<{
   avg: number
   sd: number
@@ -15,6 +15,7 @@ const recent_max_length = 10
 export class _FrameRateClass {
   // the use-times recent calls take
   recent: number[]
+  refs: _frameRateRef
   // 平均值
   private _avg: number
   // 标准差
@@ -23,11 +24,9 @@ export class _FrameRateClass {
   private _cv: number
   private _max: number
   private _min: number
-  private _call_count_avg: number
   private _call_count_last: number
   private last_call: number
   private _call_counts: number[]
-  refs: _frameRateRef
 
   constructor() {
     this._cv = 0
@@ -45,10 +44,16 @@ export class _FrameRateClass {
       cv: 0,
       max: 0,
       min: 0,
-      call_count: 0,
+      call_count: 0
     })
     this.recent = [0]
     all.push(this)
+  }
+
+  private _call_count_avg: number
+
+  get call_count_avg() {
+    return this._call_count_avg
   }
 
   calc() {
@@ -82,17 +87,15 @@ export class _FrameRateClass {
   start() {
     this.last_call = performance.now()
   }
+
   end() {
     this.recent.push(performance.now() - this.last_call)
     this._call_count_last++
   }
+
   immediate() {
     this.recent.push(1)
     this._call_count_last++
-  }
-
-  get call_count_avg() {
-    return this._call_count_avg
   }
 }
 

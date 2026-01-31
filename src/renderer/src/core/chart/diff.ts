@@ -249,7 +249,7 @@ export class Chart_diff {
   get to_note() {
     const x = this
     return function (v: number | ChartTypeV2.note) {
-      if (typeof v == "number") return x.notes[v]
+      if (typeof v == 'number') return x.notes[v]
       else return v
     }
   }
@@ -778,7 +778,6 @@ export class Chart_diff {
     else str = `${(beatOffset + 1).toFixed()}`
     if (den != 4) str += `/${den}`
     return str
-
   }
 
   update_tick_list() {

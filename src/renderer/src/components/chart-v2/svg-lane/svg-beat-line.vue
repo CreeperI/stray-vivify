@@ -8,7 +8,7 @@ import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
 const chart_state = GlobalStat.chart_state
 const chart = Chart.$current
 
-const {view_port, bar_length} = GlobalStat.useSvgSizing()
+const { view_port, bar_length } = GlobalStat.useSvgSizing()
 const current_time = chart.audio.refs.current_ms
 const mul = Storage.computes.mul
 const bb_list = chart.diff.shown_bar_ticks

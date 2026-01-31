@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { onMounted, ref, watch } from 'vue'
 
 const model = defineModel<number>({ default: -1 })
@@ -11,7 +11,7 @@ function handleClick(e: MouseEvent) {
 
   let target = e.target as HTMLDivElement
 
-  if (target.getAttributeNode("disabled")?.value == "true") return
+  if (target.getAttributeNode('disabled')?.value == 'true') return
   while (target !== container && target.parentNode) {
     if (target.parentNode === container && target.tagName === 'DIV') {
       // 找到有效的子项

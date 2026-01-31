@@ -1,10 +1,10 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 
 const m = defineModel<boolean>()
 </script>
 
 <template>
-  <input type="checkbox" v-model="m"/>
+  <input v-model="m" type="checkbox"/>
 </template>
 
 <style scoped>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 const model = defineModel<string>()
 </script>
 
@@ -6,8 +6,8 @@ const model = defineModel<string>()
   <div class="a-color-input">
     <div></div>
     <input
-      type="color"
       v-model="model"
+      type="color"
     />
     <div>{{ model }}</div>
   </div>

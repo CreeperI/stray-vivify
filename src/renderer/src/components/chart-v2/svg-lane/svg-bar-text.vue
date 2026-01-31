@@ -16,7 +16,8 @@ const current_time = chart.audio.refs.current_ms
 
 const _show_bar_text = computed(
   () =>
-    chart_state.value == 0 || (chart_state.value == 1 && Storage.settings.record_field.show_bar_text)
+    chart_state.value == 0 ||
+    (chart_state.value == 1 && Storage.settings.record_field.show_bar_text)
 )
 
 function time_bottom_bar(t: number, time: number, _mul: number) {

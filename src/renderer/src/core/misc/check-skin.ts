@@ -17,7 +17,7 @@ export namespace CheckSkin {
     // '2rh.png': 0,
     '2sl.png': 0,
     '2sm.png': 0,
-    '2sr.png': 0,
+    '2sr.png': 0
     // '3b.png': 0,
     // '3l.png': 0,
     // '3lh.png': 0,

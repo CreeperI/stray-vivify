@@ -6,30 +6,30 @@
  * run() is the nominal entry point.
  */
 interface AsyncConfig {
-  maxTime: number;
-  batchSize?: number;
-  sleepTime?: number;
-  asyncEntry?: (iterationsDone: number) => void;
-  asyncProgress?: (iterationsDone: number) => void;
-  asyncExit?: () => void;
-  then?: () => void;
+  maxTime: number
+  batchSize?: number
+  sleepTime?: number
+  asyncEntry?: (iterationsDone: number) => void
+  asyncProgress?: (iterationsDone: number) => void
+  asyncExit?: () => void
+  then?: () => void
   progress?: {
-    maxIter?: number;
-    remaining?: number;
-  };
+    maxIter?: number
+    remaining?: number
+  }
 }
 
-type AsyncFunction = (iterationIndex: number) => void;
+type AsyncFunction = (iterationIndex: number) => void
 
 class AsyncRunner {
-  private _enabled = true;
+  private _enabled = true
 
   get enabled(): boolean {
-    return this._enabled;
+    return this._enabled
   }
 
   set enabled(val: boolean) {
-    this._enabled = val;
+    this._enabled = val
   }
 
   /**
@@ -44,27 +44,27 @@ class AsyncRunner {
   run(fun: AsyncFunction, maxIter: number, config: AsyncConfig): Promise<void> | undefined {
     if (this.enabled) {
       // Disable async if we're already doing async
-      this.enabled = false;
+      this.enabled = false
 
-      const runResult = this._run(fun, maxIter, config);
+      const runResult = this._run(fun, maxIter, config)
 
       if (config.then) {
         return runResult.then(() => {
-          config.then!();
-          this.enabled = true;
-        });
+          config.then!()
+          this.enabled = true
+        })
       } else {
         return runResult.then(() => {
-          this.enabled = true;
-        });
+          this.enabled = true
+        })
       }
     } else {
       // Synchronous fallback
       for (let i = 0; i < maxIter; ++i) {
-        fun(i);
+        fun(i)
       }
-      if (config.then) config.then();
-      return undefined;
+      if (config.then) config.then()
+      return undefined
     }
   }
 
@@ -73,59 +73,59 @@ class AsyncRunner {
    * @returns The number of remaining iterations not executed.
    */
   private runForTime(fun: AsyncFunction, maxIter: number, config: AsyncConfig): number {
-    const batchSize = config.batchSize ?? 1;
-    const maxTime = config.maxTime;
-    const t0 = Date.now();
-    let remaining = maxIter;
+    const batchSize = config.batchSize ?? 1
+    const maxTime = config.maxTime
+    const t0 = Date.now()
+    let remaining = maxIter
 
     while (remaining > 0) {
-      const batch = Math.min(remaining, batchSize);
+      const batch = Math.min(remaining, batchSize)
       for (let j = 0; j < batch; ++j) {
-        fun(remaining - 1); // match original behavior: passes current "remaining" before decrement
-        --remaining;
+        fun(remaining - 1) // match original behavior: passes current "remaining" before decrement
+        --remaining
       }
       if (Date.now() - t0 >= maxTime) {
-        return remaining;
+        return remaining
       }
     }
-    return 0;
+    return 0
   }
 
   private sleepPromise(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms))
   }
 
   /**
    * @private
    */
   private async _run(fun: AsyncFunction, maxIter: number, config: AsyncConfig): Promise<void> {
-    if (!config.progress) config.progress = {};
+    if (!config.progress) config.progress = {}
 
-    config.progress.maxIter = maxIter;
-    config.progress.remaining = this.runForTime(fun, config.progress.maxIter, config);
+    config.progress.maxIter = maxIter
+    config.progress.remaining = this.runForTime(fun, config.progress.maxIter, config)
 
-    const sleepTime = config.sleepTime ?? 1;
+    const sleepTime = config.sleepTime ?? 1
 
-    if (!config.progress.remaining) return;
+    if (!config.progress.remaining) return
 
     if (config.asyncEntry) {
-      config.asyncEntry(config.progress.maxIter - config.progress.remaining);
+      config.asyncEntry(config.progress.maxIter - config.progress.remaining)
     }
 
     do {
-      await this.sleepPromise(sleepTime);
-      config.progress.remaining = this.runForTime(fun, config.progress.remaining, config);
+      await this.sleepPromise(sleepTime)
+      config.progress.remaining = this.runForTime(fun, config.progress.remaining, config)
       if (config.asyncProgress && config.progress.maxIter !== undefined) {
-        config.asyncProgress(config.progress.maxIter - config.progress.remaining);
+        config.asyncProgress(config.progress.maxIter - config.progress.remaining)
       }
-    } while (config.progress.remaining > 0);
+    } while (config.progress.remaining > 0)
 
     if (config.asyncExit) {
-      config.asyncExit();
+      config.asyncExit()
     }
   }
 }
 
 // Export singleton instance to mimic original `window.Async`
-const Async = new AsyncRunner();
-export default Async;
+const Async = new AsyncRunner()
+export default Async

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import AButton from '@renderer/components/a-elements/a-button.vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
@@ -6,15 +6,15 @@ import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 import CustomArtistList from '@renderer/components/modals/custom-artist-list.vue'
 import { CustomSongInfo } from '@preload/types'
 
-const info_data = defineModel<CustomSongInfo>('info',{ required: true })
+const info_data = defineModel<CustomSongInfo>('info', { required: true })
 const is_backstage = defineModel<boolean>('is_backstage', { default: false })
 const emit = defineEmits<{
   (e: 'next'): void
 }>()
 const STR = ['Opening', 'Middle', 'Finale', 'Encore']
 defineProps<{
-  filter_STR: () => number[],
-  diff_indexs: number[],
+  filter_STR: () => number[]
+  diff_indexs: number[]
 }>()
 </script>
 

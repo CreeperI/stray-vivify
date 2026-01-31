@@ -6,7 +6,7 @@ import { GlobalStat } from '@renderer/core/globalStat'
 
 const offset1 = Storage.settings.offset1
 
-const {view_port, svg_width} = GlobalStat.useSvgSizing()
+const { view_port, svg_width } = GlobalStat.useSvgSizing()
 
 const x = svg_width - 25
 
@@ -21,7 +21,9 @@ const minus =
 const show_ticks = computed(() => {
   if (GlobalStat.chart_state.value == 0) return Storage.settings.show_ticks
   else if (GlobalStat.chart_state.value == 1) {
-    return Storage.settings.record_field.show_circles ? false : Storage.settings.record_field.show_ticks
+    return Storage.settings.record_field.show_circles
+      ? false
+      : Storage.settings.record_field.show_ticks
   } else return false
 })
 function time_bottom_bar(t: number, time: number, _mul: number) {
@@ -34,14 +36,14 @@ const shown_t = chart.diff.shown_bar_ticks
   <g v-if="show_ticks">
     <template v-for="[tm, tick] in shown_t.ticks">
       <text
+        v-if="tick != 0"
         :x="x"
         :y="time_bottom_bar(current_time, tm, mul)"
         fill="gray"
         text-anchor="middle"
-        v-if="tick != 0"
       >
-      .{{ tick }}
-    </text>
+        .{{ tick }}
+      </text>
     </template>
   </g>
 </template>

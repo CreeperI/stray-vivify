@@ -44,21 +44,23 @@ export class modal<T extends Component> {
     this.opened = false
   }
 
+  static close_all() {
+    closeAllModals(true)
+  }
+
   show(props: ComponentProps<T>) {
-    if (this.opened) return Promise.reject("opened")
+    if (this.opened) return Promise.reject('opened')
     this.props = Object.assign({}, props)
     if (!this.props) throw new Error()
     this.opened = true
-    if (this.should_catch) return openModal(this.component, this.props).catch(() => {
-    }).finally(() => {
-      this.opened = false
-    })
+    if (this.should_catch)
+      return openModal(this.component, this.props)
+        .catch(() => {})
+        .finally(() => {
+          this.opened = false
+        })
     return openModal(this.component, this.props).finally(() => {
       this.opened = false
     })
-  }
-
-  static close_all() {
-    closeAllModals(true)
   }
 }

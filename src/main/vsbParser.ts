@@ -444,7 +444,7 @@ function note2width(t: number) {
     case 8:
       return 2
     default:
-      console.log('waht note',t)
+      console.log('waht note', t)
       return 0
   }
 }
@@ -577,17 +577,15 @@ class VsbParser {
           }
           const id = this.reader.readSByte()
           try {
-          const value = this.reader.readByNoteType(TypeToBufferType(type))
-          const NE = new NoteExtra()
-          NE.id = id
-          NE.value = value
-          extra.push(NE)
-
+            const value = this.reader.readByNoteType(TypeToBufferType(type))
+            const NE = new NoteExtra()
+            NE.id = id
+            NE.value = value
+            extra.push(NE)
           } catch (e) {
             console.log(type, e)
             break
           }
-
         }
         note.extra = extra
       }

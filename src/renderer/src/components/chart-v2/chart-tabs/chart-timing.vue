@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { Chart } from '@renderer/core/chart/chart'
 import TimingSingle from '@renderer/components/chart-v2/timing-single.vue'
 import { computed, onMounted, provide, ref } from 'vue'
@@ -10,8 +10,8 @@ const chart = Chart.$current
 const diff = chart.diff
 const index = ref(-1)
 const bpm_input = ref<HTMLInputElement>()
-const move1 = ref( false)
-const move2 = ref( false)
+const move1 = ref(false)
+const move2 = ref(false)
 provide('focus', (idx: number) => {
   index.value = idx
   bpm_input.value?.focus()
@@ -83,7 +83,6 @@ onMounted(() => {
 
 function bpm_change(e: Event) {
   bpm_comp.value = parseFloat((e.target as HTMLInputElement).value)
-
 }
 </script>
 
@@ -93,14 +92,14 @@ function bpm_change(e: Event) {
       <div class="timing-list">
         <div class="timing-header">
           <div>Timing List</div>
-          <a-button2 class="timing-add" @click="add_timing" msg="+new Timing" />
+          <a-button2 class="timing-add" msg="+new Timing" @click="add_timing" />
         </div>
         <div class="timing-list-inner">
           <timing-single
+            v-for="(t, idx) in diff.timing"
             :class="index == idx ? 'chosen' : ''"
             :idx="idx"
             :timing="t"
-            v-for="(t, idx) in diff.timing"
             @click="index = idx"
             @click.ctrl.capture="switcher(t.time)"
             @contextmenu.ctrl.capture="del_timing(idx)"
@@ -109,45 +108,53 @@ function bpm_change(e: Event) {
       </div>
     </div>
     <div class="timing-right">
-      <div class="timing-editor" v-if="index != -1">
+      <div v-if="index != -1" class="timing-editor">
         <div class="timing-index">timing #{{ index }}</div>
         <div>
           <span>Time</span>
-          <input class="timing-input" type="number" min="0" v-model="time" />
+          <input v-model="time" class="timing-input" min="0" type="number" />
         </div>
         <div>
           <span>BPM</span>
-          <input ref="bpm_input" class="timing-input" type="number" min="1"
-                 :value="bpm_comp" @change="bpm_change" />
+          <input
+            ref="bpm_input"
+            :value="bpm_comp"
+            class="timing-input"
+            min="1"
+            type="number"
+            @change="bpm_change"
+          />
         </div>
         <div style="display: flex; justify-content: center; align-items: center">
           <span>拍号</span>
           <div class="timing-signature">
-            <input class="timing-input" type="number" min="1" v-model="num_comp" />
+            <input v-model="num_comp" class="timing-input" min="1" type="number" />
             <div style="border: 1px solid #b8dcee"></div>
-            <input class="timing-input" type="number" min="1" v-model="den_comp" />
+            <input v-model="den_comp" class="timing-input" min="1" type="number" />
           </div>
         </div>
 
         <div
-          class="timing-delete"
           :class="index == 0 ? 'timing-first' : ''"
+          class="timing-delete"
           @click="del_timing(index)"
         >
           删除
         </div>
         <div class="timing-move">
           <div @click="move1 = !move1"><a-checkbox v-model="move1" /> 移动此timing内的所有物件</div>
-          <div @click="move2 = !move2"><a-checkbox v-model="move2" /> 移动此timing之后的所有物件</div>
+          <div @click="move2 = !move2">
+            <a-checkbox v-model="move2" /> 移动此timing之后的所有物件
+          </div>
         </div>
       </div>
-      <div class="timing-placeholder" v-else-if="diff.timing.length == 1">
+      <div v-else-if="diff.timing.length == 1" class="timing-placeholder">
         没有变奏呢。好曲（师）！
       </div>
-      <div class="timing-placeholder" v-else-if="diff.timing.length == 0">
+      <div v-else-if="diff.timing.length == 0" class="timing-placeholder">
         为什么这里一个timing都没有，我代码哪里炸了？
       </div>
-      <div class="timing-placeholder" v-else>古希腊掌管变奏的神。</div>
+      <div v-else class="timing-placeholder">古希腊掌管变奏的神。</div>
     </div>
   </div>
 </template>

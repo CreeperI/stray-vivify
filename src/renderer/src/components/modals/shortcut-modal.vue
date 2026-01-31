@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import ShortcutModalSingle from '@renderer/components/modals/shortcut-modal-single.vue'
 import { ShortCuts } from '@renderer/core/misc/shortcut'
@@ -11,36 +11,36 @@ import ShortcutModalHeader from '@renderer/components/modals/shortcut-modal-head
     <table class="sc-table">
       <tbody>
         <shortcut-modal-header msg="切换宽度" />
-        <shortcut-modal-single msg="1宽" :short="ShortCuts.$fun('w1')" />
-        <shortcut-modal-single msg="2宽" :short="ShortCuts.$fun('w2')" />
-        <shortcut-modal-single msg="3宽" :short="ShortCuts.$fun('w3')" />
-        <shortcut-modal-single msg="4宽" :short="ShortCuts.$fun('w4')" />
-        <shortcut-modal-single msg="SV - SV组" :short="ShortCuts.$fun('sv-fct')" />
-        <shortcut-modal-single msg="SV - 变速" :short="ShortCuts.$fun('sv-eff')" />
+        <shortcut-modal-single :short="ShortCuts.$fun('w1')" msg="1宽" />
+        <shortcut-modal-single :short="ShortCuts.$fun('w2')" msg="2宽" />
+        <shortcut-modal-single :short="ShortCuts.$fun('w3')" msg="3宽" />
+        <shortcut-modal-single :short="ShortCuts.$fun('w4')" msg="4宽" />
+        <shortcut-modal-single :short="ShortCuts.$fun('sv-fct')" msg="SV - SV组" />
+        <shortcut-modal-single :short="ShortCuts.$fun('sv-eff')" msg="SV - 变速" />
 
         <shortcut-modal-header msg="切换类型" />
-        <shortcut-modal-single msg="地雷" :short="ShortCuts.$fun('mine')" />
-        <shortcut-modal-single msg="s" :short="ShortCuts.$fun('s')" />
-        <shortcut-modal-single msg="面" :short="ShortCuts.$fun('hold')" />
+        <shortcut-modal-single :short="ShortCuts.$fun('mine')" msg="地雷" />
+        <shortcut-modal-single :short="ShortCuts.$fun('s')" msg="s" />
+        <shortcut-modal-single :short="ShortCuts.$fun('hold')" msg="面" />
 
         <shortcut-modal-header msg="CTRL家族" />
-        <shortcut-modal-single msg="撤销" :short="ShortCuts.$fun('undo')" />
-        <shortcut-modal-single msg="重做" :short="ShortCuts.$fun('redo')" />
-        <shortcut-modal-single msg="复制" :short="ShortCuts.$fun('copy')" />
-        <shortcut-modal-single msg="剪切" :short="ShortCuts.$fun('cut')"/>
-        <shortcut-modal-single msg="粘贴" :short="ShortCuts.$fun('paste')"/>
-        <shortcut-modal-single msg="保存" :short="ShortCuts.$fun('save')"/>
+        <shortcut-modal-single :short="ShortCuts.$fun('undo')" msg="撤销" />
+        <shortcut-modal-single :short="ShortCuts.$fun('redo')" msg="重做" />
+        <shortcut-modal-single :short="ShortCuts.$fun('copy')" msg="复制" />
+        <shortcut-modal-single :short="ShortCuts.$fun('cut')" msg="剪切" />
+        <shortcut-modal-single :short="ShortCuts.$fun('paste')" msg="粘贴" />
+        <shortcut-modal-single :short="ShortCuts.$fun('save')" msg="保存" />
 
-        <shortcut-modal-header msg="Modals"/>
-        <shortcut-modal-single msg="Inspector" :short="ShortCuts.$fun('log')"/>
-        <shortcut-modal-single msg="Settings" :short="ShortCuts.$fun('settings')"/>
-        <shortcut-modal-single msg="导入导出" :short="ShortCuts.$fun('iexport')"/>
+        <shortcut-modal-header msg="Modals" />
+        <shortcut-modal-single :short="ShortCuts.$fun('log')" msg="Inspector" />
+        <shortcut-modal-single :short="ShortCuts.$fun('settings')" msg="Settings" />
+        <shortcut-modal-single :short="ShortCuts.$fun('iexport')" msg="导入导出" />
 
         <shortcut-modal-header msg="键位" />
-        <shortcut-modal-single msg="4k-1" :short="ShortCuts.$fun('4k1')" />
-        <shortcut-modal-single msg="4k-2" :short="ShortCuts.$fun('4k2')" />
-        <shortcut-modal-single msg="4k-3" :short="ShortCuts.$fun('4k3')" />
-        <shortcut-modal-single msg="4k-4" :short="ShortCuts.$fun('4k4')" />
+        <shortcut-modal-single :short="ShortCuts.$fun('4k1')" msg="4k-1" />
+        <shortcut-modal-single :short="ShortCuts.$fun('4k2')" msg="4k-2" />
+        <shortcut-modal-single :short="ShortCuts.$fun('4k3')" msg="4k-3" />
+        <shortcut-modal-single :short="ShortCuts.$fun('4k4')" msg="4k-4" />
       </tbody>
     </table>
   </SimpleModal>

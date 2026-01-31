@@ -35,7 +35,6 @@ interface OsuBeatmap {
   events: string[]
 }
 
-
 /**
  * Parse a .osu file content
  */
@@ -266,11 +265,11 @@ export interface song {
  * OSZ Reader class with methods to get difficulties and song info
  */
 export class OszReader {
+  static current: OszReader | undefined = undefined
   private diffs: diff[] = []
   private songInfo: song | null = null
   private zipEntries: AdmZip.IZipEntry[] = []
   private zip: AdmZip
-  static current: OszReader | undefined = undefined
 
   constructor(fp_of_osz: string) {
     this.zip = new AdmZip(fp_of_osz)
@@ -325,7 +324,7 @@ export class OszReader {
       (entry) =>
         audioExtensions.some((ext) => {
           const name = entry.entryName.toLowerCase()
-          return name.endsWith(ext) && name.includes("audio")
+          return name.endsWith(ext) && name.includes('audio')
         }) && !entry.isDirectory
     )
 

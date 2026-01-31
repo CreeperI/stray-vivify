@@ -9,7 +9,7 @@ const { msg } = defineProps<{ msg: string }>()
   <simple-modal size="2">
     {{ msg }}
     <template #footer>
-      <a-button2 msg="ok" @click="$emit('close')"/>
+      <a-button2 msg="ok" @click="$emit('close')" />
     </template>
   </simple-modal>
 </template>

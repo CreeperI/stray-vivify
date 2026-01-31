@@ -46,7 +46,7 @@ function circle_color(t: number) {
       <div class="circles-timing">
         <div>BPM</div>
         <div>{{ current_timing.bpm }}</div>
-        <div>#{{current_timing_ix +1}}/{{timing_length}}</div>
+        <div>#{{ current_timing_ix + 1 }}/{{ timing_length }}</div>
       </div>
     </div>
     <div class="circles-right">

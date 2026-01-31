@@ -169,7 +169,7 @@ export namespace ChartTypeV2 {
     timing: timing[]
     meta: meta
     ani: []
-    sv: (SV | SV_Factory.all)[],
+    sv: (SV | SV_Factory.all)[]
   }
   export type meta = {
     charter: string
@@ -376,8 +376,8 @@ export type Invoke = {
   }
   'create-folder': {
     arg: {
-      id:string,
-      fname:string
+      id: string
+      fname: string
     }
     r: number
   }
@@ -443,18 +443,18 @@ export type Invoke = {
     }
     r: string | undefined
   }
-  "write-blob": {
+  'write-blob': {
     arg: {
       id: string
-      fname: string,
+      fname: string
       blob: Blob
     }
   }
   'export-for-custom': {
-    arg:{
+    arg: {
       data: {
         id: string
-        diffs: (string|0)[]
+        diffs: (string | 0)[]
         crop?: boolean
         gml: string
         as_id?: string
@@ -462,13 +462,13 @@ export type Invoke = {
       }
     }
     r: void
-  },
+  }
   'set-process-name': {
     arg: {
       name: string
     }
     r: void
-  },
+  }
   'joined-time': {
     arg: {}
     r: number
@@ -627,7 +627,7 @@ export namespace storages {
 
     exporter: {
       sv: boolean
-      crop:boolean
+      crop: boolean
     }
     nearest: number
 
@@ -643,7 +643,7 @@ export namespace storages {
       factory_color: string
       factory_opacity: number
     }
-    color_stats:boolean
+    color_stats: boolean
 
     always_version: boolean
   }
@@ -695,45 +695,45 @@ export namespace SkinType {
 }
 
 export type CustomSongInfo = {
-  chart_id: string,
-  name: string,
-  formatted_name: string,
-  artist: string,
-  sort_artists: string[],
-  bpm_display: string,
-  version: string,
-  is_original: false,
-  is_published: boolean,
-  jacket_artist: string,
-  has_encore: boolean,
-  difficulty_constant_1: number,
-  difficulty_display_1: string,
-  note_designer_1: string,
-  difficulty_constant_2: number,
-  difficulty_display_2: string,
-  note_designer_2: string,
-  difficulty_constant_3: number,
-  difficulty_display_3: string,
-  note_designer_3: string,
-  difficulty_constant_4: number,
-  difficulty_display_4: string,
-  note_designer_4: string,
+  chart_id: string
+  name: string
+  formatted_name: string
+  artist: string
+  sort_artists: string[]
+  bpm_display: string
+  version: string
+  is_original: false
+  is_published: boolean
+  jacket_artist: string
+  has_encore: boolean
+  difficulty_constant_1: number
+  difficulty_display_1: string
+  note_designer_1: string
+  difficulty_constant_2: number
+  difficulty_display_2: string
+  note_designer_2: string
+  difficulty_constant_3: number
+  difficulty_display_3: string
+  note_designer_3: string
+  difficulty_constant_4: number
+  difficulty_display_4: string
+  note_designer_4: string
   unlock: {
-    type: 0,
-    enc_type: number,
-    per_difficulty: boolean,
-    hidden: boolean,
-    hint: string,
+    type: 0
+    enc_type: number
+    per_difficulty: boolean
+    hidden: boolean
+    hint: string
     enc_hint: string
-  },
+  }
   enc_data: {
-    audio_id: string,
-    preview_id: string,
-    jacket: string,
-    bpm_display: string,
-    name: string,
-    formatted_name: string,
-    artist: string,
+    audio_id: string
+    preview_id: string
+    jacket: string
+    bpm_display: string
+    name: string
+    formatted_name: string
+    artist: string
     jacket_designer: string
   }
 }

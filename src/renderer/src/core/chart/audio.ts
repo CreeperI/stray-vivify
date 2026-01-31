@@ -141,7 +141,7 @@ export class Chart_audio {
 
   load_url(url: string) {
     this.ele = new Audio(url)
-    this.ele.addEventListener("timeupdate", () => {
+    this.ele.addEventListener('timeupdate', () => {
       if (this.paused) return
       this.set_current_time_from_updater(this.$ele.currentTime * 1000)
       FrameRate.audio_sync.immediate()

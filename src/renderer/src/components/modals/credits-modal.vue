@@ -1,5 +1,4 @@
-<script setup lang="ts">
-
+<script lang="ts" setup>
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import Credits from '@renderer/components/credits/credits.vue'
 </script>

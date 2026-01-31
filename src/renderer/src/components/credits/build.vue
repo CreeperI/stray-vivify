@@ -13,15 +13,15 @@ function toDate(y: string | number, m: string | number, d: string | number) {
   if (typeof y == 'string') y = Number(y)
   if (typeof m == 'string') m = Number(m)
   if (typeof d == 'string') d = Number(d)
-  return new Date(y, m -1, d).toLocaleDateString()
+  return new Date(y, m - 1, d).toLocaleDateString()
 }
 </script>
 
 <template>
-  <div class="builds" :data-is-current-version="Number(build) == Version.val">
-    <div class="build-title" >
-      <template v-if="title">{{title}}</template>
-      <template v-else>Build {{build}}</template>
+  <div :data-is-current-version="Number(build) == Version.val" class="builds">
+    <div class="build-title">
+      <template v-if="title">{{ title }}</template>
+      <template v-else>Build {{ build }}</template>
       <span class="build-date">
         {{ toDate(y, m, d) }}
       </span>

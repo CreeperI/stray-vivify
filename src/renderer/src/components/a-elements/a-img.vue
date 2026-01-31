@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref } from 'vue'
 
 const shown = ref(true)
@@ -6,7 +6,7 @@ defineProps<{ src: string }>()
 </script>
 
 <template>
-    <img :src="src" alt="" @error="shown = false" v-if="shown" />
+  <img v-if="shown" :src="src" alt="" @error="shown = false" />
 </template>
 
 <style scoped></style>

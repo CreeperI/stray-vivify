@@ -15,6 +15,7 @@
   flex: 1 1 320px;
   flex-direction: column;
 }
+
 .fn-wrapper > * {
   width: 90%;
   left: 5%;
@@ -29,23 +30,42 @@
   width: min-content;
   text-wrap: nowrap;
 }
+
 .minw-c > * {
   width: min-content;
   text-wrap: nowrap;
 }
+
 .minw-c2 > * > * {
   width: min-content;
   text-wrap: nowrap;
 }
+
 @keyframes rainbow-border {
-  0% {     color: red; }
-  14.28% { color: orange; }
-  28.56% { color: yellow; }
-  42.84% { color: green; }
-  57.12% { color: blue; }
-  71.4% {  color: indigo; }
-  85.68% { color: violet; }
-  100% {   color: red; }
+  0% {
+    color: red;
+  }
+  14.28% {
+    color: orange;
+  }
+  28.56% {
+    color: yellow;
+  }
+  42.84% {
+    color: green;
+  }
+  57.12% {
+    color: blue;
+  }
+  71.4% {
+    color: indigo;
+  }
+  85.68% {
+    color: violet;
+  }
+  100% {
+    color: red;
+  }
 }
 
 .rainbow-text {
@@ -58,9 +78,11 @@
   transition: opacity .5s;
   position: relative;
 }
+
 .fade-enter-from, .fade-leave-to, .fade-0\.2-leave-to, .fade-0\.2-enter-from {
   opacity: 0;
 }
+
 .fade-enter-to, .fade-leave-from, .fade-0\.2-enter-to, .fade-0\.2-leave-from {
   opacity: 1;
 }
@@ -68,12 +90,15 @@
 .fadeout-leave-active, .fadein-enter-active {
   transition: opacity .5s;
 }
+
 .fade-0\.2-enter-active, .fade-0\.2-leave-active {
   transition: opacity .2s ease;
 }
+
 .fadeout-leave-to, .fadein-enter-from {
   opacity: 0;
 }
+
 .fadeout-leave-from, .fadein-enter-to {
   opacity: 1;
 }
@@ -83,11 +108,13 @@
   display: flex;
   flex-direction: column;
 }
+
 .multi-table > div {
   display: flex;
   flex-direction: row;
   justify-items: center;
 }
+
 .multi-table > div > * {
   flex-grow: 1;
 }
@@ -111,17 +138,20 @@ input:invalid {
     opacity: 0;
   }
 }
+
 #svg-particle > rect {
   animation: note-particle-ani 0.15s ease-out;
 }
 
-.no-cursor{
+.no-cursor {
   cursor: none !important;
 }
+
 /* i move it here because the fucking formation will change dis into 'true' sucks*/
 #lane-notes > img[data-is-dragged=true] {
   opacity: 0 !important;
 }
+
 #lane-notes > img[data-is-selected=true] {
   box-shadow: gold 0 0 15px;
 }
@@ -142,13 +172,34 @@ div[data-is-current-version=true] {
 }
 
 @keyframes a-rainbow-cycle {
-  0%   { color: #ff0000; } /* 红 */
-  16%  { color: #ff8000; } /* 橙 */
-  33%  { color: #ffff00; } /* 黄 */
-  50%  { color: #00ff00; } /* 绿 */
-  66%  { color: #0080ff; } /* 蓝 */
-  83%  { color: #8000ff; } /* 紫 */
-  100% { color: #ff0000; } /* 回到红 */
+  0% {
+    color: #ff0000;
+  }
+  /* 红 */
+  16% {
+    color: #ff8000;
+  }
+  /* 橙 */
+  33% {
+    color: #ffff00;
+  }
+  /* 黄 */
+  50% {
+    color: #00ff00;
+  }
+  /* 绿 */
+  66% {
+    color: #0080ff;
+  }
+  /* 蓝 */
+  83% {
+    color: #8000ff;
+  }
+  /* 紫 */
+  100% {
+    color: #ff0000;
+  }
+  /* 回到红 */
 }
 
 .rainbow-text-flow {

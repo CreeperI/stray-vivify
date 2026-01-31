@@ -85,7 +85,6 @@ onMounted(() => {
   start_record()
   Storage.data.value.settings.meter = 1
   document.addEventListener('keydown', onkeydown)
-
 })
 onUnmounted(() => {
   if (interval_id != -1) clearInterval(interval_id)
@@ -93,12 +92,11 @@ onUnmounted(() => {
   chart.audio.pause()
   off = true
   document.removeEventListener('keydown', onkeydown)
-
 })
 </script>
 
 <template>
-  <div ref="top-div" class="playfield" id="preview-field">
+  <div id="preview-field" ref="top-div" class="playfield">
     <img v-if="bg_error == 0" :src="bg_src" alt="" class="playfield-bg" @error="bg_error = 1" />
     <transition name="fadeout">
       <div v-if="animation_state < 3" class="pf-animations">

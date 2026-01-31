@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Storage } from '@renderer/core/storage'
 import { computed } from 'vue'
@@ -7,7 +7,7 @@ import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
 
 const chart_state = GlobalStat.chart_state
 
-const {view_port} = GlobalStat.useSvgSizing()
+const { view_port } = GlobalStat.useSvgSizing()
 const offset1 = Storage.settings.offset1
 
 const chart = Chart.$current
@@ -18,25 +18,26 @@ const current_time = chart.audio.refs.current_ms
 const bar_offset = 0
 const _show_left_bpm = computed(
   () =>
-    chart_state.value == 0 || (chart_state.value == 1 && Storage.settings.record_field.show_bpm_left)
+    chart_state.value == 0 ||
+    (chart_state.value == 1 && Storage.settings.record_field.show_bpm_left)
 )
 function time_bottom_bar(t: number, time: number, _mul: number) {
   return view_port[3] - (time - t - offset1) * _mul - 80 - bar_offset
 }
 const timing_list = chart.diff.shown_timing
 
-useUpdateFrameRate("svg-bar-line")
+useUpdateFrameRate('svg-bar-line')
 </script>
 
 <template>
   <g v-if="_show_left_bpm" id="svg-bar-line">
     <text
       v-for="tm in timing_list"
-      x="25"
+      :y="time_bottom_bar(current_time, tm.time, mul)"
       fill="#b8dcee"
       font-size="1.2rem"
       text-anchor="middle"
-      :y="time_bottom_bar(current_time, tm.time, mul)"
+      x="25"
     >
       {{ tm.bpm }}
     </text>

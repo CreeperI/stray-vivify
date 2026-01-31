@@ -1,8 +1,8 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ref } from 'vue'
 
-const bind = defineModel<string[]>({required: true})
-const input = ref("")
+const bind = defineModel<string[]>({ required: true })
+const input = ref('')
 
 function rm_artist(i: number) {
   bind.value.splice(i, 1)
@@ -10,17 +10,17 @@ function rm_artist(i: number) {
 function add_artist() {
   if (input.value.length == 0) return
   bind.value.push(input.value)
-  input.value = ""
+  input.value = ''
 }
 </script>
 
 <template>
   <div>曲师列表</div>
   <div class="custom-artist-input">
-      <div class="single-artist" v-for="(artist, i) in bind" @click="rm_artist(i)">
-        {{artist}}
-      </div>
-      <input type="text" v-model="input" @keyup.enter="add_artist" placeholder="按enter以添加">
+    <div v-for="(artist, i) in bind" class="single-artist" @click="rm_artist(i)">
+      {{ artist }}
+    </div>
+    <input v-model="input" placeholder="按enter以添加" type="text" @keyup.enter="add_artist" />
   </div>
 </template>
 
@@ -44,7 +44,7 @@ function add_artist() {
 }
 
 .single-artist::after {
-  content: "×";
+  content: '×';
   position: absolute;
   right: 0;
   border-radius: 50%;

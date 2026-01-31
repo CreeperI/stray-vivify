@@ -98,7 +98,6 @@ function import_osz_pics() {
 function open_svg() {
   modal.ChartPreviewModal.show({})
 }
-
 </script>
 
 <template>

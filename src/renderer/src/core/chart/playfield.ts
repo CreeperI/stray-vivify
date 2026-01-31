@@ -265,7 +265,8 @@ export class Chart_playfield {
     else if (abs <= this.timing.p2) return Math.sign(delta)
     else if (abs <= this.timing.p3) return Math.sign(delta) * 2
     else if (abs <= this.timing.p4) return Math.sign(delta) * 3
-    else if (abs <= this.timing.p5) return Math.sign(delta) * 4 // Allow miss judgment for holds
+    else if (abs <= this.timing.p5)
+      return Math.sign(delta) * 4 // Allow miss judgment for holds
     else return null
   }
 
@@ -285,7 +286,8 @@ export class Chart_playfield {
     const abs = Math.abs(delta)
     // Bumpers are more lenient - use Good timing window but give Pure judgment
     if (abs <= this.timing.p4) return 0
-    else if (abs <= this.timing.p5) return Math.sign(delta) * 4 // Miss if outside good window
+    else if (abs <= this.timing.p5)
+      return Math.sign(delta) * 4 // Miss if outside good window
     else return null
   }
 
@@ -333,7 +335,7 @@ export class Chart_playfield {
     }
 
     // Check for hold note ends that were missed
-    this.holding = this.holding.filter(note => {
+    this.holding = this.holding.filter((note) => {
       if (current > note.time + note.len) {
         // Hold ended naturally - give perfect judgment for the end
         this.j(current, 0, 0)
@@ -388,18 +390,19 @@ export class Chart_playfield {
       return
     }
 
-    this._acc = this.judgements
-      .map(function (x): number {
-        const absLvl = Math.abs(x.lvl)
-        if (absLvl == 0) return 101  // Pure/MAX
-        if (absLvl == 1) return 100  // Perfect
-        if (absLvl == 2) return 80   // Great
-        if (absLvl == 3) return 50   // Good
-        if (absLvl == 4) return 0    // Miss
-        if (absLvl == 5) return 0    // Bomb hit
-        return 0
-      })
-      .reduce((a, b) => a + b, 0) / this.judgements.length
+    this._acc =
+      this.judgements
+        .map(function (x): number {
+          const absLvl = Math.abs(x.lvl)
+          if (absLvl == 0) return 101 // Pure/MAX
+          if (absLvl == 1) return 100 // Perfect
+          if (absLvl == 2) return 80 // Great
+          if (absLvl == 3) return 50 // Good
+          if (absLvl == 4) return 0 // Miss
+          if (absLvl == 5) return 0 // Bomb hit
+          return 0
+        })
+        .reduce((a, b) => a + b, 0) / this.judgements.length
 
     this.refs.value.acc = this._acc
   }

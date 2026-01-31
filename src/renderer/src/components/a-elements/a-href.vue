@@ -1,6 +1,4 @@
 <script lang="ts" setup>
-
-
 import { Invoke } from '@renderer/core/ipc'
 
 const { href } = defineProps<{ href: string }>()

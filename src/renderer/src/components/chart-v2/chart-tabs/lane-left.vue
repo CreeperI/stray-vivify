@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed, ComputedRef } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import { ChartTypeV2 } from '@preload/types'
@@ -44,29 +44,29 @@ const select_chip = computed(() => select.value.length - select_ln.value)
       <div class="note-width">
         <span>note宽</span>
         <div
-          class="note-width-btn"
           :class="width == 1 ? 'chosen' : ''"
+          class="note-width-btn"
           @click="Storage.note.set_width(1)"
         >
           1
         </div>
         <div
-          class="note-width-btn"
           :class="width == 2 ? 'chosen' : ''"
+          class="note-width-btn"
           @click="Storage.note.set_width(2)"
         >
           2
         </div>
         <div
-          class="note-width-btn"
           :class="width == 3 ? 'chosen' : ''"
+          class="note-width-btn"
           @click="Storage.note.set_width(3)"
         >
           3
         </div>
         <div
-          class="note-width-btn"
           :class="width == 4 ? 'chosen' : ''"
+          class="note-width-btn"
           @click="Storage.note.set_width(4)"
         >
           4
@@ -93,8 +93,7 @@ const select_chip = computed(() => select.value.length - select_ln.value)
           <div>
             <div>已选中 {{ select.length }}</div>
             <div>
-              {{ select.length }} notes
-              (<template v-if="select_chip">{{ select_chip }}米</template>
+              {{ select.length }} notes (<template v-if="select_chip">{{ select_chip }}米</template>
               <template v-if="select_ln">{{ select_ln }}面</template>)
             </div>
             <div>
@@ -106,7 +105,7 @@ const select_chip = computed(() => select.value.length - select_ln.value)
         </div>
       </div>
       <div class="note-pending">
-        <note-v2 :note="pending_note" style="position:static;" />
+        <note-v2 :note="pending_note" style="position: static" />
       </div>
     </div>
     <fn-counter />

@@ -1,15 +1,14 @@
-<script setup lang="ts">
-
+<script lang="ts" setup>
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 
 const model = defineModel<string>()
-const { name, disabled } = defineProps<{name: string, disabled?: boolean}>()
+const { name, disabled } = defineProps<{ name: string; disabled?: boolean }>()
 </script>
 
 <template>
   <div class="song-info-single">
-    <div :data-disabled="disabled">{{name}}</div>
-    <a-text-input :disabled="disabled" v-model.trim="model" class="sis-input" />
+    <div :data-disabled="disabled">{{ name }}</div>
+    <a-text-input v-model.trim="model" :disabled="disabled" class="sis-input" />
   </div>
 </template>
 
@@ -21,7 +20,7 @@ const { name, disabled } = defineProps<{name: string, disabled?: boolean}>()
 div {
   user-select: none;
 }
-div[data-disabled="true"] {
+div[data-disabled='true'] {
   opacity: 0.6;
 }
 </style>

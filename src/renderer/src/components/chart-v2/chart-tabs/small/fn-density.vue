@@ -53,7 +53,7 @@ function mousemove(e: MouseEvent) {
   }
 }
 const current_x = computed(() => {
-  return chart.audio.refs.current_ms.value / chart.length * width + 20
+  return (chart.audio.refs.current_ms.value / chart.length) * width + 20
 })
 function mouseout() {
   seeker.value.display = false
@@ -79,13 +79,13 @@ function click() {
       :width="width"
       height="250"
       preserveAspectRatio="none"
+      @click="click"
       @mousedown="mousedown"
       @mousemove="mousemove"
       @mouseout="mouseout"
       @mouseup="mouseup"
-      @click="click"
     >
-      <path :d="path" fill="none" stroke="white" stroke-width="1" class="no-event" />
+      <path :d="path" class="no-event" fill="none" stroke="white" stroke-width="1" />
       <g class="no-event">
         <text v-for="y in dy" :y="y[0]" dy="5" fill="white" font-size="10" text-anchor="end" x="15">
           {{ y[1].toFixed(0) }}
@@ -114,11 +114,11 @@ function click() {
       <text
         v-if="seeker.display"
         :x="seeker.x"
+        class="no-event"
         fill="white"
         font-size="10"
         text-anchor="middle"
         y="250"
-        class="no-event"
       >
         {{ utils.toTimeStr(seeker.time / 1000, 0) }}
       </text>

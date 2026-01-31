@@ -8,7 +8,7 @@ import { utils } from '@renderer/core/utils'
 import { MemoryUsage } from '@renderer/core/misc/inspector'
 
 const _fps_r = FrameRate.fps.refs
-const frontend =MemoryUsage.frontend
+const frontend = MemoryUsage.frontend
 const backend = MemoryUsage.backend
 const chart_tab = GlobalStat.chart_state
 
