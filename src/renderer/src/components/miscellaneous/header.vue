@@ -40,7 +40,7 @@ async function import_osz() {
   </div>
 </template>
 
-<style scoped>
+<style>
 div {
   user-select: none;
 }
@@ -56,7 +56,7 @@ div {
   box-shadow: #0d1418 0 0 5px;
   font-size: 1.2rem;
   line-height: 2rem;
-  z-index: 9;
+  z-index: 999;
   height: 2rem;
 }
 
@@ -134,6 +134,7 @@ div {
   margin: 0;
   text-align: center;
 }
+
 .h-menu-btn-i > .h-menu-btn-text:hover {
   background: #303156;
 }
