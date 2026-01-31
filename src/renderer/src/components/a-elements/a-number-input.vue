@@ -1,17 +1,56 @@
 <script lang="ts" setup>
-const model = defineModel<number>({required: true})
+const props = defineProps<{
+  min?: number | string
+  max?: number | string
+}>()
+
+const model = defineModel<number>({ required: true })
+
+function clamp(value: number): number {
+  let clamped = value
+  if (props.min !== undefined) clamped = Math.max(Number(props.min), clamped)
+  if (props.max !== undefined) clamped = Math.min(Number(props.max), clamped)
+  return clamped
+}
+
+function handleInput(e: Event) {
+  const input = e.target as HTMLInputElement
+  const rawValue = input.value
+
+  if (rawValue === '') {
+    input.placeholder = String(model.value)
+    return
+  }
+
+  const num = Number(rawValue)
+  if (!isNaN(num)) {
+    model.value = clamp(num)
+    if (String(model.value) !== rawValue) {
+      input.value = String(model.value)
+    }
+  }
+}
 
 function wheel(e: WheelEvent) {
   if (e.target instanceof HTMLInputElement) {
     e.target.blur()
-    model.value -= Math.sign(e.deltaY)
+    const delta = Math.sign(e.deltaY)
+    model.value = clamp(model.value - delta)
+    e.target.value = String(model.value)
     e.target.focus()
   }
 }
 </script>
 
 <template>
-  <input v-model="model" type="number" @wheel.prevent="wheel" />
+  <input
+    :value="model"
+    type="number"
+    :min="min"
+    :max="max"
+    @input="handleInput"
+    @wheel.prevent="wheel"
+  />
 </template>
 
 <style scoped>
@@ -32,5 +71,9 @@ input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+input[disabled] {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 </style>
