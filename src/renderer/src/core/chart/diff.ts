@@ -851,7 +851,7 @@ export class Chart_diff {
     while (start <= end) {
       // 如果当前区间长度小于 10，改用线性查找
       if (end - start + 1 < 10) {
-        start -= 10 // 以防又出什么bug的，至少我相信0秒内不会有那么多B东西
+        start = Math.max(start-10, 0) // 以防又出什么bug的，至少我相信0秒内不会有那么多B东西
         for (let i = start; i <= end; i++) {
           const note = this.notes[i]
           if (note.time === n.time && note.lane === n.lane && note.width === n.width) {
