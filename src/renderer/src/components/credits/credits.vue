@@ -51,9 +51,6 @@ const total = computed(() => utils.toTimeStr(Storage.data.value.statistics.used_
       <a-href href="https://github.com/kolirt/vue-modal">kolirt (vue-modal)</a-href>
       <a-href href="https://vite.electron.js.cn/">Electron-Vite</a-href>
       <a-href href="https://wiki.rotaeno.cn/">Rotaeno中文维基</a-href>
-      <a-href href="https://github.com/leezng/vue-json-pretty/"
-        >leezng<br />(vue-json-pretty)
-      </a-href>
     </div>
     <div class="credits-head">And You</div>
     <div class="credits-col">
