@@ -152,7 +152,6 @@ function parseHitObject(line: string): OsuHitObject | null {
 function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
   const notes: ChartTypeV2.note[] = []
   const timing: ChartTypeV2.timing[] = []
-  const sv: ChartTypeV2.SV[] = []
 
   // Get key count from CircleSize
   const keyCount = Math.floor(beatmap.difficulty.CircleSize || 4)
@@ -168,14 +167,6 @@ function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
         bpm: Math.round(bpm),
         den: 4,
         num: 4
-      })
-    } else {
-      // Inherited timing point - SV change
-      // Negative beatLength represents SV multiplier
-      const svMultiplier = tp.beatLength < 0 ? -100 / tp.beatLength : 1
-      sv.push({
-        time: tp.time,
-        eff: svMultiplier
       })
     }
   }
@@ -215,12 +206,10 @@ function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
 
   // Sort timing and sv by time
   timing.sort((a, b) => a.time - b.time)
-  sv.sort((a, b) => a.time - b.time)
 
   return {
     notes,
     timing,
-    sv,
     meta: {
       charter: beatmap.metadata.Creator || '',
       diff1: beatmap.metadata.Version || '',
