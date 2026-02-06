@@ -3,11 +3,11 @@ const {msg} = defineProps<{msg: string}>()
 </script>
 
 <template>
-  <div class="a2-button" v-html="msg" />
+  <div class="a-button2" v-html="msg" />
 </template>
 
 <style scoped>
-.a2-button {
+.a-button2 {
   border-radius: 3px;
   background:var(--purple-bgi);
   line-height: 1.6rem;
@@ -20,10 +20,10 @@ const {msg} = defineProps<{msg: string}>()
   text-align: center;
   transition: transform 0.1s ease-out;
 }
-.a2-button:hover {
+.a-button2:hover {
   transform: scale(1.1);
 }
-.a2-button[disabled] {
+.a-button2[disabled] {
   cursor: not-allowed;
   pointer-events: none;
   opacity: 0.7;

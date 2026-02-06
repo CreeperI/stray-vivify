@@ -3,7 +3,8 @@ import { computed } from 'vue'
 
 const props = defineProps<{
   // cb: (n: T) => void
-  options: { val: T; display: string }[]
+  options: { val: T; display: string }[] | T[],
+  maxh?: string
 }>()
 const model = defineModel<T>()
 
@@ -25,12 +26,14 @@ const val = computed(() => {
 const on_click = (val: T) => {
   model.value = val
 }
+const option_class = computed(() => props.maxh ? "ovf": '')
+const maxh = props.maxh
 </script>
 
 <template>
   <div class="a-select">
     <div class="a-select-value" v-html="val" />
-    <div class="a-option-wrapper">
+    <div class="a-option-wrapper" :class="option_class">
       <div v-for="o in option" class="a-option" @click="() => on_click(o.val)" v-html="o.display" />
     </div>
   </div>
@@ -49,6 +52,7 @@ const on_click = (val: T) => {
   margin: 0 10px;
   padding-right: 20px;
   height: min-content;
+  padding-bottom: 2px;
 }
 
 .a-select-value:after {
@@ -57,7 +61,7 @@ const on_click = (val: T) => {
   right: 2px;
   height: 100%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%) scale(0.6);
   text-align: center;
 }
 
@@ -69,7 +73,7 @@ const on_click = (val: T) => {
   transition: 0.1s linear opacity;
   top: calc(1em + 5px);
   border: 1px solid var(--grey);
-  width: 100%;
+  min-width: 100%;
   left: 0;
   box-sizing: border-box;
   opacity: 0;
@@ -86,11 +90,17 @@ const on_click = (val: T) => {
   background-color: transparent;
   line-height: 1.5em;
   text-align: left;
-  padding-left: 1em;
+  padding-left: 1rem;
+  padding-right: 1rem;
   transition: all 0.1s linear;
+  width: calc(100% - 2rem);
 }
 .a-option:hover {
   filter: brightness(1.1);
   background-color: #3b4652;
+}
+.ovf {
+  overflow: auto;
+  max-height: v-bind(maxh);
 }
 </style>

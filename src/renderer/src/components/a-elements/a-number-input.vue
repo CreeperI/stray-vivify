@@ -25,9 +25,6 @@ function handleInput(e: Event) {
   const num = Number(rawValue)
   if (!isNaN(num)) {
     model.value = clamp(num)
-    if (String(model.value) !== rawValue) {
-      input.value = String(model.value)
-    }
   }
 }
 
