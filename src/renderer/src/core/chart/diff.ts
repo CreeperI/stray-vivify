@@ -725,17 +725,23 @@ export class Chart_diff {
     time = Math.max(t, time)
 
     // 2. 获取该小节的 timing 信息（使用小节起始时刻）
-    const { bpm, den } = this.bpm_of_time(t)
+    const { bpm, den } = this.bpm_of_time(time)
+
+    // the time of last bar
+    const last_bar = Math.max(
+      0,
+      this.section_list.findLastIndex((x) => x <= time)
+    )
 
     const quarterNoteMs = 60_000 / bpm
     const beatMs = quarterNoteMs * (4 / den) // 一拍（den 分音符）的毫秒数
 
-    const offsetMs = Math.abs(time - t)
+    const offsetMs = Math.abs(time - this.section_list[last_bar])
     const beatOffset = offsetMs / beatMs
 
     let str = ''
-    if (Storage.settings.bar_from_0) str = `${beatOffset.toFixed(2)}`
-    else str = `${(beatOffset + 1).toFixed()}`
+    if (Storage.settings.bar_from_0) str = `${(last_bar + beatOffset).toFixed(2)}`
+    else str = `${(last_bar + beatOffset + 1).toFixed(2)}`
     if (den != 4) str += `/${den}`
     return str
   }
