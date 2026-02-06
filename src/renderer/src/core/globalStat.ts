@@ -95,4 +95,10 @@ export namespace GlobalStat {
     }
     window.electron.ipcRenderer.send('window-close')
   }
+
+  export const func_keys = ref({ ctrl: false, alt: false })
+  document.addEventListener('keydown', function (e) {
+    func_keys.value.ctrl = e.ctrlKey
+    func_keys.value.alt = e.altKey
+  })
 }
