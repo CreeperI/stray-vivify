@@ -93,8 +93,8 @@ export class _FrameRateClass {
     this._call_count_last++
   }
 
-  immediate() {
-    this.recent.push(1)
+  immediate(val=1) {
+    this.recent.push(val)
     this._call_count_last++
   }
 }
@@ -124,6 +124,7 @@ export const FrameRate = {
   invalidator: invalidator,
   next_tick: new _FrameRateClass(),
   fuck_shown: new _FrameRateClass(),
+  fuck_vsm: new _FrameRateClass(),
   fps: new _FPS(),
   playfield_frame: new _FrameRateClass(),
   update_pending: new _FrameRateClass(),

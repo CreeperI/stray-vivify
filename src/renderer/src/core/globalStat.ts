@@ -75,9 +75,13 @@ export namespace GlobalStat {
     const bar_length = max_lane * lane_width + 12
     const view_port = [0, 0, svg_width, window.screen.height]
     return {
+      // literally
       lane_width,
+      // full width of svg
       svg_width,
+      // the noteboard, ie lanes and LR borders
       bar_length,
+      // viewPort="114514"
       view_port,
       taskBarHeight: screen.height - screen.availHeight,
       max_lane: SvgSizing.max_lane
