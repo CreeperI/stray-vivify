@@ -9,6 +9,7 @@ import FnDensity from '@renderer/components/chart-v2/chart-tabs/small/fn-density
 import { GlobalStat } from '@renderer/core/globalStat'
 import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
+import SmallDiffChoice from '@renderer/components/chart-v2/chart-tabs/small/small-diff-choice.vue'
 
 const { width, s, hold, b } = Storage.note
 
@@ -41,6 +42,7 @@ const select_chip = computed(() => select.value.length - select_ln.value)
 <template>
   <div class="fn-wrapper">
     <div class="notes">
+      <small-diff-choice />
       <div class="note-width">
         <span>note宽</span>
         <div
