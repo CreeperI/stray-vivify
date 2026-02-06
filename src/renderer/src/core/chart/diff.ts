@@ -5,7 +5,6 @@ import { utils } from '../utils'
 import { Storage } from '@renderer/core/storage'
 import { notify } from '@renderer/core/misc/notify'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
-import { Chart_Diff_SV } from '@renderer/core/chart/diff-sv'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import { calculateChartStats } from '@renderer/core/chart/calc-stat'
 
@@ -97,7 +96,6 @@ export class Chart_diff {
 
   sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
-  sv_bind: Chart_Diff_SV
 
   constructor(chart: Chart) {
     this.chart = chart
@@ -164,7 +162,6 @@ export class Chart_diff {
       total_v3: 0
     })
     this.max_lane = ref(4)
-    this.sv_bind = new Chart_Diff_SV(this)
   }
 
   get diff() {
@@ -264,8 +261,7 @@ export class Chart_diff {
         diff2: Math.floor(Math.random() * 20) + '+',
         charter: Storage.data.value.username ?? '???'
       },
-      ani: [],
-      sv: []
+      ani: []
     }
   }
 
@@ -857,7 +853,7 @@ export class Chart_diff {
     while (start <= end) {
       // 如果当前区间长度小于 10，改用线性查找
       if (end - start + 1 < 10) {
-        start = Math.max(start-10, 0) // 以防又出什么bug的，至少我相信0秒内不会有那么多B东西
+        start = Math.max(start - 10, 0) // 以防又出什么bug的，至少我相信0秒内不会有那么多B东西
         for (let i = start; i <= end; i++) {
           const note = this.notes[i]
           if (note.time === n.time && note.lane === n.lane && note.width === n.width) {

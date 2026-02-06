@@ -14,16 +14,13 @@ const mul = Storage.computes.mul
 const bb_list = chart.diff.shown_bar_ticks
 
 const __bar_length = computed(() => {
-  if (chart.diff.sv_bind.on_sv.value) return Storage.settings.sv.beat_line_width
   return Storage.settings.sprites.bar_length
 })
 const __bar_op = computed(() => {
-  if (chart.diff.sv_bind.on_sv.value) return Storage.settings.sv.beat_line_opacity / 100
   return Storage.settings.sprites.bar_op / 100
 })
 const _show_beat_line = computed(() => {
   if (chart_state.value == 0) {
-    if (chart.diff.sv_bind.on_sv.value) return Storage.settings.sv.show_beat_line
     return true
   } else if (chart_state.value == 1) {
     if (Storage.settings.record_field.show_beat_line) return true
@@ -32,7 +29,7 @@ const _show_beat_line = computed(() => {
 })
 const offset1 = Storage.settings.offset1
 function time_bottom_bar(t: number, time: number, _mul: number) {
-  return view_port[3] - (time - t - offset1) * _mul - 80 - Storage.settings.sprites.bar_dy
+  return view_port[3] - (time - t - offset1) * _mul - 80 - Storage.settings.sprites.bar_dy - (43/2)
 }
 
 function color_of_level(lvl: number): string {
@@ -42,7 +39,7 @@ useUpdateFrameRate('svg-beat-line')
 </script>
 
 <template>
-  <g v-if="_show_beat_line" id="svg-beat-line" transform="translate(50 -20)">
+  <g v-if="_show_beat_line" id="svg-beat-line" transform="translate(50 0)">
     <line
       v-for="[line, lvl] in bb_list.beat_list"
       :data-lvl="lvl"
