@@ -1,54 +1,57 @@
-name: build + release
+name: Release on Tag
 
 on:
   push:
     tags:
-      - "v*.*"
-      - "v*"
-      - "v*F"
+      - 'v[0-9]+.[0-9]+.[0-9]+'  # 只匹配语义化版本标签，如 v0.9.6
   workflow_dispatch:
+
 
 jobs:
   release:
-    runs-on: ubuntu-latest  # Fixed: was "linux-latest"
+    runs-on: windows-latest
 
     steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v4  # Updated to latest version
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4  # Updated to latest version
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '22'  # More flexible version specification
-          cache: 'npm'  # Added npm caching for faster builds
+          node-version: 18
+          cache: 'npm'
 
-      - name: Install Dependencies
-        run: npm ci  # Use npm ci for faster, more reliable installs
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build Windows App
+      - name: Build for Windows
         run: npm run build:win
-
-      - name: List build output (debug)
-        run: ls -la  # Debug step to see what files were created
-
-      - name: Create zip archive
-        run: |
-          if [ -d "win-unpacked" ]; then
-            zip -qq -r win-unpacked.zip win-unpacked/
-          elif [ -d "dist/win-unpacked" ]; then
-            zip -qq -r win-unpacked.zip dist/win-unpacked/
-          elif [ -d "build/win-unpacked" ]; then
-            zip -qq -r win-unpacked.zip build/win-unpacked/
-          else
-            echo "Could not find win-unpacked directory"
-            find . -name "*win*" -type d
-            exit 1
-          fi
-
-      - name: Release
-        uses: softprops/action-gh-release@v2  # Updated version
-        with:
-          files: win-unpacked.zip
-          name: ${{ github.ref_name }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Try default token first
+        # 如果你的构建脚本需要环境变量，请在这里设置
+        # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version from tag
+        id: get_version
+        run: |
+          TAG=${{ github.ref_name }}
+          VERSION=${TAG#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Compress win-unpacked directory
+        run: |
+          Compress-Archive -Path "dist/win-unpacked" -DestinationPath "dist/stray-vivify-win-unpacked-${{ steps.get_version.outputs.version }}.zip"
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ steps.get_version.outputs.tag }}
+          tag_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+          files: |
+            dist/stray-vivify-${{ steps.get_version.outputs.version }}-setup.exe
+            dist/stray-vivify-win-unpacked-${{ steps.get_version.outputs.version }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
