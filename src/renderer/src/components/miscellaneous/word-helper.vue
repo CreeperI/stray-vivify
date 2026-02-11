@@ -8,9 +8,9 @@ const prop = defineProps<{
 }>()
 const r = useTemplateRef('wh')
 let flag = false
-function _in() {
+function _in(e:MouseEvent) {
   if (!r.value) return
-  const rect = r.value.children[0].getBoundingClientRect()
+  const rect = (r.value.children[0] ?? e.target).getBoundingClientRect()
   WordHelper.call_helper([rect.right, rect.bottom], prop.dec || '')
   flag = true
 }
@@ -24,9 +24,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <span ref="wh">
+  <span ref="wh" @mouseenter="_in" @mouseleave="_out" class="word-helper">
     <slot>
-      <span class="word-helper" @mouseenter="_in" @mouseleave="_out" v-html="msg" />
+      <span v-html="msg" />
     </slot>
   </span>
 </template>
