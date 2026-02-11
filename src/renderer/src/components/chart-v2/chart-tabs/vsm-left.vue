@@ -9,12 +9,23 @@ import { utils } from '@renderer/core/utils'
 import { Storage } from '@renderer/core/storage'
 import SmallDiffChoice from '@renderer/components/chart-v2/chart-tabs/small/small-diff-choice.vue'
 import FnModEditor from '@renderer/components/chart-v2/chart-tabs/small/fn-mod-editor.vue'
+import { onUnmounted, ref, watch } from 'vue'
+import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 
 const chart = Chart.$current
 const vsm = chart.vsm
 
 const vsm_index = vsm.refs.vsm_index
 const { obj, editor, all_proxy, mod, proxy } = vsm.refs
+
+const __name = ref(vsm.vsm.name)
+const { stop } = watch(vsm.refs.obj, (newV) => {
+  __name.value = newV.name
+})
+onUnmounted(() => stop())
+function write_vsm() {
+  chart.write_current_vsm(__name.value)
+}
 
 const vsm_options = () => {
   return vsm.data.map((v, ix) => {
@@ -86,6 +97,10 @@ const rKey = utils.refresh_key
           @focus="all_proxy = false"
         />
       </div>
+      <a-button2 msg="导出当前vsm" @click="write_vsm" />
+      <word-helper dec="这是文件名，不用加后缀">
+        <a-text-input v-model="__name" />
+      </word-helper>
     </div>
     <fn-mod-editor />
   </div>

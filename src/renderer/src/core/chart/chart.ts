@@ -489,6 +489,14 @@ export class Chart {
       this.diff.diff1
     ).then(() => notify.success('已导出为vsc!!!!!!!'))
   }
+  write_current_vsm(name?: string) {
+    Invoke(
+      'write-file',
+      this.id,
+      `${name ?? this.vsm.vsm.name}.vsm`,
+      Chart_vsm.to_vsm(this, this.vsm.vsm).join('\n')
+    ).then(() => notify.success('已导出为vsm!!!!!!!'))
+  }
 
   async export_chart(ext: 'svc' | 'zip') {
     const r = this.save()
