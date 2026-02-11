@@ -54,7 +54,9 @@ const maxh = props.maxh
   height: min-content;
   padding-bottom: 2px;
 }
-
+.a-select-value {
+  text-overflow: ellipsis;
+}
 .a-select-value:after {
   content: '\25BC';
   position: absolute;
@@ -94,6 +96,7 @@ const maxh = props.maxh
   padding-right: 1rem;
   transition: all 0.1s linear;
   width: calc(100% - 2rem);
+  white-space: nowrap;
 }
 .a-option:hover {
   filter: brightness(1.1);
