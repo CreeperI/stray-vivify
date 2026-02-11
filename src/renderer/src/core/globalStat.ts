@@ -2,6 +2,7 @@ import { inject, Ref, ref } from 'vue'
 import { charts_data, ChartTypeV2 } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
+import { Version } from '@renderer/core/storage'
 
 export namespace GlobalStat {
   type routes = 'start' | 'wait' | 'editor'
@@ -58,6 +59,7 @@ export namespace GlobalStat {
   export let is_dev = false
   export async function check_dev() {
     is_dev = await Invoke('is-dev')
+    if (is_dev) Version.str += "-dev"
   }
 
   export const SvgSizing = {
@@ -97,7 +99,7 @@ export namespace GlobalStat {
   }
 
   export const func_keys = ref({ ctrl: false, alt: false })
-  document.addEventListener('keydown', function (e) {
+  document.addEventListener('mousemove', function (e) {
     func_keys.value.ctrl = e.ctrlKey
     func_keys.value.alt = e.altKey
   })
