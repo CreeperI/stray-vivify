@@ -5,8 +5,8 @@ import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 
 export const Version = {
-  val: 9.6,
-  str: '0.9.6'
+  val: 9.7,
+  str: '0.9.7'
 }
 
 const note = {
@@ -129,16 +129,24 @@ const storage = ref<storages.storage_scheme>({
     },
     nearest: 2,
     sv: {
-      show_beat_line: true,
-      beat_line_opacity: 100,
-      pointer_color: '#ffffff',
-      pointer_width: 3,
-      beat_line_width: 2,
-      lane_width: 20,
-      lane_width2: 90,
-      threshold: 20,
-      factory_color: '#00ff00',
-      factory_opacity: 70
+      sort_by_name: false,
+      short_obj: false,
+      lane_width: 30,
+      opacity: 80,
+      pending_stroke: '#ffffff',
+      pending_opacity: 100,
+      pending_width: 4,
+      expand_width: 200,
+      mod_gap: 10,
+      mod_width: 20,
+      repeat_gap: 8,
+      proxy_gap: 20,
+      color_single: '#1a73e8',
+      color_repeat_bg: '#ffd700',
+      color_repeat_fg: '#008000',
+      color_pending_single: '#88aa55',
+      color_pending_repeat: "#ffc0cb",
+      color_text: "#b8dcee"
     },
     always_version: true
   },

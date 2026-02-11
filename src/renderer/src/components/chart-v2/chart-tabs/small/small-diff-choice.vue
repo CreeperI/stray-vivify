@@ -29,7 +29,7 @@ const rkey = utils.refresh_key
   width: 100%;
   white-space: nowrap;
 }
-.a-select {
-  overflow: hidden;
+:deep(.a-select-value) {
+  overflow-x: hidden;
 }
 </style>

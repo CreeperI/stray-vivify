@@ -12,6 +12,7 @@ import { Invoke } from '@renderer/core/ipc'
 import { utils } from '@renderer/core/utils'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import nextFrame = utils.nextFrame
+import { Chart_vsm } from '@renderer/core/chart/vsm'
 
 function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
@@ -103,6 +104,8 @@ export class Chart {
   path: string
   audio: Chart_audio
   diff: Chart_diff
+  playfield: Chart_playfield | null
+  vsm: Chart_vsm
   // for audio counting only
   length_end: ms
   shown_timing: ComputedRef<[ms, ms]>
@@ -111,7 +114,6 @@ export class Chart {
     diff_index: Ref<number>
   }
   id: string
-  playfield: Chart_playfield | null
   sprite_err: Ref<boolean>
   bg_err: Ref<boolean>
 
@@ -140,6 +142,7 @@ export class Chart {
       diff_index: ref(0)
     }
     this.diff = new Chart_diff(this)
+    this.vsm = new Chart_vsm(this)
     this.id = ''
     this.playfield = null
     this.sprite_err = ref(false)
@@ -175,7 +178,8 @@ export class Chart {
     return {
       song: this.song.save(),
       diffs: this.diffs,
-      version: Storage.version
+      version: Storage.version,
+      vsm: this.vsm.data
     }
   }
 
@@ -212,7 +216,8 @@ export class Chart {
         sprite: '???'
       },
       diffs: [Chart_diff.createDiff()],
-      version: Storage.version
+      version: Storage.version,
+      vsm: [],
     }
   }
 
@@ -393,6 +398,7 @@ export class Chart {
 
   update_on_time_change() {
     this.diff.update()
+    this.vsm.update()
   }
 
   create_diff() {
@@ -437,9 +443,17 @@ export class Chart {
       utils.shallow_assign(r, x)
       return r
     })
+    if (v.vsm) {
+      this.vsm.data = v.vsm.map(x => {
+        let r = Chart_vsm.create_vsm()
+        utils.shallow_assign(r,x)
+        return r
+      })
+    }
     // this.diff.set_diff(this.diffs[this.diff_index])
     this.diff_index = 0
     this.diff.set_diff(this.diffs[this.diff_index])
+    this.vsm.set_vsm(this.vsm.data[this.vsm.vsm_index])
   }
 
   on_update() {
@@ -650,4 +664,11 @@ export class Chart {
     this.add_diff(new_d)
     notify.success('new diffed')
   }
+}
+
+export function event_time(e: MouseEvent, chart: Chart, mul: number, cT: number) {
+  const bottom = window.innerHeight - e.pageY - 80 - 43 / 2
+  return Math.floor(
+    GlobalStat.func_keys.value.alt ? bottom / mul + cT : chart.diff.nearest(bottom / mul + cT)
+  )
 }

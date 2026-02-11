@@ -4,7 +4,7 @@ import { computed, inject, onMounted, onUnmounted, ref, toRaw, watch } from 'vue
 import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { Chart } from '@renderer/core/chart/chart'
+import { Chart, event_time } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
 import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
 import { notify } from '@renderer/core/misc/notify'
@@ -104,10 +104,7 @@ function update_pending(e: MouseEvent) {
   if (e.target instanceof HTMLImageElement) {
     return
   }
-  // initially here should be -80 but considering the transform of the beat lines that sucks
-  // so i just made it -100
-  const bottom = GlobalStat.refs.window.height.value - e.pageY - 100
-  const mouse_time = Math.floor(chart.diff.nearest(bottom / mul.value + current_time.value))
+  const mouse_time = event_time(e, chart, mul.value, current_time.value)
   if (pending_hold_fixed) {
     pending_len.value = Math.abs(mouse_time - pending_hold_fixed_time)
     if (mouse_time <= pending_hold_fixed_time) {

@@ -15,8 +15,6 @@ import ShortcutModalHeader from '@renderer/components/modals/shortcut-modal-head
         <shortcut-modal-single :short="ShortCuts.$fun('w2')" msg="2宽" />
         <shortcut-modal-single :short="ShortCuts.$fun('w3')" msg="3宽" />
         <shortcut-modal-single :short="ShortCuts.$fun('w4')" msg="4宽" />
-        <shortcut-modal-single :short="ShortCuts.$fun('sv-fct')" msg="SV - SV组" />
-        <shortcut-modal-single :short="ShortCuts.$fun('sv-eff')" msg="SV - 变速" />
 
         <shortcut-modal-header msg="切换类型" />
         <shortcut-modal-single :short="ShortCuts.$fun('mine')" msg="地雷" />

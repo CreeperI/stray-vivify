@@ -717,6 +717,14 @@ export class Chart_diff {
   }
 
   get_beat_string(time: number) {
+    const { beat_at, den } = this.get_beat_info(time)
+    let str = ""
+    if (Storage.settings.bar_from_0) str = `${(beat_at).toFixed(2)}`
+    else str = `${(beat_at + 1).toFixed(2)}`
+    if (den != 4) str += `/${den}`
+    return str
+  }
+  get_beat_info(time: number) {
     const t = this.timing[0].time
     time = Math.max(t, time)
 
@@ -735,11 +743,10 @@ export class Chart_diff {
     const offsetMs = Math.abs(time - this.section_list[last_bar])
     const beatOffset = offsetMs / beatMs
 
-    let str = ''
-    if (Storage.settings.bar_from_0) str = `${(last_bar + beatOffset).toFixed(2)}`
-    else str = `${(last_bar + beatOffset + 1).toFixed(2)}`
-    if (den != 4) str += `/${den}`
-    return str
+    return {
+      beat_at: beatOffset + last_bar,
+      den: den
+    }
   }
 
   update_tick_list() {
@@ -772,6 +779,11 @@ export class Chart_diff {
       if (tick > 2 && tick < 256)
         this.ticks.push([part_times[part_times.length - 1], Math.round(tick)])
     }
+  }
+
+  get_beat_length(time: number, len: number) {
+    const bpm = this.bpm_of_time(time)
+    return len / (60000 / bpm.bpm)
   }
 
   /** @returns if the note is successfully removed */

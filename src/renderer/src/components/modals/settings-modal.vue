@@ -151,40 +151,60 @@ const r = Storage._ref
         </div>
         <setting-header msg="SV编辑" />
         <div>
-          <div>显示小节线</div>
-          <a-checkbox v-model="r.settings.sv.show_beat_line" />
+          <div>mod按照名字排序</div>
+          <a-checkbox v-model="r.settings.sv.sort_by_name" />
         </div>
         <div>
-          <div>小节线透明度</div>
-          <a-number-input v-model="r.settings.sv.beat_line_opacity" max="100" min="0" step="1" />
+          <div>简化obj名</div>
+          <a-checkbox v-model="r.settings.sv.short_obj" />
         </div>
         <div>
-          <div>小节线宽度</div>
-          <a-number-input v-model="r.settings.sv.beat_line_width" min="0" step="1" />
+          <div>note不透明度</div>
+          <a-number-input v-model="r.settings.sv.opacity" max="100" min="0" />
         </div>
         <div>
-          <div>时间指针宽度</div>
-          <a-number-input v-model="r.settings.sv.pointer_width" min="0" step="1" />
+          <div>lane width</div>
+          <a-number-input v-model="r.settings.sv.lane_width" min="20" />
         </div>
         <div>
-          <div>时间指针颜色</div>
-          <a-color-input v-model="r.settings.sv.pointer_color" />
+          <div>指示线宽度</div>
+          <a-number-input v-model="r.settings.sv.pending_width" min="1" />
         </div>
         <div>
-          <div>lane_width</div>
-          <a-number-input v-model="r.settings.sv.lane_width" min="0" step="1" />
+          <div>指示线颜色</div>
+          <a-color-input v-model="r.settings.sv.pending_stroke" />
         </div>
         <div>
-          <div>lane_width2</div>
-          <a-number-input v-model="r.settings.sv.lane_width2" min="0" step="1" />
+          <div>指示线不透明度</div>
+          <a-number-input v-model="r.settings.sv.pending_opacity" max="100" min="0" />
         </div>
         <div>
-          <div>Factory颜色</div>
-          <a-color-input v-model="r.settings.sv.factory_color" />
+          <div>右侧拓展宽度</div>
+          <a-number-input v-model="r.settings.sv.expand_width" />
         </div>
         <div>
-          <div>Factory不透明度</div>
-          <a-number-input v-model="r.settings.sv.factory_opacity" max="100" min="0" step="1" />
+          <div>颜色：单次mod</div>
+          <a-color-input v-model="r.settings.sv.color_single" />
+        </div>
+        <div>
+          <div>颜色：重复mod-背景</div>
+          <a-color-input v-model="r.settings.sv.color_repeat_bg" />
+        </div>
+        <div>
+          <div>颜色：重复mod-前条</div>
+          <a-color-input v-model="r.settings.sv.color_repeat_fg" />
+        </div>
+        <div>
+          <div>颜色：新mod-单次</div>
+          <a-color-input v-model="r.settings.sv.color_pending_single" />
+        </div>
+        <div>
+          <div>颜色：新mod-重复</div>
+          <a-color-input v-model="r.settings.sv.color_pending_repeat" />
+        </div>
+        <div>
+          <div>颜色：mod文字</div>
+          <a-color-input v-model="r.settings.sv.color_text" />
         </div>
         <setting-header msg="小节线" />
         <div>

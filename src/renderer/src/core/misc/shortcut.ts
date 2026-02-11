@@ -38,8 +38,8 @@ const functions = [
   's',
   'mine',
   'hold',
-  'sv-eff',
-  'sv-fct'
+  'mod-single',
+  'mod-repeat',
 ] as const
 
 type SC_save = {
@@ -301,3 +301,6 @@ new ShortCuts(
 )
 
 new ShortCuts('refresh', 'r', () => RefreshAll.fuck(), false, true)
+
+new ShortCuts('mod-repeat', 'w', () => Chart.current?.vsm.enable_repeat())
+new ShortCuts("mod-single", 'q', () => Chart.current?.vsm.disable_repeat())

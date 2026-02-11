@@ -13,14 +13,15 @@ import SvgSection from '@renderer/components/chart-v2/svg-lane/svg-section.vue'
 import { computed, provide } from 'vue'
 
 const svg_sizing = GlobalStat.SvgSizing
-const { lane_width = Storage.settings.lane_width, only_note = false } = defineProps<{
+const { lane_width = Storage.settings.lane_width, only_note = false, x_expand = 0 } = defineProps<{
   lane_width?: number
   only_note?: boolean
+  x_expand?: number
 }>()
 
 const id = `lane-wrapper-${Math.random().toFixed(4)}`
 svg_sizing.max_lane = Chart.$current.diff.max_lane.value
-svg_sizing.svg_width = svg_sizing.max_lane * lane_width + 2 * 50 + 12
+svg_sizing.svg_width = svg_sizing.max_lane * lane_width + 2 * 50 + 12 + x_expand
 svg_sizing.bar_length = svg_sizing.max_lane * lane_width + 12
 svg_sizing.view_port = [0, 0, svg_sizing.svg_width, window.screen.height]
 
@@ -68,7 +69,7 @@ provide('lane_id', id)
         x="53"
         y="100%"
       />
-      <g id="svg-particle"></g>
+      <g id="svg-particle" />
       <g transform="translate(50 0)">
         <rect class="no-event" fill="#ffffff" height="100%" width="6" x="0" y="0" />
         <rect
@@ -81,6 +82,8 @@ provide('lane_id', id)
         />
       </g>
       <svg-bottom-bpm />
+      <slot name="overflow"></slot>
+      <g id="svg-overflow"></g>
     </svg>
   </div>
 </template>

@@ -113,32 +113,6 @@ export namespace ChartTypeV2 {
   }
   export type note = normal_note | hold_note
 
-  export type SV = {
-    time: number
-    eff: number
-  }
-
-  export namespace SV_Factory {
-    export type SV_aq = {
-      type: 0
-      time: number
-      end: number
-      eff: number
-    }
-
-    export type list = [SV_aq]
-    export type all = list[number] | { type: number; time: number; end: number }
-  }
-
-  export type sv_all = SV | SV_Factory.all
-
-  export type parsed_sv = {
-    time: number
-    eff: number
-    // whether to display a line for it
-    line: boolean
-  }
-
   export type timing = {
     time: number
     bpm: number
@@ -169,7 +143,6 @@ export namespace ChartTypeV2 {
     timing: timing[]
     meta: meta
     ani: []
-    sv: (SV | SV_Factory.all)[]
   }
   export type meta = {
     charter: string
@@ -177,10 +150,37 @@ export namespace ChartTypeV2 {
     diff2: string
     diff_name: string
   }
+  export type mod = {
+    time: number
+    // repeat-count
+    repeat: number
+    // time between two starts
+    step: number
+    duration: number
+    easing: string
+    value1: number
+    value2: number
+    modname: string
+    proxy: number
+  }
+
+  export type mpf = {
+    time: number
+    end: number
+    func: string
+  }
+  export type vsm = {
+    obj: string
+    proxies: number
+    mpfs: mpf[]
+    mods: mod[]
+    name: string
+  }
 
   export type final = {
     diffs: diff[]
     song: song
+    vsm: vsm[]
     version: number
   }
 
@@ -632,16 +632,26 @@ export namespace storages {
     nearest: number
 
     sv: {
-      show_beat_line: boolean
-      beat_line_opacity: number
-      pointer_color: string
-      pointer_width: number
-      beat_line_width: number
+      sort_by_name: boolean
+      short_obj: boolean
       lane_width: number
-      lane_width2: number
-      threshold: number
-      factory_color: string
-      factory_opacity: number
+      opacity: number
+      pending_stroke: string
+      pending_opacity: number
+      pending_width: number
+      expand_width: number
+
+      mod_width: number
+      mod_gap: number
+      repeat_gap: number
+      proxy_gap: number
+
+      color_single: string
+      color_repeat_bg: string
+      color_repeat_fg: string
+      color_pending_single: string
+      color_pending_repeat: string
+      color_text: string
     }
     color_stats: boolean
 

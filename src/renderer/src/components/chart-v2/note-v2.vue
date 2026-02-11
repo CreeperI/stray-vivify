@@ -29,7 +29,7 @@ function left() {
 }
 
 function border() {
-  const sliceHeight = 43 // 贴图实际高度（单位：px），按需替换为实际值
+  const sliceHeight = 43
   // @ts-expect-error
   const width = note.len * mul.value - 0.5 * sliceHeight
   return `border:none; border-top: transparent solid ${width}px;
