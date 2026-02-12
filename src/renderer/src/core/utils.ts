@@ -298,6 +298,54 @@ export namespace utils {
     }
     return r
   }
+
+  export function is_equal(a: any, b: any): boolean {
+    // 严格相等（处理基本类型和同一引用）
+    if (a === b) {
+      return true
+    }
+
+    // 至少一个为 null 或 undefined（因为上面已排除 a === b）
+    if (a == null || b == null) {
+      return false
+    }
+
+    // 类型不同直接返回 false
+    if (typeof a !== typeof b) {
+      return false
+    }
+
+    // 处理对象和数组
+    if (typeof a === 'object') {
+      // 数组 vs 非数组
+      if (Array.isArray(a) !== Array.isArray(b)) {
+        return false
+      }
+
+      const aKeys = Object.keys(a)
+      const bKeys = Object.keys(b)
+
+      // 属性数量不同
+      if (aKeys.length !== bKeys.length) {
+        return false
+      }
+
+      // 递归比较每个属性
+      for (const key of aKeys) {
+        if (!b.hasOwnProperty(key)) {
+          return false
+        }
+        if (!is_equal(a[key], b[key])) {
+          return false
+        }
+      }
+
+      return true
+    }
+
+    // 其他情况（如函数、Symbol 等）不认为相等
+    return false
+  }
 }
 
 // @ts-expect-error

@@ -718,8 +718,8 @@ export class Chart_diff {
 
   get_beat_string(time: number) {
     const { beat_at, den } = this.get_beat_info(time)
-    let str = ""
-    if (Storage.settings.bar_from_0) str = `${(beat_at).toFixed(2)}`
+    let str = ''
+    if (Storage.settings.bar_from_0) str = `${beat_at.toFixed(2)}`
     else str = `${(beat_at + 1).toFixed(2)}`
     if (den != 4) str += `/${den}`
     return str
@@ -788,7 +788,7 @@ export class Chart_diff {
 
   /** @returns if the note is successfully removed */
   private remove_note(v: ChartTypeV2.note) {
-    const index = this.binaryFindNoteIndex(v)
+    const index = this.findNote(v)
     if (index == -1) {
       console.log('unexist', v)
       return false
@@ -858,48 +858,8 @@ export class Chart_diff {
    * @param n 要查找的 note 对象
    * @returns note 的索引位置，如果未找到则返回 -1
    */
-  private binaryFindNoteIndex(n: ChartTypeV2.note): number {
-    let start = 0
-    let end = this.notes.length - 1
-
-    while (start <= end) {
-      // 如果当前区间长度小于 10，改用线性查找
-      if (end - start + 1 < 10) {
-        start = Math.max(start - 10, 0) // 以防又出什么bug的，至少我相信0秒内不会有那么多B东西
-        for (let i = start; i <= end; i++) {
-          const note = this.notes[i]
-          if (note.time === n.time && note.lane === n.lane && note.width === n.width) {
-            return i
-          }
-        }
-        return -1 // 未找到
-      }
-
-      const mid = Math.floor((start + end) / 2)
-      const midNote = this.notes[mid]
-
-      if (midNote.time === n.time) {
-        if (midNote.lane === n.lane) {
-          if (midNote.width === n.width) {
-            return mid
-          } else if (midNote.width < n.width) {
-            start = mid + 1
-          } else {
-            end = mid - 1
-          }
-        } else if (midNote.lane < n.lane) {
-          start = mid + 1
-        } else {
-          end = mid - 1
-        }
-      } else if (midNote.time < n.time) {
-        start = mid + 1
-      } else {
-        end = mid - 1
-      }
-    }
-
-    return -1 // 未找到匹配的 note
+  private findNote(n: ChartTypeV2.note): number {
+    return this.notes.findIndex((x) => utils.is_equal(n, x))
   }
 
   private play_hit() {
