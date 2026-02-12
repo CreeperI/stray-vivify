@@ -2,6 +2,7 @@ import { dirname, join } from 'path'
 import { app } from 'electron'
 import fsp from 'fs/promises'
 import path from 'node:path'
+import fs from 'fs'
 
 function get_base_path(to_be_join: string) {
   if (process.env.NODE_ENV === 'development') {
@@ -47,3 +48,12 @@ export async function folder_size(folderPath: string): Promise<number> {
 
   return sizes.reduce((sum, size) => sum + size, 0)
 }
+
+function ensure_path(p: string) {
+  const resolvedPath = path.resolve(p)
+  if (!fs.existsSync(resolvedPath)) {
+    fs.mkdirSync(resolvedPath, { recursive: true })
+  }
+}
+
+ensure_path(file_paths.skin)

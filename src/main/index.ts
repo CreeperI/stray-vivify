@@ -1,10 +1,8 @@
-import { app, BrowserWindow, dialog, globalShortcut, ipcMain, protocol, shell } from 'electron'
+import { app, BrowserWindow, globalShortcut, ipcMain, protocol, shell } from 'electron'
 import { join } from 'path'
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import fs from 'fs'
 import { load_ipc_handlers } from './ipc'
-import { file_paths } from './fp-parser'
 import { stray_handler } from './stray'
 
 function window_max(win: BrowserWindow) {
@@ -15,17 +13,6 @@ function window_max(win: BrowserWindow) {
     win.maximize()
   }
   win.webContents.send('window-max-state', win.isMaximized())
-}
-
-function check_skin_path() {
-  const sp = file_paths.skin
-  if (!fs.existsSync(sp)) {
-    dialog.showErrorBox(
-      'Errorrrrrr!',
-      'Cannot find skin folder. \n' + 'Please check if the /skin folder exists.\nPending:' + sp
-    )
-    app.quit()
-  }
 }
 
 // https://github.com/xieerduos/electron-custom-protocol-local-resource-example
@@ -140,8 +127,6 @@ function createWindow(): void {
 app.whenReady().then(() => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.stray.vivify')
-
-  check_skin_path()
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
