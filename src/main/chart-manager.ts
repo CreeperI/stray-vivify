@@ -219,27 +219,26 @@ export default class ChartManager {
       return ['.mp3', '.wav', '.ogg', '.m4a'].includes(path.extname(v.entryName))
     })
     if (!json || !song) {
-      await sender('notify-error', 'zip corrupted', 1000)
+      await sender('notify-error', { msg: 'zip corrupted', dur: 1000 })
       return
     }
     const chart_data = JSON.parse(json.getData().toString('utf-8')) as ChartTypeV2.final
     const id = (await new Promise((r) => {
-      sender(
-        'ask-id',
-        this.id_list(),
-        path
+      sender('ask-id', {
+        ids: this.id_list(),
+        def: path
           .basename(zip_file[0])
           .replace(path.extname(zip_file[0]), '')
           .toLowerCase()
           .replace(' ', '')
-      )
+      })
       ipcMain.once('return-id', (_, id: undefined | string) => {
         if (!id) r(0)
         else r(id)
       })
     })) as string | 0
     if (id == 0) {
-      await sender('notify-normal', '取消导入。', 1000)
+      await sender('notify-normal', { msg: '取消导入。', dur: 1000 })
       return
     }
     try {
@@ -264,7 +263,7 @@ export default class ChartManager {
           []
         )
     } catch (e) {
-      sender('notify-error', '导入失败', 1000)
+      sender('notify-error', { msg: '导入失败', dur: 1000 })
     }
   }
 

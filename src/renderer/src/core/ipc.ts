@@ -9,17 +9,16 @@ export const Send = ipcRenderer.send as IpcHandlers.send.send
 
 const Handler: IpcHandlers.send.handler = {
   'notify-normal': function (_, arg) {
-    notify.normal(arg[0], arg[1])
+    notify.normal(arg.msg, arg.dur)
   },
-  // @ts-expect-error the arg isnt typed correctly anyway
-  'ask-id': async function (_, ids: string[], def?: string) {
+  'ask-id': async function (_, { ids, def }) {
     const id = (await modal.AskIdModal.show({ all: ids, def: def })) as undefined | string
     ipcRenderer.send('return-id', id)
     if (id) return id
     else return 0
   },
-  'notify-error': function (_, arg) {
-    notify.error(arg[0], arg[1])
+  'notify-error': function (_, { msg, dur }) {
+    notify.error(msg, dur)
   },
   'im-closing': async () => {
     if (Chart.current) await Chart.current.save()

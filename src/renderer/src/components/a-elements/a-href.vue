@@ -4,7 +4,7 @@ import { Invoke } from '@renderer/core/ipc'
 const { href } = defineProps<{ href: string }>()
 
 function handle() {
-  Invoke('open-url', href)
+  Invoke('open-url', {url: href })
 }
 </script>
 

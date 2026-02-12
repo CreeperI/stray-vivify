@@ -30,7 +30,7 @@ async function import_chart() {
   if (state) return
   const song = await Invoke('ask-song')
   if (!song) return
-  const r = await Invoke('import-song', song.path)
+  const r = await Invoke('import-song', { id: song.path, path: song.path })
   console.log(r)
   await GlobalStat.update_all_chart()
   shown.value = GlobalStat.all_chart
@@ -49,13 +49,13 @@ function delete_proj(id: string, name: string) {
       msg: `确定要删除${name} (id: ${id})吗？不可以撤销的哦！<br><small>设置中可以关闭此确认。</small>`
     })
       .then(() => {
-        return Invoke('remove-chart', id)
+        return Invoke('remove-chart', { id })
       })
       .then(() => {
         GlobalStat.update_all_chart()
       })
   } else {
-    Invoke('remove-chart', id)
+    Invoke('remove-chart', { id })
   }
 }
 

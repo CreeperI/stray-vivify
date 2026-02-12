@@ -11,8 +11,8 @@ import { modal } from '@renderer/core/misc/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { utils } from '@renderer/core/utils'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
-import nextFrame = utils.nextFrame
 import { Chart_vsm } from '@renderer/core/chart/vsm'
+import nextFrame = utils.nextFrame
 
 function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
@@ -217,7 +217,7 @@ export class Chart {
       },
       diffs: [Chart_diff.createDiff()],
       version: Storage.version,
-      vsm: [],
+      vsm: []
     }
   }
 
@@ -237,13 +237,13 @@ export class Chart {
   }
 
   static async open_chart(id: string) {
-    const file = await Invoke('open-song', id)
+    const file = await Invoke('open-song', { id })
     const blob_path = URL.createObjectURL(await this.fetch_blob(id))
     const chart = await this.create(id, blob_path)
     if (file.data) {
       const data = this.parse_data(file.data)
       if (data.status == 'converted') {
-        await Invoke('backup-chart', id, file.data)
+        await Invoke('backup-chart', { id, data: file.data })
       }
       chart.set_chart(data.data)
       chart.set_name(data.data.song.name)
@@ -255,7 +255,7 @@ export class Chart {
     chart.id = id
     this.current = chart
     GlobalStat.route.change('editor')
-    Invoke('set-process-name', `${chart.song.name} - stray/vivify`)
+    Invoke('set-process-name', { name: `${chart.song.name} - stray/vivify` })
     watch(
       GlobalStat.route.route,
       () => {
@@ -444,9 +444,9 @@ export class Chart {
       return r
     })
     if (v.vsm) {
-      this.vsm.data = v.vsm.map(x => {
+      this.vsm.data = v.vsm.map((x) => {
         let r = Chart_vsm.create_vsm()
-        utils.shallow_assign(r,x)
+        utils.shallow_assign(r, x)
         return r
       })
     }
@@ -465,45 +465,42 @@ export class Chart {
       FrameRate.save.start()
       this.diff.validate_chart()
       await nextFrame()
-      Invoke('save-chart', this.id, JSON.stringify(this.chart))
+      Invoke('save-chart', { id: this.id, data: JSON.stringify(this.chart) })
       FrameRate.save.end()
       await nextFrame()
-      await Invoke(
-        'update-chart-data',
-        this.id,
-        JSON.stringify({
+      await Invoke('update-chart-data', {
+        id: this.id,
+        data: JSON.stringify({
           song: this.song.save(),
           diffs: this.diffs.map((x) => x.meta.diff1 + ' ' + x.meta.diff2)
         })
-      )
+      })
       GlobalStat.update_all_chart()
     }
     return
   }
 
   write_current_vsc() {
-    Invoke(
-      'write-vsc',
-      this.id,
-      Chart_diff.to_vsc(this.diff.diff).join('\n'),
-      this.diff.diff1
-    ).then(() => notify.success('已导出为vsc!!!!!!!'))
+    Invoke('write-vsc', {
+      id: this.id,
+      data: Chart_diff.to_vsc(this.diff.diff).join('\n'),
+      name: this.diff.diff1
+    }).then(() => notify.success('已导出为vsc!!!!!!!'))
   }
   write_current_vsm(name?: string) {
-    Invoke(
-      'write-file',
-      this.id,
-      `${name ?? this.vsm.vsm.name}.vsm`,
-      Chart_vsm.to_vsm(this, this.vsm.vsm).join('\n')
-    ).then(() => notify.success('已导出为vsm!!!!!!!'))
+    Invoke('write-file', {
+      id: this.id,
+      fname: `${name ?? this.vsm.vsm.name}.vsm`,
+      data: Chart_vsm.to_vsm(this, this.vsm.vsm).join('\n')
+    }).then(() => notify.success('已导出为vsm!!!!!!!'))
   }
 
   async export_chart(ext: 'svc' | 'zip') {
     const r = this.save()
     if (!r) return
     await r
-    if (ext == 'svc') await Invoke('export-svc', this.id)
-    else if (ext == 'zip') await Invoke('export-zip', this.id)
+    if (ext == 'svc') await Invoke('export-svc', { id: this.id })
+    else if (ext == 'zip') await Invoke('export-zip', { id: this.id })
   }
 
   init_playfield() {
@@ -519,14 +516,14 @@ export class Chart {
   }
 
   async import_osz() {
-    const r = await Invoke('read-osz')
+    const r = await Invoke('read-osz', )
     if (!r) return
     console.log(r)
     modal.LoadOszModal.show({ diff: r.diff, song: r.song })
   }
 
   import_osz_pics() {
-    Invoke('import-osz-pics', this.id).then(() => {
+    Invoke('import-osz-pics', { id: this.id }).then(() => {
       utils.refresh()
     })
   }
@@ -659,7 +656,7 @@ export class Chart {
     })
 
     // 调用主进程保存
-    Invoke('export-preview-svg', this.id, pngDataUrl)
+    Invoke('export-preview-svg', { id: this.id, svg_text: pngDataUrl })
   }
 
   copy_diff() {

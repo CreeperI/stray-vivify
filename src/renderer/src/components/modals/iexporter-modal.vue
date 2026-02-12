@@ -17,14 +17,14 @@ async function read_vsb() {
     return
   }
   const chart = Chart.current as Chart
-  chart.load_vsb(await Invoke('read-vsb', r1.path))
+  chart.load_vsb(await Invoke('read-vsb', { fp: r1.path }))
 }
 
 async function read_vsc() {
-  const r1 = await Invoke('ask-file', ['vsc文件', 'vsc'])
+  const r1 = await Invoke('ask-file', { file: ['vsc文件', 'vsc'] })
   if (!r1) return notify.error('读取vsc失败……')
   const chart = Chart.$current
-  const r2 = await Invoke('open-file-utf', r1)
+  const r2 = await Invoke('open-file-utf', { path:r1 })
   if (!r2) return notify.error('读取vsc失败……')
 
   chart.load_vsc(r2)

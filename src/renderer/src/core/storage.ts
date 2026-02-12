@@ -198,7 +198,7 @@ export const Storage = {
     this.data.value.statistics.first_open = Math.min(time, this.data.value.statistics.first_open)
   },
   save() {
-    Invoke('save-conf', JSON.stringify(toRaw(this.data.value)))
+    Invoke('save-conf', {data:JSON.stringify(toRaw(this.data.value))})
   },
   get version() {
     return storage.value.version

@@ -40,7 +40,7 @@ function do_export() {
   }
   chart
     .save()
-    .then(() => Invoke('export-for-custom', _arg))
+    .then(() => Invoke('export-for-custom', { data:_arg }))
     .then(() => {
       modal.close_all()
     })

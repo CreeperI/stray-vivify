@@ -33,10 +33,10 @@ function copy_diff() {
 }
 
 function import_sprite() {
-  Invoke('import-sprite', chart.id)
+  Invoke('import-sprite', {id:chart.id})
 }
 function import_bg() {
-  Invoke('import-background', chart.id)
+  Invoke('import-background', {id:chart.id})
 }
 const rkey = utils.refresh_key
 </script>

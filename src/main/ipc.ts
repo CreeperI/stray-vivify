@@ -21,14 +21,14 @@ const Handler = (mw: Electron.BrowserWindow) => {
   const sender = mw.webContents.send.bind(mw.webContents) as IpcHandlers.send.send
   function ask_id() {
     return new Promise<string | undefined>((resolve) => {
-      sender('ask-id', chart_manager.id_list())
+      sender('ask-id', {ids: chart_manager.id_list()})
       ipcMain.once('return-id', (_, id: undefined | string) => {
         resolve(id)
       })
     })
   }
   return {
-    'ask-song': function (_): Invoke['ask-song']['r'] {
+    'ask-song': function (_) {
       const x = dialog.showOpenDialogSync({
         properties: ['openFile'],
         filters: [{ name: 'Music Files', extensions: ['mp3', 'wav', 'ogg', 'm4a'] }]
@@ -44,31 +44,31 @@ const Handler = (mw: Electron.BrowserWindow) => {
       if (!x) return undefined
       return { path: x[0], name: basename(x[0]) }
     },
-    'get-file-buffer': function (_, fp) {
+    'get-file-buffer': function (_, { fp }) {
       if (existsSync(fp)) {
         return { state: 'success', data: readFileSync(fp) }
       } else {
         return { state: 'failed', msg: '' }
       }
     },
-    'open-url': function (_, url: string) {
+    'open-url': function (_, { url }) {
       electron.shell.openExternal(url)
     },
-    'read-vsb': function (_, p) {
+    'read-vsb': function (_, {fp:p}) {
       if (!existsSync(p)) return
       const buf = readFileSync(p)
       return new VsbParser(buf).runToNotes()
     },
-    'save-chart': function (_, id: string, data: string) {
+    'save-chart': function (_, { id, data }) {
       chart_manager.write_chart(id, JSON.parse(data))
       console.log('saved chart: ' + id)
     },
-    'import-song': async function (_, music_path: string) {
+    'import-song': async function (_, { path:music_path }) {
       const id = (await ask_id()) as string | undefined
       if (id == undefined) return { state: 'cancelled' }
       return chart_manager.import_song(music_path, id)
     },
-    'open-song': function (_, id: string) {
+    'open-song': function (_, { id }) {
       console.log(id)
       if (chart_manager.exists(id)) {
         return chart_manager.open_song(id)
@@ -79,7 +79,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'get-charts-data': function (_) {
       return chart_manager.chart_list()
     },
-    'update-chart-data': function (_, id: string, data) {
+    'update-chart-data': function (_, { id, data }) {
       const data1 = JSON.parse(data) as { song: ChartType.song; diffs: string[] }
       chart_manager.update_chart(
         id,
@@ -89,7 +89,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
         data1.diffs
       )
     },
-    'write-vsc': function (_, id, ch, name) {
+    'write-vsc': function (_, { id, data:ch, name }) {
       const fp = chart_manager.write_vsc(id, ch, name)
       if (!fp) return
       shell.showItemInFolder(fp)
@@ -99,10 +99,10 @@ const Handler = (mw: Electron.BrowserWindow) => {
         return fs.readFileSync(file_paths.config, 'utf-8')
       } else return undefined
     },
-    'save-conf': function (_, data) {
+    'save-conf': function (_, { data }) {
       fs.writeFileSync(file_paths.config, data, 'utf-8')
     },
-    'backup-chart': function (_, id, data) {
+    'backup-chart': function (_, { id, data }) {
       chart_manager.backup_chart(id, data)
     },
     'init-data': function (_) {
@@ -121,22 +121,22 @@ const Handler = (mw: Electron.BrowserWindow) => {
         cd: cd
       }
     },
-    'export-svc': function (_, id) {
+    'export-svc': function (_, { id }) {
       chart_manager.export_svc(id)
     },
-    'export-zip': (_, id) => {
+    'export-zip': (_, { id }) => {
       chart_manager.export_zip(id)
     },
     'import-zip': function (_) {
       return chart_manager.import_chart()
     },
-    'remove-chart': function (_, id) {
+    'remove-chart': function (_, { id }) {
       chart_manager.remove_chart(id)
     },
-    'import-sprite': (_, id) => {
+    'import-sprite': (_, { id }) => {
       chart_manager.import_sprite(id)
     },
-    'import-background': (_, id) => {
+    'import-background': (_, { id }) => {
       chart_manager.import_bg(id)
     },
     'enter-fullscreen': () => {
@@ -145,10 +145,10 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'leave-fullscreen': () => {
       mw.setFullScreen(false)
     },
-    'write-file': (_, id, fname, data) => {
+    'write-file': (_, { id, fname, data }) => {
       chart_manager.write_file(id, fname, data)
     },
-    'show-file': (_, id, fname) => {
+    'show-file': (_, { id, fname }) => {
       chart_manager.show_file(id, fname)
     },
     'open-skin-folder': () => {
@@ -179,7 +179,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
       if (!id) return
       chart_manager.create_with_buffer(id, song[1], song[0])
     },
-    'import-osz-pics': (_, id) => {
+    'import-osz-pics': (_, { id }) => {
       const fp = dialog.showOpenDialogSync({
         properties: ['openFile'],
         filters: [{ name: 'OSZ', extensions: ['osz'] }]
@@ -190,7 +190,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
       if (images.length == 0) return
       chart_manager.import_osz_sprite(id, images[0][0], images[0][1])
     },
-    'export-preview-svg': (_, id, svg_text) => {
+    'export-preview-svg': (_, { id, svg_text }) => {
       chart_manager.write_svg_text(id, svg_text)
     },
     'open-dev': () => {
@@ -223,7 +223,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
         total: _total
       }
     },
-    'ask-file': (_, f) => {
+    'ask-file': (_, { file:f }) => {
       const fp = dialog.showOpenDialogSync({
         properties: ['openFile'],
         filters: [{ name: f[0], extensions: f.slice(1) }]
@@ -231,24 +231,19 @@ const Handler = (mw: Electron.BrowserWindow) => {
       if (!fp) return
       return fp[0]
     },
-    'open-file-utf': (_, fp) => {
+    'open-file-utf': (_, { path: fp }) => {
       if (!fs.existsSync(fp)) return
       return fs.readFileSync(fp, 'utf-8')
     },
-    'create-folder': (_, id, name) => {
+    'create-folder': (_, { id, fname: name }) => {
       if (fs.existsSync(path.join(file_paths.charts, id)))
         if (fs.existsSync(path.join(file_paths.charts, id, name))) return 1
       return 0
     },
-    'write-blob': (_, id: string, _name: string, _blob: string) => {
-      if (fs.existsSync(path.join(file_paths.charts, id))) {
-        fs.writeFileSync(path.join(file_paths.charts, id, _name), Buffer.from(_blob), 'binary')
-      }
-    },
-    'export-for-custom': (_, data) => {
+    'export-for-custom': (_, { data }) => {
       chart_manager.export_for_custom(data)
     },
-    'set-process-name': (_, name) => {
+    'set-process-name': (_, { name }) => {
       mw.title = name
     },
     'joined-time': (_) => {

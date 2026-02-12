@@ -53,8 +53,8 @@ watch(the_id, (v1, v0) => {
 })
 
 function write_gml() {
-  Invoke('write-file', chart.id, 'songinfo.gml', gml.value).then(() => {
-    return Invoke('show-file', chart.id, 'songinfo.gml')
+  Invoke('write-file', {id:chart.id, fname:'songinfo.gml',data: gml.value}).then(() => {
+    return Invoke('show-file',{id: chart.id, fname:'songinfo.gml'})
   })
 }
 </script>

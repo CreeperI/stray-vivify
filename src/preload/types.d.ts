@@ -222,7 +222,7 @@ export type Invoke = {
   }
   'save-chart': {
     arg: {
-      fp: string
+      id: string
       data: string
     }
     r: void
@@ -443,13 +443,6 @@ export type Invoke = {
     }
     r: string | undefined
   }
-  'write-blob': {
-    arg: {
-      id: string
-      fname: string
-      blob: Blob
-    }
-  }
   'export-for-custom': {
     arg: {
       data: {
@@ -508,26 +501,26 @@ export namespace IpcHandlers {
   export namespace invoke {
     export type invoke = <T extends keyof Invoke>(
       msg: T,
-      ...arg: dic2arr<Invoke[T]['arg']>
+      ...arg: Invoke[T]['arg'] extends Record<string, never> | never ? [] : [Invoke[T]['arg']]
     ) => Promise<Invoke[T]['r']>
 
     export type handler = {
       [T in keyof Invoke]: (
         _: Electron.IpcMainInvokeEvent,
-        ...arg: dic2arr<Invoke[T]['arg']>
+        arg: Invoke[T]['arg']
       ) => Invoke[T]['r']
     }
   }
   export namespace send {
     export type send = <T extends keyof Send>(
       msg: T,
-      ...arg: dic2arr<Send[T]['arg']>
+      ...arg: Send[T]['arg'] extends Record<string, never> | never ? [] : [Send[T]['arg']]
     ) => Promise<Send[T]['r']>
 
     export type handler = {
       [T in keyof Send]: (
         _: Electron.IpcRendererEvent,
-        ...arg: dic2arr<Send[T]['arg']>
+        arg: Send[T]['arg']
       ) => Send[T]['r']
     }
   }

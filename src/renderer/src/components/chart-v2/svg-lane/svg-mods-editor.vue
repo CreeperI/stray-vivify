@@ -10,7 +10,6 @@ import { PROXY_REQUIREMENT } from '@renderer/core/chart/vsm-objects'
 const chart = Chart.$current
 const vsm = chart.vsm
 const { shown, editor, proxy_widths, proxy: viewing_proxy, all_proxy, mod_index } = vsm.refs
-const diff = chart.diff
 const mul = Storage.computes.mul
 const current_time = chart.audio.refs.current_ms
 
