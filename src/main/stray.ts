@@ -40,6 +40,7 @@ function response_img(folder: string, spr: string) {
     }
   })
 }
+const MissingSkin: string[] = []
 export function stray_handler() {
   return function (request: GlobalRequest) {
     const decodedUrl = decodeURIComponent(request.url.replace(new RegExp(`^stray:/`, 'i'), ''))
@@ -49,7 +50,15 @@ export function stray_handler() {
       return new Response(data)
     }
     if (decodedUrl.includes('__skin__')) {
-      return new Response(fs.readFileSync(join(file_paths.skin, basename(fullPath))))
+      const fn = basename(fullPath)
+      if (MissingSkin.includes(fn)) return new Response(null, { status: 404 })
+
+      try {
+        return new Response(fs.readFileSync(join(file_paths.skin, fn)))
+      } catch (e) {
+        MissingSkin.push(fn)
+        return new Response(null, { status: 404 })
+      }
     } else if (decodedUrl.includes('__song__')) {
       const id = decodedUrl.replace('/__song__/', '')
       const audio_name = new URLSearchParams(new URL(request.url).search).get('name') ?? 'song'
