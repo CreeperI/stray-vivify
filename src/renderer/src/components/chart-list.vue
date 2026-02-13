@@ -146,7 +146,7 @@ const tip = utils.random(StartUpTips)
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 1fr 1fr 10fr;
+  grid-template-rows: 1fr 3rem 1fr 10fr;
   justify-items: center;
   gap: 20px;
 }
@@ -175,7 +175,6 @@ const tip = utils.random(StartUpTips)
 }
 .su-greeting {
   text-align: center;
-  padding-top: 55px;
 }
 
 .su-desc {
