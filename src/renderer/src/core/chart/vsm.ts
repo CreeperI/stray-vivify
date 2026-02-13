@@ -174,9 +174,9 @@ export class Chart_vsm {
     return strs
   }
 
-  add_vsm() {
-    this.data.push(Chart_vsm.create_vsm())
-    this.vsm_index = this.data.length
+  add_vsm(v:ChartTypeV2.vsm) {
+    this.data.push(v)
+    this.vsm_index = this.data.length -1
   }
 
   del_vsm() {

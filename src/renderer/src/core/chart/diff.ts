@@ -748,6 +748,9 @@ export class Chart_diff {
       den: den
     }
   }
+  beat_to_time(beat: number) {
+    return this.section_list[beat] ?? 0
+  }
 
   update_tick_list() {
     this.ticks = []

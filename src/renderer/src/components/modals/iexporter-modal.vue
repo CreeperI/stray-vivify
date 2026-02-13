@@ -11,23 +11,28 @@ import IexporterGml from '@renderer/components/modals/iexporter-gml.vue'
 const chart = Chart.$current
 
 async function read_vsb() {
-  const r1 = await Invoke('ask-vsb')
+  const r1 = await Invoke('ask-file', {file: ['vsb文件', 'vsb']})
   if (!r1) {
     notify.error('读取vsb失败……')
     return
   }
-  const chart = Chart.current as Chart
-  chart.load_vsb(await Invoke('read-vsb', { fp: r1.path }))
+  chart.load_vsb(await Invoke('read-vsb', { fp: r1 }))
 }
 
 async function read_vsc() {
   const r1 = await Invoke('ask-file', { file: ['vsc文件', 'vsc'] })
   if (!r1) return notify.error('读取vsc失败……')
-  const chart = Chart.$current
   const r2 = await Invoke('open-file-utf', { path:r1 })
   if (!r2) return notify.error('读取vsc失败……')
 
   chart.load_vsc(r2)
+}
+async function read_vsm() {
+  const r1 = await Invoke('ask-file', { file: ['vsm文件', 'vsm'] })
+  if (!r1) return notify.error('读取vsm失败……')
+  const r2 = await Invoke('open-file-utf', { path:r1 })
+  if (!r2) return notify.error('读取vsm失败……')
+  chart.load_vsm(r2)
 }
 
 function write_vsc() {
@@ -66,6 +71,7 @@ function open_svg() {
         <div class="iexports">
           <a-button2 msg="导入vsb" @click="read_vsb" />
           <a-button2 msg="导入vsc" @click="read_vsc" />
+          <a-button2 msg="导入vsm" @click="read_vsm" />
           <a-button2 msg="导入osz" @click="import_osz" />
           <a-button2 msg="导入osz的曲绘" @click="import_osz_pics" />
         </div>

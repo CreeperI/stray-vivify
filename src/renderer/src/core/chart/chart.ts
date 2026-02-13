@@ -358,6 +358,60 @@ export class Chart {
     }, 200)
   }
 
+  load_vsm(r: string) {
+    const lines = r.split('\n').map(x => x.replace("\r", ""))
+    const data = {
+      obj: 'obj_base_gimmick',
+      proxies: 0
+    }
+    const mods: ChartTypeV2.mod[] = []
+    for (const line of lines) {
+      if (!line) continue
+      if (line.startsWith('!')) {
+        const [key, value] = line.slice(1).split(':')
+        data[key] = value
+      }
+      if (line.includes(',')) {
+        const [beat, duration, easing, v1, v2, modname, proxy] = line.split(',')
+        if (beat.includes(':')) {
+          const [startBeat, endBeat, step] = beat.split(':')
+          const startT = this.diff.beat_to_time(parseInt(startBeat))
+          const endT = this.diff.beat_to_time(parseInt(endBeat))
+          const stepT = (60000 / this.diff.bpm_of_time(startT).bpm) * parseInt(step)
+          mods.push({
+            time: startT,
+            duration: parseInt(duration),
+            step: stepT,
+            repeat: Math.floor((endT - startT) / stepT),
+            easing: easing,
+            value1: parseFloat(v1),
+            value2: parseFloat(v2),
+            modname: modname,
+            proxy: parseInt(proxy)
+          })
+        } else {
+          const time = this.diff.beat_to_time(parseInt(beat))
+          mods.push({
+            time,
+            duration: parseInt(duration),
+            easing: easing,
+            value1: parseFloat(v1),
+            value2: parseFloat(v2),
+            modname: modname,
+            proxy: parseInt(proxy),
+            repeat: 0,
+            step: 0
+          })
+        }
+      }
+    }
+    const vsm = Chart_vsm.create_vsm()
+    vsm.obj = data.obj
+    vsm.proxies = parseInt(String(data.proxies))
+    vsm.mods = mods
+    this.vsm.add_vsm(vsm)
+  }
+
   fuck_shown(force = false) {
     this.diff.fuck_shown(this.audio.current_time, force)
   }
@@ -516,7 +570,7 @@ export class Chart {
   }
 
   async import_osz() {
-    const r = await Invoke('read-osz', )
+    const r = await Invoke('read-osz')
     if (!r) return
     console.log(r)
     modal.LoadOszModal.show({ diff: r.diff, song: r.song })
