@@ -2,7 +2,7 @@
 import Header from '@renderer/components/miscellaneous/header.vue'
 import { ModalTarget } from '@kolirt/vue-modal'
 import AButton from '@renderer/components/a-elements/a-button.vue'
-import ChartList from '@renderer/components/miscellaneous/chart-list.vue'
+import ChartList from '@renderer/components/chart-list.vue'
 import ChartV2 from '@renderer/components/chart-v2/chart-v2.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Storage, Version } from '@renderer/core/storage'

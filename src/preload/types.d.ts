@@ -649,6 +649,7 @@ export namespace storages {
     color_stats: boolean
 
     always_version: boolean
+    stray_logo: boolean
   }
   export interface statistics {
     first_open: number

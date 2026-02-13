@@ -148,7 +148,8 @@ const storage = ref<storages.storage_scheme>({
       color_pending_repeat: "#ffc0cb",
       color_text: "#b8dcee"
     },
-    always_version: true
+    always_version: true,
+    stray_logo: true,
   },
   version: Version.val,
   shortcut: '',

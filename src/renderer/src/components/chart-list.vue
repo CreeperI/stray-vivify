@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
@@ -10,6 +10,7 @@ import { modal } from '@renderer/core/misc/modal'
 import { Storage } from '@renderer/core/storage'
 import AImg from '@renderer/components/a-elements/a-img.vue'
 import { utils } from '@renderer/core/utils'
+import { StartUpTips } from '@renderer/core/misc/startup-tips'
 
 const shown = ref(GlobalStat.all_chart)
 const search = ref('')
@@ -70,12 +71,16 @@ function detail(id: string) {
 const username = Storage.data.value.username
 const pass_days = (Date.now() - Storage.data.value.statistics.first_open) / (24 * 60 * 60 * 1000)
 const running = Storage.running_time
+const useLogo = computed(() => Storage.settings.stray_logo)
+const tip = utils.random(StartUpTips)
 </script>
 
 <template>
   <div class="chart-list-wrapper">
     <div class="chart-list-left">
-      <div class="su-title">stray/vivify</div>
+      <img alt="logo" v-if="useLogo" src="/sv.png" class="su-title">
+      <div v-else class="su-title">stray/vivify</div>
+      <div v-html="tip" class="su-tip"></div>
       <div class="su-greeting">
         欢迎，{{ username }}<br />
         这是你使用stray/vivify的第{{ pass_days.toFixed(0) }}天！ <br />
@@ -152,8 +157,25 @@ const running = Storage.running_time
   position: relative;
   padding-top: 10%;
 }
+.su-tip {
+  position: relative;
+  color: gold;
+  z-index: 15;
+  animation: a-tip 12s infinite alternate;
+  height: 1.5rem;
+  line-height: 1.5rem;
+}
+@keyframes a-tip {
+  0% {
+    font-size: 0.9rem;
+  }
+  100% {
+    font-size: 1.1rem;
+  }
+}
 .su-greeting {
   text-align: center;
+  padding-top: 55px;
 }
 
 .su-desc {

@@ -24,6 +24,10 @@ const r = Storage._ref
           <word-helper dec="会帮你自动填到谱师栏" msg="设定一个名字吧！" />
           <a-text-input v-model="r.username" />
         </div>
+        <div>
+          <div>显示stray/vivify图标</div>
+          <a-checkbox v-model="r.settings.stray_logo" />
+        </div>
         <setting-header msg="编辑器" />
         <div>
           <div>滚轮反转</div>
