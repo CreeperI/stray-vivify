@@ -8,6 +8,7 @@ import { Chart, event_time } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
 import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
 import { notify } from '@renderer/core/misc/notify'
+import useSvgSizing = GlobalStat.useSvgSizing
 
 useUpdateFrameRate('svg-notes')
 const chart = Chart.$current
@@ -21,7 +22,7 @@ const get_note = chart.diff.get_note
 const to_note = chart.diff.to_note
 
 const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
-const svg_width = 4 * lane_width + 2 * 50 + 12
+const { svg_width, bar_length } = useSvgSizing()
 const offset1 = Storage.settings.offset1
 
 const shown = chart.diff.shown
@@ -114,7 +115,8 @@ function update_pending(e: MouseEvent) {
     return
   }
   // this is initial value referring the % of the mouse
-  let lane: number = Math.min(3, e.offsetX / svg_width)
+  let lane: number = utils.clamp((e.offsetX - 56) / bar_length, 0, 1)
+  const max_lane = chart.diff.max_lane.value
   const width = dragging.value
     ? utils.range(
         ...dragging.value
@@ -125,22 +127,8 @@ function update_pending(e: MouseEvent) {
           .flat()
       )
     : Storage.note.w
-  switch (width) {
-    case 2:
-      let lane2 = lane * 4
-      if (lane2 < 1.5) lane = 0
-      else if (lane2 > 2.5) lane = 2
-      else lane = 1
-      break
-    case 3:
-      lane = Math.round(lane)
-      break
-    case 4:
-      lane = 0
-      break
-    default:
-      lane = Math.floor(lane * 4)
-  }
+  lane = utils.clamp(Math.floor(lane * (chart.diff.max_lane.value - width + 1)), 0,max_lane - width)
+
   pending_time.value = mouse_time
   pending_lane.value = lane
   pending_snm.value = Storage.note.snm
@@ -169,6 +157,7 @@ function on_click() {
 }
 
 function del_note(n: number) {
+  if (pending_hold_fixed) return
   if (selected.value.includes(n)) {
     chart.diff.remove_note_with_undo(...selected.value)
     return

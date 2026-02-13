@@ -813,7 +813,7 @@ export class Chart_diff {
    */
   private add_note(note: ChartTypeV2.note): boolean {
     note.time = Math.floor(note.time)
-    if (this.notes.find((x) => x.time == note.time && x.lane == note.lane && x.width == x.width))
+    if (this.notes.find(x =>utils.is_equal(x, note)))
       return false
 
     fix_note(note)

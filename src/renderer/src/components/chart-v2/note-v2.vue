@@ -33,7 +33,7 @@ function border() {
   // @ts-expect-error
   const width = note.len * mul.value - 0.5 * sliceHeight
   return `border:none; border-top: transparent solid ${width}px;
-    border-image-source: url("${borderSrc()}");
+    border-image-source: url(${borderSrc()});
     border-image-slice: ${sliceHeight};
     border-image-repeat: stretch;
   `

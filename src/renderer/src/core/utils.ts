@@ -240,10 +240,15 @@ export namespace utils {
       if (note.snm == 2 && note.width != 1) str += 's'
     }
     if (note.width == 1) return str + '.png'
-    if (note.lane < (max - note.width) / 3) str += 'l'
-    else if (note.lane > ((max - note.width) / 3) * 2) str += 'r'
-    else str += 'm'
-
+    if (note.width == 2) {
+      if (note.lane < (max - note.width) / 3) str += 'l'
+      else if (note.lane > ((max - note.width) / 3) * 2) str += 'r'
+      else str += 'm'
+    }
+    if (note.width == 3) {
+      if (note.lane < (max - 2) / 2) str += 'l'
+      else str += 'r'
+    }
     return str + '.png'
   }
 
@@ -253,10 +258,15 @@ export namespace utils {
     if (note.width == 1) {
       if (note.lane < max / 2) str += 'l'
       else str += 'r'
-    } else {
-      if (note.lane < max / 3) str += 'l'
-      else if (note.lane > (max / 3) * 2) str += 'r'
+    }
+    if (note.width == 2) {
+      if (note.lane < (max - note.width) / 3) str += 'l'
+      else if (note.lane > ((max - note.width) / 3) * 2) str += 'r'
       else str += 'm'
+    }
+    if (note.width == 3) {
+      if (note.lane < (max - 2) / 2) str += 'l'
+      else str += 'r'
     }
     return str + 'h.png'
   }
