@@ -563,6 +563,8 @@ export namespace storages {
       bar_color3: string
       bar_color4: string
       bar_color5: string
+      bar_color6: string
+      bar_color7: string
     }
 
     delete_no_confirm: boolean

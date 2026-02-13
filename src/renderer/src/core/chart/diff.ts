@@ -384,7 +384,7 @@ export class Chart_diff {
       const den = Storage.settings.meter
 
       // Available snap divisors that are <= den, in order (coarsest to finest)
-      const mod = [1, 4, 8, 16, 32].filter((snap) => snap <= den)
+      const mod = [1, 4, 8, 16, 32, 48, 64].filter((snap) => snap <= den)
 
       function to_level(beat_index: number) {
         // Find the coarsest snap divisor that this beat falls on

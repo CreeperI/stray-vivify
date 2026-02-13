@@ -231,6 +231,14 @@ const r = Storage._ref
           <div>小节线颜色 32</div>
           <a-color-input v-model="r.settings.sprites.bar_color5" />
         </div>
+        <div>
+          <div>小节线颜色 48</div>
+          <a-color-input v-model="r.settings.sprites.bar_color6" />
+        </div>
+        <div>
+          <div>小节线颜色 64</div>
+          <a-color-input v-model="r.settings.sprites.bar_color7" />
+        </div>
 
         <div>
           <div>小节线<b class="rainbow-text-color">不</b>透明度</div>

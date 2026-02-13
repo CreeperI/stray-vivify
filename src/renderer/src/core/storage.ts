@@ -82,6 +82,8 @@ const storage = ref<storages.storage_scheme>({
       bar_color3: '#8bff66',
       bar_color4: '#4a5dff',
       bar_color5: '#f64eff',
+      bar_color6: '#fff04e',
+      bar_color7: '#4eeaff',
       bar_length: 6,
       bar_op: 0,
       bar_dy: 0
