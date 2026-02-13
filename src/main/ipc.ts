@@ -61,7 +61,6 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'save-chart': function (_, { id, data }) {
       chart_manager.write_chart(id, JSON.parse(data))
-      console.log('saved chart: ' + id)
     },
     'import-song': async function (_, { path:music_path }) {
       const id = (await ask_id()) as string | undefined
