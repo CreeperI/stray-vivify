@@ -149,6 +149,6 @@ export const Log = {
     this.count.value.debug++
   },
   fix_max() {
-    this.error_list.value.length = 500
+    this.error_list.value.length = Math.min(this.error_list.value.length, 500)
   }
 }

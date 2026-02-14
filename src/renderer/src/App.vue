@@ -146,6 +146,9 @@ body {
   min-width: 320px;
   height: 100%;
   width: 100vw;
+  position: relative;
+  left: 0;
+  top: 0;
   overflow: hidden;
 
   --darker-bgi: linear-gradient(60deg, #0d1418 0%, #11161b 100%);
@@ -180,8 +183,8 @@ body {
   --stat-lightness: 50%;
 }
 #app {
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   overflow: hidden;
 }
 
