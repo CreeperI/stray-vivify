@@ -41,6 +41,11 @@ import ShortcutModalHeader from '@renderer/components/modals/shortcut-modal-head
         <shortcut-modal-single :short="ShortCuts.$fun('4k2')" msg="4k-2" />
         <shortcut-modal-single :short="ShortCuts.$fun('4k3')" msg="4k-3" />
         <shortcut-modal-single :short="ShortCuts.$fun('4k4')" msg="4k-4" />
+
+      <shortcut-modal-header msg="Debug"  />
+      <shortcut-modal-single :short="ShortCuts.$fun('dev')" msg="打开devTools"  />
+      <shortcut-modal-single msg="手动报错" :short="ShortCuts.$fun('error')"/>
+      <shortcut-modal-single msg="一键刷新" :short="ShortCuts.$fun('refresh')" />
       </tbody>
     </table>
   </SimpleModal>
