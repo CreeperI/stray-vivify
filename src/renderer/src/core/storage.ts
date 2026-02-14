@@ -152,6 +152,7 @@ const storage = ref<storages.storage_scheme>({
     },
     always_version: true,
     stray_logo: true,
+    err_notify: true,
   },
   version: Version.val,
   shortcut: '',

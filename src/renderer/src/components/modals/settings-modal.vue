@@ -38,6 +38,8 @@ const r = Storage._ref
         <a-checkbox v-model="r.settings.show_ticks" />
         <div>跳过删除确认</div>
         <a-checkbox v-model="r.settings.delete_no_confirm" />
+        <div>报错时notify</div>
+        <a-checkbox v-model="r.settings.err_notify" />
         <div>lane-width (px)</div>
         <a-number-input v-model="r.settings.lane_width" class="in" min="1" />
         <div>延迟（视觉）</div>

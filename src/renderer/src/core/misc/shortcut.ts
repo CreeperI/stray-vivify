@@ -25,6 +25,7 @@ const functions = [
   'settings',
   'iexport',
   'save',
+  'error',
 
   '4k1',
   '4k2',
@@ -304,3 +305,5 @@ new ShortCuts('refresh', 'r', () => RefreshAll.fuck(), false, true)
 
 new ShortCuts('mod-repeat', 'w', () => Chart.current?.vsm.enable_repeat())
 new ShortCuts("mod-single", 'q', () => Chart.current?.vsm.disable_repeat())
+
+new ShortCuts("error", "F3", () => { throw new Error("Thrown by shortcut call")})

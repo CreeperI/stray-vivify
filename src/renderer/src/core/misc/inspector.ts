@@ -1,6 +1,7 @@
 import { Ref, ref, watch } from 'vue'
 import { Invoke } from '@renderer/core/ipc'
 import { Storage } from '@renderer/core/storage'
+import { notify } from '@renderer/core/misc/notify'
 
 export namespace ChartSize {
   export const data = ref({
@@ -82,7 +83,7 @@ export const Log = {
     window.addEventListener(
       'error',
       (e) => {
-        let msg = ''
+        let msg = e.message
         if (e.target instanceof HTMLImageElement) {
           const t = e.target
           const src = decodeURIComponent(t.src)
@@ -95,6 +96,10 @@ export const Log = {
           return
         }
         Log.err(msg)
+        if (Storage.settings.err_notify) {
+          notify.error("发生未捕获的错误！请查看Inspector。")
+        }
+        this.fix_max()
       },
       true
     )
@@ -142,5 +147,8 @@ export const Log = {
       time: Date.now()
     })
     this.count.value.debug++
+  },
+  fix_max() {
+    this.error_list.value.length = 500
   }
 }

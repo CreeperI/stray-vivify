@@ -460,6 +460,7 @@ export namespace storages {
 
     always_version: boolean
     stray_logo: boolean
+    err_notify: boolean
   }
   export interface statistics {
     first_open: number

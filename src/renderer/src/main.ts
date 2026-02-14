@@ -91,4 +91,3 @@ async function main() {
 load_ipc_handlers()
 main()
 CheckSkin.check_skin()
-// app.config.performance = true
