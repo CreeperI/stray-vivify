@@ -63,7 +63,6 @@ export function calculateChartStats(
   let combo = data.noteCount
   let multi = data.multiNoteCount
   let length = Math.ceil(songLengthMs / 1000)
-  let diffmult = GetDiffMult(diff.meta)
   let notesnopiece = combo - holdpiece
   let basepower = (((notesnopiece + data.averageDensity + multi * 0.75) / (length / 3)) * 4) / 1.25
 
@@ -83,7 +82,7 @@ export function calculateChartStats(
   totalV2 = noteStat + speedStat + techStat + multiStat * 0.33 + fillStat * 0.5
   totalV3 = Math.pow(
     noteStat * 0.8 + techStat * 0.8 + speedStat + multiStat * 0.5 + fillStat * 0.5,
-    1 + diffmult / 100
+    1
   )
   FrameRate.calc_sr.end()
   return {
@@ -109,25 +108,6 @@ function GetAverageBPM(bpmList: [number, number][]): bpm {
   }
   return averageBPM
 }
-
-function GetDiffMult(info: ChartTypeV2.meta): number {
-  let name = info['diff1']
-  name = name.toLowerCase()
-  switch (name) {
-    case 'opening':
-      return 0
-    case 'middle':
-      return 1
-    case 'finale':
-      return 2
-    case 'encore':
-    case 'backstage':
-      return 2.5
-    default:
-      return 2
-  }
-}
-
 //没想到吧，我直接把gml那个类给复刻过来了
 class SongData {
   bpmList: ChartTypeV2.diff['timing']
