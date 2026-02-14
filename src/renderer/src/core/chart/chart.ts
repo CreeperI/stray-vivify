@@ -37,7 +37,6 @@ function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
           lane: note.l,
           len: note.h,
           width: 1,
-          ani: []
         })
         break
       case 'n':
@@ -45,7 +44,6 @@ function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
           time: note.t,
           lane: note.l,
           width: 1,
-          ani: [],
           snm: 0
         })
         break
@@ -54,7 +52,6 @@ function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
           time: note.t,
           lane: note.l,
           width: 2,
-          ani: [],
           snm: 0
         })
         break
@@ -63,7 +60,6 @@ function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
           time: note.t,
           lane: note.l,
           width: 2,
-          ani: [],
           snm: 2
         })
         break
@@ -72,7 +68,6 @@ function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
           time: note.t,
           lane: note.l,
           width: 1,
-          ani: [],
           snm: 1
         })
         break
@@ -81,7 +76,6 @@ function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
           time: note.t,
           lane: note.l,
           width: 2,
-          ani: [],
           snm: 1
         })
         break
@@ -302,7 +296,6 @@ export class Chart {
         return notes.push({
           time,
           lane,
-          ani: [],
           width: 1,
           len: (parseFloat(sextra) ?? 0) - time
         })
@@ -324,7 +317,6 @@ export class Chart {
         time,
         lane,
         width,
-        ani: [],
         snm
       })
     })
@@ -465,6 +457,7 @@ export class Chart {
     this.diffs = v.diffs.map((x) => {
       let r = Chart_diff.createDiff()
       utils.shallow_assign(r, x)
+      r.notes = Chart_diff.validate_notes(r.notes)
       return r
     })
     if (v.vsm) {

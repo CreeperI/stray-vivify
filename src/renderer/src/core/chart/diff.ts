@@ -273,7 +273,6 @@ export class Chart_diff {
         diff2: Math.floor(Math.random() * 20) + '+',
         charter: Storage.data.value.username ?? '???'
       },
-      ani: []
     }
   }
 
@@ -284,7 +283,6 @@ export class Chart_diff {
           lane: Math.max(x.lane, 0),
           time: x.time,
           width: 1,
-          ani: x.ani,
           snm: x.snm == 2 ? 0 : x.snm
         }
       if (!isNote(x)) {
@@ -293,7 +291,6 @@ export class Chart_diff {
             lane: x.lane,
             time: x.time,
             width: x.width,
-            ani: x.ani,
             snm: 0
           }
         }

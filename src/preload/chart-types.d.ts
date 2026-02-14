@@ -76,7 +76,6 @@ export namespace ChartTypeV2 {
     width: number
     // s or mine, 1 for mine 2 for S 0 for normal ones
     snm: number
-    ani: []
   }
 
   export type hold_note = {
@@ -84,7 +83,6 @@ export namespace ChartTypeV2 {
     lane: number
     width: number
     len: number
-    ani: []
   }
   export type note = normal_note | hold_note
 
@@ -117,7 +115,6 @@ export namespace ChartTypeV2 {
     notes: note[]
     timing: timing[]
     meta: meta
-    ani: []
   }
   export type meta = {
     charter: string

@@ -66,14 +66,12 @@ const pending_note = computed(() => {
           time: pending_time.value,
           lane: pending_lane.value,
           width: Storage.note.w,
-          ani: [],
           len: pending_len.value
         } as ChartTypeV2.hold_note)
       : ({
           time: pending_time.value,
           lane: pending_lane.value,
           width: Storage.note.w,
-          ani: [],
           snm: pending_snm.value
         } as ChartTypeV2.normal_note)
   ]
