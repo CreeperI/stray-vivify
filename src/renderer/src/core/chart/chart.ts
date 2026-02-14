@@ -117,7 +117,6 @@ export class Chart {
   constructor() {
     this.song = new Chart_song(this)
     this.diffs = [Chart_diff.createDiff()]
-    this._diff_index = 0
     this.audio = new Chart_audio(this)
     this.path = ''
     this.length_end = -1
@@ -150,17 +149,6 @@ export class Chart {
 
   get length() {
     return this.audio.length
-  }
-
-  _diff_index: number
-
-  get diff_index() {
-    return this._diff_index
-  }
-
-  set diff_index(v: number) {
-    this.diff.diff_index.value = v
-    this._diff_index = v
   }
 
   get visible_timing() {
@@ -441,14 +429,14 @@ export class Chart {
     let new_diff = Chart_diff.createDiff()
     new_diff.timing = this.diff.timing
     this.diffs.push(new_diff)
-    this.diff_index = this.diffs.length - 1
+    this.diff.diff_index.value = this.diffs.length - 1
   }
 
   add_diff(d: ChartTypeV2.diff) {
     d.notes = Chart_diff.validate_notes(d.notes)
     d.timing = Chart_diff.validate_timing(d.timing)
     this.diffs.push(d)
-    this.diff_index = this.diffs.length - 1
+    this.diff.diff_index.value = this.diffs.length - 1
     utils.refresh()
   }
 
@@ -461,8 +449,8 @@ export class Chart {
       })
     else
       modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
-        this.diffs.splice(this.diff_index, 1)
-        this.diff_index = 0
+        this.diffs.splice(this.diff.diff_index.value, 1)
+        this.diff.diff_index.value = 0
         triggerRef(this.diff.diff_index)
         utils.refresh()
       })
@@ -487,8 +475,8 @@ export class Chart {
       })
     }
     // this.diff.set_diff(this.diffs[this.diff_index])
-    this.diff_index = 0
-    this.diff.set_diff(this.diffs[this.diff_index])
+    this.diff.diff_index.value = 0
+    this.diff.set_diff(this.diffs[this.diff.diff_index.value])
     this.vsm.set_vsm(this.vsm.data[this.vsm.vsm_index])
   }
 

@@ -5,6 +5,8 @@ import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { utils } from '@renderer/core/utils'
 import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
+import { computed } from 'vue'
+import nextFrame = utils.nextFrame
 
 const chart = Chart.$current
 
@@ -24,19 +26,22 @@ const img2_show = chart.bg_err
 
 function add_diff() {
   chart.create_diff()
+  nextFrame().then(() => utils.refresh())
 }
 function delete_diff() {
   chart.delete_diff()
+  nextFrame().then(() => utils.refresh())
 }
 function copy_diff() {
   chart.copy_diff()
+  nextFrame().then(() => utils.refresh())
 }
 
 function import_sprite() {
-  Invoke('import-sprite', {id:chart.id})
+  Invoke('import-sprite', { id: chart.id })
 }
 function import_bg() {
-  Invoke('import-background', {id:chart.id})
+  Invoke('import-background', { id: chart.id })
 }
 const rkey = utils.refresh_key
 </script>
@@ -75,9 +80,9 @@ const rkey = utils.refresh_key
     </div>
     <div class="info-inner">
       <div class="song-info-single diff-choose">
-        <div>
+        <div :key="rkey">
           <div>选择难度：</div>
-          <a-select :key="rkey" v-model="dix" :options="options()"></a-select>
+          <a-select v-model="dix" :options="options()" />
         </div>
         <div>
           <a-button2 msg="新建难度" @click="add_diff" />
