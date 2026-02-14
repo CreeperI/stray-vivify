@@ -1,5 +1,5 @@
 import { ChartTypeV2 } from '@preload/types'
-import { ref } from 'vue'
+import { onUnmounted, Ref, ref, watch } from 'vue'
 
 export namespace utils {
   /** return whether a value is between the given states */
@@ -355,6 +355,10 @@ export namespace utils {
 
     // 其他情况（如函数、Symbol 等）不认为相等
     return false
+  }
+  export function useDeepWatch(observed:Ref) {
+    const {stop} = watch(observed, () => {}, {deep:true})
+    onUnmounted(() => stop())
   }
 }
 

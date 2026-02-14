@@ -24,7 +24,7 @@ function close_chart() {
   }
   Chart.current = undefined
   GlobalStat.route.change('start')
-  Invoke('set-process-name', {name:'stray/vivify'})
+  Invoke('set-process-name', { name: 'stray/vivify' })
 }
 function open_exporter() {
   modal.IExporterModal.show({})
@@ -35,6 +35,10 @@ function open_custom() {
 
 function start_play() {
   Chart.$current.init_playfield()
+  GlobalStat.chart_state.value = 2
+}
+function start_play_now() {
+  Chart.$current.init_playfield(true)
   GlobalStat.chart_state.value = 2
 }
 function start_preview() {
@@ -79,8 +83,11 @@ function is_active(i: number, i1: number) {
       <div class="header-menu-ul" @click="start_preview">
         <div class="h-menu-btn-text">预览</div>
       </div>
-      <div class="header-menu-ul" @click="start_play">
-        <div class="h-menu-btn-text">试玩</div>
+      <div class="header-menu-ul">
+        <div class="h-menu-btn-text" @click="start_play">试玩</div>
+        <div class="h-menu-btn-i">
+          <div class="h-menu-btn-text" @click="start_play_now">从当前时间开始</div>
+        </div>
       </div>
       <div class="chart-name">{{ song_name }}</div>
     </div>

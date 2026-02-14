@@ -10,6 +10,7 @@ import { notify } from '@renderer/core/misc/notify'
 import SvgNotesPlaying from '@renderer/components/chart-v2/svg-lane/svg-notes-playing.vue'
 import { Invoke } from '@renderer/core/ipc'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
+import { ChartTypeV2 } from '@preload/types'
 
 const chart = Chart.$current
 const playfield = chart.$playfield
@@ -18,14 +19,19 @@ const paused = chart.audio.refs.paused
 function onkeydown(e: KeyboardEvent) {
   if (e.key == 'Escape') {
     if (chart.audio.paused) {
-      exit_play()
+      return exit_play()
     }
-    chart.audio.pause()
-    chart.audio.set_current_time(chart.audio.current_time - 2000)
+    pause()
   }
+}
+
+function pause() {
+  chart.audio.pause()
+  chart.audio.set_current_time(chart.audio.current_time - 2000)
 }
 function exit_play() {
   GlobalStat.chart_state.value = 0
+  chart.playfield = null
 }
 function continue_play() {
   chart.audio.set_and_play()
@@ -97,27 +103,36 @@ async function start_record() {
   animation_state.value = 3
   chart.audio.play_pause()
   interval_id = Number(setInterval(() => calc_density(), 500))
+  main_loop()
+}
+function main_loop() {
+  playfield.update_per_frame()
+  if (GlobalStat.chart_state.value != 2 || chart.audio.ended) {
+    console.log('play ended')
+    return
+  }
+  requestAnimationFrame(main_loop)
+}
+
+onMounted(() => {
+  Invoke('enter-fullscreen')
+  if (playfield.start_from_now) {
+    pause()
+    animation_state.value = 3
+    show_lanes.value = true
+    main_loop()
+  } else {
+    chart.audio.set_current_time(-3000)
+    notify.normal('按空格以开始游玩。')
+    start_record()
+    Storage.data.value.settings.meter = 1
+  }
   chart.audio.on_end(() =>
     setTimeout(() => {
       show_result.value = true
       final.value = playfield.final_stats
     }, 500)
   )
-  main_loop()
-}
-function main_loop() {
-  playfield.update_per_frame()
-  if (GlobalStat.chart_state.value != 2) return
-  if (chart.audio.ended) return
-  requestAnimationFrame(main_loop)
-}
-
-onMounted(() => {
-  Invoke('enter-fullscreen')
-  chart.audio.set_current_time(-3000)
-  notify.normal('按空格以开始游玩。')
-  start_record()
-  Storage.data.value.settings.meter = 1
   document.addEventListener('keydown', onkeydown)
 })
 
@@ -129,8 +144,23 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onkeydown)
 })
 
-const refs = playfield.refs
+const { acc, last_judgement, click_sec, combo } = playfield.refs
 const final = ref(playfield.final_stats)
+const xs: ChartTypeV2.note_judgement['lvl'][] = [
+  'miss-',
+  'good-',
+  'great-',
+  'perfect-',
+  'pure',
+  'perfect+',
+  'great+',
+  'good+',
+  'miss+',
+  'boom!'
+]
+function title_ize(s: string) {
+  return s.charAt(0).toUpperCase() + s.slice(1)
+}
 </script>
 
 <template>
@@ -195,7 +225,7 @@ const final = ref(playfield.final_stats)
       </svg-lane>
       <div class="pf-inf">
         <slot name="info"></slot>
-        <div>{{ refs.click_sec }}/sec</div>
+        <div>{{ click_sec }}/sec</div>
         <div>Bpm: {{ chart.diff.timing[current_timing].bpm }}</div>
         <div class="pf-diff">{{ chart.diff.diff1 }} {{ chart.diff.diff2 }}</div>
         <div class="pf-charter">{{ chart.diff.charter }}</div>
@@ -209,11 +239,11 @@ const final = ref(playfield.final_stats)
         <div>{{ Version.str }}</div>
       </div>
       <div class="pf-acc">
-        {{ refs.acc.toFixed(2) }}%
+        {{ acc.toFixed(2) }}%
         <br />
-        {{ playfield.parse_judgements(refs.last_judgement) }}
+        {{ last_judgement }}
         <br />
-        {{ refs.combo }}
+        {{ combo }}
       </div>
       <div v-if="paused" class="pf-pause">
         <div class="pf-pause-header">暂停ing</div>
@@ -239,89 +269,17 @@ const final = ref(playfield.final_stats)
             <div class="pr-score">{{ final.acc.toFixed(2) }} %</div>
             <div class="pr-combo">
               MAX COMBO
-              <br />{{ final.max_combo }} <br />COMBO <br />{{ refs.combo }}
+              <br />{{ final.max_combo }} <br />COMBO <br />{{ combo }}
             </div>
           </div>
           <div class="pr-counter">
-            <div>
-              <div>{{ final.counts.pn4 }}</div>
+            <div v-for="k in xs">
+              <div>{{ final.counts[k] }}</div>
               <div
-                :style="{ height: (final.counts.pn4 / final.total) * 250 + 'px' }"
+                :style="{ height: (final.counts[k] / final.total) * 250 + 'px' }"
                 class="pr-portion"
               />
-              <div>Miss-</div>
-            </div>
-            <div>
-              <div>{{ final.counts.pn3 }}</div>
-              <div
-                :style="{ height: (final.counts.pn3 / final.total) * 250 + 'px' }"
-                class="pr-portion"
-              />
-              <div>Good-</div>
-            </div>
-            <div>
-              <div>{{ final.counts.pn2 }}</div>
-              <div
-                :style="{ height: (final.counts.pn2 / final.total) * 250 + 'px' }"
-                class="pr-portion"
-              />
-              <div>Great-</div>
-            </div>
-            <div>
-              <div>{{ final.counts.pn1 }}</div>
-              <div
-                :style="{ height: (final.counts.pn1 / final.total) * 250 + 'px' }"
-                class="pr-portion"
-              />
-              <div>Perfect-</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p0 }}</div>
-              <div
-                :style="{ height: (final.counts.p0 / final.total) * 250 + 'px' }"
-                class="pr-portion"
-              />
-              <div>Pure</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p1 }}</div>
-              <div
-                :style="{ height: (final.counts.p1 / final.total) * 250 + 'px' }"
-                class="pr-portion"
-              />
-              <div>Perfect+</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p2 }}</div>
-              <div
-                :style="{ height: (final.counts.p2 / final.total) * 250 + 'px' }"
-                class="pr-portion"
-              />
-              <div>Great+</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p3 }}</div>
-              <div
-                :style="{ height: (final.counts.p3 / final.total) * 250 + 'px' }"
-                class="pr-portion"
-              />
-              <div>Good+</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p4 }}</div>
-              <div
-                :style="{ height: (final.counts.p4 / final.total) * 250 + 'px' }"
-                class="pr-portion"
-              />
-              <div>Miss+</div>
-            </div>
-            <div>
-              <div>{{ final.counts.p5 }}</div>
-              <div
-                :style="{ height: (final.counts.p5 / final.total) * 250 + 'px' }"
-                class="pr-portion"
-              />
-              <div>Boom!</div>
+              <div>{{ title_ize(k) }}</div>
             </div>
           </div>
           <div class="pr-other">

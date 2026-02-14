@@ -557,8 +557,8 @@ export class Chart {
     else if (ext == 'zip') await Invoke('export-zip', { id: this.id })
   }
 
-  init_playfield() {
-    this.playfield = new Chart_playfield(this)
+  init_playfield(start_from_now=false) {
+    this.playfield = new Chart_playfield(this, start_from_now)
   }
 
   handle_key(key: number) {

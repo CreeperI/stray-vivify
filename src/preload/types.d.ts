@@ -195,7 +195,7 @@ export namespace ChartTypeV2 {
      * 4 for miss late
      * 5 for boooomb!
      *  */
-    lvl: number
+    lvl: "pure" | "perfect+" | "great+" | "good+" | "miss+" | "boom!" | "perfect-" | "great-" | "good-" | "miss-"
   }
   export interface SongStats {
     note: number

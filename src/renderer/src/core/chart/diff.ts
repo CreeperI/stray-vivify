@@ -603,7 +603,7 @@ export class Chart_diff {
   }
 
   fuck_shown(t: number, force = false) {
-    if (force ? false : Math.abs(t - this.last_update) < Storage.settings.pooling.ahead) return
+    if (force ? false : Math.abs(t - this.last_update) < Storage.settings.pooling.interval) return
     FrameRate.fuck_shown.start()
     const visible = [
       t - Storage.settings.pooling.ahead,
@@ -866,6 +866,7 @@ export class Chart_diff {
   }
 
   private play_hit() {
+    if (this.chart.playfield) return
     this.hit_sounder.play_hit()
   }
 }
