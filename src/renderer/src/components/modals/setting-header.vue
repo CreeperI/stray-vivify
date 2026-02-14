@@ -15,5 +15,6 @@ defineProps<{msg: string}>()
   text-align: center;
   display: block !important;
   margin: 10px 0;
+  grid-column: span 2;
 }
 </style>
