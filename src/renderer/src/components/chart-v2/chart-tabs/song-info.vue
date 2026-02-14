@@ -5,13 +5,11 @@ import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { utils } from '@renderer/core/utils'
 import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
-import { computed } from 'vue'
 import nextFrame = utils.nextFrame
 
 const chart = Chart.$current
 
 const refs = chart.song.refs
-const need = chart.song.need_roman
 
 const options = () =>
   chart.diffs.map((x, v: number) => {
@@ -48,11 +46,11 @@ const rkey = utils.refresh_key
 
 <template>
   <div class="info-wrapper">
-    <div :key="rkey" class="info-inner">
+    <div class="info-inner">
       <song-info-single v-model="refs.name" name="曲名" />
-      <song-info-single v-model="refs.name_roman" :disabled="!need[0]" name="曲名-罗马音" />
+      <song-info-single v-model="refs.name_roman" name="曲名-罗马音" />
       <song-info-single v-model="refs.composer" name="编曲" />
-      <song-info-single v-model="refs.composer_roman" :disabled="!need[1]" name="编曲-罗马音" />
+      <song-info-single v-model="refs.composer_roman" name="编曲-罗马音" />
       <song-info-single v-model="refs.sprite" name="画师" />
       <song-info-single v-model.trim="refs.bpm" name="BPM" />
       <song-info-single v-model="refs.source" name="来源" />

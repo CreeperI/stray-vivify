@@ -3,13 +3,9 @@ import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
 import { ChartTypeV2 } from '@preload/chart-types'
 
-function roman_need(str: string) {
-  return /[^\u0000-\u007F]/u.test(str)
-}
 export class Chart_song {
   refs: Ref<ChartTypeV2.song>
   chart: Chart
-  need_roman: Ref<[boolean, boolean]>
 
   constructor(ch: Chart) {
     this.chart = ch
@@ -21,7 +17,6 @@ export class Chart_song {
     this._source = ''
     this._ref = ''
     this._sprite = ''
-    this.need_roman = ref([false, false])
 
     this.refs = ref({
       name: '',
@@ -43,9 +38,8 @@ export class Chart_song {
         this._source = v.source
         this._ref = v.ref
         this._sprite = v.sprite
-        this.need_roman.value = [roman_need(v.name), roman_need(v.composer)]
-        this.name_roman = v.name.replace(/[^\u0000-\u007F]/gu, '')
-        this.composer_roman = v.composer.replace(/[^\u0000-\u007F]/gu, '')
+        this.name_roman = v.name_roman.replace(/[^\u0000-\u007F]/gu, '')
+        this.composer_roman = v.composer_roman.replace(/[^\u0000-\u007F]/gu, '')
         ch.set_header_name()
       },
       { deep: true, flush: 'sync' }

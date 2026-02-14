@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Chart, event_time } from '@renderer/core/chart/chart'
-import { computed, ComputedRef, h, onMounted, onUnmounted, ref, toRaw, VNode } from 'vue'
+import { computed, ComputedRef, onMounted, onUnmounted, ref, toRaw } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import Mod from '@renderer/components/chart-v2/mod.vue'
 import { notify } from '@renderer/core/misc/notify'
@@ -205,13 +205,13 @@ const shown_proxy_rect = computed(() => {
 
     <mod
       v-for="[ix, x] in shown"
+      :key="ix"
       :mod="vsm.vsm.mods[ix]"
       :x="x"
       @contextmenu="del_mod(ix)"
       @mouseenter="modenter"
       @mouseleave="modleave"
       @click.capture.stop="mod_index = ix"
-      :key="ix"
     />
     <mod v-if="pending_display && pending_fixed" :mod="pending" :x="0" pending />
     <line
