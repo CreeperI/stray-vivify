@@ -4,4 +4,5 @@ export namespace External {
     VSM_EASING?: string[]
     VSM_MODS?: Record<string, ({name: string, proxy: 0| -1}|string)[]>
   }
+  export type StartUpTips = string[]
 }

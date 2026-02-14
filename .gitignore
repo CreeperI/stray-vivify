@@ -10,3 +10,4 @@ skin/
 *.mjs
 package-lock.json
 .prettierrc.yaml
+external

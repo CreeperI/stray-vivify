@@ -15,6 +15,7 @@ import { CheckSkin } from '@renderer/core/misc/check-skin'
 import { Log, MemoryUsage, MouseTracker } from '@renderer/core/misc/inspector'
 import { expose_variables } from '@renderer/core/misc/inspector-exposer'
 import { load_external_mods } from '@renderer/core/chart/vsm-objects'
+import { load_external_tips } from '@renderer/core/misc/startup-tips'
 
 const app = createApp(App).use(
   createModal({
@@ -54,7 +55,8 @@ async function main() {
   ShortCuts.handle()
   MouseTracker.init()
   expose_variables()
-  await load_external_mods()
+  load_external_mods()
+  load_external_tips()
 
   Intervals.on(1e4, () => {
     if (Storage.settings.auto_save) Chart.current?.save()
