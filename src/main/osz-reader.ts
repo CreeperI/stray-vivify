@@ -1,6 +1,7 @@
 import AdmZip from 'adm-zip'
 import { extname } from 'node:path'
-import { ChartTypeV2 } from '../preload/types'
+
+import { ChartTypeV2 } from '../preload/chart-types'
 
 type diff = ChartTypeV2.diff
 

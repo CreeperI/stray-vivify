@@ -1,7 +1,7 @@
 //这个版本我是按照原版计算顺序来写的//
-import { ChartTypeV2 } from '@preload/types'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { utils } from '@renderer/core/utils'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 ///类型别名///
 type bpm = number

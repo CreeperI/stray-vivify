@@ -1,4 +1,3 @@
-import { ChartTypeV2 } from '@preload/types'
 import { computed, ComputedRef, Ref, ref, toRaw, watch } from 'vue'
 import { Chart, ms } from './chart'
 import { utils } from '../utils'
@@ -7,6 +6,7 @@ import { notify } from '@renderer/core/misc/notify'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import { calculateChartStats } from '@renderer/core/chart/calc-stat'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 function parse_type(v: string) {
   switch (v) {

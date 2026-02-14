@@ -1,5 +1,5 @@
-import { ChartTypeV2 } from '@preload/types'
 import { onUnmounted, Ref, ref, watch } from 'vue'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 export namespace utils {
   /** return whether a value is between the given states */

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import { computed, inject, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
-import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart, event_time } from '@renderer/core/chart/chart'
@@ -9,6 +8,7 @@ import { utils } from '@renderer/core/utils'
 import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
 import { notify } from '@renderer/core/misc/notify'
 import useSvgSizing = GlobalStat.useSvgSizing
+import { ChartTypeV2 } from '@preload/chart-types'
 
 useUpdateFrameRate('svg-notes')
 const chart = Chart.$current

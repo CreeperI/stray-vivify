@@ -3,9 +3,9 @@ import { Chart, event_time } from '@renderer/core/chart/chart'
 import { computed, ComputedRef, onMounted, onUnmounted, ref, toRaw } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import Mod from '@renderer/components/chart-v2/mod.vue'
-import { ChartTypeV2 } from '@preload/types'
 import { notify } from '@renderer/core/misc/notify'
 import { PROXY_REQUIREMENT } from '@renderer/core/chart/vsm-objects'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const chart = Chart.$current
 const vsm = chart.vsm
@@ -126,7 +126,7 @@ const _line_width = computed(() => Storage.settings.sv.pending_width)
 const _line_stroke = computed(() => Storage.settings.sv.pending_stroke)
 const _line_opacity = computed(() => Storage.settings.sv.pending_opacity)
 const _line_y = computed(() => {
-  return 1000 - (pending_time.value - current_time.value) * mul.value - 43 / 2
+  return 1000 - (pending_time.value - current_time.value) * mul.value - 43 / 2 + _line_width.value
 })
 
 function chg_proxy(p: number) {

@@ -1,10 +1,9 @@
 <script lang="ts" setup>
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
-import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { Chart } from '@renderer/core/chart/chart'
 import { inject } from 'vue'
-import { utils } from '@renderer/core/utils'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const chart = Chart.$current
 const playfield = chart.$playfield

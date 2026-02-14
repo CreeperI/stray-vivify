@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
-import { ChartTypeV2 } from '@preload/types'
+import { ChartTypeV2 } from '@preload/chart-types'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { ref } from 'vue'

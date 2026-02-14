@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { computed, inject } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const { note } = defineProps<{
   note: ChartTypeV2.note

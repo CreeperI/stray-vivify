@@ -1,8 +1,9 @@
 import { inject, Ref, ref } from 'vue'
-import { charts_data, ChartTypeV2 } from '@preload/types'
+import { charts_data } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
 import { Version } from '@renderer/core/storage'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 export namespace GlobalStat {
   type routes = 'start' | 'wait' | 'editor'

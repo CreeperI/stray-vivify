@@ -1,3 +1,5 @@
+import { ChartTypeV2 } from '../preload/chart-types'
+
 class Mod {
   B: number
   D: number
@@ -162,7 +164,6 @@ enum GlobalModType {
 
 export { Mod, PerFrame, ModData, NoteExtra, Note, Mods, VividStasisChart, EaseType, GlobalModType }
 import { Buffer } from 'buffer'
-import { ChartTypeV2 } from '../preload/types'
 
 class MessageBuffer {
   private buffer: Uint8Array

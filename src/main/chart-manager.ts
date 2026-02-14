@@ -1,12 +1,13 @@
 import path, { extname } from 'node:path'
 import fs from 'fs'
-import { charts_data, ChartTypeV2, IpcHandlers } from '../preload/types'
+import { charts_data, IpcHandlers } from '../preload/types'
 import * as electron from 'electron'
 import { dialog, ipcMain, shell } from 'electron'
 import { file_paths } from './fp-parser'
 import AdmZip from 'adm-zip'
 import { find_png, find_song } from './stray'
 import * as child_process from 'node:child_process'
+import { ChartTypeV2 } from '../preload/chart-types'
 
 function timestr() {
   const date = new Date()
@@ -429,9 +430,6 @@ export default class ChartManager {
   }
 
   private init_json() {
-    if (!fs.existsSync(this.charts_folder)) {
-      fs.mkdirSync(this.charts_folder)
-    }
     fs.writeFileSync(this.json_path, JSON.stringify([], null, 2))
   }
 

@@ -7,7 +7,8 @@ import ASelect from '@renderer/components/a-elements/a-select.vue'
 import { PROXY_REQUIREMENT, VSM_EASING } from '@renderer/core/chart/vsm-objects'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
-import { ChartTypeV2 } from '@preload/types'
+
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const chart = Chart.$current
 const vsm = chart.vsm

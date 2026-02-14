@@ -10,7 +10,7 @@ import { notify } from '@renderer/core/misc/notify'
 import SvgNotesPlaying from '@renderer/components/chart-v2/svg-lane/svg-notes-playing.vue'
 import { Invoke } from '@renderer/core/ipc'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
-import { ChartTypeV2 } from '@preload/types'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const chart = Chart.$current
 const playfield = chart.$playfield

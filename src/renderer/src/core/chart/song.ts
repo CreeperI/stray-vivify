@@ -1,7 +1,7 @@
 import { Ref, ref, watch } from 'vue'
-import { ChartTypeV2 } from '@preload/types'
 import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 function roman_need(str: string) {
   return /[^\u0000-\u007F]/u.test(str)

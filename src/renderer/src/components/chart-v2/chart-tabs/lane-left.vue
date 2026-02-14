@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { computed, ComputedRef } from 'vue'
 import { Storage } from '@renderer/core/storage'
-import { ChartTypeV2 } from '@preload/types'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter.vue'
@@ -10,6 +9,7 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
 import SmallDiffChoice from '@renderer/components/chart-v2/chart-tabs/small/small-diff-choice.vue'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const { width, s, hold, b } = Storage.note
 

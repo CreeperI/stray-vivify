@@ -1,11 +1,11 @@
 import { Chart } from '@renderer/core/chart/chart'
 import { computed, ComputedRef, ref, Ref, triggerRef, watch } from 'vue'
-import { ChartTypeV2 } from '@preload/types'
 import { utils } from '@renderer/core/utils'
 import { PROXY_REQUIREMENT, VSM_EASING, VSM_MODS } from '@renderer/core/chart/vsm-objects'
 import { Storage } from '@renderer/core/storage'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { notify } from '@renderer/core/misc/notify'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const getEffectiveEnd = (mod: ChartTypeV2.mod) => {
   return mod.time + mod.step * (mod.repeat - 1) + mod.duration
@@ -31,7 +31,7 @@ export class Chart_vsm {
       name: string
     }>
     vsm_index: Ref<number>
-    able_mods: ComputedRef<{ name: string; proxy?: 0 | -1 }[]>
+    able_mods: ComputedRef<({ name: string; proxy?: 0 | -1 } | string)[]>
     mod: Ref<string>
     mod_index: Ref<number>
     // index, translateX
@@ -91,8 +91,8 @@ export class Chart_vsm {
       all_proxy: ref(true),
       sorted_able_mods: computed(() => {
         if (Storage.settings.sv.sort_by_name)
-          return x.refs.able_mods.value.map((a) => a.name).toSorted()
-        return x.refs.able_mods.value.map((a) => a.name)
+          return x.refs.able_mods.value.map((a) => (typeof a == 'string' ? a : a.name)).toSorted()
+        return x.refs.able_mods.value.map((a) => (typeof a == 'string' ? a : a.name))
       })
     }
 
@@ -177,9 +177,9 @@ export class Chart_vsm {
   new_vsm() {
     this.add_vsm(Chart_vsm.create_vsm())
   }
-  add_vsm(v:ChartTypeV2.vsm) {
+  add_vsm(v: ChartTypeV2.vsm) {
     this.data.push(v)
-    this.vsm_index = this.data.length -1
+    this.vsm_index = this.data.length - 1
   }
 
   del_vsm() {

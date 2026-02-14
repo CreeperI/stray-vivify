@@ -1,4 +1,4 @@
-import { ChartType, ChartTypeV2 } from '@preload/types'
+import { ChartType, ChartTypeV2 } from '@preload/chart-types'
 import { notify } from '@renderer/core/misc/notify'
 import { computed, ComputedRef, ref, Ref, triggerRef, watch, WritableComputedRef } from 'vue'
 import { Chart_audio } from '@renderer/core/chart/audio'
@@ -535,10 +535,10 @@ export class Chart {
   }
 
   write_current_vsc() {
-    Invoke('write-vsc', {
+    Invoke('write-file', {
       id: this.id,
       data: Chart_diff.to_vsc(this.diff.diff).join('\n'),
-      name: this.diff.diff1
+      fname: this.diff.diff1
     }).then(() => notify.success('已导出为vsc!!!!!!!'))
   }
   write_current_vsm(name?: string) {

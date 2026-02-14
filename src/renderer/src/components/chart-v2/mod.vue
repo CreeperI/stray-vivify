@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { h, ref, useAttrs, VNode } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const { mod, x = 0 } = defineProps<{
   mod: ChartTypeV2.mod
@@ -31,14 +31,26 @@ function V() {
 
     const children: VNode[] = []
     const __bg_height = (mod.repeat * mod.step - mod.step + mod.duration) * mul.value
-    const y = window_height - 80 - (mod.time - current.value) * mul.value - __bg_height - 43 / 2
+    const y =
+      window_height -
+      80 -
+      (mod.time - current.value) * mul.value -
+      __bg_height -
+      43 +
+      Storage.settings.sprites.bar_length / 2
 
     children.push(
       h('rect', {
         class: ['rect-repeat-bg'],
         width: hovered.value || IS_PENDING ? 10 * x_repeat_times + 4 : 14,
         x: baseX,
-        y: window_height - 80 - (mod.time - current.value) * mul.value - __bg_height - 43 / 2,
+        y:
+          window_height -
+          80 -
+          (mod.time - current.value) * mul.value -
+          __bg_height -
+          43 / 2 +
+          Storage.settings.sprites.bar_length / 2,
         height: __bg_height,
         fill: IS_PENDING
           ? Storage.settings.sv.color_pending_repeat
@@ -58,7 +70,13 @@ function V() {
           style: {
             transform: hovered.value || IS_PENDING ? `translateX(${dx * 10}px)` : ''
           },
-          y: window_height - 80 - (start - current.value) * mul.value - single_height - 43,
+          y:
+            window_height -
+            80 -
+            (start - current.value) * mul.value -
+            single_height -
+            43 / 2 +
+            Storage.settings.sprites.bar_length / 2,
           fill: Storage.settings.sv.color_repeat_fg
         })
       )
@@ -94,7 +112,13 @@ function V() {
   }
   // -------------- not repeat ----------------------
   const height = mod.duration * mul.value
-  const y = window_height - 80 - (mod.time - current.value) * mul.value - height - 43
+  const y =
+    window_height -
+    80 -
+    (mod.time - current.value) * mul.value -
+    height -
+    43 / 2 +
+    Storage.settings.sprites.bar_length / 2
   return h('g', [
     h('rect', {
       class: ['rect-alone'],

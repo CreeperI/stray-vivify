@@ -1,4 +1,4 @@
-import { ChartType, Invoke, IpcHandlers } from '../preload/types'
+import { Invoke, IpcHandlers } from '../preload/types'
 import fs, { existsSync, readFileSync } from 'fs'
 import VsbParser from './vsbParser'
 import * as electron from 'electron'
@@ -7,6 +7,7 @@ import path, { basename } from 'node:path'
 import ChartManager from './chart-manager'
 import { file_paths, folder_size } from './fp-parser'
 import { OszReader } from './osz-reader'
+import { ChartType } from '../preload/chart-types'
 
 export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
   const handler = Handler(mainWindow)
@@ -87,11 +88,6 @@ const Handler = (mw: Electron.BrowserWindow) => {
         data1.song.bpm,
         data1.diffs
       )
-    },
-    'write-vsc': function (_, { id, data:ch, name }) {
-      const fp = chart_manager.write_vsc(id, ch, name)
-      if (!fp) return
-      shell.showItemInFolder(fp)
     },
     'get-conf': function (_) {
       if (fs.existsSync(file_paths.config)) {
@@ -249,6 +245,13 @@ const Handler = (mw: Electron.BrowserWindow) => {
       const moduleT = fs.statSync(file_paths.module).birthtimeMs
       const appT = fs.statSync(app.getPath('userData')).birthtimeMs
       return Math.min(moduleT, appT)
+    },
+    'read-external': (_, { fname }) => {
+      if (fs.existsSync(path.join(file_paths.external, fname))) {
+        return fs.readFileSync(path.join(file_paths.external, fname), 'utf-8')
+      }
+      return undefined
     }
+
   } as Required<IpcHandlers.invoke.handler>
 }

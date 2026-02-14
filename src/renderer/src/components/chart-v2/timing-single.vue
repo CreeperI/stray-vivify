@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { ChartTypeV2 } from '@preload/types'
 import { utils } from '@renderer/core/utils'
 import { inject } from 'vue'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const { timing, idx } = defineProps<{ timing: ChartTypeV2.timing; idx: number }>()
 

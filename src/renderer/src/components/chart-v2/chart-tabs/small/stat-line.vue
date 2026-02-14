@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { computed } from 'vue'
-import { ChartTypeV2 } from '@preload/types'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
+import { ChartTypeV2 } from '@preload/chart-types'
 
 const props = defineProps<{
   str: keyof ChartTypeV2.SongStats

@@ -1,4 +1,5 @@
-import { ChartTypeV2, storages } from '@preload/types'
+import { ChartTypeV2 } from '@preload/chart-types'
+import { storages} from '@preload/types'
 import { Ref, ref } from 'vue'
 import { Storage } from '../storage'
 import { utils } from '../utils'

@@ -19,7 +19,8 @@ export const file_paths = {
   config: get_base_path('charts/config.json'),
   skin_setting: get_base_path('skin/setting.json'),
   charts: get_base_path('charts'),
-  module: get_base_path('')
+  module: get_base_path(''),
+  external: get_base_path('external')
 }
 
 export async function folder_size(folderPath: string): Promise<number> {
@@ -57,3 +58,5 @@ function ensure_path(p: string) {
 }
 
 ensure_path(file_paths.skin)
+ensure_path(file_paths.charts)
+ensure_path(file_paths.external)
