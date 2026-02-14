@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Chart, event_time } from '@renderer/core/chart/chart'
-import { computed, ComputedRef, onMounted, onUnmounted, ref, toRaw } from 'vue'
+import { computed, ComputedRef, h, onMounted, onUnmounted, ref, toRaw, VNode } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import Mod from '@renderer/components/chart-v2/mod.vue'
 import { notify } from '@renderer/core/misc/notify'
@@ -69,8 +69,7 @@ function update_pending(e: MouseEvent) {
     }
     return
   }
-    pending_time.value = mouse_time
-
+  pending_time.value = mouse_time
 }
 function cleanUp() {
   pending_start_time = 0
@@ -212,6 +211,7 @@ const shown_proxy_rect = computed(() => {
       @mouseenter="modenter"
       @mouseleave="modleave"
       @click.capture.stop="mod_index = ix"
+      :key="ix"
     />
     <mod v-if="pending_display && pending_fixed" :mod="pending" :x="0" pending />
     <line
@@ -228,5 +228,4 @@ const shown_proxy_rect = computed(() => {
   </g>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

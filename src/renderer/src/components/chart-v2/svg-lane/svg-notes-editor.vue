@@ -437,6 +437,7 @@ const d_height = inject<number>('d_height') ?? 0
         @dragstart="(e) => ondragstart(e, ix)"
         @click.right="del_note(ix)"
         @click.ctrl="change_my_select(ix)"
+        :key="ix"
       />
       <template v-if="pending_display">
         <note-v2

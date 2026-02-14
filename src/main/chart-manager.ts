@@ -187,14 +187,6 @@ export default class ChartManager {
     }
   }
 
-  write_vsc(id: string, ch: string, name: string) {
-    const chart = this.data.find((v) => v.id === id)
-    if (!chart) return
-    const fp = path.join(this.charts_folder, id, name + '.vsc')
-    fs.writeFileSync(fp, ch)
-    return fp
-  }
-
   export_svc(id: string) {
     this._export_chart(id, '.svc')
   }

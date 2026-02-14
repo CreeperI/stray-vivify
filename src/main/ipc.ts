@@ -69,7 +69,6 @@ const Handler = (mw: Electron.BrowserWindow) => {
       return chart_manager.import_song(music_path, id)
     },
     'open-song': function (_, { id }) {
-      console.log(id)
       if (chart_manager.exists(id)) {
         return chart_manager.open_song(id)
       }

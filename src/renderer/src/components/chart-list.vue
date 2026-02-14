@@ -170,7 +170,7 @@ const tip = utils.random(StartUpTips)
     font-size: 0.9rem;
   }
   100% {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
   }
 }
 .su-greeting {
@@ -247,6 +247,7 @@ const tip = utils.random(StartUpTips)
   transform: translateX(var(--ch-transform-len));
   padding: 5px;
   border-radius: 5px;
+  min-height: 2rem;
 }
 
 .chart-unit:hover {
