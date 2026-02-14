@@ -116,6 +116,7 @@ export class Chart_audio {
   }
 
   set_and_play() {
+    if (this.current_time < 0) this.from_negative = true
     this.set_ele_time(this.current_time)
     if (!this.from_negative) this.ele?.play()
     this.paused = false
@@ -143,6 +144,7 @@ export class Chart_audio {
     this.ele = new Audio(url)
     this.ele.addEventListener('timeupdate', () => {
       if (this.paused) return
+      if (this.from_negative) return
       this.set_current_time_from_updater(this.$ele.currentTime * 1000)
       FrameRate.audio_sync.immediate()
     })
