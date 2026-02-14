@@ -532,7 +532,6 @@ class VsbParser {
             time: x.time,
             lane: x.lane,
             len: x.extra[0].value - x.time,
-            ani: [],
             width: 1
           })
         else
@@ -549,7 +548,6 @@ class VsbParser {
         width: w,
         time: x.time,
         lane: x.lane,
-        ani: [],
         snm: x.type == 8 ? 2 : x.type == 6 || x.type == 7 ? 1 : 0
       })
     })

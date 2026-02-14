@@ -9,6 +9,7 @@ const total = computed(() => utils.toTimeStr(Storage.data.value.statistics.used_
 
 <template>
   <div class="credits-list">
+    <div class="credits-head">Felleta: stray/vivify</div>
     <div class="credits-head">Creator</div>
     <div class="credits-col">
       <a-href href="https://space.bilibili.com/517691213">Allesta</a-href>

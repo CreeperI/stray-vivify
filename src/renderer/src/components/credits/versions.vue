@@ -280,6 +280,45 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>重构了Inspector和custom的modal（代码意义上）。</div>
       <div>将右下角的Version提示改为一直显示，可以在设置中关闭。</div>
     </Build>
+    <Build build="9.7" y="2026" m="2" d="14" title="0.9.7">
+      <template #bugs>
+        <div>修复了删除note失败的问题（x2），将二分查找note改为线性查找。</div>
+        <div>修复了modal会导致爆滚动条的问题。</div>
+        <div>修复了beat最大值好像不太对的问题。</div>
+        <div>修复了word-helper在部分情况下无法准确定位（报错）的问题。</div>
+        <div>修复了无法从-5秒开始播放的问题。</div>
+        <div>修复了note pooling的间隔设置未正确生效的问题。</div>
+      </template>
+      <div>为数字输入框添加了更加严格的数值校验。</div>
+      <div>调整了顶栏的z高度，使其在modal显示的时候依然在顶层。</div>
+      <div>调整了window的属性暴露方式。现在请使用window.sv来查看暴露的属性。</div>
+      <div>添加了Error的全局捕获与通知。可在设置中关闭。</div>
+      <div>添加了手动触发Error的快捷键，默认值为F3。</div>
+      <div>为编排和vsm界面添加了diff选择框。</div>
+      <div>添加了VSM编辑界面和对应的导入导出。</div>
+      <div>彻底移除了原来的sv功能。</div>
+      <div>移除了note和diff上的ani字段。</div>
+      <div>移除了罗马音的输入限制。现在罗马音字段可以独立编辑了。</div>
+      <div>将框架升级到了vue 3.5.28 最新最热了属于是</div>
+      <div>调整了stats计算的逻辑，移除了对不同难度（名称）的修正。</div>
+      <div>添加了启动页面的tips。</div>
+      <div>调整了Credits页面内容，以使本项目更符合Felleta的运作方式。</div>
+      <div>
+        添加了External功能，现在可以加载外部json。现在允许加载vsm-objects和startup-tips。具体要求请查看源代码（preload/external.d.ts）。
+      </div>
+      <div>调整了select的样式，现在溢出的文字会显示为省略号。</div>
+      <div>添加了“不吸附”的功能，按住alt以触发。（这个改不了）</div>
+      <div>添加了48 64分小节线的颜色设置。</div>
+      <div>移除了对skin文件夹的强行校验，改为了modal提示。当然要是不放skin是啥都不会显示的。</div>
+      <div>添加了一个1分钟画出来的sv图标。这对吗……？</div>
+      <div>添加了“从此处开始游玩”的功能。</div>
+      <div>调整了试玩的判定逻辑，我感觉现在比较像人了。</div>
+      <div>修复了note可能会卡src导致贴图乱变的问题。</div>
+      <div>略微提升了ticks（右边的分音）的计算精度。</div>
+      <div>移除了每次保存时在node端的控制台输出。不会有人用控制台启动sv吧……</div>
+      <div>移除了note摆放的限制。</div>
+      <span>需要注意的是这是直接把无理检测删掉了，除了不能在同一时刻放相同的note</span>
+    </Build>
   </div>
 </template>
 

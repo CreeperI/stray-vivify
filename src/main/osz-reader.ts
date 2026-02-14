@@ -186,7 +186,6 @@ function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
         lane: lane,
         width: 1,
         len: endTime - time,
-        ani: []
       }
       notes.push(holdNote)
     } else {
@@ -196,7 +195,6 @@ function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
         lane: lane,
         width: 1,
         snm: 0,
-        ani: []
       }
       notes.push(normalNote)
     }
@@ -216,8 +214,7 @@ function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
       diff1: beatmap.metadata.Version || '',
       diff2: '',
       diff_name: ''
-    },
-    ani: []
+    }
   }
 }
 
