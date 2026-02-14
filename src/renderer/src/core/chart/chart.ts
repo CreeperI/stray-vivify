@@ -110,9 +110,6 @@ export class Chart {
   length_end: ms
   shown_timing: ComputedRef<[ms, ms]>
   current_bpm: WritableComputedRef<number>
-  ref: {
-    diff_index: Ref<number>
-  }
   id: string
   sprite_err: Ref<boolean>
   bg_err: Ref<boolean>
@@ -138,9 +135,6 @@ export class Chart {
         if (n) n.bpm = v
       }
     })
-    this.ref = {
-      diff_index: ref(0)
-    }
     this.diff = new Chart_diff(this)
     this.vsm = new Chart_vsm(this)
     this.id = ''
@@ -165,8 +159,7 @@ export class Chart {
   }
 
   set diff_index(v: number) {
-    this.ref.diff_index.value = v
-    this.set_header_name()
+    this.diff.diff_index.value = v
     this._diff_index = v
   }
 
@@ -433,18 +426,7 @@ export class Chart {
     this.length_end = this.length + 3000
     this.set_header_name()
     this.audio.init_on_end()
-    watch(
-      this.ref.diff_index,
-      (v) => {
-        this._diff_index = v
-        this.set_header_name()
-        this.diff.fuck_shown(this.audio.current_time, true)
-        this.diff.calc_density()
-        this.diff.update_timing_list()
-        this.diff.sort_notes()
-      },
-      { flush: 'post' }
-    )
+
     watch(this.audio.refs.current_ms, () => {
       this.update_on_time_change()
     })
@@ -481,7 +463,7 @@ export class Chart {
       modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
         this.diffs.splice(this.diff_index, 1)
         this.diff_index = 0
-        triggerRef(this.ref.diff_index)
+        triggerRef(this.diff.diff_index)
         utils.refresh()
       })
   }

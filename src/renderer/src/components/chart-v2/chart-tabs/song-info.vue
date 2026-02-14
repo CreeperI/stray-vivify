@@ -16,7 +16,7 @@ const options = () =>
     if (x.meta.diff2 == '') return { val: v, display: x.meta.diff1 }
     return { val: v, display: x.meta.diff1 + ' - ' + x.meta.diff2 }
   })
-const dix = chart.ref.diff_index
+const dix = chart.diff.diff_index
 const src = `stray:///__sprite__/${chart.id}`
 const src2 = `stray:///__bg__/${chart.id}`
 const img_show = chart.sprite_err

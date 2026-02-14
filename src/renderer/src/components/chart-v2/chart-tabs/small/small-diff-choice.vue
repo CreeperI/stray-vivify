@@ -9,7 +9,7 @@ const options = () =>
     if (x.meta.diff2 == '') return { val: v, display: x.meta.diff1 }
     return { val: v, display: x.meta.diff1 + ' - ' + x.meta.diff2 }
   })
-const dix = chart.ref.diff_index
+const dix = chart.diff.diff_index
 const rkey = utils.refresh_key
 </script>
 

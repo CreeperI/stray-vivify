@@ -64,6 +64,7 @@ export class Chart_diff {
     max_bpm: number
     main_bpm: number
   }>
+  diff_index: Ref<number>
   undo: (() => void)[][]
   redo: (() => void)[][]
   shown: Ref<number[]>
@@ -99,6 +100,7 @@ export class Chart_diff {
 
   constructor(chart: Chart) {
     this.chart = chart
+    this.diff_index = ref(0)
     this.counts = ref({
       chip: 0,
       bpm: 0,
@@ -162,10 +164,20 @@ export class Chart_diff {
       total_v3: 0
     })
     this.max_lane = ref(4)
+
+    watch(this.diff_index, () => {
+      this.chart.set_header_name()
+      this.force_fuck()
+      this.calc_density()
+      this.update_timing_list()
+      this.sort_notes()
+      this.calc_max_lane()
+      this.update_sr()
+    })
   }
 
   get diff() {
-    return this.chart.diffs[this.chart.ref.diff_index.value]
+    return this.chart.diffs[this.diff_index.value]
   }
 
   get notes() {
@@ -770,7 +782,7 @@ export class Chart_diff {
 
       // here got a len-1 'c i want to make the last independently fucked
       for (let j = 0; j < part_times.length - 1; j++) {
-        let tick = (24e4) / (part_times[j + 1] - part_times[j]) / part.bpm
+        let tick = 24e4 / (part_times[j + 1] - part_times[j]) / part.bpm
         if (tick > 128) continue
         // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
         if (tick < 3) tick = 0
@@ -814,8 +826,7 @@ export class Chart_diff {
    */
   private add_note(note: ChartTypeV2.note): boolean {
     note.time = Math.floor(note.time)
-    if (this.notes.find(x =>utils.is_equal(x, note)))
-      return false
+    if (this.notes.find((x) => utils.is_equal(x, note))) return false
 
     fix_note(note)
 
@@ -866,5 +877,8 @@ export class Chart_diff {
   private play_hit() {
     if (this.chart.playfield) return
     this.hit_sounder.play_hit()
+  }
+  private force_fuck() {
+    this.fuck_shown(this.chart.audio.current_time, true)
   }
 }
