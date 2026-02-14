@@ -67,7 +67,7 @@ const rKey = utils.refresh_key
         <a-button2 v-if="vsm.data.length == 1" msg="清空" @click="vsm.del_vsm()" />
         <a-button2 v-else msg="删除" @click="vsm.del_vsm()" />
         <a-button2 msg="复制" @click="vsm.copy_vsm()" />
-        <a-button2 msg="新建" @click="vsm.add_vsm()" />
+        <a-button2 msg="新建" @click="vsm.new_vsm()" />
       </div>
       <div class="vsm-obj">
         <div>选择obj</div>
