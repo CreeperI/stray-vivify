@@ -770,12 +770,10 @@ export class Chart_diff {
 
       // here got a len-1 'c i want to make the last independently fucked
       for (let j = 0; j < part_times.length - 1; j++) {
-        let tick = (4 * time_per_4) / (part_times[j + 1] - part_times[j])
+        let tick = (24e4) / (part_times[j + 1] - part_times[j]) / part.bpm
         if (tick > 128) continue
         // if it's a tick longer than 3' then fuck it away i dont need fuck you fuck you
         if (tick < 3) tick = 0
-        if (tick > 47 && tick < 49) tick = 48
-        if (tick > 11 && tick < 13) tick = 12
         this.ticks.push([part_times[j], Math.round(tick)])
       }
       const tick = (time_per_4 / (part_end - part_times[part_times.length - 1])) * 4
