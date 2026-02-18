@@ -55,7 +55,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'open-url': function (_, { url }) {
       electron.shell.openExternal(url)
     },
-    'read-vsb': function (_, {fp:p}) {
+    'read-vsb': function (_, { fp: p }) {
       if (!existsSync(p)) return
       const buf = readFileSync(p)
       return new VsbParser(buf).runToNotes()
@@ -63,7 +63,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'save-chart': function (_, { id, data }) {
       chart_manager.write_chart(id, JSON.parse(data))
     },
-    'import-song': async function (_, { path:music_path }) {
+    'import-song': async function (_, { path: music_path }) {
       const id = (await ask_id()) as string | undefined
       if (id == undefined) return { state: 'cancelled' }
       return chart_manager.import_song(music_path, id)
@@ -217,7 +217,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
         total: _total
       }
     },
-    'ask-file': (_, { file:f }) => {
+    'ask-file': (_, { file: f }) => {
       const fp = dialog.showOpenDialogSync({
         properties: ['openFile'],
         filters: [{ name: f[0], extensions: f.slice(1) }]
@@ -241,9 +241,14 @@ const Handler = (mw: Electron.BrowserWindow) => {
       mw.title = name
     },
     'joined-time': (_) => {
-      const moduleT = fs.statSync(file_paths.module).birthtimeMs
-      const appT = fs.statSync(app.getPath('userData')).birthtimeMs
-      return Math.min(moduleT, appT)
+      let T = Infinity
+      T = Math.min(T,fs.statSync(file_paths.module).birthtimeMs)
+      T= Math.min(T,fs.statSync(app.getPath('userData')).birthtimeMs)
+      if (process.env.APPDATA) {
+        const p = path.join(process.env.APPDATA, 'vs-charter-ev')
+        if (fs.existsSync(p)) T = Math.min(T, fs.statSync(p).birthtimeMs)
+      }
+      return T
     },
     'read-external': (_, { fname }) => {
       if (fs.existsSync(path.join(file_paths.external, fname))) {
@@ -251,6 +256,5 @@ const Handler = (mw: Electron.BrowserWindow) => {
       }
       return undefined
     }
-
   } as Required<IpcHandlers.invoke.handler>
 }
