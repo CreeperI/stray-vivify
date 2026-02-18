@@ -14,6 +14,7 @@ const total = computed(() => utils.toTimeStr(Storage.data.value.statistics.used_
     <div class="credits-col">
       <a-href href="https://space.bilibili.com/517691213">Allesta</a-href>
       <a-href href="https://github.com/Ts-Final">TerminalFlow (github)</a-href>
+      <div>Felleta</div>
     </div>
     <div class="credits-head">先锋测试员</div>
     <div class="credits-3col">
@@ -34,6 +35,8 @@ const total = computed(() => utils.toTimeStr(Storage.data.value.statistics.used_
     </div>
     <div class="credits-head">开发帮助</div>
     <div class="credits-2col">
+      <span>图标</span>
+      <span>雫星沫RainFoamp</span>
       <span>Custom Song</span>
       <span>And_why, <a-href href="https://github.com/CreeperI">Creeper_001</a-href></span>
       <span>五维Stats统计</span>

@@ -78,7 +78,7 @@ const tip = utils.random(StartUpTips)
 <template>
   <div class="chart-list-wrapper">
     <div class="chart-list-left">
-      <img alt="logo" v-if="useLogo" src="/sv.png" class="su-title">
+      <img alt="logo" v-if="useLogo" src="/sv.png" class="su-logo">
       <div v-else class="su-title">stray/vivify</div>
       <div v-html="tip" class="su-tip"></div>
       <div class="su-greeting">
@@ -146,7 +146,7 @@ const tip = utils.random(StartUpTips)
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 1fr 3rem 1fr 10fr;
+  grid-template-rows: 1fr 3rem 6rem 10fr;
   justify-items: center;
   gap: 20px;
 }
@@ -156,6 +156,10 @@ const tip = utils.random(StartUpTips)
   text-align: center;
   position: relative;
   padding-top: 10%;
+}
+.su-logo {
+  padding-top: 5%;
+  width: 260px;
 }
 .su-tip {
   position: relative;
