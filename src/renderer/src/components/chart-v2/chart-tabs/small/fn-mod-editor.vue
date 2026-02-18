@@ -12,6 +12,7 @@ import { ChartTypeV2 } from '@preload/chart-types'
 
 const chart = Chart.$current
 const vsm = chart.vsm
+const obj = vsm.refs.obj
 const diff = chart.diff
 const mod_index = vsm.refs.mod_index
 const the = ref<ChartTypeV2.mod>({
@@ -77,7 +78,7 @@ const repeat_classes = computed(() => {
     <a-text-input v-model="the.value2" />
     <template v-if="proxy_require == 1">
       <div>Proxy</div>
-      <a-number-input v-model="the.proxy" />
+      <a-number-input v-model="the.proxy" :max="obj.proxies" />
     </template>
     <template v-else>
       <div class="no-repeat">Proxy</div>
@@ -94,7 +95,7 @@ const repeat_classes = computed(() => {
     <a-select v-model="the.easing" :options="VSM_EASING" maxh="10rem" />
     <div>modname</div>
     <a-select v-model="the.modname" :options="able_mods" maxh="10rem" />
-    <div style="grid-column: span 2;height: 15px" />
+    <div style="grid-column: span 2; height: 15px" />
     <div style="grid-column: span 2">时值参考</div>
     <div class="beat-lengths">
       <div>4'</div>
@@ -116,7 +117,7 @@ const repeat_classes = computed(() => {
 <style scoped>
 .fn-mod-editor {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 2fr 3fr;
   justify-items: center;
   gap: 5px;
 }
@@ -132,7 +133,7 @@ const repeat_classes = computed(() => {
 }
 .beat-lengths {
   grid-column: span 2;
-  grid-template-columns: repeat(4,1fr);
+  grid-template-columns: repeat(4, 1fr);
   width: 100%;
   display: grid;
   justify-items: center;
