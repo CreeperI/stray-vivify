@@ -8,7 +8,6 @@ export class HitSoundSystem {
   private hit_error = false
   private audioContext: AudioContext | null = null
   private audioBuffer: AudioBuffer | null = null
-  private playedNotes = new Set<number>()
   private gainNode: GainNode | null = null
   private maxVoices = 64
   private activeVoices: Array<{ source: AudioBufferSourceNode; endTime: number }> = []
@@ -20,7 +19,7 @@ export class HitSoundSystem {
     this.chart = chart
     this.shown = shown
     this.initWebAudio()
-    this.last_trigger = 0
+    this.last_trigger = -Infinity
   }
 
   on_unpause() {
@@ -39,12 +38,12 @@ export class HitSoundSystem {
     const current = this.chart.audio.current_time - Storage.settings.offset3
 
     // Find note in current time window
-    const hitNote = this.shown.value.find(
-      (x: number) => utils.between(this.chart.diff.notes[x].time, [last, current]) && x['snm'] != 1
+    const hitNote = this.shown.value.some(
+      (x) => utils.between(this.chart.diff.notes[x].time, [last, current]) && x['snm'] != 1
     )
     this.last_trigger = this.chart.audio.current_time
 
-    if (hitNote && !this.playedNotes.has(this.chart.diff.notes[hitNote].time)) {
+    if (hitNote) {
       if (this.activeVoices.length >= this.maxVoices) {
         this.activeVoices.shift()
       }
@@ -60,12 +59,6 @@ export class HitSoundSystem {
           source,
           endTime: now + (this.audioBuffer.duration || 0.5)
         })
-
-        // Mark note as played
-        this.playedNotes.add(this.chart.diff.notes[hitNote].time)
-
-        // Clean up played note marker after it's definitely passed
-        setTimeout(() => this.playedNotes.delete(this.chart.diff.notes[hitNote].time), 200)
       } catch (e) {
         console.error('Failed to play sound:', e)
       }
