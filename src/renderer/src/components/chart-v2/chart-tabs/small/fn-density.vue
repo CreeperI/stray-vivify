@@ -6,6 +6,7 @@ import { utils } from '@renderer/core/utils'
 
 const chart = Chart.$current
 const width = 300 + 20
+const _width_px = width + 'px'
 const data = chart.diff.density_data
 const path = ref('')
 
@@ -21,7 +22,7 @@ async function update_path() {
   path.value = 'M 20 240'
   const max = Math.max(...data.value)
   if (data.value.findIndex((v) => v > 0) == -1) return
-  const dx = width / data.value.length
+  const dx = (width -20) / data.value.length
   const dt = 1500 / data.value.length
   is_drawing = true
   for (let i = 0; i < data.value.length; i++) {
@@ -45,7 +46,7 @@ function mousemove(e: MouseEvent) {
     seeker.value.display = false
     return
   }
-  seeker.value.time = Math.floor((x / width) * chart.length)
+  seeker.value.time = Math.floor((x / (width - 20)) * chart.length)
   seeker.value.display = true
   seeker.value.x = e.offsetX
   if (flag) {
@@ -53,7 +54,7 @@ function mousemove(e: MouseEvent) {
   }
 }
 const current_x = computed(() => {
-  return (chart.audio.refs.current_ms.value / chart.length) * width + 20
+  return (chart.audio.refs.current_ms.value / chart.length) * (width - 20) + 20
 })
 function mouseout() {
   seeker.value.display = false
@@ -140,10 +141,12 @@ function click() {
 .density-title {
   text-align: center;
   cursor: pointer;
+  max-height: calc(3rem + 250px);
+  overflow: hidden;
 }
 .density-wrapper {
   columns: 1;
-  overflow-x: hidden;
   text-align: center;
+  min-width: v-bind(_width_px);
 }
 </style>

@@ -16,6 +16,7 @@ import { Log, MemoryUsage, MouseTracker } from '@renderer/core/misc/inspector'
 import { expose_variables } from '@renderer/core/misc/inspector-exposer'
 import { load_external_mods } from '@renderer/core/chart/vsm-objects'
 import { load_external_tips } from '@renderer/core/misc/startup-tips'
+import { Chart_diff } from '@renderer/core/chart/diff'
 
 const app = createApp(App).use(
   createModal({
@@ -65,7 +66,7 @@ async function main() {
   Intervals.on(1000, () => {
     FrameRate.refresh()
     Chart.current?.playfield?.refresh()
-    Chart.current?.diff.update_diff_counts()
+    Chart_diff.all.forEach(v => v.update_diff_counts())
     MemoryUsage.update()
     Storage.update_used_time()
 

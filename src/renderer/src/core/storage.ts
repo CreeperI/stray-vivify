@@ -153,6 +153,11 @@ const storage = ref<storages.storage_scheme>({
     always_version: true,
     stray_logo: true,
     err_notify: true,
+    diff_reference: {
+      main_lw: 130,
+      ref_lw: 80,
+      reverse: false
+    }
   },
   version: Version.val,
   shortcut: '',

@@ -91,7 +91,7 @@ provide('lane_id', id)
 <style scoped>
 .lane-wrapper {
   height: 100%;
-  margin-right: 10px;
+  flex-shrink: 0;
 }
 
 .lane-svg {

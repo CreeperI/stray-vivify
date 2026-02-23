@@ -53,7 +53,6 @@ const r = Storage._ref
         <a-checkbox v-model="r.settings.bar_or_section" />
 
         <word-helper dec="在启用Beat的时候自动开启。">显示Beat时间</word-helper>
-
         <a-checkbox v-model="r.settings.beat_fn_time" class="in" />
         <div>Beat从0开始</div>
         <a-checkbox v-model="r.settings.bar_from_0" />
@@ -70,6 +69,14 @@ const r = Storage._ref
         <a-checkbox v-model="r.settings.color_stats" />
         <div>显示Version</div>
         <a-checkbox v-model="r.settings.always_version" />
+
+        <setting-header msg="Diff参考" />
+        <div>编辑难度lane width</div>
+        <a-number-input v-model="r.settings.diff_reference.main_lw" min="1" />
+        <div>参考难度lane width</div>
+        <a-number-input v-model="r.settings.diff_reference.ref_lw" min="1" />
+        <div>左右颠倒</div>
+        <a-checkbox v-model="r.settings.diff_reference.reverse" />
 
         <setting-header msg="note分组" />
 

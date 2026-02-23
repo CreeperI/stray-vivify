@@ -461,6 +461,11 @@ export namespace storages {
     always_version: boolean
     stray_logo: boolean
     err_notify: boolean
+    diff_reference: {
+      main_lw: number
+      ref_lw: number
+      reverse: boolean
+    }
   }
   export interface statistics {
     first_open: number

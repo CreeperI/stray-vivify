@@ -190,7 +190,7 @@ export class ShortCuts {
   }
 
   is(k: string, alt = false, ctrl = false, shift = false) {
-    return this.key == k && this._alt == alt && this._ctrl == ctrl && this._shift == shift
+    return this.key.toLowerCase() == k.toLowerCase() && this._alt == alt && this._ctrl == ctrl && this._shift == shift
   }
 
   handle(e: KeyboardEvent) {

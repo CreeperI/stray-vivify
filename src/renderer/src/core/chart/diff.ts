@@ -49,6 +49,7 @@ function fix_note(v: ChartTypeV2.note) {
 
 export class Chart_diff {
   chart: Chart
+  static all:Chart_diff[] = []
   counts: Ref<{
     chip: number
     bpm: number
@@ -174,6 +175,7 @@ export class Chart_diff {
       this.calc_max_lane()
       this.update_sr()
     })
+    Chart_diff.all.push(this)
   }
 
   get diff() {
@@ -862,11 +864,6 @@ export class Chart_diff {
     return start
   }
 
-  /**
-   * 草拟吗二分害我删除note失败
-   * @param n 要查找的 note 对象
-   * @returns note 的索引位置，如果未找到则返回 -1
-   */
   private findNote(n: ChartTypeV2.note): number {
     return this.notes.findIndex((x) => utils.is_equal(n, x))
   }
