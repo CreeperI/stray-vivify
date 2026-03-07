@@ -1,31 +1,38 @@
 <script lang="ts" setup>
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
-import { computed, inject, onMounted, onUnmounted, ref, toRaw, watch } from 'vue'
+import { computed, inject, onMounted, onUnmounted, ref, toRaw } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart, event_time } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
 import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
 import { notify } from '@renderer/core/misc/notify'
-import useSvgSizing = GlobalStat.useSvgSizing
 import { ChartTypeV2 } from '@preload/chart-types'
+import { Chart_diff } from '@renderer/core/chart/diff'
+import useSvgSizing = GlobalStat.useSvgSizing
 
 useUpdateFrameRate('svg-notes')
 const chart = Chart.$current
+const { diff_index = -1, disable_pending = false } = defineProps<{
+  diff_index?: number
+  disable_pending?: boolean
+}>()
 // const force_playing = ref(false)
 const not_playing_class = computed(
   () =>
     // chart.audio.refs.paused.value && !force_playing.value ? 'not-playing' : ''
     ''
 )
-const get_note = chart.diff.get_note
-const to_note = chart.diff.to_note
+const diff = diff_index == -1 ? chart.diff : Chart_diff.useCreateDiff(chart, diff_index)
+console.log(`loaded diff: ${diff.diff_index.value}`, JSON.stringify(diff.diff.meta))
+const get_note = diff.get_note
+const to_note = diff.to_note
 
 const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
 const { svg_width, bar_length } = useSvgSizing()
 const offset1 = Storage.settings.offset1
 
-const shown = chart.diff.shown
+const shown = diff.shown
 const mul = Storage.computes.mul
 const current_time = chart.audio.refs.current_ms
 
@@ -42,6 +49,7 @@ let dragging_delta = 0
 let pending_hold_fixed = false
 let pending_hold_fixed_time = 0
 const pending_note = computed(() => {
+  if (disable_pending) return []
   if (dragging.value?.length) {
     return dragging.value.map((ix) => {
       const x = to_note(ix)
@@ -77,7 +85,7 @@ const pending_note = computed(() => {
   ]
 })
 
-watch(chart.audio.refs.paused, (v) => {
+utils.stopWatch(chart.audio.refs.paused, (v) => {
   if (!v) {
     pending_display.value = false
     pending_hold_fixed = false
@@ -99,7 +107,7 @@ function update_pending_display(_trigger: 'enter' | 'leave' | 'note') {
 
 function update_pending(e: MouseEvent) {
   if (GlobalStat.chart_state.value != 0) return
-  if (!chart.audio.paused) return
+  if (!chart.audio.paused || disable_pending) return
   if (e.target instanceof HTMLImageElement) {
     return
   }
@@ -114,7 +122,7 @@ function update_pending(e: MouseEvent) {
   }
   // this is initial value referring the % of the mouse
   let lane: number = utils.clamp((e.offsetX - 56) / bar_length, 0, 1)
-  const max_lane = chart.diff.max_lane.value
+  const max_lane = diff.max_lane.value
   const width = dragging.value
     ? utils.range(
         ...dragging.value
@@ -125,7 +133,7 @@ function update_pending(e: MouseEvent) {
           .flat()
       )
     : Storage.note.w
-  lane = utils.clamp(Math.floor(lane * (chart.diff.max_lane.value - width + 1)), 0,max_lane - width)
+  lane = utils.clamp(Math.floor(lane * (diff.max_lane.value - width + 1)), 0, max_lane - width)
 
   pending_time.value = mouse_time
   pending_lane.value = lane
@@ -137,11 +145,12 @@ function update_pending(e: MouseEvent) {
 function on_click() {
   if (GlobalStat.chart_state.value != 0) return
   if (clipboard.value.length) return
+  if (disable_pending) return
   if (Storage.note.w == 0) return
 
   if (Storage.note.hold.value) {
     if (pending_hold_fixed) {
-      if (!chart.diff.add_notes_with_undo(toRaw(pending_note.value))) notify.error('添加note失败。')
+      if (!diff.add_notes_with_undo(toRaw(pending_note.value))) notify.error('添加note失败。')
       pending_len.value = 0
       pending_hold_fixed = false
     } else {
@@ -150,17 +159,18 @@ function on_click() {
     }
     return
   } else {
-    if (!chart.diff.add_notes_with_undo(toRaw(pending_note.value))) notify.error('添加note失败。')
+    if (!diff.add_notes_with_undo(toRaw(pending_note.value))) notify.error('添加note失败。')
   }
 }
 
 function del_note(n: number) {
+  if (disable_pending) return
   if (pending_hold_fixed) return
   if (selected.value.includes(n)) {
-    chart.diff.remove_note_with_undo(...selected.value)
+    diff.remove_note_with_undo(...selected.value)
     return
   }
-  if (!chart.diff.remove_note_with_undo(to_note(n))) notify.error('删除note失败。')
+  if (!diff.remove_note_with_undo(to_note(n))) notify.error('删除note失败。')
 }
 
 function fuck_hold() {
@@ -175,6 +185,7 @@ const opacity = computed(() => {
   else return 1
 })
 function ondragstart(e: DragEvent, n: number) {
+  if (disable_pending) return
   dragging.value = [n]
   if (selected.value) {
     if (selected.value.includes(n)) {
@@ -197,10 +208,11 @@ function ondragend() {
 }
 function ondrop() {
   if (!dragging.value) return
+  if (!disable_pending) return
 
-  if (!chart.diff.remove_note_with_undo(...dragging.value)) console.log('bugged removing')
+  if (!diff.remove_note_with_undo(...dragging.value)) console.log('bugged removing')
 
-  chart.diff.add_notes_with_undo(pending_note.value)
+  diff.add_notes_with_undo(pending_note.value)
   dragging.value = undefined
 }
 // ----------------- selector ---------------------
@@ -217,6 +229,7 @@ let select_start_screenY = 0
 let select_last_screen = [0, 0]
 
 let is_selecting = false
+const select_state = ref(false)
 
 const select_rect = ref({
   x: 0,
@@ -229,11 +242,13 @@ const select_rect = ref({
 function on_mouse_down(e: MouseEvent) {
   if (e.target instanceof HTMLImageElement) return
   if (Storage.note.w != 0) return
+  if (disable_pending) return
   if (clipboard.value.length) {
     NoteClipboard.paste()
     return
   }
   is_selecting = true
+  select_state.value = true
   select_rect.value.shown = true
   select_rect.value.x = 0
   select_rect.value.height = 0
@@ -258,6 +273,7 @@ function select_cleanup() {
 }
 
 function on_mouse_up(e: MouseEvent) {
+  if (disable_pending) return
   if (!is_selecting) {
     select_cleanup()
     return
@@ -276,7 +292,7 @@ function on_mouse_up(e: MouseEvent) {
 
   if (e.ctrlKey) {
     selected.value.push(
-      ...utils.indexes_of(chart.diff.notes, (n, ix) => {
+      ...utils.indexes_of(diff.notes, (n, ix) => {
         if (n.time >= time0 && n.time <= time1) {
           if (selected.value.includes(ix)) return false
           if (n.lane + 0.25 >= lane_min && n.lane - 0.25 <= lane_max) return true
@@ -285,7 +301,7 @@ function on_mouse_up(e: MouseEvent) {
       })
     )
   } else
-    selected.value = utils.indexes_of(chart.diff.notes, (n) => {
+    selected.value = utils.indexes_of(diff.notes, (n) => {
       if (n.time >= time0 && n.time <= time1)
         if (n.lane + 0.25 >= lane_min && n.lane - 0.25 <= lane_max) return true
       return false
@@ -298,6 +314,7 @@ function on_mouse_up(e: MouseEvent) {
       return { ...x, time: x.time - min }
     })
     selected.value = []
+    select_state.value = false
     NoteClipboard.copy = () => {}
     NoteClipboard.cut = () => {}
   }
@@ -308,14 +325,16 @@ function on_mouse_up(e: MouseEvent) {
       const x = to_note(ix)
       return { ...x, time: x.time - min }
     })
-    chart.diff.remove_note_with_undo(...selected.value)
+    if (!disable_pending) diff.remove_note_with_undo(...selected.value)
     selected.value = []
+    select_state.value = false
     NoteClipboard.copy = () => {}
     NoteClipboard.cut = () => {}
   }
 
   NoteClipboard.paste = () => {
-    chart.diff.add_notes_with_undo(pending_note.value)
+    if (!disable_pending) diff.add_notes_with_undo(pending_note.value)
+    select_state.value = false
     clipboard.value = []
     NoteClipboard.paste = () => {}
   }
@@ -365,9 +384,9 @@ function fuck_wheel(e: WheelEvent) {
 
   const current_time = chart.audio.current_time
   const meter = Storage.settings.meter
-  const current_bpm = chart.diff.bpm_of_time(current_time)?.bpm ?? 120
+  const current_bpm = diff.bpm_of_time(current_time)?.bpm ?? 120
 
-  chart.audio.set_current_time(chart.diff.nearest(current_time))
+  chart.audio.set_current_time(diff.nearest(current_time))
   const scr = Math.round((4 / meter) * (60 / current_bpm) * Math.sign(e.deltaY) * 1000)
   if (Storage.settings.reverse_scroll) {
     chart.audio.set_current_time(chart.audio.current_time + scr)
@@ -389,7 +408,7 @@ onMounted(() => {
     clearInterval(id)
   }, 500)
 
-  chart.diff.fuck_shown(chart.audio.current_time, true)
+  diff.fuck_shown(chart.audio.current_time, true)
 })
 onUnmounted(() => {
   document.getElementById(top_id)?.removeEventListener('wheel', fuck_wheel)
@@ -402,7 +421,7 @@ const d_height = inject<number>('d_height') ?? 0
 </script>
 
 <template>
-  <g
+  <g v-bind="$attrs"
     id="svg-notes"
     :class="not_playing_class"
     @mouseenter="() => update_pending_display('enter')"
@@ -423,6 +442,7 @@ const d_height = inject<number>('d_height') ?? 0
     >
       <note-v2
         v-for="ix in shown"
+        :key="ix"
         :data-is-dragged="dragging?.includes(ix)"
         :data-is-selected="am_i_selected(ix)"
         :note="get_note(ix)"
@@ -435,7 +455,6 @@ const d_height = inject<number>('d_height') ?? 0
         @dragstart="(e) => ondragstart(e, ix)"
         @click.right="del_note(ix)"
         @click.ctrl="change_my_select(ix)"
-        :key="ix"
       />
       <template v-if="pending_display">
         <note-v2

@@ -5,8 +5,9 @@ import { ref } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { utils } from '@renderer/core/utils'
 import CustomDiff from '@renderer/components/modals/export-custom/custom-diff.vue'
-import type { CustomSongInfo } from '@preload/types.d.ts'
 import CustomJson from '@renderer/components/modals/export-custom/custom-json.vue'
+import CustomInfo from '@renderer/components/modals/export-custom/custom-info.vue'
+import type { CustomSongInfo } from '@preload/types.d.ts'
 
 const chart = Chart.$current
 const phase = ref(0)
@@ -116,7 +117,7 @@ function start_phase_2() {
       </a-tab>
       <div class="custom-inner">
         <custom-diff v-if="phase == 0" v-model="diff_indexs" @next="start_phase_1" />
-        <custom-song-info
+        <custom-info
           v-if="phase == 1"
           v-model:info="info_data"
           v-model:is_backstage="is_backstage"

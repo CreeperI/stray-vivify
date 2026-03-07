@@ -465,6 +465,8 @@ export namespace storages {
       main_lw: number
       ref_lw: number
       reverse: boolean
+      as_bg: boolean
+      bg_op: number
     }
   }
   export interface statistics {

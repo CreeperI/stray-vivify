@@ -156,7 +156,9 @@ const storage = ref<storages.storage_scheme>({
     diff_reference: {
       main_lw: 130,
       ref_lw: 80,
-      reverse: false
+      reverse: false,
+      as_bg: false,
+      bg_op: 70
     }
   },
   version: Version.val,

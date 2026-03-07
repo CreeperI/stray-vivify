@@ -60,7 +60,7 @@ export namespace GlobalStat {
   export let is_dev = false
   export async function check_dev() {
     is_dev = await Invoke('is-dev')
-    if (is_dev) Version.str += "-dev"
+    if (is_dev) Version.str += '-dev'
   }
 
   export const SvgSizing = {

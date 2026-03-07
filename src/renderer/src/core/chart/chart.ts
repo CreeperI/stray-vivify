@@ -1,6 +1,6 @@
 import { ChartType, ChartTypeV2 } from '@preload/chart-types'
 import { notify } from '@renderer/core/misc/notify'
-import { computed, ComputedRef, ref, Ref, triggerRef, watch, WritableComputedRef } from 'vue'
+import { computed, ComputedRef, ref, Ref, watch, WritableComputedRef } from 'vue'
 import { Chart_audio } from '@renderer/core/chart/audio'
 import { Chart_song } from '@renderer/core/chart/song'
 import { Chart_diff } from '@renderer/core/chart/diff'
@@ -12,6 +12,7 @@ import { Invoke } from '@renderer/core/ipc'
 import { utils } from '@renderer/core/utils'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { Chart_vsm } from '@renderer/core/chart/vsm'
+import { StopClass } from '@renderer/core/misc/eventhub'
 import nextFrame = utils.nextFrame
 
 function isBumper(n: ChartType.note | string) {
@@ -36,7 +37,7 @@ function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
           time: note.t,
           lane: note.l,
           len: note.h,
-          width: 1,
+          width: 1
         })
         break
       case 'n':
@@ -90,7 +91,7 @@ function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
 }
 export type ms = number
 
-export class Chart {
+export class Chart extends StopClass {
   static current: Chart | undefined = undefined
   static isBumper = isBumper
   song: Chart_song
@@ -108,7 +109,12 @@ export class Chart {
   sprite_err: Ref<boolean>
   bg_err: Ref<boolean>
 
+  refs: {
+    diff_ref: Ref<number>
+  }
+
   constructor() {
+    super()
     this.song = new Chart_song(this)
     this.diffs = [Chart_diff.createDiff()]
     this.audio = new Chart_audio(this)
@@ -134,6 +140,9 @@ export class Chart {
     this.playfield = null
     this.sprite_err = ref(false)
     this.bg_err = ref(false)
+    this.refs = {
+      diff_ref: ref(-1)
+    }
   }
 
   static get $current() {
@@ -332,7 +341,7 @@ export class Chart {
   }
 
   load_vsm(r: string) {
-    const lines = r.split('\n').map(x => x.replace("\r", ""))
+    const lines = r.split('\n').map((x) => x.replace('\r', ''))
     const data = {
       obj: 'obj_base_gimmick',
       proxies: 0
@@ -406,15 +415,6 @@ export class Chart {
     this.length_end = this.length + 3000
     this.set_header_name()
     this.audio.init_on_end()
-
-    watch(this.audio.refs.current_ms, () => {
-      this.update_on_time_change()
-    })
-  }
-
-  update_on_time_change() {
-    this.diff.update()
-    this.vsm.update()
   }
 
   create_diff() {
@@ -438,12 +438,14 @@ export class Chart {
         msg: '这是最后一张谱面了。这样做会清空已有的note哦。要继续吗？<br>timing将会保留。'
       }).then(() => {
         this.diff.notes = []
+        this.fuck_shown(true)
       })
     else
       modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
         this.diffs.splice(this.diff.diff_index.value, 1)
         this.diff.diff_index.value = 0
-        triggerRef(this.diff.diff_index)
+        this.diff.update_on_diff_index()
+        this.fuck_shown(true)
         utils.refresh()
       })
   }
@@ -520,7 +522,7 @@ export class Chart {
     else if (ext == 'zip') await Invoke('export-zip', { id: this.id })
   }
 
-  init_playfield(start_from_now=false) {
+  init_playfield(start_from_now = false) {
     this.playfield = new Chart_playfield(this, start_from_now)
   }
 

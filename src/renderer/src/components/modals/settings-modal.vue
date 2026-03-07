@@ -71,12 +71,17 @@ const r = Storage._ref
         <a-checkbox v-model="r.settings.always_version" />
 
         <setting-header msg="Diff参考" />
+
         <div>编辑难度lane width</div>
         <a-number-input v-model="r.settings.diff_reference.main_lw" min="1" />
         <div>参考难度lane width</div>
         <a-number-input v-model="r.settings.diff_reference.ref_lw" min="1" />
         <div>左右颠倒</div>
         <a-checkbox v-model="r.settings.diff_reference.reverse" />
+        <div>显示为背景</div>
+        <a-checkbox v-model="r.settings.diff_reference.as_bg" />
+        <div>背景不透明度</div>
+        <a-number-input v-model="r.settings.diff_reference.bg_op" min="0" max="100" />
 
         <setting-header msg="note分组" />
 

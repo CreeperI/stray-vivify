@@ -1,4 +1,4 @@
-import { onUnmounted, Ref, ref, watch } from 'vue'
+import { onUnmounted, Ref, ref, watch, WatchCallback, WatchOptions, WatchSource } from 'vue'
 import { ChartTypeV2 } from '@preload/chart-types'
 
 export namespace utils {
@@ -359,6 +359,12 @@ export namespace utils {
   export function useDeepWatch(observed:Ref) {
     const {stop} = watch(observed, () => {}, {deep:true})
     onUnmounted(() => stop())
+  }
+
+  export function stopWatch(source:WatchSource, cb:WatchCallback, options?:WatchOptions){
+    const x = watch(source, cb, options)
+    onUnmounted(x.stop)
+    return x
   }
 }
 

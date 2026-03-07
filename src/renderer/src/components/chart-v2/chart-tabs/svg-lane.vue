@@ -17,6 +17,7 @@ const { lane_width = Storage.settings.lane_width, only_note = false, x_expand = 
   lane_width?: number
   only_note?: boolean
   x_expand?: number
+  diff_index?: number
 }>()
 
 const id = `lane-wrapper-${Math.random().toFixed(4)}`
@@ -56,7 +57,7 @@ provide('lane_id', id)
         <svg-ticks />
       </template>
       <slot>
-        <svg-notes-editor />
+        <svg-notes-editor :diff_index="diff_index" />
       </slot>
       <rect
         id="svg-bottom-rect"

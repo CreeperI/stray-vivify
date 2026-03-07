@@ -1,6 +1,7 @@
 import { computed, ref, Ref, WritableComputedRef } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
+import { EventHub } from '@renderer/core/misc/eventhub'
 
 type ms = number
 type second = number
@@ -113,6 +114,7 @@ export class Chart_audio {
     this.refs.current_ms.value = v
     if (v < 0) this.from_negative = true
     if (this.paused) this.set_ele_time(v)
+    EventHub.dispatch('audio-time-update')
   }
 
   set_and_play() {
@@ -121,7 +123,7 @@ export class Chart_audio {
     if (!this.from_negative) this.ele?.play()
     this.paused = false
     this.last = performance.now()
-    this.chart.diff.hit_sounder.on_unpause()
+    this.chart.diff.hit_sounder?.on_unpause()
   }
 
   set_ele_time(v: ms) {
@@ -191,5 +193,6 @@ export class Chart_audio {
     this.refs.current_ms.value = v
     if (v < 0) this.from_negative = true
     if (this.paused) this.set_ele_time(v)
+    EventHub.dispatch('audio-time-update')
   }
 }

@@ -6,6 +6,19 @@ import FnDensity from '@renderer/components/chart-v2/chart-tabs/small/fn-density
 import FnEditor from '@renderer/components/chart-v2/chart-tabs/small/fn-editor.vue'
 import FnTime from '@renderer/components/chart-v2/chart-tabs/small/fn-time.vue'
 import FnDebug from '@renderer/components/chart-v2/chart-tabs/small/fn-debug.vue'
+import { Chart } from '@renderer/core/chart/chart'
+import { computed } from 'vue'
+import { Storage } from '@renderer/core/storage'
+import SvgNotesEditor from '@renderer/components/chart-v2/svg-lane/svg-notes-editor.vue'
+
+const chart = Chart.$current
+const d_ref = chart.refs.diff_ref
+const display_other = computed(() => {
+  return d_ref.value != -1 ? !Storage.settings.diff_reference.as_bg : false
+})
+const display_bg = computed(() => {
+  return d_ref.value != -1 ? Storage.settings.diff_reference.as_bg : false
+})
 </script>
 
 <template>
@@ -15,23 +28,44 @@ import FnDebug from '@renderer/components/chart-v2/chart-tabs/small/fn-debug.vue
       <fn-counter />
       <fn-density />
     </div>
-    <svg-lane class="svg-lane" />
+    <svg-lane v-if="display_bg" class="svg-lane">
+      <svg-notes-editor />
+      <svg-notes-editor
+        :diff_index="d_ref"
+        :disable_pending="true"
+        :style="{ opacity: (Storage.settings.diff_reference.bg_op / 100).toFixed(2) }"
+      />
+    </svg-lane>
+    <template v-else-if="display_other && Storage.settings.diff_reference.reverse">
+      <svg-lane
+        :key="d_ref"
+        :diff_index="d_ref"
+        :lane_width="Storage.settings.diff_reference.ref_lw"
+        class="svg-lane"
+        style="margin-left: 10px"
+      >
+        <svg-notes-editor :diff_index="d_ref" :disable_pending="true" />
+      </svg-lane>
+      <svg-lane :lane_width="Storage.settings.diff_reference.main_lw" class="svg-lane" />
+    </template>
+    <template v-else-if="display_other && !Storage.settings.diff_reference.reverse">
+      <svg-lane :lane_width="Storage.settings.diff_reference.main_lw" class="svg-lane" />
+      <svg-lane
+        :key="d_ref"
+        :diff_index="d_ref"
+        :lane_width="Storage.settings.diff_reference.ref_lw"
+        class="svg-lane"
+        style="margin-left: 10px"
+      >
+        <svg-notes-editor :diff_index="d_ref" :disable_pending="true" />
+      </svg-lane>
+    </template>
+    <svg-lane v-else class="svg-lane" />
     <div class="chart-fn fn-wrapper">
       <fn-editor />
       <fn-time />
       <fn-debug />
     </div>
-  </div>
-  <div class="chart-main-left">
-    <div class="chart-fn">
-      <fn-note />
-      <fn-editor />
-      <fn-time />
-      <fn-counter />
-      <fn-density />
-      <fn-debug />
-    </div>
-    <svg-lane class="svg-lane" />
   </div>
 </template>
 
@@ -61,14 +95,5 @@ import FnDebug from '@renderer/components/chart-v2/chart-tabs/small/fn-debug.vue
 
 .chart-fn {
   z-index: 1;
-}
-
-@media screen and (max-width: 1050px) {
-  .chart-main {
-    display: none;
-  }
-  .chart-main-left {
-    display: flex;
-  }
 }
 </style>

@@ -1,11 +1,12 @@
 import { Chart } from '@renderer/core/chart/chart'
-import { computed, ComputedRef, ref, Ref, triggerRef, watch } from 'vue'
+import { computed, ComputedRef, ref, Ref, triggerRef } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { PROXY_REQUIREMENT, VSM_EASING, VSM_MODS } from '@renderer/core/chart/vsm-objects'
 import { Storage } from '@renderer/core/storage'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { notify } from '@renderer/core/misc/notify'
 import { ChartTypeV2 } from '@preload/chart-types'
+import { StopClass } from '@renderer/core/misc/eventhub'
 
 const getEffectiveEnd = (mod: ChartTypeV2.mod) => {
   return mod.time + mod.step * (mod.repeat - 1) + mod.duration
@@ -21,7 +22,7 @@ function fix_mod(m: ChartTypeV2.mod) {
   const req = PROXY_REQUIREMENT(m.modname)
   if (req != 1) m.proxy = req
 }
-export class Chart_vsm {
+export class Chart_vsm extends StopClass {
   chart: Chart
   data: ChartTypeV2.vsm[]
   refs: {
@@ -55,6 +56,7 @@ export class Chart_vsm {
   last_update: number
 
   constructor(chart: Chart) {
+    super()
     this.chart = chart
     this._vsm_index = 0
     this.data = [Chart_vsm.create_vsm()]
@@ -96,14 +98,14 @@ export class Chart_vsm {
       })
     }
 
-    watch(this.refs.vsm_index, (v) => {
+    this.watch(this.refs.vsm_index, (v) => {
       this._vsm_index = v
       this.refs.mod_index.value = -1
       utils.less_assign(this.refs.obj.value, this.data[v])
       this.fuck_shown(this.chart.audio.current_time, true)
     })
 
-    watch(
+    this.watch(
       this.refs.obj,
       (v) => {
         utils.less_assign(this.vsm, v)
@@ -113,10 +115,10 @@ export class Chart_vsm {
       { deep: true }
     )
 
-    watch(this.refs.proxy, () => {
+    this.watch(this.refs.proxy, () => {
       this.force_fuck()
     })
-    watch(this.refs.all_proxy, () => {
+    this.watch(this.refs.all_proxy, () => {
       this.force_fuck()
     })
   }

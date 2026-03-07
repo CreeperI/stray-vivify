@@ -1,4 +1,4 @@
-import { computed, ComputedRef, Ref, ref, toRaw, watch } from 'vue'
+import { computed, ComputedRef, onUnmounted, Ref, ref, toRaw } from 'vue'
 import { Chart, ms } from './chart'
 import { utils } from '../utils'
 import { Storage } from '@renderer/core/storage'
@@ -7,6 +7,7 @@ import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import { calculateChartStats } from '@renderer/core/chart/calc-stat'
 import { ChartTypeV2 } from '@preload/chart-types'
+import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 
 function parse_type(v: string) {
   switch (v) {
@@ -47,9 +48,9 @@ function fix_note(v: ChartTypeV2.note) {
   }
 }
 
-export class Chart_diff {
+export class Chart_diff extends StopClass {
+  static all: Chart_diff[] = []
   chart: Chart
-  static all:Chart_diff[] = []
   counts: Ref<{
     chip: number
     bpm: number
@@ -94,14 +95,15 @@ export class Chart_diff {
   operating_fns: (() => void)[]
   hit_error: boolean
 
-  hit_sounder: HitSoundSystem
+  hit_sounder: HitSoundSystem | undefined
 
   sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
 
-  constructor(chart: Chart) {
+  constructor(chart: Chart, index?: number, hitsound = true) {
+    super()
     this.chart = chart
-    this.diff_index = ref(0)
+    this.diff_index = ref(index ?? 0)
     this.counts = ref({
       chip: 0,
       bpm: 0,
@@ -138,13 +140,14 @@ export class Chart_diff {
       )
     )
     this.density_data = ref([0])
-    watch(
+    this.watch(
       () => Storage.settings.meter,
       () => {
         this.update_beat_line_list()
         this.update_t(this.visible)
       }
     )
+
     // which is for 分音
     // 我想做一个和pjsk.moe那种差不多的谱面导出所以加了一个分音的list
     this.ticks = []
@@ -153,7 +156,7 @@ export class Chart_diff {
     this.operating_fns = []
 
     this.hit_error = false
-    this.hit_sounder = new HitSoundSystem(chart, this.shown)
+    this.hit_sounder = hitsound ? new HitSoundSystem(chart, this.shown) : undefined
 
     this.sr = ref({
       note: 0,
@@ -166,16 +169,12 @@ export class Chart_diff {
     })
     this.max_lane = ref(4)
 
-    watch(this.diff_index, () => {
-      this.chart.set_header_name()
-      this.force_fuck()
-      this.calc_density()
-      this.update_timing_list()
-      this.sort_notes()
-      this.calc_max_lane()
-      this.update_sr()
+    this.watch(this.diff_index, () => {
+      this.update_on_diff_index()
     })
     Chart_diff.all.push(this)
+
+    this.add_stop(EventHub.on('audio-time-update', () => this.update()))
   }
 
   get diff() {
@@ -274,7 +273,7 @@ export class Chart_diff {
         diff1: ['Finale', 'Encore', 'Backstage', 'Terminal'][Math.floor(Math.random() * 4)],
         diff2: Math.floor(Math.random() * 20) + '+',
         charter: Storage.data.value.username ?? '???'
-      },
+      }
     }
   }
 
@@ -356,6 +355,24 @@ export class Chart_diff {
       strs.push(str)
     }
     return strs
+  }
+
+  static useCreateDiff(ch: Chart, index: number) {
+    const diff = new Chart_diff(ch, index, false)
+    onUnmounted(() => {
+      diff.stop()
+    })
+    return diff
+  }
+
+  update_on_diff_index() {
+    this.chart.set_header_name()
+    this.force_fuck()
+    this.calc_density()
+    this.update_timing_list()
+    this.sort_notes()
+    this.calc_max_lane()
+    this.update_sr()
   }
 
   calc_max_lane() {
@@ -735,6 +752,7 @@ export class Chart_diff {
     if (den != 4) str += `/${den}`
     return str
   }
+
   get_beat_info(time: number) {
     const t = this.timing[0].time
     time = Math.max(t, time)
@@ -759,6 +777,7 @@ export class Chart_diff {
       den: den
     }
   }
+
   beat_to_time(beat: number) {
     return this.section_list[beat] ?? 0
   }
@@ -870,8 +889,9 @@ export class Chart_diff {
 
   private play_hit() {
     if (this.chart.playfield) return
-    this.hit_sounder.play_hit()
+    this.hit_sounder?.play_hit()
   }
+
   private force_fuck() {
     this.fuck_shown(this.chart.audio.current_time, true)
   }

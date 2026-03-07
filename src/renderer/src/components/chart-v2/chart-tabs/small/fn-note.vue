@@ -2,12 +2,13 @@
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import SmallDiffChoice from '@renderer/components/chart-v2/chart-tabs/small/small-diff-choice.vue'
-import { Chart } from '@renderer/core/chart/chart'
 import { computed, ComputedRef } from 'vue'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
+import SmallRefChoice from '@renderer/components/chart-v2/chart-tabs/small/small-ref-choice.vue'
+import { Chart } from '@renderer/core/chart/chart'
 
 const { width, s, hold, b } = Storage.note
 
@@ -40,6 +41,7 @@ const select_chip = computed(() => select.value.length - select_ln.value)
 <template>
   <div class="notes">
     <small-diff-choice />
+    <small-ref-choice />
     <div class="note-width">
       <span>note宽</span>
       <div
@@ -117,6 +119,7 @@ const select_chip = computed(() => select.value.length - select_ln.value)
   flex-direction: column;
   gap: 10px;
   margin-bottom: 15px;
+  padding-top: 10px;
 }
 
 .note-width {
