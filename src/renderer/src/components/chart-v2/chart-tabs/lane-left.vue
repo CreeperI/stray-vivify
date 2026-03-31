@@ -37,6 +37,7 @@ const select_max = computed(() => Math.max(...select.value.map((x) => to_note(x)
 const select_min = computed(() => Math.min(...select.value.map((x) => to_note(x).time)))
 const select_ln = computed(() => select.value.filter((x) => 'len' in to_note(x)).length)
 const select_chip = computed(() => select.value.length - select_ln.value)
+// console.log(select)
 </script>
 
 <template>
@@ -45,32 +46,16 @@ const select_chip = computed(() => select.value.length - select_ln.value)
       <small-diff-choice />
       <div class="note-width">
         <span>note宽</span>
-        <div
-          :class="width == 1 ? 'chosen' : ''"
-          class="note-width-btn"
-          @click="Storage.note.set_width(1)"
-        >
+        <div :class="width == 1 ? 'chosen' : ''" class="note-width-btn" @click="Storage.note.set_width(1)">
           1
         </div>
-        <div
-          :class="width == 2 ? 'chosen' : ''"
-          class="note-width-btn"
-          @click="Storage.note.set_width(2)"
-        >
+        <div :class="width == 2 ? 'chosen' : ''" class="note-width-btn" @click="Storage.note.set_width(2)">
           2
         </div>
-        <div
-          :class="width == 3 ? 'chosen' : ''"
-          class="note-width-btn"
-          @click="Storage.note.set_width(3)"
-        >
+        <div :class="width == 3 ? 'chosen' : ''" class="note-width-btn" @click="Storage.note.set_width(3)">
           3
         </div>
-        <div
-          :class="width == 4 ? 'chosen' : ''"
-          class="note-width-btn"
-          @click="Storage.note.set_width(4)"
-        >
+        <div :class="width == 4 ? 'chosen' : ''" class="note-width-btn" @click="Storage.note.set_width(4)">
           4
         </div>
       </div>
@@ -122,45 +107,54 @@ const select_chip = computed(() => select.value.length - select_ln.value)
   gap: 10px;
   margin-bottom: 15px;
 }
+
 .note-width {
   display: grid;
   grid-template-columns: 2fr repeat(4, 1fr);
   gap: 5px;
 }
-.note-width > div,
-.note-width > span,
-.note-snb > div,
-.note-snb > s {
+
+.note-width>div,
+.note-width>span,
+.note-snb>div,
+.note-snb>s {
   text-align: center;
   line-height: 1.5rem;
   height: 1.5rem;
 }
-.note-width > div {
+
+.note-width>div {
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.note-width > div:hover,
+
+.note-width>div:hover,
 .chosen {
   background: var(--button-hover);
 }
+
 .note-snb {
   display: grid;
   grid-template-columns: 3fr 2fr 2fr 2fr;
   gap: 5px;
 }
+
 .note-pending {
   display: flex;
   position: relative;
   justify-content: center;
 }
-.note-pending > img {
+
+.note-pending>img {
   position: relative;
   max-width: 90%;
 }
+
 .note-select-wrapper {
   width: 100%;
   text-align: center;
 }
+
 .note-select {
   color: gray;
   font-style: italic;
@@ -169,6 +163,7 @@ const select_chip = computed(() => select.value.length - select_ln.value)
 .counter-inner div:nth-child(2n + 1) {
   text-align: right;
 }
+
 .counter-inner div:nth-child(2n + 2) {
   text-align: left;
 }

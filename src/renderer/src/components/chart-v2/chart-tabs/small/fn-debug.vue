@@ -29,10 +29,12 @@ const nextT = FrameRate.next_tick.refs
   gap: 15px;
   text-align: left;
 }
-.fn-right-debugger > div {
+
+.fn-right-debugger>div {
   width: 100%;
 }
-.fn-right-debugger > div:nth-child(2n + 1) {
+
+.fn-right-debugger>div:nth-child(2n + 1) {
   text-align: right;
 }
 </style>
