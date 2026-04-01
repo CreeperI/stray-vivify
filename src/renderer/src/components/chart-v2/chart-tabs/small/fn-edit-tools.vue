@@ -7,14 +7,22 @@ const selectedNID = GlobalStat.NoteClipboard.selected
 </script>
 
 <template>
-    <div class="edit-frame">
-        <div class="edit-button" @click="EditorTools.test(selectedNID)">Time Randomize</div>
-        <div class="edit-button" @click="EditorTools.mirror(selectedNID)">Mirror</div>
+    <div class="edit-frame" v-if="selectedNID.length > 0">
+        <p style="text-align: center;">想做些什么呢？</p>
+        <div class="edit-button-frame">
+            <div class="edit-button" @click="EditorTools.test(selectedNID)">Time Randomize</div>
+            <div class="edit-button" @click="EditorTools.mirror(selectedNID)">Mirror</div>
+        </div>
     </div>
+
 </template>
 
 <style lang="css" scoped>
 .edit-frame {
+    padding-top: 0px
+}
+
+.edit-button-frame {
     display: grid;
     grid-template-rows: 1fr 1fr;
     grid-template-columns: 1fr 1fr;
