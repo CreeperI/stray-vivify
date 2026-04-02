@@ -21,8 +21,8 @@ console.log(toolMultiArgs.value)
             <div class="edit-button ln2"
                 @click="EditorTools.mutiplier(selectedNID, toolMultiArgs.multiVal, toolMultiArgs.baseZero)">TimeMultiply
             </div>
-            <a-number-input class=" ln2" v-model="toolMultiArgs.multiVal" :min="0.1" :step="0.1" />
-            <label class=" ln2" style="grid-column: span 1">0ms base</label>
+            <a-number-input class="ln2" v-model="toolMultiArgs.multiVal" :min="0.1" :step="0.1" />
+            <label class="ln2" style="grid-column: span 1">0ms base</label>
             <a-checkbox v-model="toolMultiArgs.baseZero" class="ln2" style="grid-column: span 1" />
         </div>
     </div>
