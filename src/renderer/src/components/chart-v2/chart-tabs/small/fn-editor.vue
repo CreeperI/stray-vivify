@@ -27,19 +27,19 @@ const meter = computed({
       <tr>
         <td style="width: 10%">流速</td>
         <td colspan="9">
-          <a-range v-model="scale" :max="20" :min="0.1" :step="0.1" style="width: 100%" />
+          <a-range v-model="scale" :max="Storage.settings.max_scale" :min="0.1" :step="0.1" style="width: 100%" />
         </td>
         <td style="width: 15%">
-          <a-number-input v-model="scale" max="20" min="0.1" step="0.1" />
+          <a-number-input v-model="scale" :max="Storage.settings.max_scale" min="0.1" step="0.1" />
         </td>
       </tr>
       <tr>
         <td rowspan="2">分音</td>
         <td colspan="9">
-          <a-range v-model="meter" max="64" min="1" step="1" style="width: 100%" />
+          <a-range v-model="meter" :max="Storage.settings.max_meter" min="1" step="1" style="width: 100%" />
         </td>
         <td>
-          <a-number-input v-model="meter" max="64" min="1" step="1" />
+          <a-number-input v-model="meter" :max="Storage.settings.max_meter" min="1" step="1" />
         </td>
       </tr>
       <tr>
@@ -82,7 +82,7 @@ td {
   background: #444;
 }
 
-.fn-right-inner > input {
+.fn-right-inner>input {
   background-color: transparent;
   outline: none;
   border: none;
@@ -92,15 +92,15 @@ td {
   border-bottom: 1px solid transparent;
 }
 
-.fn-right-inner > input:focus {
+.fn-right-inner>input:focus {
   border-bottom: 1px solid var(--grey);
 }
 
-.fn-right-debugger > div {
+.fn-right-debugger>div {
   width: 100%;
 }
 
-.fn-right-debugger > div:nth-child(2n + 1) {
+.fn-right-debugger>div:nth-child(2n + 1) {
   text-align: right;
 }
 </style>

@@ -58,6 +58,8 @@ const storage = ref<storages.storage_scheme>({
   settings: {
     scale: 10,
     meter: 4,
+    max_scale: 20,
+    max_meter: 64,
     reverse_scroll: false,
     lane_width: 130,
     show_bottom_timing: true,
@@ -147,12 +149,12 @@ const storage = ref<storages.storage_scheme>({
       color_repeat_bg: '#ffd700',
       color_repeat_fg: '#008000',
       color_pending_single: '#88aa55',
-      color_pending_repeat: "#ffc0cb",
-      color_text: "#b8dcee"
+      color_pending_repeat: '#ffc0cb',
+      color_text: '#b8dcee'
     },
     always_version: true,
     stray_logo: true,
-    err_notify: true,
+    err_notify: true
   },
   version: Version.val,
   shortcut: '',
@@ -202,7 +204,7 @@ export const Storage = {
     this.data.value.statistics.first_open = Math.min(time, this.data.value.statistics.first_open)
   },
   save() {
-    Invoke('save-conf', {data:JSON.stringify(toRaw(this.data.value))})
+    Invoke('save-conf', { data: JSON.stringify(toRaw(this.data.value)) })
   },
   get version() {
     return storage.value.version
