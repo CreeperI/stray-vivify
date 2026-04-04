@@ -30,7 +30,7 @@ const _meters = [1, 4, 8, 12, 16, 24, 32, 48, 64]
 function fuck_wheel(e: WheelEvent) {
   if (e.ctrlKey) {
     Storage.data.value.settings.scale = Number(
-      Math.max(1, Math.min(Storage.settings.scale - 0.001 * e.deltaY, 20)).toFixed(1)
+      Math.max(1, Math.min(Storage.settings.scale - 0.001 * e.deltaY, Storage.settings.max_scale)).toFixed(1)
     )
   } else if (e.altKey) {
     const current_meter_left = _meters.findIndex((v) => v >= Storage.settings.meter)

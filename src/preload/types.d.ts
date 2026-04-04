@@ -337,6 +337,8 @@ export namespace storages {
   export interface settings {
     scale: number
     meter: number
+    max_scale: number
+    max_meter: number
     reverse_scroll: boolean
     lane_width: number
 

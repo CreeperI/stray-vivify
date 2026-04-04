@@ -36,6 +36,7 @@ const select_max = computed(() => Math.max(...select.value.map((x) => to_note(x)
 const select_min = computed(() => Math.min(...select.value.map((x) => to_note(x).time)))
 const select_ln = computed(() => select.value.filter((x) => 'len' in to_note(x)).length)
 const select_chip = computed(() => select.value.length - select_ln.value)
+// console.log(select)
 </script>
 
 <template>
