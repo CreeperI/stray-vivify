@@ -42,14 +42,15 @@ const r = Storage._ref
         <a-checkbox v-model="r.settings.err_notify" />
         <div>lane-width (px)</div>
         <a-number-input v-model="r.settings.lane_width" class="in" min="1" />
+        <div>最高流速</div>
+        <a-number-input v-model="r.settings.max_scale" class="in" min="1" />
+        <div>最高分度</div>
+        <a-number-input v-model="r.settings.max_meter" class="in" min="1" />
         <div>延迟（视觉）</div>
         <a-number-input v-model="r.settings.offset1" class="in" />
         <word-helper dec="密度折线的采样数，也即折线的数据点数" msg="密度采样间隔" />
         <a-number-input v-model="r.settings.density_data_count" class="in" min="10" />
-        <word-helper
-          dec="仿照malody，不使用小节来标注，而是每一个四分音符（按timing设置）标一个。<br>勾选这个=启用beat。"
-          msg="小节号或拍号"
-        />
+        <word-helper dec="仿照malody，不使用小节来标注，而是每一个四分音符（按timing设置）标一个。<br>勾选这个=启用beat。" msg="小节号或拍号" />
         <a-checkbox v-model="r.settings.bar_or_section" />
 
         <word-helper dec="在启用Beat的时候自动开启。">显示Beat时间</word-helper>
@@ -57,10 +58,7 @@ const r = Storage._ref
         <a-checkbox v-model="r.settings.beat_fn_time" class="in" />
         <div>Beat从0开始</div>
         <a-checkbox v-model="r.settings.bar_from_0" />
-        <word-helper
-          dec="摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间"
-          msg="note吸附范围"
-        />
+        <word-helper dec="摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间" msg="note吸附范围" />
         <a-number-input v-model="r.settings.nearest" />
         <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
         <a-checkbox v-model="r.settings.auto_save" />
@@ -210,6 +208,7 @@ const r = Storage._ref
   align-items: center;
   max-height: 60vh;
 }
+
 .contain {
   flex: 1;
   width: 100%;
@@ -235,6 +234,7 @@ select {
 option {
   color: black;
 }
+
 input {
   max-width: 60%;
   justify-self: center;
