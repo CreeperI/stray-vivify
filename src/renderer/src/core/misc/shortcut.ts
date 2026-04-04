@@ -301,7 +301,7 @@ new ShortCuts(
   true
 )
 
-new ShortCuts('refresh', 'r', () => RefreshAll.fuck(), false, true)
+new ShortCuts('refresh', 'r', () => RefreshAll.refreshAll(), false, true)
 
 new ShortCuts('mod-repeat', 'w', () => Chart.current?.vsm.enable_repeat())
 new ShortCuts("mod-single", 'q', () => Chart.current?.vsm.disable_repeat())

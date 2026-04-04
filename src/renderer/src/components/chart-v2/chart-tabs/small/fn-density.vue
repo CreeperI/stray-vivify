@@ -8,29 +8,15 @@ const chart = Chart.$current
 const width = 300 + 20
 const _width_px = width + 'px'
 const data = chart.diff.density_data
-const path = ref('')
+const path = chart.diff.density_path
 
 const dy = computed(() => {
   const max = Math.max(...data.value)
   return [0, 0.25, 0.5, 0.75, 1].map((v) => [240 - Math.floor(v * 230), v * max])
 })
 
-let is_drawing = false
-async function update_path() {
-  if (is_drawing) return
-  chart.diff.calc_density()
-  path.value = 'M 20 240'
-  const max = Math.max(...data.value)
-  if (data.value.findIndex((v) => v > 0) == -1) return
-  const dx = (width -20) / data.value.length
-  const dt = 1500 / data.value.length
-  is_drawing = true
-  for (let i = 0; i < data.value.length; i++) {
-    const y = 240 - Math.floor((data.value[i] / max) * 230)
-    path.value += `L ${(dx * i + 20).toFixed(3)} ${y}`
-    await new Promise((r) => setTimeout(r, dt))
-  }
-  is_drawing = false
+function update_path() {
+  chart.diff.update_density_path()
 }
 
 onMounted(() => {

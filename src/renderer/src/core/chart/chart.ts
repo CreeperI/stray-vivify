@@ -13,6 +13,7 @@ import { utils } from '@renderer/core/utils'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { Chart_vsm } from '@renderer/core/chart/vsm'
 import { StopClass } from '@renderer/core/misc/eventhub'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import nextFrame = utils.nextFrame
 
 function isBumper(n: ChartType.note | string) {
@@ -429,7 +430,7 @@ export class Chart extends StopClass {
     d.timing = Chart_diff.validate_timing(d.timing)
     this.diffs.push(d)
     this.diff.diff_index.value = this.diffs.length - 1
-    utils.refresh()
+    RefreshAll.refresh('diff-choice')
   }
 
   delete_diff() {
@@ -446,7 +447,7 @@ export class Chart extends StopClass {
         this.diff.diff_index.value = 0
         this.diff.update_on_diff_index()
         this.fuck_shown(true)
-        utils.refresh()
+        RefreshAll.refresh('diff-choice')
       })
   }
 
@@ -543,7 +544,7 @@ export class Chart extends StopClass {
 
   import_osz_pics() {
     Invoke('import-osz-pics', { id: this.id }).then(() => {
-      utils.refresh()
+      RefreshAll.refresh("song-cover")
     })
   }
   async write_png() {

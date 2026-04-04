@@ -14,7 +14,7 @@ const isMax = GlobalStat.window_max_state
 const song_name = GlobalStat.refs.header_display
 
 function do_refresh() {
-  RefreshAll.fuck()
+  RefreshAll.refreshAll()
 }
 
 function close_chart() {

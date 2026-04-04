@@ -93,8 +93,7 @@ export class _FrameRateClass {
     this._call_count_last++
   }
 
-  immediate(val=1) {
-    this.recent.push(val)
+  immediate() {
     this._call_count_last++
   }
 }

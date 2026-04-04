@@ -2,10 +2,9 @@
 import SongInfoSingle from '@renderer/components/chart-v2/chart-tabs/small/song-info-single.vue'
 import ASelect from '@renderer/components/a-elements/a-select.vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
-import { utils } from '@renderer/core/utils'
 import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
-import nextFrame = utils.nextFrame
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const chart = Chart.$current
 
@@ -24,15 +23,12 @@ const img2_show = chart.bg_err
 
 function add_diff() {
   chart.create_diff()
-  nextFrame().then(() => utils.refresh())
 }
 function delete_diff() {
   chart.delete_diff()
-  nextFrame().then(() => utils.refresh())
 }
 function copy_diff() {
   chart.copy_diff()
-  nextFrame().then(() => utils.refresh())
 }
 
 function import_sprite() {
@@ -41,7 +37,8 @@ function import_sprite() {
 function import_bg() {
   Invoke('import-background', { id: chart.id })
 }
-const rkey = utils.refresh_key
+const dkey = RefreshAll.generate_key('diff-choice')
+const pkey = RefreshAll.generate_key('song-cover')
 </script>
 
 <template>
@@ -55,7 +52,7 @@ const rkey = utils.refresh_key
       <song-info-single v-model.trim="refs.bpm" name="BPM" />
       <song-info-single v-model="refs.source" name="来源" />
       <song-info-single v-model="refs.ref" name="注释" />
-      <div class="song-info-single">
+      <div :key="pkey" class="song-info-single">
         <div>曲绘<a-button2 msg="导入曲绘" @click="import_sprite" /></div>
         <img
           v-if="!img_show"
@@ -65,7 +62,7 @@ const rkey = utils.refresh_key
           @error="img_show = true"
         />
       </div>
-      <div class="song-info-single">
+      <div :key="pkey" class="song-info-single">
         <div>背景<a-button2 msg="导入背景" @click="import_bg" /></div>
         <img
           v-if="!img2_show"
@@ -78,7 +75,7 @@ const rkey = utils.refresh_key
     </div>
     <div class="info-inner">
       <div class="song-info-single diff-choose">
-        <div :key="rkey">
+        <div :key="dkey">
           <div>选择难度：</div>
           <a-select v-model="dix" :options="options()" />
         </div>

@@ -5,15 +5,15 @@ import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 import ASelect from '@renderer/components/a-elements/a-select.vue'
 import { Chart } from '@renderer/core/chart/chart'
-import { utils } from '@renderer/core/utils'
 import { onUnmounted, ref, watch } from 'vue'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const chart = Chart.$current
 const vsm = chart.vsm
 
 const { obj, editor, all_proxy, mod, proxy } = vsm.refs
 const able_mods = vsm.refs.sorted_able_mods
-const rKey = utils.refresh_key
+const rKey = RefreshAll.generate_key('vsm-mod')
 function write_vsm() {
   chart.write_current_vsm(__name.value)
 }

@@ -7,6 +7,7 @@ import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { notify } from '@renderer/core/misc/notify'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { StopClass } from '@renderer/core/misc/eventhub'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const getEffectiveEnd = (mod: ChartTypeV2.mod) => {
   return mod.time + mod.step * (mod.repeat - 1) + mod.duration
@@ -109,7 +110,8 @@ export class Chart_vsm extends StopClass {
       this.refs.obj,
       (v) => {
         utils.less_assign(this.vsm, v)
-        utils.refresh()
+        RefreshAll.refresh("vsm-choice")
+        RefreshAll.refresh("vsm-mod")
         this.refs.proxy_widths.value = this.refs.proxy_widths.value.slice(0, v.proxies + 2)
       },
       { deep: true }

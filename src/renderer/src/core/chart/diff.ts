@@ -8,6 +8,7 @@ import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import { calculateChartStats } from '@renderer/core/chart/calc-stat'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 function parse_type(v: string) {
   switch (v) {
@@ -90,6 +91,8 @@ export class Chart_diff extends StopClass {
   shown_timing: Ref<ChartTypeV2.timing[]>
   current_timing: ComputedRef<number>
   density_data: Ref<number[]>
+  density_path: Ref<string>
+  density_updating: boolean = false
 
   on_operating: boolean
   operating_fns: (() => void)[]
@@ -140,6 +143,7 @@ export class Chart_diff extends StopClass {
       )
     )
     this.density_data = ref([0])
+    this.density_path = ref("")
     this.watch(
       () => Storage.settings.meter,
       () => {
@@ -197,7 +201,7 @@ export class Chart_diff extends StopClass {
   set diff1(v: string) {
     this.diff.meta.diff1 = v
     this.chart.set_header_name()
-    utils.refresh()
+    RefreshAll.refresh("diff-choice")
   }
 
   get diff2() {
@@ -207,7 +211,7 @@ export class Chart_diff extends StopClass {
   set diff2(v: string) {
     this.diff.meta.diff2 = v
     this.chart.set_header_name()
-    utils.refresh()
+    RefreshAll.refresh("diff-choice")
   }
 
   get charter() {
@@ -366,13 +370,34 @@ export class Chart_diff extends StopClass {
   }
 
   update_on_diff_index() {
+    console.log('update_on_diff_index')
     this.chart.set_header_name()
     this.force_fuck()
     this.calc_density()
+    this.update_density_path()
     this.update_timing_list()
     this.sort_notes()
     this.calc_max_lane()
     this.update_sr()
+  }
+
+  async update_density_path() {
+    if (this.density_updating) return
+    const path = this.density_path
+    const data = this.density_data
+    path.value = 'M 20 240'
+    const max = Math.max(...data.value)
+    if (data.value.findIndex((v) => v > 0) == -1) return
+    const dx = 300 / data.value.length
+    const dt = 1500 / data.value.length
+
+    this.density_updating = true
+    for (let i = 0; i < data.value.length; i++) {
+      const y = 240 - Math.floor((data.value[i] / max) * 230)
+      path.value += `L ${(dx * i + 20).toFixed(3)} ${y}`
+      await new Promise((r) => setTimeout(r, dt))
+    }
+    this.density_updating = false
   }
 
   calc_max_lane() {

@@ -1,4 +1,4 @@
-import { onUnmounted, Ref, ref, watch, WatchCallback, WatchOptions, WatchSource } from 'vue'
+import { onUnmounted, Ref, watch, WatchCallback, WatchOptions, WatchSource } from 'vue'
 import { ChartTypeV2 } from '@preload/chart-types'
 
 export namespace utils {
@@ -270,11 +270,7 @@ export namespace utils {
     }
     return str + 'h.png'
   }
-
-  export const refresh_key = ref('')
-  export function refresh() {
-    refresh_key.value = Math.random().toString().slice(0, 7)
-  }
+  export function refresh() {}
 
   export function memset<R extends string, T>(o: Record<R, T>, v: T) {
     for (const key in o) {
@@ -356,12 +352,12 @@ export namespace utils {
     // 其他情况（如函数、Symbol 等）不认为相等
     return false
   }
-  export function useDeepWatch(observed:Ref) {
-    const {stop} = watch(observed, () => {}, {deep:true})
+  export function useDeepWatch(observed: Ref) {
+    const { stop } = watch(observed, () => {}, { deep: true })
     onUnmounted(() => stop())
   }
 
-  export function stopWatch(source:WatchSource, cb:WatchCallback, options?:WatchOptions){
+  export function stopWatch(source: WatchSource, cb: WatchCallback, options?: WatchOptions) {
     const x = watch(source, cb, options)
     onUnmounted(x.stop)
     return x

@@ -7,7 +7,7 @@ import { Chart } from '@renderer/core/chart/chart'
 import { onUnmounted, ref, watch } from 'vue'
 import { VSM_OBJECTS } from '@renderer/core/chart/vsm-objects'
 import { Storage } from '@renderer/core/storage'
-import { utils } from '@renderer/core/utils'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const chart = Chart.$current
 const vsm = chart.vsm
@@ -44,7 +44,7 @@ const obj_options = VSM_OBJECTS.map((x) => {
     display: x
   }
 })
-const rKey = utils.refresh_key
+const rKey = RefreshAll.generate_key('vsm-choice')
 </script>
 
 <template>

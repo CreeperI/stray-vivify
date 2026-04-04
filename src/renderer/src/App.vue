@@ -13,7 +13,7 @@ import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { computed } from 'vue'
 
 const state = GlobalStat.route.route
-const key = RefreshAll.__key
+const key = RefreshAll.generate_key("app")
 
 const show_version = computed(() => {
   if (Storage.settings.always_version) return true
@@ -22,7 +22,7 @@ const show_version = computed(() => {
 </script>
 
 <template>
-  <template v-if="key % 2 == 0">
+  <template v-if="key != '' " :key="key">
     <Header v-if="state != 'editor'" />
     <ChartList v-if="state == 'start'" />
     <ChartV2 v-if="state == 'editor'" />

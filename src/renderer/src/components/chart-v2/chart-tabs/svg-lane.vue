@@ -8,12 +8,16 @@ import SvgBottomBpm from '@renderer/components/chart-v2/svg-lane/svg-bottom-bpm.
 import SvgTicks from '@renderer/components/chart-v2/svg-lane/svg-ticks.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { utils } from '@renderer/core/utils'
 import SvgSection from '@renderer/components/chart-v2/svg-lane/svg-section.vue'
 import { computed, provide } from 'vue'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const svg_sizing = GlobalStat.SvgSizing
-const { lane_width = Storage.settings.lane_width, only_note = false, x_expand = 0 } = defineProps<{
+const {
+  lane_width = Storage.settings.lane_width,
+  only_note = false,
+  x_expand = 0
+} = defineProps<{
   lane_width?: number
   only_note?: boolean
   x_expand?: number
@@ -27,7 +31,7 @@ svg_sizing.bar_length = svg_sizing.max_lane * lane_width + 12
 svg_sizing.view_port = [0, 0, svg_sizing.svg_width, window.screen.height]
 
 const _px = svg_sizing.svg_width + 'px'
-const rkey = utils.refresh_key
+const rkey = RefreshAll.generate_key('svg-lane')
 
 const bar_or_section = computed(() => Storage.settings.bar_or_section)
 

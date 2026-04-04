@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import ASelect from '@renderer/components/a-elements/a-select.vue'
 import { Chart } from '@renderer/core/chart/chart'
-import { utils } from '@renderer/core/utils'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const chart = Chart.$current
 const options = () =>
@@ -10,7 +10,7 @@ const options = () =>
     return { val: v, display: x.meta.diff1 + ' - ' + x.meta.diff2 }
   })
 const dix = chart.diff.diff_index
-const rkey = utils.refresh_key
+const rkey = RefreshAll.generate_key('diff-choice')
 </script>
 
 <template>
