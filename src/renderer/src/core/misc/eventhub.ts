@@ -1,6 +1,6 @@
 import { watch as VueWatch, WatchCallback, WatchHandle, WatchOptions, WatchSource } from 'vue'
 
-const events = ['audio-time-update'] as const
+const events = ['audio-time-update', 'fuck-shown'] as const
 
 type eventNames = (typeof events)[number]
 

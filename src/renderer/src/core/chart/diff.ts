@@ -179,6 +179,7 @@ export class Chart_diff extends StopClass {
     Chart_diff.all.push(this)
 
     this.add_stop(EventHub.on('audio-time-update', () => this.update()))
+    this.add_stop(EventHub.on('fuck-shown', () => this.force_fuck()))
   }
 
   get diff() {
