@@ -232,10 +232,7 @@ export class Chart extends StopClass {
       }
       chart.set_chart(data.data)
       chart.set_name(data.data.song.name)
-      chart.diff.calc_max_lane()
-      chart.diff.update_timing_list()
-      chart.diff.sort_notes()
-      chart.diff.update_sr()
+      chart.diff.update_on_diff_index()
     }
     chart.id = id
     this.current = chart

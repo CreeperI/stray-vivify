@@ -35,11 +35,11 @@ useUpdateFrameRate('svg-bar-line')
       v-for="tm in timing_list"
       :y="time_bottom_bar(current_time, tm.time, mul)"
       fill="#b8dcee"
-      font-size="1.2rem"
+      font-size="1rem"
       text-anchor="middle"
       x="25"
     >
-      {{ tm.bpm }}
+      {{ tm.bpm.toString().slice(0,6) }}
     </text>
   </g>
 </template>

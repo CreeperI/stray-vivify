@@ -29,25 +29,25 @@ const sr = chart.diff.sr
       <div>平均密度</div>
       <div>{{ counts.avg_density.toFixed(2) }}</div>
       <div>BPM</div>
-      <div>{{ counts.min_bpm }} ~ {{ counts.max_bpm }}</div>
+      <div>{{ counts.min_bpm.toFixed(2) }} ~ {{ counts.max_bpm.toFixed(2) }}</div>
       <div>(Mainly</div>
       <div>{{ counts.main_bpm }})</div>
     </div>
 
     <div v-if="Storage.settings.star_rating" class="counter-sr">
       <div @click="chart.diff.update_sr()">
-        <word-helper :msg="`SR ${(sr.total_v3 / 50).toFixed(2)}*`" dec="开玩笑的"></word-helper>
+        <word-helper :msg="`Lv. ${(sr.total_v3 / 50).toFixed(2)}`" dec="开玩笑的，点击刷新" />
       </div>
       <div>CHIP</div>
       <stat-line str="note" />
-      <div>STREAM</div>
-      <stat-line str="speed" />
       <div>TECH</div>
       <stat-line str="tech" />
-      <div>BURST</div>
-      <stat-line str="fill" />
+      <div>STREAM</div>
+      <stat-line str="speed" />
       <div>CHORD</div>
       <stat-line str="multi" />
+      <div>BURST</div>
+      <stat-line str="fill" />
     </div>
   </div>
 </template>

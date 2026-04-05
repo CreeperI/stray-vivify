@@ -24,9 +24,9 @@ function test(nids: number[]) {
 
 function mirror(nids: number[]) {
   const notes: ChartTypeV2.note[] = nids.map((nid) => Chart.$current.diff.to_note(nid))
+  const maxLane = Chart.$current.diff.max_lane.value
   notes.forEach((note) => {
-    const midLane = (4 - note.width) / 2
-    note.lane = Math.round(-(note.lane - midLane) + midLane)
+    note.lane = maxLane - note.lane - note.width
   })
   EventHub.dispatch('fuck-shown')
 }

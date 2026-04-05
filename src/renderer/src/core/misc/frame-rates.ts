@@ -139,13 +139,18 @@ export const FrameRate = {
 }
 
 export function useUpdateFrameRate(key: string) {
-  const cls = new _FrameRateClass()
-  FrameRate.Updates[key] = cls
-
+  let cls = FrameRate.Updates[key]
+  if (!cls) {
+    cls = new _FrameRateClass()
+    FrameRate.Updates[key] = cls
+  }
   onBeforeUpdate(() => cls.start())
   onUpdated(() => cls.end())
 
-  onUnmounted(() => delete FrameRate.Updates[key])
+  onUnmounted(() => {
+    delete FrameRate.Updates[key]
+    utils.remove(all, cls)
+  })
 
   return cls
 }

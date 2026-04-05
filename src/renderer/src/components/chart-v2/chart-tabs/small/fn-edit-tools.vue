@@ -17,8 +17,7 @@ console.log(toolMultiArgs.value)
   <div v-if="selectedNID.length > 0" class="edit-frame">
     <p style="text-align: center">想做些什么呢？</p>
     <div class="edit-button-frame">
-      <div class="edit-button ln1" @click="EditorTools.test(selectedNID)">Time Randomize</div>
-      <div class="edit-button ln1" @click="EditorTools.mirror(selectedNID)">Mirror</div>
+      <div class="edit-button ln1" @click="EditorTools.mirror(selectedNID)">对称</div>
       <div
         class="edit-button ln2"
         @click="EditorTools.mutiplier(selectedNID, toolMultiArgs.multiVal, toolMultiArgs.baseZero)"

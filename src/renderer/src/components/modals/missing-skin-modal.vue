@@ -18,7 +18,9 @@ const missings = utils.keyof(status).filter((x) => status[x] == 1)
     <div class="wrapper">
       <div>下列skin贴图未能加载，请检查skin中是否有这个贴图。</div>
       <p></p>
-      <div v-for="sk in missings">{{ sk }}</div>
+      <div class="skin-names">
+        <div v-for="sk in missings">{{ sk }}</div>
+      </div>
     </div>
     <template #footer>
       <a-button2 msg="打开skin文件夹" @click="open_folder" />
@@ -31,5 +33,10 @@ const missings = utils.keyof(status).filter((x) => status[x] == 1)
 .wrapper {
   width: 90%;
   text-align: center;
+}
+.skin-names {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  justify-content: center;
 }
 </style>

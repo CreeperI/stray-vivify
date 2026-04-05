@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { Chart } from '@renderer/core/chart/chart'
 import { computed } from 'vue'
+import { Storage } from '@renderer/core/storage'
 
 const chart = Chart.$current
 const current_time = chart.audio.refs.current_ms
@@ -10,7 +11,7 @@ const show_circle = computed(() => {
   return true
 })
 function time_left(t: number, time: number) {
-  return `left: ${(time - t) * 0.85 + 50}px;`
+  return `left: ${(time - t) * Storage.settings.record_field.circle_speed + 50}px;`
 }
 const shown_t = chart.diff.shown_bar_ticks
 const current_timing = computed(() => chart.diff.timing[chart.diff.current_timing.value])
@@ -40,8 +41,8 @@ function circle_color(t: number) {
     <div class="circles-left">
       <img alt="" class="ticks-icon" src="/yq.jpg" />
       <div class="circles-sv">
-        stray/vivify <br />
-        Analyser
+<!--        stray/vivify <br />-->
+<!--        Analyser-->
       </div>
       <div class="circles-timing">
         <div>BPM</div>

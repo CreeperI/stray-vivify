@@ -28,7 +28,7 @@ const _show_bottom_bpm = computed(() => {
       Timing #{{ current_timing }}
     </text>
     <text dy="-35px" text-anchor="start" x="50%" y="100%">
-      {{ chart.diff.timing[current_timing].bpm }}bpm {{ chart.diff.timing[current_timing].num }}/{{
+      {{ chart.diff.timing[current_timing].bpm.toString().slice(0,6) }}bpm {{ chart.diff.timing[current_timing].num }}/{{
         chart.diff.timing[current_timing].den
       }}
     </text>

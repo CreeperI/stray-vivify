@@ -361,6 +361,7 @@ export namespace storages {
       sprite: boolean
       show_ticks: boolean
       show_circles: boolean
+      circle_speed: number
     }
 
     sprites: {

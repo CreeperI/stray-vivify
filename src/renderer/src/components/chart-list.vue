@@ -253,6 +253,9 @@ const tip = utils.random(StartUpTips)
   border-radius: 5px;
   min-height: 2rem;
 }
+.chart-unit:last-child {
+  margin-bottom: 120px;
+}
 
 .chart-unit:hover {
   transform: translateX(0);

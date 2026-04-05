@@ -9,6 +9,7 @@ import { calculateChartStats } from '@renderer/core/chart/calc-stat'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
+import { GlobalStat } from '@renderer/core/globalStat'
 
 function parse_type(v: string) {
   switch (v) {
@@ -380,6 +381,8 @@ export class Chart_diff extends StopClass {
     this.sort_notes()
     this.calc_max_lane()
     this.update_sr()
+    RefreshAll.refresh("svg-lane")
+    GlobalStat.SvgSizing.max_lane = this.max_lane.value
   }
 
   async update_density_path() {

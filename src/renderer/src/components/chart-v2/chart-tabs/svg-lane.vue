@@ -25,12 +25,16 @@ const {
 }>()
 
 const id = `lane-wrapper-${Math.random().toFixed(4)}`
-svg_sizing.max_lane = Chart.$current.diff.max_lane.value
-svg_sizing.svg_width = svg_sizing.max_lane * lane_width + 2 * 50 + 12 + x_expand
-svg_sizing.bar_length = svg_sizing.max_lane * lane_width + 12
-svg_sizing.view_port = [0, 0, svg_sizing.svg_width, window.screen.height]
+viewBox()
 
-const _px = svg_sizing.svg_width + 'px'
+function viewBox() {
+  svg_sizing.max_lane = Chart.$current.diff.max_lane.value
+  svg_sizing.svg_width = svg_sizing.max_lane * lane_width + 2 * 50 + 12 + x_expand
+  svg_sizing.bar_length = svg_sizing.max_lane * lane_width + 12
+  svg_sizing.view_port = [0, 0, svg_sizing.svg_width, window.screen.height]
+  return svg_sizing.view_port
+}
+
 const rkey = RefreshAll.generate_key('svg-lane')
 
 const bar_or_section = computed(() => Storage.settings.bar_or_section)
@@ -41,10 +45,9 @@ provide('lane_id', id)
 </script>
 
 <template>
-  <div :id="id" :style="{ flexBasis: _px }" class="lane-wrapper">
+  <div :id="id" :style="{ flexBasis: viewBox()[2] + 'px' }" class="lane-wrapper" :key="rkey">
     <svg
-      :key="rkey"
-      :viewBox="svg_sizing.view_port.join(' ')"
+      :viewBox="viewBox().join(' ')"
       :width="svg_sizing.svg_width"
       class="lane-svg"
       preserveAspectRatio="xMidYMax slice"
@@ -97,6 +100,7 @@ provide('lane_id', id)
 .lane-wrapper {
   height: 100%;
   flex-shrink: 0;
+  transition: flex-basis 0.2s ease-in-out;
 }
 
 .lane-svg {

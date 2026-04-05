@@ -35,8 +35,12 @@ export namespace CheckSkin {
     let is_missing = false
     for (const key of utils.keyof(status)) {
       try {
-        await fetch('stray:/__skin__/' + key)
-        status[key] = 2
+        const r = await fetch('stray:/__skin__/' + key)
+        if (r.ok) status[key] = 2
+        else {
+          status[key] = 1
+          is_missing = true
+        }
       } catch (e) {
         is_missing = true
         status[key] = 1

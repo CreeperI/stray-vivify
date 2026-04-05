@@ -5,8 +5,8 @@ import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 
 export const Version = {
-  val: 9.7,
-  str: '0.9.7'
+  val: 9.8,
+  str: '0.9.8'
 }
 
 const note = {
@@ -76,7 +76,8 @@ const storage = ref<storages.storage_scheme>({
       detail: 3,
       sprite: true,
       show_ticks: true,
-      show_circles: false
+      show_circles: false,
+      circle_speed: 0.65
     },
     sprites: {
       bar_color1: '#ffffff',

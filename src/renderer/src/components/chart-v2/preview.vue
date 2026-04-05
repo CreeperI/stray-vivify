@@ -10,6 +10,7 @@ import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter
 import { notify } from '@renderer/core/misc/notify'
 import { Invoke } from '@renderer/core/ipc'
 import SvgNotesDisplay from '@renderer/components/chart-v2/svg-lane/svg-notes-display.vue'
+import TickCircle from '@renderer/components/chart-v2/chart-tabs/small/tick-circle.vue'
 
 const chart = Chart.$current
 
@@ -152,6 +153,8 @@ onUnmounted(() => {
           <svg-notes-display />
         </svg-lane>
       </slot>
+
+      <tick-circle v-if="Storage.settings.record_field.show_circles" />
 
       <div class="pf-inf">
         <slot name="info"></slot>

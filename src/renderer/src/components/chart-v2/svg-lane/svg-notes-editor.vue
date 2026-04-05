@@ -168,6 +168,7 @@ function del_note(n: number) {
   if (pending_hold_fixed) return
   if (selected.value.includes(n)) {
     diff.remove_note_with_undo(...selected.value)
+    utils.clear_arr(selected.value)
     return
   }
   if (!diff.remove_note_with_undo(to_note(n))) notify.error('删除note失败。')
