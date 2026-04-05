@@ -11,3 +11,4 @@ skin/
 package-lock.json
 .prettierrc.yaml
 external
+pnpm-*
