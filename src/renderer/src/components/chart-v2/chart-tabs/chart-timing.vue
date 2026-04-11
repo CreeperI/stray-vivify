@@ -84,6 +84,10 @@ onMounted(() => {
 function bpm_change(e: Event) {
   bpm_comp.value = parseFloat((e.target as HTMLInputElement).value)
 }
+
+function copy_timing_list() {
+  navigator.clipboard.writeText(chart.diff.timing.map((t) => `${t.time}, ${t.bpm}`).join('\n'))
+}
 </script>
 
 <template>
@@ -91,7 +95,8 @@ function bpm_change(e: Event) {
     <div class="timing-left">
       <div class="timing-list">
         <div class="timing-header">
-          <div>Timing List</div>
+          <div style="flex: 1">Timing List</div>
+          <a-button2 class="timing-add" msg="复制timing list" @click="copy_timing_list" />
           <a-button2 class="timing-add" msg="+new Timing" @click="add_timing" />
         </div>
         <div class="timing-list-inner">
@@ -181,6 +186,7 @@ function bpm_change(e: Event) {
   display: flex;
   justify-content: space-between;
   padding-left: 15px;
+  gap:  5px;
 }
 .timing-add {
   border-radius: 3px;
