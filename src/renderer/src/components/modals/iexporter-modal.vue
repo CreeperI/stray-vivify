@@ -56,9 +56,6 @@ function import_osz() {
   Chart.$current.import_osz()
 }
 
-function import_osz_pics() {
-  Chart.$current.import_osz_pics()
-}
 function open_svg() {
   modal.ChartPreviewModal.show({})
 }
@@ -73,7 +70,6 @@ function open_svg() {
           <a-button2 msg="导入vsc" @click="read_vsc" />
           <a-button2 msg="导入vsm" @click="read_vsm" />
           <a-button2 msg="导入osz" @click="import_osz" />
-          <a-button2 msg="导入osz的曲绘" @click="import_osz_pics" />
         </div>
       </Hide>
       <Hide :def="true" title="导出">

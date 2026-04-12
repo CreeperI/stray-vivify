@@ -3,7 +3,7 @@ import fs, { existsSync, readFileSync } from 'fs'
 import VsbParser from './vsbParser'
 import * as electron from 'electron'
 import { app, dialog, ipcMain, shell } from 'electron'
-import path, { basename } from 'node:path'
+import path, { basename, extname } from 'node:path'
 import ChartManager from './chart-manager'
 import { file_paths, folder_size } from './fp-parser'
 import { OszReader } from './osz-reader'
@@ -22,8 +22,10 @@ const Handler = (mw: Electron.BrowserWindow) => {
   const sender = mw.webContents.send.bind(mw.webContents) as IpcHandlers.send.send
   function ask_id() {
     return new Promise<string | undefined>((resolve) => {
-      sender('ask-id', {ids: chart_manager.id_list()})
+      sender('ask-id', { ids: chart_manager.id_list() })
+      console.log(`[${Date.now()}]Asked id`)
       ipcMain.once('return-id', (_, id: undefined | string) => {
+        console.log(`[${Date.now()}]Got id: ${id}`)
         resolve(id)
       })
     })
@@ -157,7 +159,8 @@ const Handler = (mw: Electron.BrowserWindow) => {
       const osz = OszReader.create(fp[0])
       return {
         song: osz.get_song(),
-        diff: osz.get_diffs()
+        diff: osz.get_diffs(),
+        pix: osz.getImages().length
       }
     },
     'import-from-osz': async () => {
@@ -165,24 +168,25 @@ const Handler = (mw: Electron.BrowserWindow) => {
         properties: ['openFile'],
         filters: [{ name: 'OSZ', extensions: ['osz'] }]
       })
-      if (!fp) return
-      const osz = new OszReader(fp[0])
-      const song = osz.getAudioFile()
-      if (!song) return
-      const id = await ask_id()
-      if (!id) return
-      chart_manager.create_with_buffer(id, song[1], song[0])
-    },
-    'import-osz-pics': (_, { id }) => {
-      const fp = dialog.showOpenDialogSync({
-        properties: ['openFile'],
-        filters: [{ name: 'OSZ', extensions: ['osz'] }]
-      })
-      if (!fp) return
+      if (!fp) return 0
       const osz = OszReader.create(fp[0])
-      const images = osz.getImages()
+      const song = osz.getAudioFile()
+      if (!song) return 0
+      const id = await ask_id()
+      if (!id) return 0
+      chart_manager.create_from_osz(id, osz)
+      return 1
+    },
+    'import-osz-pics': (_, { id, ix }) => {
+      const current = OszReader.current
+      if (!current) return
+      const images = current.getImages()
       if (images.length == 0) return
-      chart_manager.import_osz_sprite(id, images[0][0], images[0][1])
+      chart_manager.import_osz_sprite(id, images[ix][0], extname(images[ix][1]))
+    },
+    'close-osz': () => {
+      OszReader.current = undefined
+      console.log("osz closed")
     },
     'export-preview-svg': (_, { id, svg_text }) => {
       chart_manager.write_svg_text(id, svg_text)
@@ -242,8 +246,8 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'joined-time': (_) => {
       let T = Infinity
-      T = Math.min(T,fs.statSync(file_paths.module).birthtimeMs)
-      T= Math.min(T,fs.statSync(app.getPath('userData')).birthtimeMs)
+      T = Math.min(T, fs.statSync(file_paths.module).birthtimeMs)
+      T = Math.min(T, fs.statSync(app.getPath('userData')).birthtimeMs)
       if (process.env.APPDATA) {
         const p = path.join(process.env.APPDATA, 'vs-charter-ev')
         if (fs.existsSync(p)) T = Math.min(T, fs.statSync(p).birthtimeMs)

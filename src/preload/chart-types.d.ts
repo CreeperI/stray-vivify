@@ -114,7 +114,10 @@ export namespace ChartTypeV2 {
   export type diff = {
     notes: note[]
     timing: timing[]
-    meta: meta
+    meta: meta,
+    override?: {
+      max_lane?: number
+    }
   }
   export type meta = {
     charter: string

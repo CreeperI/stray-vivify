@@ -2,6 +2,7 @@ import fs from 'fs'
 import { join } from 'path'
 import path, { basename, extname } from 'node:path'
 import { file_paths } from './fp-parser'
+import { OszReader } from './osz-reader'
 
 function convertPath(originalPath: string) {
   const match = originalPath.match(/^\/([a-zA-Z])\/(.*)$/)
@@ -36,7 +37,10 @@ function response_img(folder: string, spr: string) {
   return new Response(fs.readFileSync(path.join(folder, spr)), {
     headers: {
       'Content-Type': 'image/' + extname(spr).replace('.', ''),
-      'Content-Disposition': 'inline'
+      'Content-Disposition': 'inline',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0'
     }
   })
 }
@@ -89,6 +93,19 @@ export function stray_handler() {
             'Content-Disposition': 'inline'
           }
         })
+    } else if (decodedUrl.includes('__osz__')) {
+      if (OszReader.current) {
+        const imgs = OszReader.current.getImages()
+        const id = parseInt(decodedUrl.replace('/__osz__/', ''))
+        if (imgs.length > id) {
+          return new Response(Buffer.from(imgs[id][0]), {
+            headers: {
+              'Content-Type': 'image/' + imgs[id][1].slice(1),
+              'Content-Disposition': 'inline'
+            }
+          })
+        }
+      }
     }
     return new Response(null, { status: 404 })
   }

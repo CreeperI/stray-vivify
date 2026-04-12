@@ -8,6 +8,7 @@ import AdmZip from 'adm-zip'
 import { find_png, find_song } from './stray'
 import * as child_process from 'node:child_process'
 import { ChartTypeV2 } from '../preload/chart-types'
+import { OszReader } from './osz-reader'
 
 function timestr() {
   const date = new Date()
@@ -293,6 +294,47 @@ export default class ChartManager {
     fs.writeFileSync(path.join(folder, 'song' + ext), buf)
     this.add_chart(id, 'song', 'unknown', 'unknown', ext, [])
     return 1
+  }
+
+  create_from_osz(id: string, osz:OszReader) {
+    const folder = path.join(this.charts_folder, id)
+    if (fs.existsSync(folder)) return 0
+    fs.mkdirSync(folder)
+    const s = osz.getAudioFile()
+    if (!s) return
+    fs.writeFileSync(path.join(folder, 'song' + s[0]), s[1])
+    const imgs = osz.getImages()
+    if (imgs.length != 0) {
+      fs.writeFileSync(path.join(folder, 'song' + imgs[0][1]), imgs[0][0])
+    }
+    const chart: ChartTypeV2.final = {
+      diffs: osz.get_diffs(),
+      song: osz.get_song() || {
+        name: 'song',
+        composer: 'unknown',
+        bpm: 'unknown',
+        name_roman: '',
+        composer_roman: '',
+        source: '',
+        sprite: '',
+        ref: ''
+      },
+      vsm: [
+        {
+          obj: 'obj_base_gimmick',
+          proxies: 0,
+          mods: [],
+          mpfs: [],
+          name: '#DEFAULT'
+        }
+      ],
+      version: -1
+    }
+    this.add_chart(id, chart.song.name, chart.song.composer, chart.song.bpm, s[0], chart.diffs.map(d =>
+      d.meta.diff1 + ' ' + d.meta.diff2
+    ))
+    this.write_chart(id, chart)
+    return chart
   }
 
   import_osz_sprite(id: string, buf: Buffer, ext: string) {

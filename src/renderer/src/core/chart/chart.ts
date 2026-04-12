@@ -456,11 +456,11 @@ export class Chart extends StopClass {
     this.song.set_song(v.song)
     this.diffs = v.diffs.map((x) => {
       let r = Chart_diff.createDiff()
-      utils.shallow_assign(r, x)
+      utils.shallow_assign(r as Required<ChartTypeV2.diff>, x)
       r.notes = Chart_diff.validate_notes(r.notes)
       return r
     })
-    if (v.vsm) {
+    if (v.vsm?.length) {
       this.vsm.data = v.vsm.map((x) => {
         let r = Chart_vsm.create_vsm()
         utils.shallow_assign(r, x)
@@ -536,12 +536,13 @@ export class Chart extends StopClass {
     const r = await Invoke('read-osz')
     if (!r) return
     console.log(r)
-    modal.LoadOszModal.show({ diff: r.diff, song: r.song })
+    modal.LoadOszModal.show({ diff: r.diff, song: r.song, pix: r.pix })
   }
 
-  import_osz_pics() {
-    Invoke('import-osz-pics', { id: this.id }).then(() => {
-      RefreshAll.refresh("song-cover")
+  import_osz_pics(ix: number) {
+    Invoke('import-osz-pics', { id: this.id, ix: ix }).then(() => {
+      RefreshAll.refresh('song-cover')
+      notify.success("曲绘一份！")
     })
   }
   async write_png() {

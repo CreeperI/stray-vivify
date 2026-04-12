@@ -202,14 +202,21 @@ export type Invoke = {
   }
   'read-osz': {
     arg: {}
-    r: { diff?: ChartTypeV2.diff[]; song?: ChartTypeV2.song } | undefined
+    r: { diff?: ChartTypeV2.diff[];
+      song?: ChartTypeV2.song;
+      // here pix stands for the max-index of imageData[], would be [0, img.length - 1]
+      pix: number } | undefined
+  }
+  'close-osz': {
+    arg: {}
+    r: void
   }
   'import-from-osz': {
     arg: {}
-    r: Promise<void> | undefined
+    r: Promise<number> | undefined
   }
   'import-osz-pics': {
-    arg: { id: string }
+    arg: { id: string; ix: number }
     r: void
   }
   'export-preview-svg': {

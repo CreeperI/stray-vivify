@@ -165,17 +165,8 @@ const tip = utils.random(StartUpTips)
   position: relative;
   color: gold;
   z-index: 15;
-  animation: a-tip 12s infinite alternate;
   height: 1.5rem;
   line-height: 1.5rem;
-}
-@keyframes a-tip {
-  0% {
-    font-size: 0.9rem;
-  }
-  100% {
-    font-size: 0.95rem;
-  }
 }
 .su-greeting {
   text-align: center;

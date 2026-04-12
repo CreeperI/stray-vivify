@@ -2,6 +2,7 @@ import { Ref, ref, watch } from 'vue'
 import { Invoke } from '@renderer/core/ipc'
 import { Storage } from '@renderer/core/storage'
 import { notify } from '@renderer/core/misc/notify'
+import { GlobalStat } from '@renderer/core/globalStat'
 
 export namespace ChartSize {
   export const data = ref({
@@ -103,6 +104,7 @@ export const Log = {
       },
       true
     )
+    if (GlobalStat.is_dev) return
     const keys = ['log', 'warn', 'error', 'debug']
     for (const key of keys) {
       const old: Function = console[key]

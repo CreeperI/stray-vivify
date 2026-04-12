@@ -3,13 +3,15 @@ import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import { ChartTypeV2 } from '@preload/chart-types'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { Chart } from '@renderer/core/chart/chart'
-import { ref } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import Hide from '@renderer/components/a-elements/hide.vue'
 import { utils } from '@renderer/core/utils'
+import { Invoke } from '@renderer/core/ipc'
 
 defineProps<{
   diff?: ChartTypeV2.diff[]
   song?: ChartTypeV2.song
+  pix: number
 }>()
 
 const chart = Chart.$current
@@ -18,6 +20,9 @@ function import_diff(d: ChartTypeV2.diff, ix: number) {
   chart.add_diff(d)
   imported.value.push(ix)
 }
+function import_png(ix: number) {
+  chart.import_osz_pics(ix)
+}
 
 const show_song = ref(false)
 function load_song(s: ChartTypeV2.song) {
@@ -25,6 +30,9 @@ function load_song(s: ChartTypeV2.song) {
   show_song.value = true
   chart.set_header_name()
 }
+onUnmounted(() => {
+  Invoke('close-osz')
+})
 </script>
 
 <template>
@@ -40,12 +48,24 @@ function load_song(s: ChartTypeV2.song) {
           </div>
         </div>
       </Hide>
-      <Hide title="歌曲">
+      <Hide :def="true" title="歌曲">
         <div v-if="song" class="osz-song">
-          <div>{{ song.name }}</div>
-          <div>{{ song.composer }}</div>
+          <div>
+            <strong>{{ song.name }}</strong> - {{ song.composer }}
+          </div>
+          <div>
+            <strong>{{ song.name_roman }}</strong> - {{ song.composer_roman }}
+          </div>
           <a-button2 v-if="show_song" disabled msg="已导入" @click="load_song(song)"></a-button2>
           <a-button2 v-else msg="导入" @click="load_song(song)"></a-button2>
+        </div>
+      </Hide>
+      <Hide title="背景">
+        <div class="osz-imgs">
+          <div v-for="i in pix">
+            <img :alt="`${i - 1}`" :src="`stray://__osz__/${i - 1}`" />
+            <a-button2 msg="我要这个！" @click="import_png(i - 1)" />
+          </div>
         </div>
       </Hide>
     </div>
@@ -74,5 +94,24 @@ function load_song(s: ChartTypeV2.song) {
 .osz-song {
   display: flex;
   justify-content: space-evenly;
+}
+.osz-imgs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  gap: 50px 0;
+}
+.osz-imgs > div {
+  display: grid;
+  grid-template-rows: 25vh 1fr;
+  max-width: 45%;
+  justify-items: center;
+  gap: 10px;
+}
+.osz-imgs > div > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 </style>

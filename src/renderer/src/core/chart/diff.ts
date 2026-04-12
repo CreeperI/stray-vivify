@@ -144,7 +144,7 @@ export class Chart_diff extends StopClass {
       )
     )
     this.density_data = ref([0])
-    this.density_path = ref("")
+    this.density_path = ref('')
     this.watch(
       () => Storage.settings.meter,
       () => {
@@ -173,10 +173,12 @@ export class Chart_diff extends StopClass {
       total_v3: 0
     })
     this.max_lane = ref(4)
+    this.calc_max_lane()
 
-    this.watch(this.diff_index, () => {
-      this.update_on_diff_index()
-    })
+    if (index != undefined)
+      this.watch(this.diff_index, () => {
+        this.update_on_diff_index()
+      })
     Chart_diff.all.push(this)
 
     this.add_stop(EventHub.on('audio-time-update', () => this.update()))
@@ -203,7 +205,7 @@ export class Chart_diff extends StopClass {
   set diff1(v: string) {
     this.diff.meta.diff1 = v
     this.chart.set_header_name()
-    RefreshAll.refresh("diff-choice")
+    RefreshAll.refresh('diff-choice')
   }
 
   get diff2() {
@@ -213,7 +215,7 @@ export class Chart_diff extends StopClass {
   set diff2(v: string) {
     this.diff.meta.diff2 = v
     this.chart.set_header_name()
-    RefreshAll.refresh("diff-choice")
+    RefreshAll.refresh('diff-choice')
   }
 
   get charter() {
@@ -381,7 +383,7 @@ export class Chart_diff extends StopClass {
     this.sort_notes()
     this.calc_max_lane()
     this.update_sr()
-    RefreshAll.refresh("svg-lane")
+    RefreshAll.refresh('svg-lane')
     GlobalStat.SvgSizing.max_lane = this.max_lane.value
   }
 
@@ -405,12 +407,19 @@ export class Chart_diff extends StopClass {
   }
 
   calc_max_lane() {
+    this.max_lane.value = Chart_diff.calc_max_lane(this.diff)
+  }
+
+  static calc_max_lane(diff: ChartTypeV2.diff) {
+    if (diff?.override?.max_lane) {
+      return diff.override.max_lane
+    }
     let max = Storage.settings.min_lane
-    const n = this.toRaw
+    const n = diff.notes
     for (let i = 0; i < n.length; i++) {
       max = Math.max(n[i].lane + n[i].width, max)
     }
-    this.max_lane.value = max
+    return max
   }
 
   update_bar_section_list() {

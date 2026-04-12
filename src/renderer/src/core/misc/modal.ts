@@ -20,7 +20,7 @@ export class modal<T extends Component> {
   static ShowInformationModal = new modal(ConfirmModal)
   static VersionsModal = new modal(VersionsModal, true)
   static CreditsModal = new modal(CreditsModal, true)
-  static AskIdModal = new modal(AskIdModal)
+  static AskIdModal = new modal(AskIdModal, true)
   static ShortcutModal = new modal(ShortcutModal, true)
   static InspectorModal = new modal(InspectorModal, true)
   static IExporterModal = new modal(IexporterModal, true)

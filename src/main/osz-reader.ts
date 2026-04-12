@@ -1,5 +1,5 @@
 import AdmZip from 'adm-zip'
-import { extname } from 'node:path'
+import { basename, extname } from 'node:path'
 
 import { ChartTypeV2 } from '../preload/chart-types'
 
@@ -150,72 +150,128 @@ function parseHitObject(line: string): OsuHitObject | null {
 /**
  * Convert osu! beatmap to diff format
  */
-function convertToDiff(beatmap: OsuBeatmap): ChartTypeV2.diff {
+function convertToDiff(beatmap: OsuBeatmap, isMania: boolean): ChartTypeV2.diff {
   const notes: ChartTypeV2.note[] = []
   const timing: ChartTypeV2.timing[] = []
 
   // Get key count from CircleSize
-  const keyCount = Math.floor(beatmap.difficulty.CircleSize || 4)
+  const keyCount = isMania ? Math.floor(beatmap.difficulty.CircleSize || 4) : 1
 
   // Process timing points
   for (const tp of beatmap.timingPoints) {
     if (tp.uninherited) {
       // Uninherited timing point - actual BPM change
-      if (tp.beatLength < 0) continue
+      // Skip if beatLength is negative or zero (malformed data)
+      if (tp.beatLength <= 0) continue
+
       const bpm = 60000 / tp.beatLength // Convert beat length to BPM
       timing.push({
         time: tp.time,
         bpm: Math.round(bpm),
         den: 4,
-        num: 4
+        num: tp.meter // Use the meter from the timing point
       })
     }
   }
 
   // Process hit objects
-  for (const hitObject of beatmap.hitObjects) {
-    const lane = calculateLane(hitObject.x, keyCount)
-    const time = hitObject.time
+  if (isMania) {
+    // Process mania hit objects normally
+    for (const hitObject of beatmap.hitObjects) {
+      const lane = calculateLane(hitObject.x, keyCount)
+      const time = hitObject.time
 
-    // Check if it's a hold note (bit 7 set)
-    if (hitObject.type & (1 << 7)) {
-      // Hold note
-      const endTime = parseEndTime(hitObject.objectParams || '')
-      const holdNote: ChartTypeV2.hold_note = {
-        time: time,
-        lane: lane,
-        width: 1,
-        len: endTime - time,
+      // Check if it's a hold note (bit 7 set)
+      if (hitObject.type & (1 << 7)) {
+        // Hold note
+        const endTime = parseEndTime(hitObject.objectParams || '')
+        const holdNote: ChartTypeV2.hold_note = {
+          time: time,
+          lane: lane,
+          width: 1,
+          len: endTime - time
+        }
+        notes.push(holdNote)
+      } else {
+        // Normal note
+        const normalNote: ChartTypeV2.normal_note = {
+          time: time,
+          lane: lane,
+          width: 1,
+          snm: 0
+        }
+        notes.push(normalNote)
       }
-      notes.push(holdNote)
-    } else {
-      // Normal note
-      const normalNote: ChartTypeV2.normal_note = {
-        time: time,
-        lane: lane,
-        width: 1,
-        snm: 0,
+    }
+  } else {
+    // Convert other modes to 1K mania
+    for (const hitObject of beatmap.hitObjects) {
+      const time = hitObject.time
+
+      // Check object type
+      const isCircle = hitObject.type & (1 << 0)
+      const isSlider = hitObject.type & (1 << 1)
+      const isSpinner = hitObject.type & (1 << 3)
+
+      if (isCircle) {
+        // Convert hit circles to normal notes in lane 0
+        const normalNote: ChartTypeV2.normal_note = {
+          time: time,
+          lane: 0,
+          width: 1,
+          snm: 0
+        }
+        notes.push(normalNote)
+      } else if (isSlider) {
+        // Convert sliders to hold notes in lane 0
+        // Parse slider duration from objectParams
+        const sliderDuration = parseSliderDuration(hitObject.objectParams || '', beatmap)
+        const holdNote: ChartTypeV2.hold_note = {
+          time: time,
+          lane: 0,
+          width: 1,
+          len: sliderDuration
+        }
+        notes.push(holdNote)
+      } else if (isSpinner) {
+        // Convert spinners to hold notes in lane 0
+        const endTime = parseEndTime(hitObject.objectParams || '')
+        const holdNote: ChartTypeV2.hold_note = {
+          time: time,
+          lane: 0,
+          width: 1,
+          len: endTime - time
+        }
+        notes.push(holdNote)
       }
-      notes.push(normalNote)
     }
   }
 
   // Sort notes by time
   notes.sort((a, b) => a.time - b.time)
 
-  // Sort timing and sv by time
+  // Sort timing by time
   timing.sort((a, b) => a.time - b.time)
 
-  return {
+  const result: ChartTypeV2.diff = {
     notes,
     timing,
     meta: {
-      charter: beatmap.metadata.Creator || '',
-      diff1: beatmap.metadata.Version || '',
-      diff2: '',
-      diff_name: ''
+      charter: (beatmap.metadata.Creator as string) || '',
+      diff1: (beatmap.metadata.Version as string) || '',
+      diff2: keyCount.toString(), // Store key count in diff2
+      diff_name: (beatmap.metadata.Version as string) || ''
     }
   }
+
+  // Add override flag for non-mania modes
+  if (!isMania) {
+    result.override = {
+      max_lane: 1
+    }
+  }
+
+  return result
 }
 
 /**
@@ -235,6 +291,34 @@ function parseEndTime(objectParams: string): number {
   // For hold notes, objectParams contains "endTime:hitSample"
   const parts = objectParams.split(':')
   return parseInt(parts[0]) || 0
+}
+
+/**
+ * Parse slider duration from objectParams for non-mania modes
+ */
+function parseSliderDuration(objectParams: string, beatmap: OsuBeatmap): number {
+  // Slider format: curveType|curvePoints,slides,length,edgeSounds,edgeSets,hitSample
+  const parts = objectParams.split(',')
+
+  if (parts.length < 3) return 100 // Default duration if parsing fails
+
+  const slides = parseInt(parts[1]) || 1
+  const length = parseFloat(parts[2]) || 100
+
+  // Get slider multiplier from difficulty settings
+  const sliderMultiplier = beatmap.difficulty.SliderMultiplier || 1.4
+
+  // Find the current timing point for this slider
+  // For simplicity, use the first uninherited timing point
+  const firstTiming = beatmap.timingPoints.find((tp) => tp.uninherited)
+  const beatLength = firstTiming?.beatLength || 500
+
+  // Calculate slider duration in milliseconds
+  // Formula: length / (SliderMultiplier * 100 * SV) * beatLength
+  // Assuming SV = 1 for simplicity
+  const duration = (length / (sliderMultiplier * 100)) * beatLength * slides
+
+  return Math.round(duration)
 }
 
 export interface song {
@@ -257,6 +341,7 @@ export class OszReader {
   private songInfo: song | null = null
   private zipEntries: AdmZip.IZipEntry[] = []
   private zip: AdmZip
+  private images: [Buffer, string][] = []
 
   constructor(fp_of_osz: string) {
     this.zip = new AdmZip(fp_of_osz)
@@ -269,6 +354,7 @@ export class OszReader {
     OszReader.current = the
     return the
   }
+
   static close() {
     OszReader.current = undefined
   }
@@ -310,8 +396,7 @@ export class OszReader {
     const audioEntry = this.zipEntries.find(
       (entry) =>
         audioExtensions.some((ext) => {
-          const name = entry.entryName.toLowerCase()
-          return name.endsWith(ext) && name.includes('audio')
+          return entry.entryName.toLowerCase().endsWith(ext)
         }) && !entry.isDirectory
     )
 
@@ -322,7 +407,8 @@ export class OszReader {
    * Get all image files as a map
    */
   public getImages() {
-    const images: [Buffer, string][] = []
+    const images: [Buffer, string][] = this.images
+    if (images.length > 0) return this.images
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
 
     this.zipEntries.forEach((entry) => {
@@ -330,7 +416,7 @@ export class OszReader {
         imageExtensions.some((ext) => entry.entryName.toLowerCase().endsWith(ext)) &&
         !entry.isDirectory
       ) {
-        images.push([entry.getData(), extname(entry.entryName)])
+        images.push([entry.getData(), basename(entry.entryName)])
       }
     })
 
@@ -353,11 +439,11 @@ export class OszReader {
           firstBeatmap = beatmap
         }
 
-        // Only process osu!mania charts (mode 3)
-        if (beatmap.general.Mode === 3) {
-          const difficulty = convertToDiff(beatmap)
-          this.diffs.push(difficulty)
-        }
+        // Process all modes
+        // Mode 0 = osu!standard, 1 = taiko, 2 = catch, 3 = mania
+        const isMania = beatmap.general.Mode === 3
+        const difficulty = convertToDiff(beatmap, isMania)
+        this.diffs.push(difficulty)
       }
     })
 
@@ -385,11 +471,13 @@ export class OszReader {
 
     // Calculate average BPM from timing points
     let avgBpm = ''
-    const uninheritedTimingPoints = beatmap.timingPoints.filter((tp) => tp.uninherited)
+    const uninheritedTimingPoints = beatmap.timingPoints.filter(
+      (tp) => tp.uninherited && tp.beatLength > 0
+    )
     if (uninheritedTimingPoints.length > 0) {
       const bpms = uninheritedTimingPoints.map((tp) => 60000 / tp.beatLength)
       const averageBpm = bpms.reduce((sum, bpm) => sum + bpm, 0) / bpms.length
-      avgBpm = Math.abs(Math.round(averageBpm)).toString()
+      avgBpm = Math.round(averageBpm).toString()
     }
 
     return {

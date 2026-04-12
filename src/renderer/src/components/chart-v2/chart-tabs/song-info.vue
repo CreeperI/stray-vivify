@@ -17,9 +17,9 @@ const options = () =>
   })
 const dix = chart.diff.diff_index
 const src = `stray:///__sprite__/${chart.id}`
-const src2 = `stray:///__bg__/${chart.id}`
+/*const src2 = `stray:///__bg__/${chart.id}`
+const img2_show = chart.bg_err*/
 const img_show = chart.sprite_err
-const img2_show = chart.bg_err
 
 function add_diff() {
   chart.create_diff()
@@ -34,9 +34,9 @@ function copy_diff() {
 function import_sprite() {
   Invoke('import-sprite', { id: chart.id })
 }
-function import_bg() {
+/*function import_bg() {
   Invoke('import-background', { id: chart.id })
-}
+}*/
 const dkey = RefreshAll.generate_key('diff-choice')
 const pkey = RefreshAll.generate_key('song-cover')
 </script>
@@ -62,7 +62,7 @@ const pkey = RefreshAll.generate_key('song-cover')
           @error="img_show = true"
         />
       </div>
-      <div :key="pkey" class="song-info-single">
+<!--      <div :key="pkey" class="song-info-single">
         <div>背景<a-button2 msg="导入背景" @click="import_bg" /></div>
         <img
           v-if="!img2_show"
@@ -71,7 +71,7 @@ const pkey = RefreshAll.generate_key('song-cover')
           class="song-sprite"
           @error="img2_show = true"
         />
-      </div>
+      </div>-->
     </div>
     <div class="info-inner">
       <div class="song-info-single diff-choose">

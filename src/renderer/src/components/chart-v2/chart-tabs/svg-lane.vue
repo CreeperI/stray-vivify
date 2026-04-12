@@ -11,12 +11,14 @@ import { GlobalStat } from '@renderer/core/globalStat'
 import SvgSection from '@renderer/components/chart-v2/svg-lane/svg-section.vue'
 import { computed, provide } from 'vue'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
+import { Chart_diff } from '@renderer/core/chart/diff'
 
 const svg_sizing = GlobalStat.SvgSizing
 const {
   lane_width = Storage.settings.lane_width,
   only_note = false,
-  x_expand = 0
+  x_expand = 0,
+  diff_index = -1
 } = defineProps<{
   lane_width?: number
   only_note?: boolean
@@ -28,7 +30,9 @@ const id = `lane-wrapper-${Math.random().toFixed(4)}`
 viewBox()
 
 function viewBox() {
-  svg_sizing.max_lane = Chart.$current.diff.max_lane.value
+  if (diff_index != -1)
+    svg_sizing.max_lane = Chart_diff.calc_max_lane(Chart.$current.diffs[diff_index])
+  else svg_sizing.max_lane = Chart.$current.diff.max_lane.value
   svg_sizing.svg_width = svg_sizing.max_lane * lane_width + 2 * 50 + 12 + x_expand
   svg_sizing.bar_length = svg_sizing.max_lane * lane_width + 12
   svg_sizing.view_port = [0, 0, svg_sizing.svg_width, window.screen.height]
@@ -45,7 +49,7 @@ provide('lane_id', id)
 </script>
 
 <template>
-  <div :id="id" :style="{ flexBasis: viewBox()[2] + 'px' }" class="lane-wrapper" :key="rkey">
+  <div :id="id" :key="rkey" :style="{ flexBasis: viewBox()[2] + 'px' }" class="lane-wrapper">
     <svg
       :viewBox="viewBox().join(' ')"
       :width="svg_sizing.svg_width"
