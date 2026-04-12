@@ -35,6 +35,7 @@ export function calculateChartStats(
   data.SetBucketLength(averageBPM, Math.ceil(songLengthMs / 1000))
 
   for (const note of diff.notes) {
+    if ('snm' in note && note.snm == 1) continue
     let noteMs = note.time
     let noteWidth = note.width
     let noteLane = note.lane
