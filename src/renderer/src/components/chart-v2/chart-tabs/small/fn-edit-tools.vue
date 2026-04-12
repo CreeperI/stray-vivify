@@ -17,16 +17,20 @@ console.log(toolMultiArgs.value)
   <div v-if="selectedNID.length > 0" class="edit-frame">
     <p style="text-align: center">想做些什么呢？</p>
     <div class="edit-button-frame">
-      <div class="edit-button ln1" @click="EditorTools.mirror(selectedNID)">对称</div>
-      <div
-        class="edit-button ln2"
-        @click="EditorTools.mutiplier(selectedNID, toolMultiArgs.multiVal, toolMultiArgs.baseZero)"
-      >
-        TimeMultiply
+      <div>
+        <div class="edit-button" @click="EditorTools.mirror(selectedNID)">对称</div>
       </div>
-      <a-number-input v-model="toolMultiArgs.multiVal" :min="0.1" :step="0.1" class="ln2" />
-      <label class="ln2" style="grid-column: span 1">0ms base</label>
-      <a-checkbox v-model="toolMultiArgs.baseZero" class="ln2" style="grid-column: span 1" />
+      <div>
+        <div
+          class="edit-button"
+          @click="EditorTools.mutiplier(selectedNID, toolMultiArgs.multiVal, toolMultiArgs.baseZero)"
+        >
+          TimeMultiply
+        </div>
+        <a-number-input v-model="toolMultiArgs.multiVal" :min="0.1" :step="0.1" style="max-width: 6rem" />
+        <label class="ln2" style="grid-column: span 1">0ms base</label>
+        <a-checkbox v-model="toolMultiArgs.baseZero" class="ln2" style="grid-column: span 1" />
+      </div>
     </div>
   </div>
 </template>
@@ -36,27 +40,23 @@ console.log(toolMultiArgs.value)
   padding-top: 0;
 }
 
-.ln1 {
-  grid-column: span 3;
-}
-
-.ln2 {
-  grid-column: span 2;
-}
-
 .edit-button-frame {
-  display: grid;
-  grid-template-rows: 1fr 1fr;
-  grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  flex-direction: column;
   gap: 10px;
+}
+.edit-button-frame > div {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
 }
 
 .edit-button {
-  width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0.5rem;
 }
 
 .edit-button:hover {
