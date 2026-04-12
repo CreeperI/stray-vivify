@@ -280,7 +280,7 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>重构了Inspector和custom的modal（代码意义上）。</div>
       <div>将右下角的Version提示改为一直显示，可以在设置中关闭。</div>
     </Build>
-    <Build build="9.7" y="2026" m="2" d="14" title="0.9.7">
+    <Build build="9.7" d="14" m="2" title="0.9.7" y="2026">
       <template #bugs>
         <div>修复了删除note失败的问题（x2），将二分查找note改为线性查找。</div>
         <div>修复了modal会导致爆滚动条的问题。</div>
@@ -318,6 +318,33 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>移除了每次保存时在node端的控制台输出。不会有人用控制台启动sv吧……</div>
       <div>移除了note摆放的限制。</div>
       <span>需要注意的是这是直接把无理检测删掉了，除了不能在同一时刻放相同的note</span>
+    </Build>
+    <Build build="9.8" d="17" m="2" title="0.9.8-dev" y="2026">
+      <template #bugs>
+        <div>修复了导出Custom-JSON的问题。 (@Creeper_001)</div>
+        <div>修复了大写（shift或者大写锁定下）快捷键不生效的问题。</div>
+        <div>修复了第一个note吞打击音的问题（索引为 0 时的if炸了）</div>
+      </template>
+      <template #qol>
+        <div>重构了 osz 导入行为，现在所有内容都在一个modal中处理</div>
+        <div>添加了工具栏功能，支持刷新谱面数据。</div>
+        <div>添加了修改最大缩放和拍号的支持。</div>
+        <div>优化了 diff 密度计算逻辑，现在在 diff.ts 中处理而非由 Vue 触发。</div>
+        <div>将刷新所有内容的快捷键改为更具针对性的 Refresh-all。</div>
+        <div>优化了皮肤模态框样式，并将设置整合到模态框中。</div>
+        <div>改进了圆形显示和存储逻辑。</div>
+        <div>优化了 SVG 在最大轨道数变化时的尺寸调整。</div>
+        <div>为 BPM 文本添加了固定显示。</div>
+      </template>
+      <div style="font-size: 1.2rem; padding: 10px 0">更新了图标！感谢 @雫星沫RainFoamp</div>
+      <div>添加了timing复制为文字功能</div>
+      <div>更新了builder选项，现在大概是可以安装到自定义路径了（当然和用zip的人没什么关系</div>
+      <div>试了下vue3.6-beta又回滚回来了，憋笑</div>
+      <div>引入了 EventHub 和 StopClass 以节省资源（灵感来自Antimatter Dimensions）</div>
+      <div>实现了基础的 diff参考功能。</div>
+      <div>添加了一点对窗口宽度的自适应</div>
+      <div>使用时长统计：添加了为旧版本 vs-charter-ev 的检查。</div>
+      <div>禁用了首页一句话中的动画效果。</div>
     </Build>
   </div>
 </template>

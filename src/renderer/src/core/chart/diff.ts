@@ -398,8 +398,9 @@ export class Chart_diff extends StopClass {
     const dt = 1500 / data.value.length
 
     this.density_updating = true
-    for (let i = 0; i < data.value.length; i++) {
-      const y = 240 - Math.floor((data.value[i] / max) * 230)
+    const d = data.value
+    for (let i = 0; i < d.length; i++) {
+      const y = 240 - Math.floor((d[i] / max) * 230)
       path.value += `L ${(dx * i + 20).toFixed(3)} ${y}`
       await new Promise((r) => setTimeout(r, dt))
     }
