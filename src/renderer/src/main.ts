@@ -5,7 +5,7 @@ import '@renderer/styles.css'
 import { createModal } from '@kolirt/vue-modal'
 import { ShortCuts } from '@renderer/core/misc/shortcut'
 import { Invoke, load_ipc_handlers } from '@renderer/core/ipc'
-import { Storage } from '@renderer/core/storage'
+import { Storage, Version } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
@@ -17,6 +17,7 @@ import { expose_variables } from '@renderer/core/misc/inspector-exposer'
 import { load_external_mods } from '@renderer/core/chart/vsm-objects'
 import { load_external_tips } from '@renderer/core/misc/startup-tips'
 import { Chart_diff } from '@renderer/core/chart/diff'
+import { Preinit } from '@renderer/core/misc/preinit'
 
 const app = createApp(App).use(
   createModal({
@@ -47,18 +48,22 @@ function update_per_frame() {
 async function main() {
   const r = await Storage.set_from_storage()
   ShortCuts.fromJson(Storage.data.value.shortcut)
+  Preinit.Stages.load_settings = true
+
   await GlobalStat.update_all_chart()
   await GlobalStat.check_dev()
-  await Invoke('leave-fullscreen')
+  Invoke('leave-fullscreen')
+  Preinit.Stages.all_chart = true
 
-  Storage.init_interval()
   Log.handle()
   ShortCuts.handle()
   MouseTracker.init()
   expose_variables()
   load_external_mods()
   load_external_tips()
+  Preinit.Stages.debugs = true
 
+  Storage.init_interval()
   Intervals.on(1e4, () => {
     if (Storage.settings.auto_save) Chart.current?.save()
     Chart.current?.diff.update_tick_list()
@@ -66,7 +71,7 @@ async function main() {
   Intervals.on(1000, () => {
     FrameRate.refresh()
     Chart.current?.playfield?.refresh()
-    Chart_diff.all.forEach(v => v.update_diff_counts())
+    Chart_diff.all.forEach((v) => v.update_diff_counts())
     MemoryUsage.update()
     Storage.update_used_time()
 
@@ -76,19 +81,22 @@ async function main() {
       GlobalStat.window_max_state.value = r
     })
   })
+  Preinit.Stages.intervals = true
 
   requestAnimationFrame(update_per_frame)
-  app.mount('#app')
+  Preinit.Stages.animation_frame = true
   if (r) {
-    if (r[0] < 0) {
-      modal.ShowInformationModal.show({ msg: `已从更新的版本（版本号${r[1]}）回退至${r[2]}。` })
+    if (r > Version.val) {
+      modal.ShowInformationModal.show({ msg: `已从更新的版本（版本号${r}）回退至${Version.val}。` })
     }
-    if (r[0] > 0) {
+    if (r < Version.val) {
       modal.VersionsModal.show({})
     }
   }
+  Preinit.finish_init()
 }
 
 load_ipc_handlers()
 main()
 CheckSkin.check_skin()
+app.mount('#app')

@@ -202,10 +202,9 @@ export const Storage = {
     const parsed = JSON.parse(data) as storages.storage_scheme
     merge(parsed)
     utils.less_assign(this.data.value, parsed)
-    const d = [Version.val - parsed.version, parsed.version, Version.val]
     this.data.value.version = Version.val
     this.update_join_time()
-    return d
+    return parsed.version
   },
   async update_join_time() {
     const time = await Invoke('joined-time')

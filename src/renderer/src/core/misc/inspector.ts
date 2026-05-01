@@ -98,12 +98,20 @@ export const Log = {
         }
         Log.err(msg)
         if (Storage.settings.err_notify) {
-          notify.error("发生未捕获的错误！请查看Inspector。")
+          notify.error('发生未捕获的错误！请查看Inspector。')
         }
         this.fix_max()
       },
       true
     )
+    window.addEventListener('unhandledrejection', (e) => {
+      let msg = e.reason
+      Log.err(msg)
+      if (Storage.settings.err_notify) {
+        notify.error('发生未捕获的错误！请查看Inspector。')
+      }
+      this.fix_max()
+    })
     if (GlobalStat.is_dev) return
     const keys = ['log', 'warn', 'error', 'debug']
     for (const key of keys) {

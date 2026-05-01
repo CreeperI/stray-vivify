@@ -11,9 +11,12 @@ import MouseTracker from '@renderer/components/miscellaneous/mouse-tracker.vue'
 import { modal } from '@renderer/core/misc/modal'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { computed } from 'vue'
+import { Preinit } from '@renderer/core/misc/preinit'
+import PreInitPage from '@renderer/components/miscellaneous/pre-init-page.vue'
 
 const state = GlobalStat.route.route
-const key = RefreshAll.generate_key("app")
+const key = RefreshAll.generate_key('app')
+const Initialized = Preinit.Initialized
 
 const show_version = computed(() => {
   if (Storage.settings.always_version) return true
@@ -22,11 +25,10 @@ const show_version = computed(() => {
 </script>
 
 <template>
-  <template v-if="key != '' " :key="key">
+  <template v-if="Initialized" :key="key">
     <Header v-if="state != 'editor'" />
     <ChartList v-if="state == 'start'" />
     <ChartV2 v-if="state == 'editor'" />
-    <div id="n-c" class="notify-container" />
     <ModalTarget />
     <a-button
       v-if="show_version"
@@ -37,6 +39,8 @@ const show_version = computed(() => {
     <WordHelperOverlay />
     <MouseTracker />
   </template>
+  <pre-init-page v-else />
+    <div id="n-c" class="notify-container" />
 </template>
 <style scoped>
 .--build {
