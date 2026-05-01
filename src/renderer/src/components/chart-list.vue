@@ -55,6 +55,7 @@ function delete_proj(id: string, name: string) {
       .then(() => {
         GlobalStat.update_all_chart()
       })
+      .catch()
   } else {
     Invoke('remove-chart', { id })
   }
@@ -78,9 +79,9 @@ const tip = utils.random(StartUpTips)
 <template>
   <div class="chart-list-wrapper">
     <div class="chart-list-left">
-      <img alt="logo" v-if="useLogo" src="/sv.png" class="su-logo">
+      <img v-if="useLogo" alt="logo" class="su-logo" src="/sv.png" />
       <div v-else class="su-title">stray/vivify</div>
-      <div v-html="tip" class="su-tip"></div>
+      <div class="su-tip" v-html="tip"></div>
       <div class="su-greeting">
         欢迎，{{ username }}<br />
         这是你使用stray/vivify的第{{ pass_days.toFixed(0) }}天！ <br />
@@ -93,11 +94,14 @@ const tip = utils.random(StartUpTips)
       <div v-if="display_data" class="su-display">
         <div class="sd-title">{{ display_data.name }}</div>
         <div class="sd-composer">by {{ display_data.composer }}</div>
-        <div>-bpm: {{ display_data.bpm }} -id: {{ display_data.id }}</div>
+        <div class="sd-info">
+          <span>bpm: {{ display_data.bpm }}</span>
+          <span>id: {{ display_data.id }}</span>
+        </div>
         <br />
         <div class="sd-diff">
-          <div>charts:</div>
-          <div v-for="d in display_data.diffs">> {{ d }}</div>
+          <div>Diffs:</div>
+          <div v-for="d in display_data.diffs">- {{ d }}</div>
         </div>
       </div>
     </div>
@@ -182,12 +186,35 @@ const tip = utils.random(StartUpTips)
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
 }
 
 .sd-title {
   font-size: 1.5rem;
+  height: 1.8rem;
 }
-
+.sd-info {
+  width: 50%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+  align-content: space-evenly;
+}
+.sd-info > span:first-child {
+  text-align: left;
+}
+.sd-info > span:last-child {
+  text-align: right;
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
+}
+.sd-diff {
+  width: 50%;
+  text-overflow: ellipsis;
+  text-align: left;
+}
 .chart-list-right {
   display: flex;
   flex-direction: column;
@@ -285,6 +312,7 @@ const tip = utils.random(StartUpTips)
   font-weight: bold;
   width: min-content;
   transition: all 0.2s ease;
+  height: 1.2rem;
 }
 
 .chart-unit-cid {
