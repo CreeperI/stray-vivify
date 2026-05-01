@@ -103,6 +103,7 @@ export class Chart_diff extends StopClass {
 
   sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
+  #__density_abort = false
 
   constructor(chart: Chart, index?: number, hitsound = true) {
     super()
@@ -175,7 +176,7 @@ export class Chart_diff extends StopClass {
     this.max_lane = ref(4)
     this.calc_max_lane()
 
-    if (index != undefined)
+    if (index == undefined)
       this.watch(this.diff_index, () => {
         this.update_on_diff_index()
       })
@@ -373,12 +374,24 @@ export class Chart_diff extends StopClass {
     return diff
   }
 
+  static calc_max_lane(diff: ChartTypeV2.diff) {
+    if (diff?.override?.max_lane) {
+      return diff.override.max_lane
+    }
+    let max = Storage.settings.min_lane
+    const n = diff.notes
+    for (let i = 0; i < n.length; i++) {
+      max = Math.max(n[i].lane + n[i].width, max)
+    }
+    return max
+  }
+
   update_on_diff_index() {
     console.log('update_on_diff_index')
     this.chart.set_header_name()
     this.force_fuck()
     this.calc_density()
-    this.update_density_path()
+    this.update_density_path(true)
     this.update_timing_list()
     this.sort_notes()
     this.calc_max_lane()
@@ -387,8 +400,11 @@ export class Chart_diff extends StopClass {
     GlobalStat.SvgSizing.max_lane = this.max_lane.value
   }
 
-  async update_density_path() {
-    if (this.density_updating) return
+  async update_density_path(force = false) {
+    if (!force || this.density_updating) return
+    if (force && this.density_updating) {
+      this.#__density_abort = true
+    }
     const path = this.density_path
     const data = this.density_data
     path.value = 'M 20 240'
@@ -400,6 +416,10 @@ export class Chart_diff extends StopClass {
     this.density_updating = true
     const d = data.value
     for (let i = 0; i < d.length; i++) {
+      if (this.#__density_abort) {
+        this.#__density_abort = false
+        return
+      }
       const y = 240 - Math.floor((d[i] / max) * 230)
       path.value += `L ${(dx * i + 20).toFixed(3)} ${y}`
       await new Promise((r) => setTimeout(r, dt))
@@ -409,18 +429,6 @@ export class Chart_diff extends StopClass {
 
   calc_max_lane() {
     this.max_lane.value = Chart_diff.calc_max_lane(this.diff)
-  }
-
-  static calc_max_lane(diff: ChartTypeV2.diff) {
-    if (diff?.override?.max_lane) {
-      return diff.override.max_lane
-    }
-    let max = Storage.settings.min_lane
-    const n = diff.notes
-    for (let i = 0; i < n.length; i++) {
-      max = Math.max(n[i].lane + n[i].width, max)
-    }
-    return max
   }
 
   update_bar_section_list() {

@@ -32,7 +32,8 @@ export const VSM_OBJECTS = [
   'obj_times_gimmick',
   'obj_tutorial_gimmick',
   'obj_unraveling_gimmick',
-  'obj_starcrashers_gimmick'
+  'obj_starcrashers_gimmick',
+  'obj_custom_gimmick'
 ] as const
 
 type vsm_objs = (typeof VSM_OBJECTS)[number]
@@ -960,6 +961,88 @@ export const VSM_MODS: Record<vsm_objs, ({ name: string; proxy: 0 | -1 } | strin
     'blackfade_alpha',
     'end_gravescene2_alpha',
     'ending_coroutine'
+  ],
+  obj_custom_gimmick: [
+    'textX',
+    'textY',
+    'textalp ',
+    'textrot ',
+    'textcolhex',
+    'textscale',
+    'textX_[tid]',
+    'textX_[tid]b',
+    'textY_[tid]',
+    'textY_[tid]b',
+    'textalp_[tid]',
+    'textrot_[tid]',
+    'textcolrgb_[tid]',
+    'textscale_[tid]',
+    'textsep_[tid]',
+    'textmaxwidth_[tid]',
+    'ditortedBG_alp',
+    'ditortedBG_col_rgb',
+    'plaudite_jacket',
+    'jumpto',
+    'playspeed',
+    'col_convertion',
+    'slash_anycol',
+    'set_slash_col',
+    'cover1',
+    'fx_red_intensity',
+    'fx_colorise_col_rgb',
+    'fx_colorise_col_alpha',
+    'fx_colorise_intensity',
+    'uialpha',
+    'cover1',
+    'cover2',
+    'cover3',
+    'rainbow',
+    'sides',
+    'notealp',
+    'noteoverlayalp',
+    'scorealph',
+    'bgalph',
+    'gray',
+    'barrel',
+    'barrel2',
+    'hdistort',
+    'fish',
+    'vig',
+    'abx',
+    'aby',
+    'aberamp',
+    'glitchamp',
+    'glitchoffset',
+    'uhnoise',
+    'abberationxamp',
+    'abberationyamp',
+    'static',
+    'fx_hue_hue',
+    'fx_hue_saturation',
+    'fx_edge',
+    'fx_posterize',
+    'fx_twirl',
+    'fx_posterize_vis',
+    'fx_underwater',
+    'bloom',
+    'angelstar_checker_alpha',
+    'angelstar_checker_set',
+    'fx_zoom',
+    'fx_red',
+    'recolor',
+    'holdoverlayalpha',
+    'plaudite_pburst',
+    'hide_combo',
+    'plaudite_red_particle',
+    'df_sideline2',
+    'df_sides',
+    'df_sideline',
+    'df_whitebg',
+    'df_grid_alpha',
+    'df_grid_top',
+    'df_grid_bottom',
+    'wflash',
+    'plaudite_jacket'
   ]
 }
 
@@ -1011,27 +1094,33 @@ export function PROXY_REQUIREMENT(v: string): 0 | -1 | 1 {
 export async function load_external_mods() {
   const r = await Invoke('read-external', { fname: 'vsm-objects.json' })
   if (!r) {
-    console.log("Read External: vsm-objects failed")
+    console.log('Read External: vsm-objects failed')
     return
   }
   const mods = JSON.parse(r) as External.VSM_OBJECTS
+  const override = mods.OVERRIDE || false
   if (mods.VSM_EASING) {
-    utils.clear_arr(VSM_EASING)
-    VSM_EASING.push(...mods.VSM_EASING)
+    if (override) {
+      utils.clear_arr(VSM_EASING)
+      VSM_EASING.push(...mods.VSM_EASING)
+    } else {
+      // check for duplicate ones
+      mods.VSM_EASING.forEach((x) => {
+        if (!VSM_EASING.includes(x)) VSM_EASING.push(x)
+      })
+    }
+
     console.log('Read External: VSM_EASING')
-  }
-  if (mods.VSM_OBJECTS) {
-    // @ts-expect-error here VSM_OBJ should be immut but you know
-    // this is external loading
-    utils.clear_arr(VSM_OBJECTS)
-    // @ts-expect-error not read-only (huh)
-    VSM_OBJECTS.push(...mods.VSM_OBJECTS)
-    console.log('Read External: VSM_OBJECTS')
   }
   if (mods.VSM_MODS) {
     for (const obj of utils.keyof(mods.VSM_MODS)) {
+      if (override) {
+        // On override, clear all s-v data
+        for (const key of utils.keyof(VSM_MODS)) {
+          delete VSM_MODS[key]
+        }
+      }
       if (VSM_MODS[obj]) {
-        utils.clear_arr(VSM_MODS[obj])
         VSM_MODS[obj].push(...mods.VSM_MODS[obj])
       } else {
         VSM_MODS[obj] = mods.VSM_MODS[obj]
@@ -1039,4 +1128,8 @@ export async function load_external_mods() {
     }
     console.log('Read External: VSM_MODS')
   }
+  // @ts-expect-error I know it's THAT readonly, but this is external *that's how it works!*
+  utils.clear_arr(VSM_OBJECTS)
+  // @ts-expect-error T.T crying.
+  VSM_OBJECTS.push(Object.keys(VSM_MODS))
 }

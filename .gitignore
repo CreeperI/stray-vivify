@@ -10,5 +10,6 @@ skin/
 *.mjs
 package-lock.json
 .prettierrc.yaml
-external
+external/*
+!external/examples/
 pnpm-*

@@ -1,0 +1,34 @@
+{
+  "VSM_MODS": {
+    "obj_example": [
+      {
+        "name": "example",
+        "proxy": 0
+      },
+      {
+        "name": "example1",
+        "proxy": -1
+      },
+      "example2",
+      "example3"
+    ],
+    "obj_example2": [
+      {
+        "name": "example",
+        "proxy": 0
+      },
+      {
+        "name": "example1",
+        "proxy": -1
+      },
+      "example2",
+      "example3"
+    ]
+  },
+  "VSM_EASING": [
+    "EASING1",
+    "EASING2",
+    "EASING3"
+  ],
+  "OVERRIDE": false
+}

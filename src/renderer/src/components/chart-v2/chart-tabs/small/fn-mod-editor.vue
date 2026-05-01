@@ -71,7 +71,7 @@ const repeat_classes = computed(() => {
       <span class="time-span">/ {{ diff.get_beat_string(the.time) }}</span>
     </div>
     <div>Duration</div>
-    <a-number-input v-model="the.duration" min="0" :key="mod_index" />
+    <a-number-input :key="mod_index" v-model="the.duration" min="0" />
     <div>value1</div>
     <a-text-input v-model="the.value1" />
     <div>value2</div>
@@ -95,6 +95,8 @@ const repeat_classes = computed(() => {
     <a-select v-model="the.easing" :options="VSM_EASING" maxh="10rem" />
     <div>modname</div>
     <a-select v-model="the.modname" :options="able_mods" maxh="10rem" />
+    <word-helper dec="直接编辑mod名称，如果你不想在上面找的话">modname</word-helper>
+    <a-text-input v-model="the.modname" />
     <div style="grid-column: span 2; height: 15px" />
     <div style="grid-column: span 2">时值参考</div>
     <div class="beat-lengths">
