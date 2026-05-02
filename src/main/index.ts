@@ -5,6 +5,20 @@ import icon from '../../resources/icon.png?asset'
 import { load_ipc_handlers } from './ipc'
 import { stray_handler } from './stray'
 
+const singleInstanceLock = app.requestSingleInstanceLock()
+
+if (!singleInstanceLock) {
+  app.quit()
+} else {
+  // 当第二个实例被打开时，聚焦到第一个实例的窗口
+  app.on('second-instance', () => {
+    const windows = BrowserWindow.getAllWindows()
+    if (windows.length) {
+      if (windows[0].isMinimized()) windows[0].restore()
+      windows[0].focus()
+    }
+  })
+}
 function window_max(win: BrowserWindow) {
   win.setFullScreen(false)
   if (win.isMaximized()) {

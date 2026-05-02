@@ -46,9 +46,8 @@ function getStatStyle(statName: keyof ChartTypeV2.SongStats) {
     }
   } else {
     return {
-      class_line: '',
-      width: '100%',
-      bg: `linear-gradient(to right, red, orange, yellow, green)`
+      class_line: 'rainbow-line',
+      width: '100%'
     }
   }
 }
@@ -99,5 +98,74 @@ const class_line = computed(() => {
 }
 .stat-white {
   background: white;
+}
+
+.rainbow-line {
+  position: relative; /* 必须设置 relative，作为伪元素的定位基准 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  z-index: 1;
+  --rainbow-line-background: linear-gradient(
+    90deg,
+    #ff0000,
+    #ff8000,
+    #ffff00,
+    #80ff00,
+    #00ff80,
+    #00ffff,
+    #0080ff,
+    #8000ff,
+    #ff00ff,
+    #ff0000
+  );
+  animation-duration: 3s;
+}
+
+/* 1. 内部的彩虹流动背景 (使用 ::after 实现) */
+.rainbow-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--rainbow-line-background);
+  background-size: 200% 100%; /* 放大背景尺寸，为流动做准备 */
+  z-index: -1; /* 放在文字下方 */
+  animation: a-rainbowline linear infinite; /* 绑定流动动画 */
+  opacity: 0.8; /* 稍微调低一点透明度，让文字更清晰 */
+  animation-duration: inherit;
+}
+
+/* 2. 外侧的彩虹发光效果 (使用 ::before 实现) */
+.rainbow-line::before {
+  content: '';
+  position: absolute;
+  /* 让伪元素比主盒子大一圈，用来做外发光 */
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  /* 使用和内部完全一样的 45° 彩虹渐变 */
+  background: var(--rainbow-line-background);
+  background-size: 200% 100%;
+  z-index: -2; /* 放在最底层 */
+  border-radius: 5px; /* 比主盒子的圆角稍大一点 */
+  filter: blur(5px); /* 核心：高斯模糊制造光晕 */
+  opacity: 0.7; /* 控制发光的亮度 */
+  animation: a-rainbowline linear infinite; /* 绑定完全同步的流动动画 */
+  animation-duration: inherit;
+}
+
+/* 定义彩虹流动动画：改变背景位置 */
+@keyframes a-rainbowline {
+  0% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 200% 100%;
+  }
 }
 </style>

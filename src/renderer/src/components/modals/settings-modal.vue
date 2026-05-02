@@ -10,12 +10,13 @@ import { modal } from '@renderer/core/misc/modal'
 import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Invoke } from '@renderer/core/ipc'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
+import ACheckbox2 from '@renderer/components/a-elements/a-checkbox2.vue'
 
 const r = Storage._ref
 </script>
 
 <template>
-  <SimpleModal size="1" title="设置">
+  <SimpleModal size="2" title="设置">
     <div class="settings-wrapper">
       <div class="contain">
         <div style="width: 100%; text-align: center; grid-column: span 2">
@@ -26,20 +27,16 @@ const r = Storage._ref
         <word-helper dec="会帮你自动填到谱师栏" msg="设定一个名字吧！" />
         <a-text-input v-model="r.username" />
         <div>显示stray/vivify图标</div>
-        <a-checkbox v-model="r.settings.stray_logo" />
+        <a-checkbox2 v-model="r.settings.stray_logo" />
 
-        <setting-header msg="编辑器" />
+        <setting-header msg="Lane部分" />
 
-        <div>滚轮反转</div>
-        <a-checkbox v-model="r.settings.reverse_scroll" />
+        <setting-header msg="界面与显示" />
+
         <div>显示底部#Timing黑字</div>
         <a-checkbox v-model="r.settings.show_bpm_bottom" />
         <div>右侧分音</div>
         <a-checkbox v-model="r.settings.show_ticks" />
-        <div>跳过删除确认</div>
-        <a-checkbox v-model="r.settings.delete_no_confirm" />
-        <div>报错时notify</div>
-        <a-checkbox v-model="r.settings.err_notify" />
         <div>lane-width (px)</div>
         <a-number-input v-model="r.settings.lane_width" class="in" min="1" />
         <div>最小Lane</div>
@@ -48,6 +45,21 @@ const r = Storage._ref
         <a-number-input v-model="r.settings.max_scale" class="in" min="1" />
         <div>最高分度</div>
         <a-number-input v-model="r.settings.max_meter" class="in" min="1" />
+        <div>Stats面板</div>
+        <a-checkbox v-model="r.settings.star_rating" />
+        <div>彩色Stats</div>
+        <a-checkbox v-model="r.settings.color_stats" />
+        <div>显示Version</div>
+        <a-checkbox v-model="r.settings.always_version" />
+
+        <setting-header msg="编辑功能" />
+
+        <div>滚轮反转</div>
+        <a-checkbox v-model="r.settings.reverse_scroll" />
+        <div>跳过删除确认</div>
+        <a-checkbox v-model="r.settings.delete_no_confirm" />
+        <div>报错时notify</div>
+        <a-checkbox v-model="r.settings.err_notify" />
         <div>延迟（视觉）</div>
         <a-number-input v-model="r.settings.offset1" class="in" />
         <word-helper dec="密度折线的采样数，也即折线的数据点数" msg="密度采样间隔" />
@@ -57,26 +69,18 @@ const r = Storage._ref
           msg="小节号或拍号"
         />
         <a-checkbox v-model="r.settings.bar_or_section" />
-
         <word-helper dec="在启用Beat的时候自动开启。">显示Beat时间</word-helper>
         <a-checkbox v-model="r.settings.beat_fn_time" class="in" />
         <div>Beat从0开始</div>
         <a-checkbox v-model="r.settings.bar_from_0" />
-        <word-helper
-          dec="摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间"
-          msg="note吸附范围"
-        />
+        <word-helper dec="摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间">
+          note吸附范围
+        </word-helper>
         <a-number-input v-model="r.settings.nearest" />
         <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
         <a-checkbox v-model="r.settings.auto_save" />
-        <div>Stats面板</div>
-        <a-checkbox v-model="r.settings.star_rating" />
-        <div>彩色Stats</div>
-        <a-checkbox v-model="r.settings.color_stats" />
-        <div>显示Version</div>
-        <a-checkbox v-model="r.settings.always_version" />
 
-        <setting-header msg="Diff参考" />
+        <setting-header msg="难度参考" />
 
         <div>编辑难度lane width</div>
         <a-number-input v-model="r.settings.diff_reference.main_lw" min="1" />
@@ -87,9 +91,9 @@ const r = Storage._ref
         <div>显示为背景</div>
         <a-checkbox v-model="r.settings.diff_reference.as_bg" />
         <div>背景不透明度</div>
-        <a-number-input v-model="r.settings.diff_reference.bg_op" min="0" max="100" />
+        <a-number-input v-model="r.settings.diff_reference.bg_op" max="100" min="0" />
 
-        <setting-header msg="note分组" />
+        <setting-header msg="Note分组" />
 
         <div>向后ms</div>
         <a-number-input v-model="r.settings.pooling.ahead" class="in" />
@@ -100,7 +104,7 @@ const r = Storage._ref
         <div>最大note数</div>
         <a-number-input v-model="r.settings.pooling.count" min="20" />
 
-        <setting-header msg="打击音" />
+        <setting-header msg="音频设置" />
 
         <div>打击音</div>
         <a-checkbox v-model="r.settings.hit_sound" />
@@ -124,7 +128,12 @@ const r = Storage._ref
         <div>球ticks</div>
         <a-checkbox v-model="r.settings.record_field.show_circles" />
         <div>球ticks速度</div>
-        <a-number-input min="0.1" max="2" v-model="r.settings.record_field.circle_speed" step="0.01" />
+        <a-number-input
+          v-model="r.settings.record_field.circle_speed"
+          max="2"
+          min="0.1"
+          step="0.01"
+        />
 
         <setting-header msg="SV编辑" />
 
@@ -157,7 +166,7 @@ const r = Storage._ref
         <div>颜色：mod文字</div>
         <a-color-input v-model="r.settings.sv.color_text" />
 
-        <setting-header msg="小节线" />
+        <setting-header msg="小节线样式" />
 
         <div>小节线颜色 1</div>
         <a-color-input v-model="r.settings.sprites.bar_color1" />
@@ -180,7 +189,7 @@ const r = Storage._ref
         <div>小节线偏移</div>
         <a-number-input v-model="r.settings.sprites.bar_dy" />
 
-        <setting-header msg="游玩" />
+        <setting-header msg="游玩判定" />
 
         <div>Pure</div>
         <a-number-input v-model="r.settings.judgement.p1" min="0" />
@@ -197,14 +206,14 @@ const r = Storage._ref
         <div>延迟（视觉）</div>
         <a-number-input v-model="r.settings.offset3" class="in" />
 
-        <setting-header msg="导出：Custom Song" />
+        <setting-header msg="导出设置" />
 
         <div>剪裁图片</div>
         <a-checkbox v-model="r.settings.exporter.crop" />
         <div>导出stray/vivify文件</div>
         <a-checkbox v-model="r.settings.exporter.sv" />
 
-        <setting-header msg="debug" />
+        <setting-header msg="开发者选项" />
 
         <div>Mouse Tracker</div>
         <a-checkbox v-model="r.settings.mouse_tracker" />
@@ -235,12 +244,23 @@ const r = Storage._ref
   flex: 1;
   width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto 1fr;
+  gap: 5px 10px;
   overflow-y: scroll;
-}
-
-.contain {
   text-align: center;
+  align-items: center;
+}
+.contain > div {
+  text-wrap: nowrap;
+}
+.contain > div:not(.settings-header),
+span,
+s {
+  text-align: left;
+  padding-left: 15px;
+}
+.ds {
+  grid-column: span 2;
 }
 
 select {
@@ -259,7 +279,26 @@ option {
 
 input {
   max-width: 60%;
-  justify-self: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+input[type='text'],
+input[type='number'] {
+  max-width: 30%;
+  padding: 2px 0;
+}
+
+input:focus {
+  border-bottom: transparent 1px solid !important;
+}
+:deep(.a-color-input) {
+  justify-items: flex-start;
+  width: min-content;
+  gap: 0 20px;
+}
+input[type=checkbox] {
+  width: min-content;
 }
 
 .in ::-webkit-inner-spin-button,

@@ -26,13 +26,15 @@ const the = ref<ChartTypeV2.mod>({
   value1: 0,
   value2: 0
 })
-const beat_length = ref(114)
+const beat_length = ref(60000 / diff.bpm_of_time(chart.audio.current_time).bpm)
 
 const { stop: stopwatchIdx } = watch(mod_index, (newV) => {
   const r = vsm.vsm.mods[newV]
   if (r) {
     the.value = r
     beat_length.value = 60000 / diff.bpm_of_time(r.time).bpm
+  } else {
+    beat_length.value = 60000 / diff.bpm_of_time(chart.audio.current_time).bpm
   }
 })
 const { stop: stopwatchThe } = watch(
@@ -63,41 +65,43 @@ const repeat_classes = computed(() => {
 </script>
 
 <template>
-  <div v-if="mod_index > -1" :key="mod_index" class="fn-mod-editor">
-    <div class="mod-header">Mod #{{ mod_index }}</div>
-    <div>Time</div>
-    <div>
-      {{ utils.toTimeStr(the.time / 1000) }}
-      <span class="time-span">/ {{ diff.get_beat_string(the.time) }}</span>
-    </div>
-    <div>Duration</div>
-    <a-number-input :key="mod_index" v-model="the.duration" min="0" />
-    <div>value1</div>
-    <a-text-input v-model="the.value1" />
-    <div>value2</div>
-    <a-text-input v-model="the.value2" />
-    <template v-if="proxy_require == 1">
-      <div>Proxy</div>
-      <a-number-input v-model="the.proxy" :max="obj.proxies" />
-    </template>
-    <template v-else>
-      <div class="no-repeat">Proxy</div>
-      <word-helper dec="该mod限制了proxy">
-        <a-number-input v-model="the.proxy" disabled style="max-width: 3rem" />
-      </word-helper>
-    </template>
+  <div :key="mod_index" class="fn-mod-editor">
+    <template v-if="mod_index > -1">
+      <div class="mod-header">Mod #{{ mod_index }}</div>
+      <div>Time</div>
+      <div>
+        {{ utils.toTimeStr(the.time / 1000) }}
+        <span class="time-span">/ {{ diff.get_beat_string(the.time) }}</span>
+      </div>
+      <div>Duration</div>
+      <a-number-input :key="mod_index" v-model="the.duration" min="0" />
+      <div>value1</div>
+      <a-text-input v-model="the.value1" />
+      <div>value2</div>
+      <a-text-input v-model="the.value2" />
+      <template v-if="proxy_require == 1">
+        <div>Proxy</div>
+        <a-number-input v-model="the.proxy" :max="obj.proxies" />
+      </template>
+      <template v-else>
+        <div class="no-repeat">Proxy</div>
+        <word-helper dec="该mod限制了proxy">
+          <a-number-input v-model="the.proxy" disabled style="max-width: 3rem" />
+        </word-helper>
+      </template>
 
-    <div :class="repeat_classes">Repeat</div>
-    <a-number-input v-model="the.repeat" min="0" />
-    <div :class="repeat_classes">Step</div>
-    <a-number-input v-model="the.step" min="0" />
-    <div>Easing</div>
-    <a-select v-model="the.easing" :options="VSM_EASING" maxh="10rem" />
-    <div>modname</div>
-    <a-select v-model="the.modname" :options="able_mods" maxh="10rem" />
-    <word-helper dec="直接编辑mod名称，如果你不想在上面找的话">modname</word-helper>
-    <a-text-input v-model="the.modname" />
-    <div style="grid-column: span 2; height: 15px" />
+      <div :class="repeat_classes">Repeat</div>
+      <a-number-input v-model="the.repeat" min="0" />
+      <div :class="repeat_classes">Step</div>
+      <a-number-input v-model="the.step" min="0" />
+      <div>Easing</div>
+      <a-select v-model="the.easing" :options="VSM_EASING" maxh="10rem" />
+      <div>modname</div>
+      <a-select v-model="the.modname" :options="able_mods" maxh="10rem" />
+      <word-helper dec="直接编辑mod名称，如果你不想在上面找的话">modname</word-helper>
+      <a-text-input v-model="the.modname" />
+      <div style="grid-column: span 2; height: 15px" />
+    </template>
     <div style="grid-column: span 2">时值参考</div>
     <div class="beat-lengths">
       <div>4'</div>

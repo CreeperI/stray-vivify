@@ -79,7 +79,7 @@ const tip = utils.random(StartUpTips)
 <template>
   <div class="chart-list-wrapper">
     <div class="chart-list-left">
-      <img v-if="useLogo" alt="logo" class="su-logo" src="/sv.png" />
+      <img v-if="useLogo" alt="logo" class="su-logo" src="/sv.png" draggable="false" />
       <div v-else class="su-title">stray/vivify</div>
       <div class="su-tip" v-html="tip"></div>
       <div class="su-greeting">
@@ -130,7 +130,7 @@ const tip = utils.random(StartUpTips)
               <div class="chart-unit-composer">{{ chart.composer }}</div>
               <div class="chart-unit-id">id: {{ chart.id }}</div>
             </div>
-            <a-img :src="`stray:///__sprite__/${chart.id}`" class="chart-unit-bg"></a-img>
+            <a-img :src="`stray:///__sprite__/${chart.id}`" class="chart-unit-bg" />
           </div>
         </TransitionGroup>
         <div v-if="shown.length == 0">这里没有歌哦。试试导入和更换搜索方式吧！</div>
@@ -201,6 +201,7 @@ const tip = utils.random(StartUpTips)
   grid-template-columns: 1fr 1fr;
   gap: 25px;
   align-content: space-evenly;
+  margin-top: 15px;
 }
 .sd-info > span:first-child {
   text-align: left;

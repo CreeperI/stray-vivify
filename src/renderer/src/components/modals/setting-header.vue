@@ -8,13 +8,14 @@ defineProps<{msg: string}>()
 
 <style scoped>
 .settings-header {
-  font-size: 1.2em;
+  font-size: 1.5rem;
   font-weight: bold;
-  height: 2rem;
   line-height: 2rem;
-  text-align: center;
+  text-align: left;
   display: block !important;
-  margin: 10px 0;
+  margin-top: 25px;
   grid-column: span 2;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 5px;
 }
 </style>

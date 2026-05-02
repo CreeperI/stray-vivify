@@ -39,7 +39,9 @@ export class HitSoundSystem {
 
     // Find note in current time window
     const hitNote = this.shown.value.some(
-      (x) => utils.between(this.chart.diff.notes[x].time, [last, current]) && x['snm'] != 1
+      (x) =>
+        utils.between(this.chart.diff.notes[x].time, [last, current]) &&
+        this.chart.diff.notes[x]['snm'] != 1
     )
     this.last_trigger = this.chart.audio.current_time
 

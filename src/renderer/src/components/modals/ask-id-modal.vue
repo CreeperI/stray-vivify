@@ -26,7 +26,7 @@ onMounted(() => {
       v-model="pending"
       placeholder="这里输入哦"
       @keydown.enter.capture="confirmModal(pending)"
-    ></a-text-input>
+    />
     <div>建议：不要使用中文或特殊字符</div>
     <div v-if="all.includes(pending)">该id已存在。请换一个试试。</div>
     <template #footer>
@@ -36,4 +36,8 @@ onMounted(() => {
   </SimpleModal>
 </template>
 
-<style scoped></style>
+<style scoped>
+#id-input-box {
+  width: 90%;
+}
+</style>

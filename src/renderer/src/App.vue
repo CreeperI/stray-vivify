@@ -15,7 +15,8 @@ import { Preinit } from '@renderer/core/misc/preinit'
 import PreInitPage from '@renderer/components/miscellaneous/pre-init-page.vue'
 
 const state = GlobalStat.route.route
-const key = RefreshAll.generate_key('app')
+// @ts-ignore i just dont understand why this sucks
+const app_key = RefreshAll.generate_key('app')
 const Initialized = Preinit.Initialized
 
 const show_version = computed(() => {
@@ -25,7 +26,7 @@ const show_version = computed(() => {
 </script>
 
 <template>
-  <template v-if="Initialized" :key="key">
+  <template v-if="Initialized" v-bind:key="app_key">
     <Header v-if="state != 'editor'" />
     <ChartList v-if="state == 'start'" />
     <ChartV2 v-if="state == 'editor'" />

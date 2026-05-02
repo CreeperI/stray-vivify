@@ -52,27 +52,31 @@ const props = defineProps({
 
   &.size-1 {
     width: 100%;
-    max-width: 576px;
+    max-width: 30vw;
   }
 
   &.size-2 {
     width: 100%;
-    max-width: 768px;
+    max-width: 45vw;
   }
 
   &.size-3 {
     width: 100%;
-    max-width: 992px;
+    max-width: 55vw;
   }
 
   &.size-4 {
     width: 100%;
-    max-width: 1200px;
+    max-width: 65vw;
   }
 
   &.size-5 {
     width: 100%;
-    max-width: 1400px;
+    max-width: 75vw;
+  }
+  &.size-6 {
+    width: 100%;
+    max-width: 85vw;
   }
 }
 
