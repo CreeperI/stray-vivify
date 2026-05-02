@@ -75,7 +75,7 @@ export class Chart_diff extends StopClass {
   last_update: number
   // 小节线
   bar_list: ms[]
-  // 分音 t - 等级
+  // 分音 [t, 等级]
   beat_list: [ms, number][]
   ticks: [ms, number][]
   section_list: ms[]
@@ -183,7 +183,6 @@ export class Chart_diff extends StopClass {
     Chart_diff.all.push(this)
 
     this.add_stop(EventHub.on('audio-time-update', () => this.update()))
-    this.add_stop(EventHub.on('fuck-shown', () => this.force_fuck()))
   }
 
   get diff() {
@@ -389,7 +388,6 @@ export class Chart_diff extends StopClass {
   update_on_diff_index() {
     console.log('update_on_diff_index')
     this.chart.set_header_name()
-    this.force_fuck()
     this.calc_density()
     this.update_density_path(true)
     this.update_timing_list()
@@ -398,6 +396,7 @@ export class Chart_diff extends StopClass {
     this.update_sr()
     RefreshAll.refresh('svg-lane')
     GlobalStat.SvgSizing.max_lane = this.max_lane.value
+    utils.nextFrame().then(() => this.force_fuck())
   }
 
   async update_density_path(force = false) {
@@ -431,6 +430,7 @@ export class Chart_diff extends StopClass {
     this.max_lane.value = Chart_diff.calc_max_lane(this.diff)
   }
 
+  /* 小节线，拍号线 */
   update_bar_section_list() {
     this.bar_list = []
     this.section_list = []
@@ -449,6 +449,7 @@ export class Chart_diff extends StopClass {
     }
   }
 
+  /* 分音线 */
   update_beat_line_list() {
     this.beat_list = []
     const v = this.timing
@@ -642,6 +643,9 @@ export class Chart_diff extends StopClass {
     else return Math.round(Math.floor(passed / per_beat) * per_beat + bpm.time)
   }
 
+  /**
+  * @returns t if |nearest - t| less than threshold, and the-nearest if gt threshold
+  * */
   nearest_threshold(t: ms, threshold: ms) {
     const nearest = this.nearest(t)
     if (Math.abs(t - nearest) <= threshold) return nearest
@@ -690,6 +694,7 @@ export class Chart_diff extends StopClass {
     this.last_update = t
     FrameRate.fuck_shown.end()
     this.update_t(this.visible)
+    EventHub.dispatch('fuck-shown')
   }
 
   update_t(visible: [number, number]) {

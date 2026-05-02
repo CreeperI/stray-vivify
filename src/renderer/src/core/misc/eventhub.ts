@@ -1,4 +1,12 @@
-import { watch as VueWatch, WatchCallback, WatchHandle, WatchOptions, WatchSource } from 'vue'
+import {
+  onMounted,
+  onUnmounted,
+  watch as VueWatch,
+  WatchCallback,
+  WatchHandle,
+  WatchOptions,
+  WatchSource
+} from 'vue'
 
 const events = ['audio-time-update', 'fuck-shown'] as const
 
@@ -25,6 +33,10 @@ class eventHub {
     if (this.handlers[event]) {
       this.handlers[event] = this.handlers[event].filter((x) => x !== fn)
     }
+  }
+  use(event: eventNames, fn: () => void) {
+    onMounted(() => EventHub.on(event, fn))
+    onUnmounted(() => EventHub.off(event, fn))
   }
 }
 

@@ -46,6 +46,7 @@ const bar_or_section = computed(() => Storage.settings.bar_or_section)
 provide('lane_width', lane_width)
 provide('d_height', (lane_width / 130 - 1) * 43 * 0.5)
 provide('lane_id', id)
+provide('max_lane', svg_sizing.max_lane)
 </script>
 
 <template>

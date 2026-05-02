@@ -1,6 +1,5 @@
 import { ChartTypeV2 } from '@preload/chart-types'
 import { Chart } from '@renderer/core/chart/chart'
-import { EventHub } from '@renderer/core/misc/eventhub'
 
 export const EditorTools = {
   test: test,
@@ -19,7 +18,6 @@ function test(nids: number[]) {
   notes.forEach((note) => {
     note.time = Math.round(Math.random() * (maxTime - minTime) + minTime)
   })
-  EventHub.dispatch('fuck-shown')
 }
 
 function mirror(nids: number[]) {
@@ -28,7 +26,7 @@ function mirror(nids: number[]) {
   notes.forEach((note) => {
     note.lane = maxLane - note.lane - note.width
   })
-  EventHub.dispatch('fuck-shown')
+  Chart.current?.fuck_shown(true)
 }
 
 function timeMultiplier(nids: number[], multiplier: number, baseOnZero: boolean) {
@@ -44,5 +42,5 @@ function timeMultiplier(nids: number[], multiplier: number, baseOnZero: boolean)
       note.len = Math.round(note.len * multiplier)
     }
   })
-  EventHub.dispatch('fuck-shown')
+  Chart.current?.fuck_shown(true)
 }

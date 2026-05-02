@@ -2,8 +2,8 @@
 import { computed, ref } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { Storage } from '@renderer/core/storage'
-import { utils } from '@renderer/core/utils'
 import { ChartTypeV2 } from '@preload/chart-types'
+import { NoteProps } from '@renderer/core/misc/note-object'
 
 const shown_parts = computed(() => Storage.data.value.settings.svg_shown_parts)
 
@@ -62,8 +62,8 @@ const svg_height = inf_height + 10 + max_height
 const img_able = ref(true)
 const src = `stray:/__sprite__/${chart.id}`
 
-const src_of = (n) => utils.getSrc(n, max_lane)
-const src_of_len = (n) => utils.borderSrc(n, max_lane)
+const src_of = (n) => NoteProps.getSrc(n, max_lane)
+const src_of_len = (n) => NoteProps.borderSrc(n, max_lane)
 
 const svgWidth = layoutInfo.columnsNeeded * (CHART_WIDTH + CHART_GAP) + 2 * PADDING
 

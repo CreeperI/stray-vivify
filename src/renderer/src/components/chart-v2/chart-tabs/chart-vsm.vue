@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
-import SvgNotesDisplay from '@renderer/components/chart-v2/svg-lane/svg-notes-display.vue'
 import SvgModsEditor from '@renderer/components/chart-v2/svg-lane/svg-mods-editor.vue'
 import { Storage } from '@renderer/core/storage'
 import { computed } from 'vue'
@@ -10,6 +9,7 @@ import FnEditor from '@renderer/components/chart-v2/chart-tabs/small/fn-editor.v
 import FnVsmInfo from '@renderer/components/chart-v2/chart-tabs/small/fn-vsm-info.vue'
 import FnModEditor from '@renderer/components/chart-v2/chart-tabs/small/fn-mod-editor.vue'
 import FnVsmMod from '@renderer/components/chart-v2/chart-tabs/small/fn-vsm-mod.vue'
+import SvgNotesEditor from '@renderer/components/chart-v2/svg-lane/svg-notes-editor.vue'
 
 const lane_width = Storage.settings.sv.lane_width
 console.log(lane_width)
@@ -25,7 +25,7 @@ const x_expand = Storage.settings.sv.expand_width
       <fn-mod-editor />
     </div>
     <svg-lane :lane_width="lane_width" :x_expand="x_expand">
-      <svg-notes-display :style="opacity" />
+      <svg-notes-editor :disable_pending="true" :style="opacity" />
 
       <svg-mods-editor />
     </svg-lane>

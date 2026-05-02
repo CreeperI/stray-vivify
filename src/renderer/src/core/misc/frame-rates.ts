@@ -135,6 +135,7 @@ export const FrameRate = {
   audio_sync: new _FrameRateClass(),
   note_bottom: new _FrameRateClass(),
   note_style: new _FrameRateClass(),
+  create_note_object: new _FrameRateClass(),
   Updates: {} as Record<string, _FrameRateClass>
 }
 

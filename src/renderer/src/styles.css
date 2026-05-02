@@ -151,13 +151,11 @@ input:invalid {
   cursor: none !important;
 }
 
-/* i move it here because the fucking formation will change dis into 'true' sucks*/
-#lane-notes > img[data-is-dragged=true] {
-  opacity: 0 !important;
-}
-
-#lane-notes > img[data-is-selected=true] {
-  box-shadow: gold 0 0 15px;
+.note-v2 {
+  width: min-content;
+  user-select: none;
+  display: block;
+  position: absolute;
 }
 
 div[data-is-current-version=true] {

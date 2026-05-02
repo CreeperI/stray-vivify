@@ -542,7 +542,7 @@ export class Chart extends StopClass {
   import_osz_pics(ix: number) {
     Invoke('import-osz-pics', { id: this.id, ix: ix }).then(() => {
       RefreshAll.refresh('song-cover')
-      notify.success("曲绘一份！")
+      notify.success('曲绘一份！')
     })
   }
   async write_png() {
@@ -686,6 +686,20 @@ export class Chart extends StopClass {
 
     this.add_diff(new_d)
     notify.success('new diffed')
+  }
+
+  scr_time(deltaY: number) {
+    const current_time = this.audio.current_time
+    const meter = Storage.settings.meter
+    const current_bpm = this.diff.bpm_of_time(current_time)?.bpm ?? 120
+
+    this.audio.set_current_time(this.diff.nearest(current_time))
+    const scr = Math.round((4 / meter) * (60 / current_bpm) * Math.sign(deltaY) * 1000)
+    if (Storage.settings.reverse_scroll) {
+      this.audio.set_current_time(this.audio.current_time + scr)
+    } else {
+      this.audio.set_current_time(this.audio.current_time - scr)
+    }
   }
 }
 

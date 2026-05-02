@@ -147,7 +147,7 @@ export class Chart_audio {
     this.ele.addEventListener('timeupdate', () => {
       if (this.paused) return
       if (this.from_negative) return
-      this.set_current_time_from_updater(this.$ele.currentTime * 1000)
+      this._current_time = this.$ele.currentTime * 1000
       FrameRate.audio_sync.immediate()
     })
   }

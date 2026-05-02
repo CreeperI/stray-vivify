@@ -9,8 +9,8 @@ import AImg from '@renderer/components/a-elements/a-img.vue'
 import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter.vue'
 import { notify } from '@renderer/core/misc/notify'
 import { Invoke } from '@renderer/core/ipc'
-import SvgNotesDisplay from '@renderer/components/chart-v2/svg-lane/svg-notes-display.vue'
 import TickCircle from '@renderer/components/chart-v2/chart-tabs/small/tick-circle.vue'
+import SvgNotesEditor from '@renderer/components/chart-v2/svg-lane/svg-notes-editor.vue'
 
 const chart = Chart.$current
 
@@ -150,7 +150,7 @@ onUnmounted(() => {
       </div>
       <slot>
         <svg-lane>
-          <svg-notes-display />
+          <svg-notes-editor :disable_pending="true" />
         </svg-lane>
       </slot>
 

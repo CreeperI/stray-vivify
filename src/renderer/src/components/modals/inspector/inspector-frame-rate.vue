@@ -53,6 +53,7 @@ function parse_size(size: number) {
           :r="FrameRate.calc_sr"
           msg="Star Rating"
         />
+        <frame-rate-single :r="FrameRate.create_note_object" msg="Note Object" />
         <frame-rate-single :r="FrameRate.note_bottom" msg="time bottom" />
         <frame-rate-single :r="FrameRate.note_style" msg="note style" />
       </tbody>

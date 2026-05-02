@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import { Storage } from '@renderer/core/storage'
 import { computed, inject } from 'vue'
-import { utils } from '@renderer/core/utils'
 import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { ChartTypeV2 } from '@preload/chart-types'
+import { NoteProps } from '@renderer/core/misc/note-object'
 
 const { note } = defineProps<{
   note: ChartTypeV2.note
@@ -13,8 +13,8 @@ const max_width = Chart.$current.diff.max_lane.value
 const mul = Storage.computes.mul
 const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
 
-const borderSrc = () => utils.borderSrc(note, max_width)
-const getSrc = () => utils.getSrc(note, max_width)
+const borderSrc = () => NoteProps.borderSrc(note, max_width)
+const getSrc = () => NoteProps.getSrc(note, max_width)
 
 function size() {
   return lane_width * note.width + 'px'
@@ -32,7 +32,8 @@ function border() {
   const sliceHeight = 43
   // @ts-expect-error
   const width = note.len * mul.value - 0.5 * sliceHeight
-  return `border:none; border-top: transparent solid ${width}px;
+  return `border:none;
+    border-top: transparent solid ${width}px;
     border-image-source: url(${borderSrc()});
     border-image-slice: ${sliceHeight};
     border-image-repeat: stretch;
