@@ -1,13 +1,16 @@
 import { resolve } from 'path'
-import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
+import { defineConfig } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
+import vueDevtools from 'vite-plugin-vue-devtools'
+
+const plugins = (process.env.NODE_ENV === 'development' || process.argv.includes("--dt")) ? [vue(), vueDevtools()] : [vue()]
 
 export default defineConfig({
   main: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: []
   },
   preload: {
-    plugins: [externalizeDepsPlugin()]
+    plugins: []
   },
   renderer: {
     resolve: {
@@ -15,6 +18,6 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src')
       }
     },
-    plugins: [vue()]
+    plugins: plugins
   }
 })
