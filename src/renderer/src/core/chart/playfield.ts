@@ -1,11 +1,12 @@
 import { ChartTypeV2 } from '@preload/chart-types'
-import { storages} from '@preload/types'
+import { storages } from '@preload/types'
 import { Ref, ref } from 'vue'
 import { Storage } from '../storage'
 import { utils } from '../utils'
 import { Chart } from './chart'
 import { Chart_diff } from './diff'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
+import { StopClass } from '@renderer/core/misc/eventhub'
 
 type lvl_string = ChartTypeV2.note_judgement['lvl']
 
@@ -21,7 +22,7 @@ function sign_of(x: number) {
   return '-'
 }
 
-export class Chart_playfield {
+export class Chart_playfield extends StopClass {
   judgements: ChartTypeV2.note_judgement[]
   combo_max: number
   notes: ChartTypeV2.note[]
@@ -52,6 +53,7 @@ export class Chart_playfield {
   private processed_lns: Set<number>
 
   constructor(ch: Chart, start_from_now: boolean) {
+    super()
     this.chart = ch
     this.start_from_now = start_from_now
     this.diff = ch.diff
@@ -83,6 +85,7 @@ export class Chart_playfield {
       last_judgement: ref(''),
       combo: ref(0)
     }
+    this.add_on('audio-time-update', () => this.calc_acc())
   }
 
   _acc: number
@@ -437,10 +440,6 @@ export class Chart_playfield {
     this._click_time = this._click_time.filter((x) => x > now - 500)
     this.refs.click_sec.value = this._click_time.length
     this.max_cps = Math.max(this.max_cps, this.refs.click_sec.value)
-  }
-
-  refresh() {
-    this.calc_acc()
   }
 
   parse_judgements(v: number) {

@@ -70,7 +70,6 @@ async function main() {
   })
   Intervals.on(1000, () => {
     FrameRate.refresh()
-    Chart.current?.playfield?.refresh()
     Chart_diff.all.forEach((v) => v.update_diff_counts())
     MemoryUsage.update()
     Storage.update_used_time()

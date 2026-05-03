@@ -2,6 +2,7 @@ import { computed, ref, Ref, WritableComputedRef } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { EventHub } from '@renderer/core/misc/eventhub'
+import { Intervals } from '@renderer/core/misc/intervals'
 
 type ms = number
 type second = number
@@ -124,6 +125,7 @@ export class Chart_audio {
     this.paused = false
     this.last = performance.now()
     this.chart.hit_sounder?.on_unpause()
+    Intervals.pause()
   }
 
   set_ele_time(v: ms) {
@@ -155,6 +157,7 @@ export class Chart_audio {
   pause() {
     this.ele?.pause()
     this.paused = true
+    Intervals.resume()
   }
 
   play_pause() {

@@ -1,9 +1,13 @@
 class _IntervalClass {
   func: [number, (() => any)[]][]
   private time_ids: [number, number][]
+  private pending_intervals: Set<number>
+  private paused: boolean
   constructor() {
     this.func = []
     this.time_ids = []
+    this.pending_intervals = new Set<number>()
+    this.paused = false
   }
 
   on(interval: number, fn: () => any) {
@@ -28,14 +32,32 @@ class _IntervalClass {
     }
   }
 
+  call_interval(interval: number) {
+    if (this.paused) {
+      this.pending_intervals.add(interval)
+      return
+    }
+    const f = this.func.find((x) => x[0] == interval)
+    if (f) f[1].forEach((fn) => fn())
+  }
+
+  pause() {
+    this.paused = true
+  }
+  resume() {
+    this.paused = false
+    this.pending_intervals.forEach((interval) => {
+      this.call_interval(interval)
+    })
+    this.pending_intervals.clear()
+  }
+
   private start_interval(interval: number) {
+    const x = this
     this.time_ids.push([
       interval,
       // @ts-expect-error fuck you typescript this is a NUMBER
-      setInterval(() => {
-        const f = this.func.find((x) => x[0] == interval)
-        if (f) f[1].forEach((fn) => fn())
-      }, interval)
+      setInterval(() => x.call_interval(interval), interval)
     ])
   }
 }
