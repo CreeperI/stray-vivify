@@ -81,26 +81,4 @@ td {
 .meter-button:hover {
   background: #444;
 }
-
-.fn-right-inner>input {
-  background-color: transparent;
-  outline: none;
-  border: none;
-  font-size: 1rem;
-  line-height: 1rem;
-  text-align: center;
-  border-bottom: 1px solid transparent;
-}
-
-.fn-right-inner>input:focus {
-  border-bottom: 1px solid var(--grey);
-}
-
-.fn-right-debugger>div {
-  width: 100%;
-}
-
-.fn-right-debugger>div:nth-child(2n + 1) {
-  text-align: right;
-}
 </style>

@@ -12,7 +12,7 @@ const show_beat_time = computed(
 )
 </script>
 <template>
-  <div class="fn-right-inner">
+  <div class="fn-time">
     <label>
       <span>{{ utils.toTimeStr(current_ms / 1000) }}</span>
       <span style="font-size: 0.8rem; color: gray"
@@ -29,14 +29,11 @@ const show_beat_time = computed(
     <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
     <label @click="writable_play_rate = 1">播放速度:{{ play_rate }}x</label>
     <a-range v-model="writable_play_rate" max="2" min="0.25" step="0.05" />
-    <label v-if="Storage.settings.hit_sound">打击音量: {{ Storage.settings.hit_volume }}</label>
-    <a-range
-      v-if="Storage.settings.hit_sound"
-      v-model="Storage.settings.hit_volume"
-      max="100"
-      min="0"
-      step="1"
-    />
+    <template v-if="Storage.settings.hit_sound">
+      <label   v-if="!chart.hit_sounder.hit_error" >打击音量: {{ Storage.settings.hit_volume }}</label>
+      <a-range v-if="!chart.hit_sounder.hit_error" v-model="Storage.settings.hit_volume" max="100" min="0" step="1" />
+      <div v-else class="fn-time-hit-err">打击音加载失败。</div>
+    </template>
   </div>
 </template>
 <style scoped>
@@ -48,7 +45,7 @@ td {
   text-align: center;
 }
 
-.fn-right-inner {
+.fn-time {
   display: grid;
   grid-template-columns: 2fr 3fr;
   grid-template-rows: 2fr 1fr 1fr;
@@ -58,7 +55,7 @@ td {
   text-align: center;
 }
 
-.fn-right-inner > input {
+.fn-time > input {
   background-color: transparent;
   outline: none;
   border: none;
@@ -68,15 +65,11 @@ td {
   border-bottom: 1px solid transparent;
 }
 
-.fn-right-inner > input:focus {
+.fn-time > input:focus {
   border-bottom: 1px solid var(--grey);
 }
-
-.fn-right-debugger > div {
-  width: 100%;
-}
-
-.fn-right-debugger > div:nth-child(2n + 1) {
-  text-align: right;
+.fn-time-hit-err {
+  grid-column: span 2;
+  text-align: center;
 }
 </style>

@@ -4,7 +4,7 @@ import { computed, inject } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { ChartTypeV2 } from '@preload/chart-types'
-import { NoteProps } from '@renderer/core/misc/note-object'
+import { NoteProps } from '@renderer/core/chart/note-object'
 
 const { note } = defineProps<{
   note: ChartTypeV2.note

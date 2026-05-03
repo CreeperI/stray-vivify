@@ -10,7 +10,7 @@ const nextT = FrameRate.next_tick.refs
 </script>
 
 <template>
-  <div v-if="Storage.settings.debug_window" class="fn-right-debugger">
+  <div v-if="Storage.settings.debug_window" class="fn-debug">
     <div>Active Notes</div>
     <div>{{ chart.diff.shown.value.length }}x</div>
     <div>FPS</div>
@@ -23,18 +23,18 @@ const nextT = FrameRate.next_tick.refs
 </template>
 
 <style scoped>
-.fn-right-debugger {
+.fn-debug {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 15px;
   text-align: left;
 }
 
-.fn-right-debugger>div {
+.fn-debug>div {
   width: 100%;
 }
 
-.fn-right-debugger>div:nth-child(2n + 1) {
+.fn-debug>div:nth-child(2n + 1) {
   text-align: right;
 }
 </style>

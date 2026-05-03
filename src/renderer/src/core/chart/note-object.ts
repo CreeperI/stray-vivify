@@ -1,6 +1,5 @@
 import { ChartTypeV2 } from '@preload/chart-types'
 import { Storage } from '@renderer/core/storage'
-import { GlobalStat } from '@renderer/core/globalStat'
 
 const mul = Storage.computes.mul
 export namespace NoteProps {
@@ -52,13 +51,12 @@ export class NoteObject {
   opacity = false
   private note: ChartTypeV2.note
 
-  constructor(note_index: number, note: ChartTypeV2.note,
-              lane_width: number = -1, max_lane = 4) {
+  constructor(note_index: number, note: ChartTypeV2.note, lane_width: number = -1, max_lane = 4) {
     this.note = note
     this.index = note_index
     this.e = document.createElement('img')
     this.e.src = NoteProps.getSrc(note)
-    this.e.alt = `${this.e.src}`
+    this.e.alt = `${this.e.src}不见了？`
     this.e.classList.add('note-v2')
     if ('snm' in note) {
       this.e.style.cssText = [
@@ -88,8 +86,7 @@ export class NoteObject {
 
   update_bottom(t: number) {
     const y = (this.note.time - t - Storage.settings.offset1) * mul.value
-    if (y < GlobalStat.window_size.height) this.e.style.bottom = y + 'px'
-    else this.e.style.bottom = GlobalStat.window_size.height + 300 + "px"
+    this.e.style.bottom = y + 'px'
   }
 
   swap_gold() {

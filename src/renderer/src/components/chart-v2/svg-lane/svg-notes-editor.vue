@@ -10,7 +10,7 @@ import { notify } from '@renderer/core/misc/notify'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { EventHub } from '@renderer/core/misc/eventhub'
-import { NoteObject } from '@renderer/core/misc/note-object'
+import { NoteObject } from '@renderer/core/chart/note-object'
 import useSvgSizing = GlobalStat.useSvgSizing
 
 useUpdateFrameRate('svg-notes')
