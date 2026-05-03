@@ -188,6 +188,111 @@ export default class ChartManager {
     }
   }
 
+  /**
+   * Write backup file with timestamp-based naming (binary .svb format)
+   * 写入备份文件，使用时间戳命名（二进制 .svb 格式）
+   * @param id - Chart ID
+   * @param data - Compressed chart data as JSON string with binary encoded notes
+   */
+  write_backup(id: string, data: string) {
+    const chart = this.data.find((v) => v.id === id)
+    if (!chart) return
+
+    const backupFolder = path.join(this.charts_folder, id, 'backup')
+    
+    // Create backup folder if it doesn't exist
+    // 如果备份文件夹不存在则创建
+    if (!fs.existsSync(backupFolder)) {
+      fs.mkdirSync(backupFolder, { recursive: true })
+    }
+
+    // Generate timestamp-based filename (yymmdd-hhmmss)
+    // 生成基于时间戳的文件名（yymmdd-hhmmss）
+    const now = new Date()
+    const year = now.getFullYear().toString().slice(-2)
+    const month = (now.getMonth() + 1).toString().padStart(2, '0')
+    const day = now.getDate().toString().padStart(2, '0')
+    const hours = now.getHours().toString().padStart(2, '0')
+    const minutes = now.getMinutes().toString().padStart(2, '0')
+    const seconds = now.getSeconds().toString().padStart(2, '0')
+    
+    let baseFilename = `${year}${month}${day}-${hours}${minutes}${seconds}.svb`
+    let filePath = path.join(backupFolder, baseFilename)
+    
+    // If file exists, add suffix with incrementing number
+    // 如果文件已存在，添加递增序号后缀
+    let counter = 1
+    while (fs.existsSync(filePath)) {
+      baseFilename = `${year}${month}${day}-${hours}${minutes}${seconds}-${counter}.svb`
+      filePath = path.join(backupFolder, baseFilename)
+      counter++
+    }
+
+    // Write the backup file
+    // 写入备份文件
+    fs.writeFileSync(filePath, data, 'utf-8')
+  }
+
+  /**
+   * Get list of backup files for a chart
+   * 获取谱面的备份文件列表
+   * @param id - Chart ID
+   * @returns Array of backup filenames sorted by time (newest first)
+   */
+  get_backup_list(id: string): string[] {
+    const chart = this.data.find((v) => v.id === id)
+    if (!chart) return []
+
+    const backupFolder = path.join(this.charts_folder, id, 'backup')
+    
+    // Return empty array if backup folder doesn't exist
+    // 如果备份文件夹不存在则返回空数组
+    if (!fs.existsSync(backupFolder)) {
+      return []
+    }
+
+    // Read all .svb files from backup folder
+    // 读取备份文件夹中的所有 .svb 文件
+    const files = fs.readdirSync(backupFolder)
+      .filter(file => file.endsWith('.svb'))
+      .sort((a, b) => {
+        // Sort by filename (timestamp-based, so alphabetical sort works)
+        // 按文件名排序（基于时间戳，所以字母排序有效）
+        return b.localeCompare(a) // Newest first
+      })
+
+    return files
+  }
+
+  /**
+   * Load a backup file and return its content
+   * 加载备份文件并返回其内容
+   * @param id - Chart ID
+   * @param backup_name - Backup filename
+   * @returns Backup data as JSON string, or undefined if not found
+   */
+  load_backup(id: string, backup_name: string): string | undefined {
+    const chart = this.data.find((v) => v.id === id)
+    if (!chart) return undefined
+
+    const backupPath = path.join(this.charts_folder, id, 'backup', backup_name)
+    
+    // Check if backup file exists
+    // 检查备份文件是否存在
+    if (!fs.existsSync(backupPath)) {
+      return undefined
+    }
+
+    // Read and return backup content
+    // 读取并返回备份内容
+    try {
+      return fs.readFileSync(backupPath, 'utf-8')
+    } catch (error) {
+      console.error('Failed to load backup:', error)
+      return undefined
+    }
+  }
+
   export_svc(id: string) {
     this._export_chart(id, '.svc')
   }

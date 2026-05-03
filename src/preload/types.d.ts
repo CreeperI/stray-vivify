@@ -287,6 +287,26 @@ export type Invoke = {
     }
     r: string | undefined
   }
+  'store-backup': {
+    arg: {
+      id: string
+      data: string
+    }
+    r: void
+  }
+  'get-backup-list': {
+    arg: {
+      id: string
+    }
+    r: string[]
+  }
+  'load-backup': {
+    arg: {
+      id: string
+      backup_name: string
+    }
+    r: string | undefined
+  }
 }
 
 export type Send = {

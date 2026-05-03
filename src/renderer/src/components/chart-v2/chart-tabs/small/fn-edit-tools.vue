@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { GlobalStat } from '@renderer/core/globalStat'
-import { EditorTools } from '@renderer/core/chart/tools'
+import { EditorTools } from '@renderer/core/chart/select-tools'
 import { ref } from 'vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
@@ -23,11 +23,18 @@ console.log(toolMultiArgs.value)
       <div>
         <div
           class="edit-button"
-          @click="EditorTools.mutiplier(selectedNID, toolMultiArgs.multiVal, toolMultiArgs.baseZero)"
+          @click="
+            EditorTools.mutiplier(selectedNID, toolMultiArgs.multiVal, toolMultiArgs.baseZero)
+          "
         >
           TimeMultiply
         </div>
-        <a-number-input v-model="toolMultiArgs.multiVal" :min="0.1" :step="0.1" style="max-width: 6rem" />
+        <a-number-input
+          v-model="toolMultiArgs.multiVal"
+          :min="0.1"
+          :step="0.1"
+          style="max-width: 6rem"
+        />
         <label class="ln2" style="grid-column: span 1">0ms base</label>
         <a-checkbox v-model="toolMultiArgs.baseZero" class="ln2" style="grid-column: span 1" />
       </div>

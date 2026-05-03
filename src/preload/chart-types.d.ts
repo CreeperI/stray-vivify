@@ -159,6 +159,22 @@ export namespace ChartTypeV2 {
     version: number
   }
 
+  // Compressed final format for backup (binary .svb format)
+  // 用于备份的压缩格式（二进制 .svb 格式）
+  export type compressed_final = {
+    diffs: {
+      notes: number[]  // binary encoded notes as array of bytes
+      timing: timing[]
+      meta: meta
+      override?: {
+        max_lane?: number
+      }
+    }[]
+    song: song
+    vsm: vsm[]
+    version: number
+  }
+
   export type note_judgement = {
     time: number
     delta: number

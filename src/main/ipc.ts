@@ -101,6 +101,15 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'backup-chart': function (_, { id, data }) {
       chart_manager.backup_chart(id, data)
     },
+    'store-backup': function (_, { id, data }) {
+      chart_manager.write_backup(id, data)
+    },
+    'get-backup-list': function (_, { id }) {
+      return chart_manager.get_backup_list(id)
+    },
+    'load-backup': function (_, { id, backup_name }) {
+      return chart_manager.load_backup(id, backup_name)
+    },
     'init-data': function (_) {
       const cd = chart_manager.chart_list()
       let conf: string | undefined = undefined

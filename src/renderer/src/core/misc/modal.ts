@@ -13,6 +13,7 @@ import MissingSkinModal from '@renderer/components/modals/missing-skin-modal.vue
 import LoadOszModal from '@renderer/components/modals/load-osz-modal.vue'
 import ChartPreviewModal from '@renderer/components/modals/chart-preview-modal.vue'
 import ExportCustom from '@renderer/components/modals/export-custom/export-custom.vue'
+import LoadBackupModal from '@renderer/components/modals/load-backup-modal.vue'
 
 export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal, true)
@@ -28,6 +29,7 @@ export class modal<T extends Component> {
   static LoadOszModal = new modal(LoadOszModal, true)
   static ChartPreviewModal = new modal(ChartPreviewModal, true)
   static ExportCustomModal = new modal(ExportCustom, true)
+  static LoadBackupModal = new modal(LoadBackupModal, true)
 
   component: T
   priority: number
