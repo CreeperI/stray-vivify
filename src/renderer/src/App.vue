@@ -55,10 +55,6 @@ const show_version = computed(() => {
 </style>
 
 <style>
-* {
-  outline: none;
-}
-
 #n-c {
   position: absolute;
   right: 5px;

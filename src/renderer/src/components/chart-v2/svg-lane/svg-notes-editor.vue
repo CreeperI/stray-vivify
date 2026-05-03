@@ -512,7 +512,6 @@ const d_height = inject<number>('d_height') ?? 0
         />
       </template>
     </foreignObject>
-  </g>
   <rect
     v-if="select_rect.shown"
     :height="select_rect.height"
@@ -523,6 +522,7 @@ const d_height = inject<number>('d_height') ?? 0
     fill="#b8dcee"
     opacity="0.6"
   ></rect>
+  </g>
 </template>
 
 <style scoped>

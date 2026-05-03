@@ -14,6 +14,7 @@ import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { Chart_vsm } from '@renderer/core/chart/vsm'
 import { StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
+import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import nextFrame = utils.nextFrame
 
 function isBumper(n: ChartType.note | string) {
@@ -109,6 +110,7 @@ export class Chart extends StopClass {
   id: string
   sprite_err: Ref<boolean>
   bg_err: Ref<boolean>
+  hit_sounder: HitSoundSystem
 
   refs: {
     diff_ref: Ref<number>
@@ -144,6 +146,7 @@ export class Chart extends StopClass {
     this.refs = {
       diff_ref: ref(-1)
     }
+    this.hit_sounder = new HitSoundSystem(this, this.diff.shown)
   }
 
   static get $current() {

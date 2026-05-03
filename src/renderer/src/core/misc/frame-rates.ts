@@ -151,7 +151,8 @@ export function useUpdateFrameRate(key: string) {
   onUnmounted(() => {
     delete FrameRate.Updates[key]
     utils.remove(all, cls)
+    console.debug("endUpdate:", key)
   })
-
+  console.debug("useUpdate:",key)
   return cls
 }

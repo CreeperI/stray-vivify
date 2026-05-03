@@ -319,21 +319,23 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>移除了note摆放的限制。</div>
       <span>需要注意的是这是直接把无理检测删掉了，除了不能在同一时刻放相同的note</span>
     </Build>
-    <Build build="9.8" d="17" m="2" title="0.9.8-dev" y="2026">
+    <Build build="9.8" d="12" m="4" title="0.9.8" y="2026">
       <template #bugs>
         <div>修复了导出Custom-JSON的问题。 (@Creeper_001)</div>
         <div>修复了大写（shift或者大写锁定下）快捷键不生效的问题。</div>
         <div>修复了第一个note吞打击音的问题（索引为 0 时的if炸了）</div>
       </template>
       <template #qol>
-        <div>重构了 osz 导入行为，现在所有内容都在一个modal中处理</div>
+        <div>
+          重构了osz导入行为，现在所有内容都在一个modal中处理。并且可以导入（除了mania的）其他模式了
+        </div>
         <div>添加了工具栏功能，支持刷新谱面数据。</div>
-        <div>添加了修改最大缩放和拍号的支持。</div>
-        <div>优化了 diff 密度计算逻辑，现在在 diff.ts 中处理而非由 Vue 触发。</div>
-        <div>将刷新所有内容的快捷键改为更具针对性的 Refresh-all。</div>
+        <div>添加了修改最大缩放和分音的设置。(@Creeper_001)</div>
+        <div>优化了 diff 密度计算逻辑，现在在切换diff时自动触发而非由 Vue 触发。</div>
+        <div>刷新组件的刷新更加明确一些，作用域更加像人了。</div>
         <div>优化了皮肤模态框样式，并将设置整合到模态框中。</div>
         <div>改进了圆形显示和存储逻辑。</div>
-        <div>优化了 SVG 在最大轨道数变化时的尺寸调整。</div>
+        <div>优化了不同diff间轨道数存在差异时，svg尺寸自适应的逻辑。</div>
         <div>为 BPM 文本添加了固定显示。</div>
       </template>
       <div style="font-size: 1.2rem; padding: 10px 0">更新了图标！感谢 @雫星沫RainFoamp</div>

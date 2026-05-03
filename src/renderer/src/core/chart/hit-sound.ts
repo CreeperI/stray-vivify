@@ -5,7 +5,7 @@ import { utils } from '@renderer/core/utils'
 import { notify } from '@renderer/core/misc/notify'
 
 export class HitSoundSystem {
-  private hit_error = false
+  hit_error = false
   private audioContext: AudioContext | null = null
   private audioBuffer: AudioBuffer | null = null
   private gainNode: GainNode | null = null
@@ -38,10 +38,11 @@ export class HitSoundSystem {
     const current = this.chart.audio.current_time - Storage.settings.offset3
 
     // Find note in current time window
-    const hitNote = this.shown.value.some(
-      (x) =>
-        utils.between(this.chart.diff.notes[x].time, [last, current]) &&
-        this.chart.diff.notes[x]['snm'] != 1
+    const hitNote = this.shown.value.some((x) =>
+      utils.between(this.chart.diff.notes[x].time, [last, current]) &&
+      'snm' in this.chart.diff.notes[x]
+        ? this.chart.diff.notes[x].snm != 1
+        : true
     )
     this.last_trigger = this.chart.audio.current_time
 
@@ -85,13 +86,15 @@ export class HitSoundSystem {
 
       const response = await fetch('stray:/__hit__/')
       if (!response.ok) {
-        throw new Error(`Failed to fetch audio: ${response.status}`)
+        this.hit_error = true
+        return console.error("Hitsound unfound")
       }
 
       const arrayBuffer = await response.arrayBuffer()
       this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer)
     } catch (error) {
       this.hit_error = true
+      notify.error("打击音无法加载。请检查打击音文件是否有效。")
     }
   }
 }

@@ -11,8 +11,16 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Invoke } from '@renderer/core/ipc'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 import ACheckbox2 from '@renderer/components/a-elements/a-checkbox2.vue'
+import { defineComponent, h } from 'vue'
 
 const r = Storage._ref
+
+const ds = defineComponent({
+  name: 'ds',
+  setup(_, { slots }) {
+    return () => h('div', { class: 'ds' }, slots.default?.())
+  }
+})
 </script>
 
 <template>
@@ -30,17 +38,19 @@ const r = Storage._ref
         <a-checkbox2 v-model="r.settings.stray_logo" />
 
         <setting-header msg="Lane部分" />
-
-        <setting-header msg="界面与显示" />
-
+        <div>lane-width (px)</div>
+        <a-number-input v-model="r.settings.lane_width" class="in" min="1" />
+        <ds>每个lane的宽度。以像素为单位。</ds>
+        <div>最小Lane</div>
+        <a-number-input v-model="r.settings.min_lane" class="in" min="1" />
+        <div class="ds"></div>
         <div>显示底部#Timing黑字</div>
         <a-checkbox v-model="r.settings.show_bpm_bottom" />
         <div>右侧分音</div>
         <a-checkbox v-model="r.settings.show_ticks" />
-        <div>lane-width (px)</div>
-        <a-number-input v-model="r.settings.lane_width" class="in" min="1" />
-        <div>最小Lane</div>
-        <a-number-input v-model="r.settings.min_lane" class="in" min="1" />
+
+        <setting-header msg="界面与显示" />
+
         <div>最高流速</div>
         <a-number-input v-model="r.settings.max_scale" class="in" min="1" />
         <div>最高分度</div>
@@ -97,8 +107,6 @@ const r = Storage._ref
 
         <div>向后ms</div>
         <a-number-input v-model="r.settings.pooling.ahead" class="in" />
-        <s>向前ms</s>
-        <a-number-input v-model="r.settings.pooling.behind" class="in" disabled />
         <div>最小pooling间隔</div>
         <a-number-input v-model="r.settings.pooling.interval" min="16" />
         <div>最大note数</div>
@@ -261,6 +269,11 @@ s {
 }
 .ds {
   grid-column: span 2;
+  opacity: 0.8;
+  margin-top: -10px;
+  margin-bottom: -10px;
+  padding-top: 7px;
+  padding-bottom: 35px;
 }
 
 select {
@@ -297,7 +310,7 @@ input:focus {
   width: min-content;
   gap: 0 20px;
 }
-input[type=checkbox] {
+input[type='checkbox'] {
   width: min-content;
 }
 

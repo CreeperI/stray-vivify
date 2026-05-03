@@ -13,3 +13,4 @@ package-lock.json
 external/*
 !external/examples/
 pnpm-*
+.aiignore

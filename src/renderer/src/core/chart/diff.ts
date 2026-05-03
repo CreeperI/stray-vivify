@@ -4,7 +4,6 @@ import { utils } from '../utils'
 import { Storage } from '@renderer/core/storage'
 import { notify } from '@renderer/core/misc/notify'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
-import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import { calculateChartStats } from '@renderer/core/chart/calc-stat'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
@@ -99,13 +98,11 @@ export class Chart_diff extends StopClass {
   operating_fns: (() => void)[]
   hit_error: boolean
 
-  hit_sounder: HitSoundSystem | undefined
-
   sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
   #__density_abort = false
 
-  constructor(chart: Chart, index?: number, hitsound = true) {
+  constructor(chart: Chart, index?: number) {
     super()
     this.chart = chart
     this.diff_index = ref(index ?? 0)
@@ -162,7 +159,6 @@ export class Chart_diff extends StopClass {
     this.operating_fns = []
 
     this.hit_error = false
-    this.hit_sounder = hitsound ? new HitSoundSystem(chart, this.shown) : undefined
 
     this.sr = ref({
       note: 0,
@@ -366,7 +362,7 @@ export class Chart_diff extends StopClass {
   }
 
   static useCreateDiff(ch: Chart, index: number) {
-    const diff = new Chart_diff(ch, index, false)
+    const diff = new Chart_diff(ch, index)
     onUnmounted(() => {
       diff.stop()
     })
@@ -644,8 +640,8 @@ export class Chart_diff extends StopClass {
   }
 
   /**
-  * @returns t if |nearest - t| less than threshold, and the-nearest if gt threshold
-  * */
+   * @returns t if |nearest - t| less than threshold, and the-nearest if gt threshold
+   * */
   nearest_threshold(t: ms, threshold: ms) {
     const nearest = this.nearest(t)
     if (Math.abs(t - nearest) <= threshold) return nearest
@@ -756,9 +752,6 @@ export class Chart_diff extends StopClass {
 
   update() {
     this.fuck_shown(this.chart.audio.current_time)
-    if (!this.chart.audio.paused) {
-      if (Storage.settings.hit_sound) this.play_hit()
-    }
   }
 
   sort_timing() {
@@ -937,11 +930,6 @@ export class Chart_diff extends StopClass {
 
   private findNote(n: ChartTypeV2.note): number {
     return this.notes.findIndex((x) => utils.is_equal(n, x))
-  }
-
-  private play_hit() {
-    if (this.chart.playfield) return
-    this.hit_sounder?.play_hit()
   }
 
   private force_fuck() {
