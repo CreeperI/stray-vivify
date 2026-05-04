@@ -25,11 +25,11 @@ const sr = chart.diff.sr
       <div>s</div>
       <div>{{ counts.s }}</div>
       <div>总计</div>
-      <div>{{ counts.total }} ({{ counts.total1 }})</div>
+      <div>{{ counts.total }}</div>
       <div>平均密度</div>
       <div>{{ counts.avg_density.toFixed(2) }}</div>
       <div>BPM</div>
-      <div>{{ counts.min_bpm.toFixed(2) }} ~ {{ counts.max_bpm.toFixed(2) }}</div>
+      <div>{{ counts.min_bpm.toFixed(0) }} ~ {{ counts.max_bpm.toFixed(0) }}</div>
       <div>(Mainly</div>
       <div>{{ counts.main_bpm }})</div>
     </div>

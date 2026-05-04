@@ -13,7 +13,7 @@ const show_circle = computed(() => {
 function time_left(t: number, time: number) {
   return `left: ${(time - t) * Storage.settings.record_field.circle_speed + 50}px;`
 }
-const shown_t = chart.diff.shown_bar_ticks
+const shown_t = chart.diff.shown_timing_list
 const current_timing = computed(() => chart.diff.timing[chart.diff.current_timing.value])
 const current_timing_ix = chart.diff.current_timing
 const timing_length = chart.diff.timing.length

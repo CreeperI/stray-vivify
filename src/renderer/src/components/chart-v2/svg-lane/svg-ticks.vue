@@ -1,23 +1,11 @@
 <script lang="ts" setup>
 import { Storage } from '@renderer/core/storage'
 import { Chart } from '@renderer/core/chart/chart'
-import { computed } from 'vue'
+import { computed, inject, onMounted, useTemplateRef } from 'vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 
-const offset1 = Storage.settings.offset1
-
-const { view_port, svg_width } = GlobalStat.useSvgSizing()
-
-const x = svg_width - 25
-
 const chart = Chart.$current
-const mul = Storage.computes.mul
-const current_time = chart.audio.refs.current_ms
 
-// const bar_offset = (((lane_width - 130) / 130) * 43) / 4
-const bar_offset = 0
-const minus =
-  view_port[3] - 80 - bar_offset - parseFloat(getComputedStyle(document.documentElement).fontSize)
 const show_ticks = computed(() => {
   if (GlobalStat.chart_state.value == 0) return Storage.settings.show_ticks
   else if (GlobalStat.chart_state.value == 1) {
@@ -26,26 +14,13 @@ const show_ticks = computed(() => {
       : Storage.settings.record_field.show_ticks
   } else return false
 })
-function time_bottom_bar(t: number, time: number, _mul: number) {
-  return minus - (time - t - offset1) * _mul
-}
-const shown_t = chart.diff.shown_bar_ticks
+const g = useTemplateRef('svg-ticks')
+const diff = inject('diff', chart.diff)
+onMounted(() => diff.element_groups.tick.mount(g.value))
 </script>
 
 <template>
-  <g v-if="show_ticks">
-    <template v-for="[tm, tick] in shown_t.ticks">
-      <text
-        v-if="tick != 0"
-        :x="x"
-        :y="time_bottom_bar(current_time, tm, mul)"
-        fill="gray"
-        text-anchor="middle"
-      >
-        .{{ tick }}
-      </text>
-    </template>
-  </g>
+  <g v-show="show_ticks" id="svg-ticks" ref="svg-ticks" />
 </template>
 
 <style scoped></style>

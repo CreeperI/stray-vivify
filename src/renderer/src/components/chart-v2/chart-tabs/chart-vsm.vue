@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
+import SvgLane from '@renderer/components/chart-v2/svg-lane/svg-lane.vue'
 import SvgModsEditor from '@renderer/components/chart-v2/svg-lane/svg-mods-editor.vue'
 import { Storage } from '@renderer/core/storage'
 import { computed } from 'vue'

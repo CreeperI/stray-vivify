@@ -3,7 +3,10 @@ import { defineConfig } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevtools from 'vite-plugin-vue-devtools'
 
-const plugins = (process.env.NODE_ENV === 'development' || process.argv.includes("--dt")) ? [vue(), vueDevtools()] : [vue()]
+const plugins =
+  process.env.NODE_ENV === 'development' || process.argv.includes('--dt')
+    ? [vue(), vueDevtools({ launchEditor: 'none' })]
+    : [vue()]
 
 export default defineConfig({
   main: {

@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import ARange from '@renderer/components/a-elements/a-range.vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
+import { EventHub } from '@renderer/core/misc/eventhub'
 
 const scale = computed({
   get() {
@@ -27,7 +28,14 @@ const meter = computed({
       <tr>
         <td style="width: 10%">流速</td>
         <td colspan="9">
-          <a-range v-model="scale" :max="Storage.settings.max_scale" :min="0.1" :step="0.1" style="width: 100%" />
+          <a-range
+            v-model="scale"
+            :max="Storage.settings.max_scale"
+            :min="0.1"
+            :step="0.1"
+            style="width: 100%"
+            @update:model-value="EventHub.dispatch('scale-changed')"
+          />
         </td>
         <td style="width: 15%">
           <a-number-input v-model="scale" :max="Storage.settings.max_scale" min="0.1" step="0.1" />
@@ -36,7 +44,14 @@ const meter = computed({
       <tr>
         <td rowspan="2">分音</td>
         <td colspan="9">
-          <a-range v-model="meter" :max="Storage.settings.max_meter" min="1" step="1" style="width: 100%" />
+          <a-range
+            v-model="meter"
+            :max="Storage.settings.max_meter"
+            min="1"
+            step="1"
+            style="width: 100%"
+            @update:model-value="EventHub.dispatch('meter-changed')"
+          />
         </td>
         <td>
           <a-number-input v-model="meter" :max="Storage.settings.max_meter" min="1" step="1" />

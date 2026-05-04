@@ -71,6 +71,7 @@ function click() {
       @mousemove="mousemove"
       @mouseout="mouseout"
       @mouseup="mouseup"
+      style="contain: strict"
     >
       <path :d="path" class="no-event" fill="none" stroke="white" stroke-width="1" />
       <g class="no-event">

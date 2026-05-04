@@ -1,42 +1,16 @@
 <script lang="ts" setup>
-import { Storage } from '@renderer/core/storage'
-import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart } from '@renderer/core/chart/chart'
-import { computed } from 'vue'
-
-const offset1 = Storage.settings.offset1
-
-const { lane_width, view_port } = GlobalStat.useSvgSizing()
+import { inject, onMounted, useTemplateRef } from 'vue'
 
 const chart = Chart.$current
-const mul = Storage.computes.mul
-const plus1 = computed(() => !Storage.settings.bar_from_0)
-const current_time = chart.audio.refs.current_ms
 
-const bb_list = chart.diff.shown_bar_ticks
-
-const bar_offset = (((lane_width - 130) / 130) * 43) / 4
-function time_bottom_bar(t: number, time: number, _mul: number) {
-  return view_port[3] - (time - t - offset1) * _mul - 80 - bar_offset
-}
+const g = useTemplateRef('svg-section-list')
+const diff = inject('diff', chart.diff)
+onMounted(() => diff.element_groups.section.mount(g.value))
 </script>
 
 <template>
-  <g id="svg-section-list">
-    <text
-      v-for="[line, idx] in bb_list.section_list"
-      :y="time_bottom_bar(current_time, line, mul)"
-      dy="-1rem"
-      fill="#ffffff"
-      font-size="1.2rem"
-      opacity="0.5"
-      style="user-select: none"
-      text-anchor="middle"
-      x="25"
-    >
-      {{ plus1 ? idx + 1 : idx }}
-    </text>
-  </g>
+  <g id="svg-bar-text" ref="svg-section-list" />
 </template>
 
 <style scoped>

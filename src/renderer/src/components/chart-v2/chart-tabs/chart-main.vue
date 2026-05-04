@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
+import SvgLane from '@renderer/components/chart-v2/svg-lane/svg-lane.vue'
 import FnNote from '@renderer/components/chart-v2/chart-tabs/small/fn-note.vue'
 import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter.vue'
 import FnDensity from '@renderer/components/chart-v2/chart-tabs/small/fn-density.vue'
