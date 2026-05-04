@@ -535,7 +535,17 @@ const d_height = inject<number>('d_height') ?? 0
 .pt-selecting > img {
   pointer-events: none;
 }
-#lane-notes {
+.lane-notes {
   position: relative;
+  contain: strict;
+}
+.pending-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
 }
 </style>

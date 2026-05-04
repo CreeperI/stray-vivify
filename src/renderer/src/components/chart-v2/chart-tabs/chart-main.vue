@@ -84,6 +84,7 @@ const display_bg = computed(() => {
   flex-grow: 1;
   justify-content: space-around;
   position: relative;
+  contain: strict;
 }
 .chart-main-left {
   display: none;

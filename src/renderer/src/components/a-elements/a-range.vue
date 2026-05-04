@@ -17,6 +17,7 @@ input[type='range'] {
   background-color: transparent;
   height: 20px;
   position: relative;
+  contain: strict;
 }
 
 input[type='range']::-webkit-slider-container {

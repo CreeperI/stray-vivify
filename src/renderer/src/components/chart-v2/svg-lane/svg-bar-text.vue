@@ -45,4 +45,8 @@ useUpdateFrameRate('svg-bar-text')
   </g>
 </template>
 
-<style scoped></style>
+<style scoped>
+#svg-bar-text > text {
+  user-select: none;
+}
+</style>

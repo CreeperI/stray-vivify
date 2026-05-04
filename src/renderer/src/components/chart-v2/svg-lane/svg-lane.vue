@@ -105,13 +105,16 @@ provide('max_lane', svg_sizing.max_lane)
 .lane-wrapper {
   height: 100%;
   flex-shrink: 0;
+  flex-grow: 0;
   transition: flex-basis 0.2s ease-in-out;
+  contain: strict;
 }
 
 .lane-svg {
   bottom: 0;
   position: absolute;
   height: 100%;
+  contain: strict;
 }
 
 text {

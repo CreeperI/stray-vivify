@@ -97,6 +97,11 @@ function toDate(y: string | number, m: string | number, d: string | number) {
   left: 0;
   margin-bottom: 10px;
 }
+div[data-is-current-version='true'] {
+  box-shadow: 0 0 5px 2px white inset;
+  padding: 10px 0;
+  border-radius: 10px;
+}
 </style>
 <style>
 .build-content > span {

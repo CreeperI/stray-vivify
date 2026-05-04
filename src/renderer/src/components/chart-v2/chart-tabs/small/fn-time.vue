@@ -53,6 +53,8 @@ td {
   justify-items: center;
   gap: 15px 0;
   text-align: center;
+  padding: 15px 0;
+  contain: layout paint style;
 }
 
 .fn-time > input {

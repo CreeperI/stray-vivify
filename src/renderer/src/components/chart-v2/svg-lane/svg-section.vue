@@ -39,4 +39,9 @@ function time_bottom_bar(t: number, time: number, _mul: number) {
   </g>
 </template>
 
-<style scoped></style>
+<style scoped>
+#svg-section-list > text {
+  user-select: none;
+  pointer-events: none;
+}
+</style>
