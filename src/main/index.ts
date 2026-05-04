@@ -1,6 +1,6 @@
-import { app, BrowserWindow, globalShortcut, ipcMain, protocol, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, protocol, shell } from 'electron'
 import { join } from 'path'
-import { electronApp, is, optimizer } from '@electron-toolkit/utils'
+import { electronApp, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import { load_ipc_handlers } from './ipc'
 import { stray_handler } from './stray'
@@ -123,9 +123,6 @@ function createWindow(): void {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
     // globalShortcut.register('F11', () => window_max(mainWindow))
-    globalShortcut.register('Alt+F12', () => {
-      mainWindow.webContents.openDevTools({ mode: 'right' })
-    })
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
@@ -145,9 +142,9 @@ app.whenReady().then(() => {
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
+  // app.on('browser-window-created', (_, window) => {
+  //    optimizer.watchWindowShortcuts(window)
+  // })
 
   createWindow()
 
