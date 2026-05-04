@@ -26,7 +26,7 @@ export class _FrameRateClass {
   private _min: number
   private _call_count_last: number
   private last_call: number
-  private _call_counts: number[]
+  call_counts: number[]
 
   constructor() {
     this._cv = 0
@@ -36,7 +36,7 @@ export class _FrameRateClass {
     this._min = 0
     this._call_count_avg = 0
     this._call_count_last = 0
-    this._call_counts = []
+    this.call_counts = []
     this.last_call = 0
     this.refs = ref({
       avg: 0,
@@ -77,9 +77,9 @@ export class _FrameRateClass {
 
   refresh() {
     this.recent = this.recent.slice(-recent_max_length)
-    this._call_counts.push(this._call_count_last)
-    this._call_counts = this._call_counts.slice(-10)
-    this._call_count_avg = utils.average(this._call_counts)
+    this.call_counts.push(this._call_count_last)
+    this.call_counts = this.call_counts.slice(-10)
+    this._call_count_avg = utils.average(this.call_counts)
     this._call_count_last = 0
     this.calc()
   }
@@ -108,7 +108,7 @@ class _FPS extends _FrameRateClass {
   }
   refresh() {
     this.recent.push(aniFrame.call_count_avg)
-    this.last.value = aniFrame.call_count_avg
+    this.last.value = aniFrame.call_counts.at(-1) ?? 0
     this.calc()
   }
 }
@@ -151,8 +151,8 @@ export function useUpdateFrameRate(key: string) {
   onUnmounted(() => {
     delete FrameRate.Updates[key]
     utils.remove(all, cls)
-    console.debug("endUpdate:", key)
+    console.debug('endUpdate:', key)
   })
-  console.debug("useUpdate:",key)
+  console.debug('useUpdate:', key)
   return cls
 }

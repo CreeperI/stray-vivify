@@ -34,7 +34,7 @@ function parse_size(size: number) {
         </tr>
         <tr>
           <td>FPS</td>
-          <td>{{ _fps_r.min.toFixed(1) }}/{{ _fps_r.max.toFixed(1) }}</td>
+          <td>{{ _fps_r.min }}/{{ _fps_r.max }}</td>
           <td>{{ _fps_r.avg.toFixed(2) }}</td>
           <td>{{ _fps_r.sd.toFixed(2) }}</td>
           <td>{{ _fps_r.cv.toFixed(2) }}</td>

@@ -14,7 +14,7 @@ const nextT = FrameRate.next_tick.refs
     <div>Active Notes</div>
     <div>{{ chart.diff.shown.value.length }}x</div>
     <div>FPS</div>
-    <div>{{ fps.toFixed(1) }}</div>
+    <div>{{ fps }}</div>
     <div>audio sync</div>
     <div>{{ sync.call_count.toFixed(1) }}/s</div>
     <div>NextTick</div>
