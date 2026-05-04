@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
-import { computed, inject, onMounted, onUnmounted, ref, toRaw, useTemplateRef } from 'vue'
+import { computed, inject, markRaw, onMounted, onUnmounted, ref, toRaw, useTemplateRef } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Chart, event_time } from '@renderer/core/chart/chart'
@@ -8,35 +7,27 @@ import { utils } from '@renderer/core/utils'
 import { useUpdateFrameRate } from '@renderer/core/misc/frame-rates'
 import { notify } from '@renderer/core/misc/notify'
 import { ChartTypeV2 } from '@preload/chart-types'
-import { Chart_diff } from '@renderer/core/chart/diff'
 import { EventHub } from '@renderer/core/misc/eventhub'
 import { NoteObject } from '@renderer/core/chart/note-object'
+import { Intervals } from '@renderer/core/misc/intervals'
+import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import useSvgSizing = GlobalStat.useSvgSizing
 
 useUpdateFrameRate('svg-notes')
 const chart = Chart.$current
-const { diff_index = -1, disable_pending = false } = defineProps<{
-  diff_index?: number
+const { disable_pending = false } = defineProps<{
   disable_pending?: boolean
 }>()
-// const force_playing = ref(false)
-const not_playing_class = computed(
-  () =>
-    // chart.audio.refs.paused.value && !force_playing.value ? 'not-playing' : ''
-    ''
-)
-const diff = diff_index == -1 ? chart.diff : Chart_diff.useCreateDiff(chart, diff_index)
+const diff = inject('diff', chart.diff)
 console.log(`loaded diff: ${diff.diff_index.value}`, JSON.stringify(diff.diff.meta))
 const to_note = diff.to_note
 
 const lane_width = inject<number>('lane_width', Storage.settings.lane_width)
 const max_lane = inject<number>('max_lane', diff.max_lane.value)
-const { svg_width, bar_length } = useSvgSizing()
+const { svg_width, bar_length, view_port } = useSvgSizing()
 const offset1 = Storage.settings.offset1
 
 const mul = Storage.computes.mul
-const current_time = chart.audio.refs.current_ms
-
 // ------------ pending --------------
 const pending_time = ref(0)
 const pending_lane = ref(0)
@@ -112,7 +103,7 @@ function update_pending(e: MouseEvent) {
   if (e.target instanceof HTMLImageElement) {
     return
   }
-  const mouse_time = event_time(e, chart, mul.value, current_time.value)
+  const mouse_time = event_time(e, chart, mul.value, chart.audio.current_time)
   if (pending_hold_fixed) {
     pending_len.value = Math.abs(mouse_time - pending_hold_fixed_time)
     if (mouse_time <= pending_hold_fixed_time) {
@@ -207,11 +198,11 @@ function ondragstart(e: DragEvent, n: number) {
 }
 function ondrop() {
   if (!dragging.value) return
-  if (!disable_pending) return
+  if (disable_pending) return
 
   if (!diff.remove_note_with_undo(...dragging.value)) console.log('bugged removing')
 
-  diff.add_notes_with_undo(pending_note.value)
+  if (!diff.add_notes_with_undo(pending_note.value)) console.log('bugged adding')
   dragging.value = undefined
   update_notes_objects_dragging()
 }
@@ -252,15 +243,15 @@ function on_mouse_down(e: MouseEvent) {
   select_rect.value.shown = true
   select_rect.value.x = 0
   select_rect.value.height = 0
-  select_rect.value.y = (select_start_time - current_time.value - offset1) * mul.value
+  select_rect.value.y = (select_start_time - chart.audio.current_time - offset1) * mul.value
 
   select_start_screenY = e.screenY
   select_start_screenX = e.screenX
 
   const bottom = screen.availHeight - 125 - e.offsetY
-  select_start_time = Math.floor(bottom / mul.value + current_time.value)
+  select_start_time = Math.floor(bottom / mul.value + chart.audio.current_time)
   select_start_offsetX = e.offsetX
-  select_start_delta = select_start_time - current_time.value
+  select_start_delta = select_start_time - chart.audio.current_time
   document.addEventListener('mouseup', on_mouse_up, { once: true })
   document.addEventListener('mousemove', select_mouse_move, { passive: true })
 }
@@ -279,11 +270,11 @@ function on_mouse_up(e: MouseEvent) {
     return
   }
   const dy = e.screenY - select_start_screenY
-  const mouse_time = current_time.value - dy / mul.value + select_start_delta
+  const mouse_time = chart.audio.current_time - dy / mul.value + select_start_delta
 
   // main select logic
-  const lane0 = ((e.offsetX - 56) / (svg_width - 112)) * 4
-  const lane1 = ((select_start_offsetX - 56) / (svg_width - 112)) * 4
+  const lane0 = ((e.offsetX - 56) / (svg_width - 112)) * max_lane
+  const lane1 = ((select_start_offsetX - 56) / (svg_width - 112)) * max_lane
   const lane_min = Math.min(lane0, lane1)
   const lane_max = Math.max(lane0, lane1)
 
@@ -295,7 +286,7 @@ function on_mouse_up(e: MouseEvent) {
       ...utils.indexes_of(diff.notes, (n, ix) => {
         if (n.time >= time0 && n.time <= time1) {
           if (selected.value.includes(ix)) return false
-          if (n.lane + 0.25 >= lane_min && n.lane - 0.25 <= lane_max) return true
+          if (n.lane + 0.25 >= lane_min && n.lane + n.width - 0.25 <= lane_max) return true
         }
         return false
       })
@@ -303,7 +294,7 @@ function on_mouse_up(e: MouseEvent) {
   } else
     selected.value = utils.indexes_of(diff.notes, (n) => {
       if (n.time >= time0 && n.time <= time1)
-        if (n.lane + 0.25 >= lane_min && n.lane - 0.25 <= lane_max) return true
+        if (n.lane + 0.25 >= lane_min && n.lane + n.width - 0.25 <= lane_max) return true
       return false
     })
 
@@ -349,7 +340,7 @@ function select_mouse_move(e: MouseEvent) {
 
   select_last_screen = [e.screenX, e.screenY]
   const dy = e.screenY - select_start_screenY
-  const mouse_time = current_time.value - dy / mul.value + select_start_delta
+  const mouse_time = chart.audio.current_time - dy / mul.value + select_start_delta
   select_rect.value.width = Math.abs(e.screenX - select_start_screenX)
   if (e.screenX > select_start_screenX) select_rect.value.x = select_start_offsetX
   else select_rect.value.x = select_start_offsetX + (e.screenX - select_start_screenX)
@@ -358,8 +349,8 @@ function select_mouse_move(e: MouseEvent) {
   // dragging to later of song
   // if (dy < 0)
   // select_rect.value.y = screen.availHeight - 52 - Math.max(mouse_time, select_start_time) * mul.value - select_rect.value.height
-  const y1 = screen.height - 96 - (select_start_time - current_time.value) * mul.value
-  const y2 = screen.height - 96 - (mouse_time - current_time.value) * mul.value
+  const y1 = screen.height - 96 - (select_start_time - chart.audio.current_time) * mul.value
+  const y2 = screen.height - 96 - (mouse_time - chart.audio.current_time) * mul.value
   // select_rect.value.y = Math.min(y1, y2)
 
   select_rect.value.y = Math.min(y1, y2)
@@ -392,17 +383,25 @@ onMounted(() => {
   }, 500)
 
   diff.fuck_shown(chart.audio.current_time, true)
+  update_note_objects_list()
 })
 onUnmounted(() => {
   document.getElementById(top_id)?.removeEventListener('wheel', fuck_wheel)
 })
-EventHub.use('audio-time-update', () => {
-  update_notes_objects_bottom()
+EventHub.use('audio-time-update', () => update_notes_objects_position())
+EventHub.use('scale-changed', () => {
+  update_notes_objects_position()
+  update_notes_objects_height()
+  diff.update_element_groups(lane_width, view_port[3])
 })
 EventHub.use('fuck-shown', () => update_note_objects_list())
+EventHub.use('meter-changed', () => {
+  diff.update_element_svg_width(svg_width)
+  diff.update_element_groups(lane_width, view_port[3])
+})
 
 const LaneNotesRef = useTemplateRef('lane-notes')
-const objects: NoteObject[] = []
+const objects: NoteObject[] = markRaw([])
 function update_notes_objects_selection() {
   objects.forEach((x) => {
     x.set_gold(selected.value.includes(x.index))
@@ -411,69 +410,80 @@ function update_notes_objects_selection() {
 function update_notes_objects_dragging() {
   if (dragging.value)
     objects.forEach((x) => {
-      x.set_opacity(dragging.value!.includes(x.index) || false)
+      x.set_transparent(dragging.value!.includes(x.index))
     })
-  else objects.forEach((x) => x.set_opacity(false))
+  else objects.forEach((x) => x.set_transparent(false))
 }
-function update_notes_objects_bottom() {
+function update_notes_objects_position() {
   const t = chart.audio.current_time
-  objects.forEach((x) => x.update_bottom(t))
+  const offset1 = Storage.settings.offset1
+  objects.forEach((x) => x.update_position(t, offset1))
+
+  diff.update_element_groups(lane_width, view_port[3])
+}
+function update_notes_objects_height() {
+  objects.forEach((x) => {
+    if ('len' in x.note) x.e.style.borderTopWidth = x.note.len * mul.value - 0.5 * 43 + 'px'
+  })
 }
 function update_note_objects_list() {
   objects.forEach((x) => x.unmount())
   utils.clear_arr(objects)
-  diff.shown.value.forEach((noteIx) => {
+  toRaw(diff.shown.value).forEach((noteIx) => {
     const obj = new NoteObject(noteIx, to_note(noteIx), lane_width, max_lane)
     objects.push(obj)
     if (disable_pending) return
-    obj.e.addEventListener('dragend', () => {
-      dragging.value = undefined
-      selected.value = []
-      update_notes_objects_dragging()
-    })
-    obj.e.addEventListener('contextmenu', (e) => {
-      e.preventDefault()
-      del_note(noteIx)
-    })
-    obj.e.addEventListener('click', (e) => {
-      if (e.ctrlKey) {
-        const ix = selected.value.findIndex((x) => x == noteIx)
-        if (ix == -1) {
-          selected.value.push(noteIx)
-          obj.set_gold(true)
-        } else {
-          obj.set_gold(false)
-          selected.value.splice(ix, 1)
+    Intervals.wait_resume.then(() => {
+      obj.e.addEventListener('dragend', () => {
+        dragging.value = undefined
+        selected.value = []
+        update_notes_objects_dragging()
+      })
+      obj.e.addEventListener('contextmenu', (e) => {
+        e.preventDefault()
+        del_note(noteIx)
+      })
+      obj.e.addEventListener('click', (e) => {
+        if (e.ctrlKey) {
+          const ix = selected.value.findIndex((x) => x == noteIx)
+          if (ix == -1) {
+            selected.value.push(noteIx)
+            obj.set_gold(true)
+          } else {
+            obj.set_gold(false)
+            selected.value.splice(ix, 1)
+          }
         }
-      }
-    })
-    obj.e.addEventListener('dragstart', (e) => {
-      ondragstart(e, noteIx)
+      })
+      obj.e.addEventListener('dragstart', (e) => {
+        ondragstart(e, noteIx)
+      })
     })
   })
   LaneNotesRef.value!.append(...objects.map((x) => x.e))
-  update_notes_objects_bottom()
+  update_notes_objects_position()
+  diff.update_element_svg_width(svg_width)
 }
 
 const pointer_class = computed(() => {
   return (dragging.value != undefined ? 'pt-dragging' : '') + (is_selecting ? ' pt-selecting' : '')
 })
 const d_height = inject<number>('d_height') ?? 0
+const lane_id = inject('lane_id', 'lane-notes')
 </script>
 
 <template>
   <g
     id="svg-notes"
-    :class="not_playing_class"
-    v-bind="$attrs"
     @mouseenter="() => update_pending_display('enter')"
     @mouseleave="() => update_pending_display('leave')"
   >
     <foreignObject
-      id="lane-notes"
+      :id="lane_id"
       ref="lane-notes"
       :class="pointer_class"
       :y="-80 + d_height"
+      class="lane-notes"
       height="100%"
       width="100%"
       x="0"
@@ -500,6 +510,7 @@ const d_height = inject<number>('d_height') ?? 0
         @click.right="del_note(ix)"
         @click.ctrl="change_my_select(ix)"
       />-->
+      <div id="normal-notes" key="normal-notes" ref="normal-notes" />
       <template v-if="pending_display && pending_note.length">
         <note-v2
           v-for="note in pending_note"
@@ -512,23 +523,20 @@ const d_height = inject<number>('d_height') ?? 0
         />
       </template>
     </foreignObject>
-  <rect
-    v-if="select_rect.shown"
-    :height="select_rect.height"
-    :width="select_rect.width"
-    :x="select_rect.x"
-    :y="select_rect.y"
-    class="no-event select-rect"
-    fill="#b8dcee"
-    opacity="0.6"
-  ></rect>
+    <rect
+      v-if="select_rect.shown"
+      :height="select_rect.height"
+      :width="select_rect.width"
+      :x="select_rect.x"
+      :y="select_rect.y"
+      class="no-event select-rect"
+      fill="#b8dcee"
+      opacity="0.6"
+    />
   </g>
 </template>
 
 <style scoped>
-.not-playing > * > img[data-shown-note] {
-  transition: bottom 0.1s cubic-bezier(0, 0, 0, 0.7);
-}
 .pt-dragging {
   cursor: grabbing;
 }

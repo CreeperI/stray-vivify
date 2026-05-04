@@ -15,23 +15,29 @@ const show_beat_time = computed(
   <div class="fn-time">
     <label>
       <span>{{ utils.toTimeStr(current_ms / 1000) }}</span>
-      <span style="font-size: 0.8rem; color: gray"
-        >/{{ utils.toTimeStr(chart.length / 1000) }}</span
-      >
+      <span style="font-size: 0.8rem; color: gray">
+        /{{ utils.toTimeStr(chart.length / 1000) }}
+      </span>
       <template v-if="show_beat_time">
         <br />
         <span>{{ chart.diff.get_beat_string(current_ms) }}</span>
-        <span style="font-size: 0.8rem; color: gray"
-          >/{{ chart.diff.section_list.length - 1 }}</span
-        >
+        <span style="font-size: 0.8rem; color: gray">
+          /{{ chart.diff.section_list.length - 1 }}
+        </span>
       </template>
     </label>
     <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
     <label @click="writable_play_rate = 1">播放速度:{{ play_rate }}x</label>
     <a-range v-model="writable_play_rate" max="2" min="0.25" step="0.05" />
     <template v-if="Storage.settings.hit_sound">
-      <label   v-if="!chart.hit_sounder.hit_error" >打击音量: {{ Storage.settings.hit_volume }}</label>
-      <a-range v-if="!chart.hit_sounder.hit_error" v-model="Storage.settings.hit_volume" max="100" min="0" step="1" />
+      <label v-if="!chart.hit_sounder.hit_error">打击音量: {{ Storage.settings.hit_volume }}</label>
+      <a-range
+        v-if="!chart.hit_sounder.hit_error"
+        v-model="Storage.settings.hit_volume"
+        max="100"
+        min="0"
+        step="1"
+      />
       <div v-else class="fn-time-hit-err">打击音加载失败。</div>
     </template>
   </div>
@@ -41,14 +47,9 @@ input {
   width: 100%;
 }
 
-td {
-  text-align: center;
-}
-
 .fn-time {
   display: grid;
   grid-template-columns: 2fr 3fr;
-  grid-template-rows: 2fr 1fr 1fr;
   align-items: center;
   justify-items: center;
   gap: 15px 0;

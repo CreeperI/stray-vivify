@@ -9,6 +9,7 @@ import Playfield from '@renderer/components/chart-v2/playfield.vue'
 import { onUnmounted } from 'vue'
 import ChartMain from '@renderer/components/chart-v2/chart-tabs/chart-main.vue'
 import ChartVsm from '@renderer/components/chart-v2/chart-tabs/chart-vsm.vue'
+import { EventHub } from '@renderer/core/misc/eventhub'
 
 const active = GlobalStat.refs.chart_tab
 active.value = 2
@@ -30,13 +31,18 @@ const _meters = [1, 4, 8, 12, 16, 24, 32, 48, 64]
 function fuck_wheel(e: WheelEvent) {
   if (e.ctrlKey) {
     Storage.data.value.settings.scale = Number(
-      Math.max(1, Math.min(Storage.settings.scale - 0.001 * e.deltaY, Storage.settings.max_scale)).toFixed(1)
+      Math.max(
+        1,
+        Math.min(Storage.settings.scale - 0.001 * e.deltaY, Storage.settings.max_scale)
+      ).toFixed(1)
     )
+    EventHub.dispatch('scale-changed')
   } else if (e.altKey) {
     const current_meter_left = _meters.findIndex((v) => v >= Storage.settings.meter)
     if (current_meter_left == -1) return
     Storage.data.value.settings.meter =
       _meters[Math.max(current_meter_left - (e.deltaY > 0 ? 1 : -1), 0)] ?? 64
+    EventHub.dispatch('meter-changed')
   }
 }
 

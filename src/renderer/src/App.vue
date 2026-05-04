@@ -26,7 +26,7 @@ const show_version = computed(() => {
 </script>
 
 <template>
-  <template v-if="Initialized" v-bind:key="app_key">
+  <template v-if="Initialized">
     <Header v-if="state != 'editor'" />
     <ChartList v-if="state == 'start'" />
     <ChartV2 v-if="state == 'editor'" />
@@ -41,7 +41,7 @@ const show_version = computed(() => {
     <MouseTracker />
   </template>
   <pre-init-page v-else />
-    <div id="n-c" class="notify-container" />
+  <div id="n-c" class="notify-container" />
 </template>
 <style scoped>
 .--build {

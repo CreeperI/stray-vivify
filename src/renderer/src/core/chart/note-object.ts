@@ -48,11 +48,13 @@ export class NoteObject {
   index: number
   e: HTMLImageElement
   gold = false
-  opacity = false
-  private note: ChartTypeV2.note
+  transparent = false
+  note: ChartTypeV2.note
+  is_hold: boolean
 
   constructor(note_index: number, note: ChartTypeV2.note, lane_width: number = -1, max_lane = 4) {
     this.note = note
+    this.is_hold = 'len' in note
     this.index = note_index
     this.e = document.createElement('img')
     this.e.src = NoteProps.getSrc(note)
@@ -84,31 +86,21 @@ export class NoteObject {
     this.e.setAttribute('data-shown-note', '')
   }
 
-  update_bottom(t: number) {
-    const y = (this.note.time - t - Storage.settings.offset1) * mul.value
-    this.e.style.bottom = y + 'px'
+  update_position(t: number, offset1: number) {
+    const y = (this.note.time - t - offset1) * mul.value
+    this.e.style.transform = `translateY(${-y}px)`
   }
 
-  swap_gold() {
-    if (this.gold) this.e.style.boxShadow = ''
-    else this.e.style.boxShadow = '0 0 15px gold'
-    this.gold = !this.gold
-  }
   set_gold(v: boolean) {
     if (v) this.e.style.boxShadow = '0 0 15px gold'
     else this.e.style.boxShadow = ''
     this.gold = v
   }
 
-  swap_opacity() {
-    if (this.opacity) this.e.style.opacity = ''
-    else this.e.style.opacity = '0'
-    this.opacity = !this.opacity
-  }
-  set_opacity(v: boolean) {
-    if (v) this.e.style.opacity = ''
-    else this.e.style.opacity = '0'
-    this.opacity = v
+  set_transparent(v: boolean) {
+    if (v) this.e.style.opacity = '0'
+    else this.e.style.opacity = ''
+    this.transparent = v
   }
   unmount() {
     this.e.remove()

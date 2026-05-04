@@ -61,6 +61,7 @@ async function main() {
   expose_variables()
   load_external_mods()
   load_external_tips()
+  setInterval(() => FrameRate.refresh(), 1000)
   Preinit.Stages.debugs = true
 
   Storage.init_interval()
@@ -69,7 +70,6 @@ async function main() {
     Chart.current?.diff.update_tick_list()
   })
   Intervals.on(1000, () => {
-    FrameRate.refresh()
     Chart_diff.all.forEach((v) => v.update_diff_counts())
     MemoryUsage.update()
     Storage.update_used_time()

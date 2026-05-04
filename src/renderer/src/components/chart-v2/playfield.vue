@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { Chart } from '@renderer/core/chart/chart'
-import SvgLane from '@renderer/components/chart-v2/chart-tabs/svg-lane.vue'
+import SvgLane from '@renderer/components/chart-v2/svg-lane/svg-lane.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { utils } from '@renderer/core/utils'

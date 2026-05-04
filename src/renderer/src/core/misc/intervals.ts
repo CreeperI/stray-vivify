@@ -1,13 +1,18 @@
 class _IntervalClass {
   func: [number, (() => any)[]][]
+  private wait_resolve: () => void
+  wait_resume: Promise<void>
   private time_ids: [number, number][]
   private pending_intervals: Set<number>
   private paused: boolean
+
   constructor() {
     this.func = []
     this.time_ids = []
     this.pending_intervals = new Set<number>()
     this.paused = false
+    this.wait_resume = Promise.resolve()
+    this.wait_resolve = () => {}
   }
 
   on(interval: number, fn: () => any) {
@@ -43,9 +48,14 @@ class _IntervalClass {
 
   pause() {
     this.paused = true
+    Intervals.wait_resume = new Promise((resolve) => {
+      Intervals.wait_resolve = resolve
+    })
   }
   resume() {
     this.paused = false
+    this.wait_resolve()
+    this.wait_resolve = () => {}
     this.pending_intervals.forEach((interval) => {
       this.call_interval(interval)
     })

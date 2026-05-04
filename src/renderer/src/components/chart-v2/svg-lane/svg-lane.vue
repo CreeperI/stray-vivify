@@ -26,7 +26,7 @@ const {
   diff_index?: number
 }>()
 
-const id = `lane-wrapper-${Math.random().toFixed(4)}`
+const id = `lane-wrapper-${Math.random().toString(36).substring(2, 10)}`
 viewBox()
 
 function viewBox() {
@@ -43,14 +43,23 @@ const rkey = RefreshAll.generate_key('svg-lane')
 
 const bar_or_section = computed(() => Storage.settings.bar_or_section)
 
+const chart = Chart.$current
+const diff = diff_index == -1 ? chart.diff : Chart_diff.useCreateDiff(chart, diff_index)
+
 provide('lane_width', lane_width)
 provide('d_height', (lane_width / 130 - 1) * 43 * 0.5)
 provide('lane_id', id)
 provide('max_lane', svg_sizing.max_lane)
+provide('diff', diff)
 </script>
 
 <template>
-  <div :id="id" :key="rkey" :style="{ flexBasis: viewBox()[2] + 'px' }" class="lane-wrapper">
+  <div
+    :id="id"
+    :key="rkey"
+    :style="{ flexBasis: viewBox()[2] + 'px', width: viewBox()[2] + 'px' }"
+    class="lane-wrapper"
+  >
     <svg
       :viewBox="viewBox().join(' ')"
       :width="svg_sizing.svg_width"
@@ -69,7 +78,7 @@ provide('max_lane', svg_sizing.max_lane)
         <svg-ticks />
       </template>
       <slot>
-        <svg-notes-editor :diff_index="diff_index" />
+        <svg-notes-editor />
       </slot>
       <rect
         id="svg-bottom-rect"

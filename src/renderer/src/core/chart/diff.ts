@@ -9,6 +9,8 @@ import { ChartTypeV2 } from '@preload/chart-types'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { GlobalStat } from '@renderer/core/globalStat'
+import { ElementGroup } from '@renderer/core/misc/element-group'
+import { diff_elements } from '@renderer/core/chart/diff-element-groups'
 
 function parse_type(v: string) {
   switch (v) {
@@ -30,7 +32,7 @@ function parse_type(v: string) {
       throw new Error('Unknown Type.' + v)
   }
 }
-function isNote(v: ChartTypeV2.note): v is ChartTypeV2.normal_note {
+function is_note(v: ChartTypeV2.note): v is ChartTypeV2.normal_note {
   return 'snm' in v
 }
 function fix_note(v: ChartTypeV2.note) {
@@ -48,6 +50,7 @@ function fix_note(v: ChartTypeV2.note) {
     }
   }
 }
+const fs = parseFloat(getComputedStyle(document.documentElement).fontSize)
 
 export class Chart_diff extends StopClass {
   static all: Chart_diff[] = []
@@ -76,9 +79,12 @@ export class Chart_diff extends StopClass {
   bar_list: ms[]
   // 分音 [t, 等级]
   beat_list: [ms, number][]
+
+  // which is for note之间的X分音
+  // 我想做一个和pjsk.moe那种差不多的谱面导出所以加了一个分音的list
   ticks: [ms, number][]
   section_list: ms[]
-  shown_bar_ticks: Ref<{
+  shown_timing_list: {
     // 小节
     bar_list: [ms, number][]
     // 分音线
@@ -87,16 +93,22 @@ export class Chart_diff extends StopClass {
     section_list: [ms, number][]
     // 右边的xx分音
     ticks: [ms, number][]
-  }>
-  shown_timing: Ref<ChartTypeV2.timing[]>
+  }
+  shown_timing: ChartTypeV2.timing[]
   current_timing: ComputedRef<number>
   density_data: Ref<number[]>
   density_path: Ref<string>
   density_updating: boolean = false
+  element_groups: {
+    bar_text: ElementGroup<SVGTextElement, [ms, number]>
+    beat_line: ElementGroup<SVGLineElement, [ms, number]>
+    section: ElementGroup<SVGTextElement, [ms, number]>
+    bpm_text: ElementGroup<SVGTextElement, ChartTypeV2.timing>
+    tick: ElementGroup<SVGTextElement, [ms, number]>
+  }
 
   on_operating: boolean
   operating_fns: (() => void)[]
-  hit_error: boolean
 
   sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
@@ -128,13 +140,13 @@ export class Chart_diff extends StopClass {
     this.bar_list = []
     this.beat_list = []
     this.section_list = []
-    this.shown_bar_ticks = ref({
+    this.shown_timing_list = {
       bar_list: [],
       beat_list: [],
       ticks: [],
       section_list: []
-    })
-    this.shown_timing = ref([])
+    }
+    this.shown_timing = []
     this.current_timing = computed(() =>
       Math.max(
         0,
@@ -143,22 +155,23 @@ export class Chart_diff extends StopClass {
     )
     this.density_data = ref([0])
     this.density_path = ref('')
-    this.watch(
-      () => Storage.settings.meter,
-      () => {
-        this.update_beat_line_list()
-        this.update_t(this.visible)
-      }
-    )
+    this.add_on('meter-changed', () => {
+      console.log(Storage.settings.meter)
+      this.update_beat_line_list()
+      this.update_t(this.visible)
+    })
+    this.element_groups = {
+      bar_text: diff_elements.create_bartext(),
+      beat_line: diff_elements.create_beatline(),
+      section: diff_elements.create_section(),
+      bpm_text: diff_elements.create_bpm(),
+      tick: diff_elements.create_tick()
+    }
 
-    // which is for 分音
-    // 我想做一个和pjsk.moe那种差不多的谱面导出所以加了一个分音的list
     this.ticks = []
 
     this.on_operating = false
     this.operating_fns = []
-
-    this.hit_error = false
 
     this.sr = ref({
       note: 0,
@@ -283,14 +296,14 @@ export class Chart_diff extends StopClass {
 
   static validate_notes(notes: ChartTypeV2.note[]) {
     return notes.map((x) => {
-      if (x.width == 1 && isNote(x))
+      if (x.width == 1 && is_note(x))
         return {
           lane: Math.max(x.lane, 0),
           time: x.time,
           width: 1,
           snm: x.snm == 2 ? 0 : x.snm
         }
-      if (!isNote(x)) {
+      if (!is_note(x)) {
         if (x.len == 0) {
           return {
             lane: x.lane,
@@ -449,25 +462,25 @@ export class Chart_diff extends StopClass {
   update_beat_line_list() {
     this.beat_list = []
     const v = this.timing
+    const den = Storage.settings.meter
+
+    // Available snap divisors that are <= den, in order (coarsest to finest)
+    const mod = [1, 4, 8, 16, 32, 48, 64].filter((snap) => snap <= den)
+
+    function to_level(beat_index: number) {
+      // Find the coarsest snap divisor that this beat falls on
+      for (let i = 0; i < mod.length; i++) {
+        const snap = mod[i]
+        if (beat_index % (den / snap) === 0) {
+          return i + 1
+        }
+      }
+      return mod.length + 1 // Fallback
+    }
 
     for (let i = 0; i < v.length; i++) {
       const timing = v[i]
       const end = this.timing_end_of(timing, v, this.chart.length)
-      const den = Storage.settings.meter
-
-      // Available snap divisors that are <= den, in order (coarsest to finest)
-      const mod = [1, 4, 8, 16, 32, 48, 64].filter((snap) => snap <= den)
-
-      function to_level(beat_index: number) {
-        // Find the coarsest snap divisor that this beat falls on
-        for (let i = 0; i < mod.length; i++) {
-          const snap = mod[i]
-          if (beat_index % (den / snap) === 0) {
-            return i + 1
-          }
-        }
-        return mod.length + 1 // Fallback
-      }
 
       const time_per_beat = (240 / (timing.bpm * den)) * 1000
       let beat_index = 0
@@ -695,7 +708,7 @@ export class Chart_diff extends StopClass {
 
   update_t(visible: [number, number]) {
     const is_circle = Storage.settings.record_field.show_circles
-    this.shown_bar_ticks.value = {
+    this.shown_timing_list = {
       bar_list: this.bar_list
         .map((x, ix) => [x, ix] as [number, number])
         .filter((x) => utils.between(x[0], visible)),
@@ -707,7 +720,12 @@ export class Chart_diff extends StopClass {
         .map((x, dx) => [x, dx] as [number, number])
         .filter((x) => utils.between(x[0], visible))
     }
-    this.shown_timing.value = this.timing.filter((x) => utils.between(x.time, visible))
+    this.shown_timing = this.timing.filter((x) => utils.between(x.time, visible))
+    this.element_groups.section.recreate(...this.shown_timing_list.section_list)
+    this.element_groups.bar_text.recreate(...this.shown_timing_list.bar_list)
+    this.element_groups.beat_line.recreate(...this.shown_timing_list.beat_list)
+    this.element_groups.bpm_text.recreate(...this.shown_timing)
+    this.element_groups.tick.recreate(...this.shown_timing_list.ticks)
   }
 
   isVisible(n: ChartTypeV2.note, visible: [number, number]): boolean {
@@ -752,6 +770,45 @@ export class Chart_diff extends StopClass {
 
   update() {
     this.fuck_shown(this.chart.audio.current_time)
+  }
+  update_element_groups(lane_width: number, view3: number) {
+    const time = this.chart.audio.current_time
+    const section = Storage.settings.bar_or_section
+    const offset1 = Storage.settings.offset1
+    const mul = Storage.computes.mul.value
+    const bar_offset = (((lane_width - 130) / 130) * 43) / 4
+    if (section) {
+      this.element_groups.section.update(([el, [t, _]]) => {
+        el.setAttribute('y', String(view3 - (t - time - offset1) * mul - 80 - bar_offset))
+      })
+    } else {
+      this.element_groups.bar_text.update(([el, [t, _]]) => {
+        el.setAttribute('y', String(view3 - (t - time - offset1) * mul - 80 - bar_offset))
+      })
+    }
+    const bar_dy = 80 + Storage.settings.sprites.bar_dy + 43 / 2
+    this.element_groups.beat_line.update(([el, [t, _]]) => {
+      el.setAttribute('y1', String(view3 - (t - time - offset1) * mul - bar_dy))
+      el.setAttribute('y2', String(view3 - (t - time - offset1) * mul - bar_dy))
+    })
+    this.element_groups.bpm_text.update(([el, timing]) => {
+      el.setAttribute('y', String(view3 - (timing.time - time - offset1) * mul - 80 - bar_offset))
+    })
+    const dy = view3 - 80 - fs
+    this.element_groups.tick.update(([el, [t, _]]) => {
+      el.setAttribute('y', String(dy - (t - time - offset1) * mul))
+    })
+  }
+  update_element_svg_width(svg_width: number) {
+    this.element_groups.tick.update(([el, _]) => {
+      el.setAttribute('x', svg_width - 25 + 'px')
+    })
+    this.element_groups.beat_line.update(([el, _]) => {
+      el.setAttribute('x2', String(svg_width - 50))
+    })
+  }
+  update_element_meter() {
+    this.element_groups.beat_line.recreate(...this.shown_timing_list.beat_list)
   }
 
   sort_timing() {
@@ -843,7 +900,7 @@ export class Chart_diff extends StopClass {
           ? all_times.slice(0, part_index_end)
           : all_times.slice(part_index_start, part_index_end)
 
-      // here got a len-1 'c i want to make the last independently fucked
+      // here got a len-1 'cause i want to make the last independently fucked
       for (let j = 0; j < part_times.length - 1; j++) {
         let tick = 24e4 / (part_times[j + 1] - part_times[j]) / part.bpm
         if (tick > 128) continue
