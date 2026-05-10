@@ -601,18 +601,19 @@ export class Chart_diff extends StopClass {
   remove_note_with_undo(...v: ChartTypeV2.note[] | number[]) {
     const undo: (() => void)[] = []
     const r: boolean[] = []
-    for (const ele of v) {
+    const notes: ChartTypeV2.note[] = []
+    v.forEach((ele: ChartTypeV2.note | number) => {
       if (typeof ele == 'number') {
-        r.push(this.remove_ix(ele))
-        undo.push(() => {
-          this.add_note(this.notes[ele])
-        })
+        notes.push(this.notes[ele])
       } else {
-        r.push(this.remove_note(ele))
-        undo.push(() => {
-          this.add_note(ele)
-        })
+        notes.push(ele)
       }
+    })
+    for (const ele of notes) {
+      r.push(this.remove_note(ele))
+      undo.push(() => {
+        this.add_note(ele)
+      })
     }
     this.push_undo(() => {
       undo.forEach((v) => v())
@@ -927,15 +928,6 @@ export class Chart_diff extends StopClass {
       return false
     }
     this.notes.splice(index, 1)
-    return true
-  }
-
-  private remove_ix(v: number) {
-    if (v < 0) {
-      console.log('trying to remove note with neg ix given')
-      return false
-    }
-    this.notes.splice(v, 1)
     return true
   }
 
