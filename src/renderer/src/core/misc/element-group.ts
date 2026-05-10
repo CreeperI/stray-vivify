@@ -31,7 +31,7 @@ export class ElementGroup<T extends Element, createFrom> {
     this.elements.forEach((v) => fn(v))
   }
   mount(parent?: Element | null) {
-    this.parent = parent || null || this.parent
+    if (parent) this.parent = parent
     if (!this.parent) return
     this.elements.forEach((v) => {
       this.parent!.appendChild(v[0])

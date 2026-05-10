@@ -106,6 +106,7 @@ export const Log = {
     )
     window.addEventListener('unhandledrejection', (e) => {
       let msg = e.reason
+      if (msg == 'opened') return
       Log.err(msg)
       if (Storage.settings.err_notify) {
         notify.error('发生未捕获的错误！请查看Inspector。')

@@ -123,8 +123,6 @@ const storage = ref<storages.storage_scheme>({
     hit_volume: 100,
     pooling: {
       ahead: 5000,
-      behind: 500,
-      count: 200,
       interval: 2000
     },
     auto_save: false,

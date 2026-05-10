@@ -451,8 +451,6 @@ export namespace storages {
 
     pooling: {
       ahead: number
-      behind: number
-      count: number
       interval: number
     }
 

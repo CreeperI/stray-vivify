@@ -1,17 +1,16 @@
 <script lang="ts" setup>
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
-import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import AButton from '@renderer/components/a-elements/a-button.vue'
 import { Storage } from '@renderer/core/storage'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import SettingHeader from '@renderer/components/modals/setting-header.vue'
 import AColorInput from '@renderer/components/a-elements/a-color-input.vue'
 import { modal } from '@renderer/core/misc/modal'
-import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Invoke } from '@renderer/core/ipc'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 import ACheckbox2 from '@renderer/components/a-elements/a-checkbox2.vue'
 import { defineComponent, h } from 'vue'
+import { EventHub } from '@renderer/core/misc/eventhub'
 
 const r = Storage._ref
 
@@ -32,8 +31,9 @@ const ds = defineComponent({
         </div>
         <setting-header msg="欢迎来到stray-vivify！" />
 
-        <word-helper dec="会帮你自动填到谱师栏" msg="设定一个名字吧！" />
+        <div>设定一个名字吧！</div>
         <a-text-input v-model="r.username" />
+        <ds>会帮你自动填到谱师栏</ds>
         <div>显示stray/vivify图标</div>
         <a-checkbox2 v-model="r.settings.stray_logo" />
 
@@ -45,9 +45,9 @@ const ds = defineComponent({
         <a-number-input v-model="r.settings.min_lane" class="in" min="1" />
         <div class="ds"></div>
         <div>显示底部#Timing黑字</div>
-        <a-checkbox v-model="r.settings.show_bpm_bottom" />
+        <a-checkbox2 v-model="r.settings.show_bpm_bottom" />
         <div>右侧分音</div>
-        <a-checkbox v-model="r.settings.show_ticks" />
+        <a-checkbox2 v-model="r.settings.show_ticks" />
 
         <setting-header msg="界面与显示" />
 
@@ -56,39 +56,41 @@ const ds = defineComponent({
         <div>最高分度</div>
         <a-number-input v-model="r.settings.max_meter" class="in" min="1" />
         <div>Stats面板</div>
-        <a-checkbox v-model="r.settings.star_rating" />
+        <a-checkbox2 v-model="r.settings.star_rating" />
         <div>彩色Stats</div>
-        <a-checkbox v-model="r.settings.color_stats" />
+        <a-checkbox2 v-model="r.settings.color_stats" />
         <div>显示Version</div>
-        <a-checkbox v-model="r.settings.always_version" />
+        <a-checkbox2 v-model="r.settings.always_version" />
 
         <setting-header msg="编辑功能" />
 
         <div>滚轮反转</div>
-        <a-checkbox v-model="r.settings.reverse_scroll" />
+        <a-checkbox2 v-model="r.settings.reverse_scroll" />
         <div>跳过删除确认</div>
-        <a-checkbox v-model="r.settings.delete_no_confirm" />
+        <a-checkbox2 v-model="r.settings.delete_no_confirm" />
         <div>报错时notify</div>
-        <a-checkbox v-model="r.settings.err_notify" />
+        <a-checkbox2 v-model="r.settings.err_notify" />
         <div>延迟（视觉）</div>
         <a-number-input v-model="r.settings.offset1" class="in" />
-        <word-helper dec="密度折线的采样数，也即折线的数据点数" msg="密度采样间隔" />
+        <div>密度采样间隔</div>
         <a-number-input v-model="r.settings.density_data_count" class="in" min="10" />
-        <word-helper
-          dec="仿照malody，不使用小节来标注，而是每一个四分音符（按timing设置）标一个。<br>勾选这个=启用beat。"
-          msg="小节号或拍号"
-        />
-        <a-checkbox v-model="r.settings.bar_or_section" />
-        <word-helper dec="在启用Beat的时候自动开启。">显示Beat时间</word-helper>
-        <a-checkbox v-model="r.settings.beat_fn_time" class="in" />
+        <ds>密度折线的采样数，也即折线的数据点数</ds>
+        <div>小节号或拍号</div>
+        <a-checkbox2 v-model="r.settings.bar_or_section" />
+        <ds>
+          仿照malody，不使用小节来标注，而是每一个四分音符（按timing的bpm）标一个。<br />勾选这个=启用beat。
+        </ds>
+        <div>显示Beat时间</div>
+        <a-checkbox2 v-model="r.settings.beat_fn_time" class="in" />
+        <ds>在启用Beat的时候自动开启。</ds>
         <div>Beat从0开始</div>
-        <a-checkbox v-model="r.settings.bar_from_0" />
-        <word-helper dec="摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间">
-          note吸附范围
-        </word-helper>
+        <a-checkbox2 v-model="r.settings.bar_from_0" />
+        <div>note吸附范围</div>
         <a-number-input v-model="r.settings.nearest" />
+        <ds>摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间</ds>
         <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
-        <a-checkbox v-model="r.settings.auto_save" />
+        <a-checkbox2 v-model="r.settings.auto_save" />
+        <ds>在播放的时候会暂停。</ds>
 
         <setting-header msg="难度参考" />
 
@@ -96,26 +98,38 @@ const ds = defineComponent({
         <a-number-input v-model="r.settings.diff_reference.main_lw" min="1" />
         <div>参考难度lane width</div>
         <a-number-input v-model="r.settings.diff_reference.ref_lw" min="1" />
-        <div>左右颠倒</div>
-        <a-checkbox v-model="r.settings.diff_reference.reverse" />
         <div>显示为背景</div>
-        <a-checkbox v-model="r.settings.diff_reference.as_bg" />
+        <a-checkbox2 v-model="r.settings.diff_reference.as_bg" />
+        <ds
+          >将参考难度和编辑难度显示在同一个轨道板中。勾选此项会忽略左右颠倒和参考难度lane-width的设置。</ds
+        >
         <div>背景不透明度</div>
         <a-number-input v-model="r.settings.diff_reference.bg_op" max="100" min="0" />
+        <ds>背景模式下：参考难度的不透明度。</ds>
+        <div>左右颠倒</div>
+        <a-checkbox2 v-model="r.settings.diff_reference.reverse" />
+        <ds>勾选时，参考难度在左，编辑难度在右。勾选背景时不生效。</ds>
 
         <setting-header msg="Note分组" />
 
-        <div>向后ms</div>
+        <ds>
+          note分组逻辑：每一段时间（最小触发间隔按照interval设置，这是音频的时间而不是现实时间），将
+          [current - 时间范围, current + 时间范围 + 可见长度] 的时间内的note加载到缓存（渲染组）
+          里面（可见长度是通过屏幕大小和流速计算的一个时间值，相当于屏幕等高的轨道板对应的时间长度）。
+        </ds>
+
+        <div>时间范围</div>
         <a-number-input v-model="r.settings.pooling.ahead" class="in" />
         <div>最小pooling间隔</div>
         <a-number-input v-model="r.settings.pooling.interval" min="16" />
-        <div>最大note数</div>
-        <a-number-input v-model="r.settings.pooling.count" min="20" />
+        <ds v-if="r.settings.pooling.interval >= r.settings.pooling.ahead" class="warn">
+          pooling间隔不应该大于时间范围设置。
+        </ds>
 
         <setting-header msg="音频设置" />
 
         <div>打击音</div>
-        <a-checkbox v-model="r.settings.hit_sound" />
+        <a-checkbox2 v-model="r.settings.hit_sound" />
         <div>打击音延迟</div>
         <a-number-input v-model="r.settings.offset3" class="in" />
         <div>打击音音量</div>
@@ -124,17 +138,17 @@ const ds = defineComponent({
         <setting-header msg="预览模式" />
 
         <div>左侧显示小节数</div>
-        <a-checkbox v-model="r.settings.record_field.show_bar_text" />
+        <a-checkbox2 v-model="r.settings.record_field.show_bar_text" />
         <div>显示小节线</div>
-        <a-checkbox v-model="r.settings.record_field.show_beat_line" />
+        <a-checkbox2 v-model="r.settings.record_field.show_beat_line" />
         <div>左侧小节线下显示bpm</div>
-        <a-checkbox v-model="r.settings.record_field.show_bpm_left" />
+        <a-checkbox2 v-model="r.settings.record_field.show_bpm_left" />
         <div>底部显示#timing</div>
-        <a-checkbox v-model="r.settings.record_field.show_bpm_bottom" />
+        <a-checkbox2 v-model="r.settings.record_field.show_bpm_bottom" />
         <div>右侧信息密度</div>
         <a-number-input v-model="r.settings.record_field.detail" max="5" min="0" />
         <div>球ticks</div>
-        <a-checkbox v-model="r.settings.record_field.show_circles" />
+        <a-checkbox2 v-model="r.settings.record_field.show_circles" />
         <div>球ticks速度</div>
         <a-number-input
           v-model="r.settings.record_field.circle_speed"
@@ -143,12 +157,12 @@ const ds = defineComponent({
           step="0.01"
         />
 
-        <setting-header msg="SV编辑" />
+        <setting-header msg="mod编辑" />
 
         <div>mod按照名字排序</div>
-        <a-checkbox v-model="r.settings.sv.sort_by_name" />
+        <a-checkbox2 v-model="r.settings.sv.sort_by_name" />
         <div>简化obj名</div>
-        <a-checkbox v-model="r.settings.sv.short_obj" />
+        <a-checkbox2 v-model="r.settings.sv.short_obj" />
         <div>note不透明度</div>
         <a-number-input v-model="r.settings.sv.opacity" max="100" min="0" />
         <div>lane width</div>
@@ -174,7 +188,7 @@ const ds = defineComponent({
         <div>颜色：mod文字</div>
         <a-color-input v-model="r.settings.sv.color_text" />
 
-        <setting-header msg="小节线样式" />
+        <setting-header msg="小节线" />
 
         <div>小节线颜色 1</div>
         <a-color-input v-model="r.settings.sprites.bar_color1" />
@@ -192,12 +206,19 @@ const ds = defineComponent({
         <a-color-input v-model="r.settings.sprites.bar_color7" />
         <div>小节线<b class="rainbow-text-color">不</b>透明度</div>
         <a-number-input v-model="r.settings.sprites.bar_op" max="100" min="0" step="1" />
+        <ds>别看成透明度了。</ds>
         <div>小节线宽度</div>
         <a-number-input v-model="r.settings.sprites.bar_length" min="0" />
+        <ds v-if="r.settings.sprites.bar_length == 0" class="warn"> 真的吗？ </ds>
         <div>小节线偏移</div>
-        <a-number-input v-model="r.settings.sprites.bar_dy" />
+        <a-number-input
+          v-model="r.settings.sprites.bar_dy"
+          @update:model-value="EventHub.dispatch('audio-time-update')"
+        />
+        <ds>调节小节线的位置。正值为向上移。默认是穿过note中心。</ds>
 
         <setting-header msg="游玩判定" />
+        <ds>不必在意……</ds>
 
         <div>Pure</div>
         <a-number-input v-model="r.settings.judgement.p1" min="0" />
@@ -217,16 +238,21 @@ const ds = defineComponent({
         <setting-header msg="导出设置" />
 
         <div>剪裁图片</div>
-        <a-checkbox v-model="r.settings.exporter.crop" />
+        <a-checkbox2 v-model="r.settings.exporter.crop" />
+        <ds>勾选会将导出的图片剪裁为正方形。不勾选则会拉伸（压缩）成正方形</ds>
         <div>导出stray/vivify文件</div>
-        <a-checkbox v-model="r.settings.exporter.sv" />
+        <a-checkbox2 v-model="r.settings.exporter.sv" />
 
         <setting-header msg="开发者选项" />
 
         <div>Mouse Tracker</div>
-        <a-checkbox v-model="r.settings.mouse_tracker" />
+        <a-checkbox2 v-model="r.settings.mouse_tracker" />
+        <ds>osu!std同款鼠标</ds>
         <div>Debug Widget</div>
-        <a-checkbox v-model="r.settings.debug_window" />
+        <a-checkbox2 v-model="r.settings.debug_window" />
+        <ds>
+          在time下面显示一个开发的时候赛的东西。参考意义不大，但是据说能够加快一些渲染速度。我也不知道为什么。
+        </ds>
       </div>
     </div>
     <template #footer>
@@ -258,9 +284,6 @@ const ds = defineComponent({
   text-align: center;
   align-items: center;
 }
-.contain > div {
-  text-wrap: nowrap;
-}
 .contain > div:not(.settings-header),
 span,
 s {
@@ -270,10 +293,9 @@ s {
 .ds {
   grid-column: span 2;
   opacity: 0.8;
-  margin-top: -10px;
-  margin-bottom: -10px;
-  padding-top: 7px;
-  padding-bottom: 35px;
+  padding-top: 0;
+  margin-bottom: 10px;
+  text-indent: 2rem;
 }
 
 select {
@@ -295,8 +317,9 @@ input {
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
 }
-
-input[type='text'],
+input[type='text'] {
+  padding: 2px 0;
+}
 input[type='number'] {
   max-width: 30%;
   padding: 2px 0;
@@ -317,5 +340,9 @@ input[type='checkbox'] {
 .in ::-webkit-inner-spin-button,
 .in ::-webkit-outer-spin-button {
   appearance: none;
+}
+.warn::before {
+  content: '⚠';
+  color: gold;
 }
 </style>

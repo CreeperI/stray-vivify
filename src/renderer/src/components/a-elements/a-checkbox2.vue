@@ -4,7 +4,7 @@ const v = defineModel<boolean>()
 
 <template>
   <div :class="`a-checkbox2-${v ? 'y' : 'n'}`" class="a-checkbox2" @click="v = !v">
-    <div class="a-checkbox2-button">{{ v ? '✔' : '✘' }}</div>
+    <div class="a-checkbox2-button" />
   </div>
 </template>
 
@@ -23,7 +23,7 @@ const v = defineModel<boolean>()
   background: #0f0;
 
   > .a-checkbox2-button {
-    left: 1.0rem;
+    left: 1rem;
   }
 }
 .a-checkbox2-n {
