@@ -196,5 +196,6 @@ export namespace ChartTypeV2 {
     multi: number
     total_v2: number
     total_v3: number
+    sr: number
   }
 }

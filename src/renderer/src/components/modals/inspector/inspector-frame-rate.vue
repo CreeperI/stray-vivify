@@ -49,7 +49,7 @@ function parse_size(size: number) {
         <frame-rate-single :r="FrameRate.calc_density" msg="calc-density" />
         <frame-rate-single :r="FrameRate.save" msg="save" />
         <frame-rate-single
-          v-if="Storage.settings.star_rating"
+          v-if="Storage.settings.song_stats"
           :r="FrameRate.calc_sr"
           msg="Star Rating"
         />

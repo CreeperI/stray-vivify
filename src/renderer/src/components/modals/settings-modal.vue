@@ -56,11 +56,13 @@ const ds = defineComponent({
         <div>最高分度</div>
         <a-number-input v-model="r.settings.max_meter" class="in" min="1" />
         <div>Stats面板</div>
-        <a-checkbox2 v-model="r.settings.star_rating" />
+        <a-checkbox2 v-model="r.settings.song_stats" />
         <div>彩色Stats</div>
         <a-checkbox2 v-model="r.settings.color_stats" />
         <div>显示Version</div>
         <a-checkbox2 v-model="r.settings.always_version" />
+        <div>osu!mania难度计算</div>
+        <a-checkbox2 v-model="r.settings.osu_sr" />
 
         <setting-header msg="编辑功能" />
 

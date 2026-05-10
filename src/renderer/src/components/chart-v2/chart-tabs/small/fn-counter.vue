@@ -34,9 +34,10 @@ const sr = chart.diff.sr
       <div>{{ counts.main_bpm }})</div>
     </div>
 
-    <div v-if="Storage.settings.star_rating" class="counter-sr">
-      <div @click="chart.diff.update_sr()">
+    <div v-if="Storage.settings.song_stats" class="counter-sr">
+      <div class="sr" @click="chart.diff.update_sr()">
         <word-helper :msg="`Lv. ${(sr.total_v3 / 50).toFixed(2)}`" dec="开玩笑的，点击刷新" />
+        <word-helper :msg="`${sr.sr.toFixed(2)}*`" dec="如果这是张osu谱有多少概率rank？"></word-helper>
       </div>
       <div>CHIP</div>
       <stat-line str="note" />
@@ -95,6 +96,8 @@ const sr = chart.diff.sr
 .counter-sr div:first-child {
   grid-column: 1 / 3;
   text-align: center;
+  display: flex;
+  justify-content: space-evenly;
 }
 
 .counter-sr {

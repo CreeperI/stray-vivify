@@ -114,7 +114,7 @@ const storage = ref<storages.storage_scheme>({
       tick: true,
       bar: true
     },
-    star_rating: false,
+    song_stats: true,
     color_stats: false,
     min_lane: 4,
     bar_or_section: false,
@@ -160,7 +160,8 @@ const storage = ref<storages.storage_scheme>({
       reverse: false,
       as_bg: false,
       bg_op: 70
-    }
+    },
+    osu_sr: false
   },
   version: Version.val,
   shortcut: '',
@@ -178,9 +179,13 @@ const computes = {
   mul_sec: computed(() => storage.value.settings.scale * 200 + 100)
 }
 
-function merge(s: storages.storage_scheme) {
+function patch(s: storages.storage_scheme) {
   if (s.version) {
     if (s.version < 9.5) s.settings.auto_save = true
+    if (s.version < 9.9) {
+      // @ts-ignore
+      s.settings.song_stats = s.settings.star_rating
+    }
   }
 }
 
@@ -198,7 +203,7 @@ export const Storage = {
     const data = await Invoke('get-conf')
     if (!data) return
     const parsed = JSON.parse(data) as storages.storage_scheme
-    merge(parsed)
+    patch(parsed)
     utils.less_assign(this.data.value, parsed)
     this.data.value.version = Version.val
     this.update_join_time()

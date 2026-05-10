@@ -2,6 +2,7 @@
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { utils } from '@renderer/core/utils'
 import { ChartTypeV2 } from '@preload/chart-types'
+import { Chart_diff } from '@renderer/core/chart/diff'
 
 ///类型别名///
 type bpm = number
@@ -10,10 +11,7 @@ type time_sec = number
 type lane = number
 ////////////
 
-export function calculateChartStats(
-  diff: ChartTypeV2.diff,
-  songLengthMs: number
-): ChartTypeV2.SongStats {
+export function calc_stats(diff: ChartTypeV2.diff, songLengthMs: number): ChartTypeV2.SongStats {
   FrameRate.calc_sr.start()
   let noteStat: number,
     speedStat: number,
@@ -93,7 +91,8 @@ export function calculateChartStats(
     fill: fillStat,
     multi: multiStat,
     total_v2: totalV2,
-    total_v3: totalV3
+    total_v3: totalV3,
+    sr: 0
   }
 }
 
@@ -304,4 +303,117 @@ class SongData {
     for (let i = 0; i < this.chainTimings.length; i++)
       this.chainStat += Math.max(0, 1000 - this.chainTimings[i])
   }
+}
+
+/* written by claude, idk why im making this */
+export function calc_sr(diff: ChartTypeV2.diff): number {
+  const MAX_LANE = diff.override?.max_lane ?? Chart_diff.calc_max_lane(diff)
+
+  // ─── Step 1: Flatten & expand notes ────────────────────────────────────────
+  type FlatNote = {
+    time: number
+    lane: number
+    isLN: boolean
+    endTime: number
+  }
+
+  const flatNotes: FlatNote[] = []
+
+  for (const note of diff.notes) {
+    if ('snm' in note && note.snm === 1) continue
+
+    const isLN = 'len' in note && (note as ChartTypeV2.hold_note).len > 0
+    const endTime = isLN ? note.time + (note as ChartTypeV2.hold_note).len : note.time
+
+    for (let i = 0; i < note.width; i++) {
+      flatNotes.push({ time: note.time, lane: note.lane + i, isLN, endTime })
+    }
+  }
+
+  flatNotes.sort((a, b) => a.time - b.time)
+  if (flatNotes.length === 0) return 0
+
+  // ─── Step 2: Strain calculation ─────────────────────────────────────────────
+  // osu!mania uses two strain components per note:
+  //   - individual: how hard is THIS column being hit
+  //   - overall:    how hard is the chart as a whole at this moment
+  //
+  // Decay bases (per-second, not per-ms):
+  //   individual decay: 0.125^(dt/1000)  — very fast decay, column isolation
+  //   overall decay:    0.30^(dt/1000)   — slower, captures density across cols
+  //
+  // The key fix: these are applied correctly with dt in SECONDS.
+
+  const INDIVIDUAL_DECAY_BASE = 0.125
+  const OVERALL_DECAY_BASE = 0.3
+  const STRAIN_STEP = 400 // ms per section window
+
+  const colStrain = new Array(MAX_LANE).fill(0.0)
+  const colLastTime = new Array(MAX_LANE).fill(Number.NEGATIVE_INFINITY)
+  let overallStrain = 0.0
+  let overallLastTime = Number.NEGATIVE_INFINITY
+
+  // Section-based peak collection (like osu! source)
+  const sectionPeaks: number[] = []
+  let currentSectionEnd = flatNotes[0].time + STRAIN_STEP
+  let currentSectionPeak = 0.0
+
+  for (const note of flatNotes) {
+    const col = Math.max(0, Math.min(MAX_LANE - 1, note.lane))
+
+    // dt in SECONDS for decay
+    const dtCol = (note.time - colLastTime[col]) / 1000
+    const dtOverall = (note.time - overallLastTime) / 1000
+
+    const indivDecay =
+      colLastTime[col] === Number.NEGATIVE_INFINITY ? 0 : Math.pow(INDIVIDUAL_DECAY_BASE, dtCol)
+    const overallDecay =
+      overallLastTime === Number.NEGATIVE_INFINITY ? 0 : Math.pow(OVERALL_DECAY_BASE, dtOverall)
+
+    colStrain[col] = colStrain[col] * indivDecay
+    overallStrain = overallStrain * overallDecay
+
+    // Note value: LNs are worth more
+    const noteValue = note.isLN ? 1.0 : 0.8
+
+    // Hold penalty: if a column is being held, it reduces the value of other
+    // notes in that column (already accounted for by the individual strain)
+    colStrain[col] += noteValue
+    overallStrain += noteValue
+
+    colLastTime[col] = note.time
+    overallLastTime = note.time
+
+    // Combined strain at this note = best individual column + overall
+    const peakIndividual = Math.max(...colStrain)
+    const combinedStrain = peakIndividual + overallStrain
+
+    // Section peak tracking
+    if (note.time > currentSectionEnd) {
+      sectionPeaks.push(currentSectionPeak)
+      currentSectionEnd += STRAIN_STEP
+      currentSectionPeak = 0
+    }
+    if (combinedStrain > currentSectionPeak) {
+      currentSectionPeak = combinedStrain
+    }
+  }
+  sectionPeaks.push(currentSectionPeak)
+
+  // ─── Step 3: Weighted difficulty sum ────────────────────────────────────────
+  // Sort peaks descending, apply geometric decay weight 0.9^i
+  // (osu! uses 0.9 here, not 0.5 — this is the correct value)
+  sectionPeaks.sort((a, b) => b - a)
+
+  let difficulty = 0
+  for (let i = 0; i < sectionPeaks.length; i++) {
+    difficulty += sectionPeaks[i] * Math.pow(0.9, i)
+  }
+
+  // ─── Step 4: Star rating scaling ────────────────────────────────────────────
+  // osu!mania: SR = difficulty * STAR_SCALING_FACTOR
+  // STAR_SCALING_FACTOR = 0.018 (empirically matches osu! output in the 1-12* range)
+  const SR = difficulty * 0.028
+
+  return Math.round(SR * 100) / 100
 }

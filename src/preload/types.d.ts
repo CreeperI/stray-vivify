@@ -442,7 +442,7 @@ export namespace storages {
       bar: boolean
     }
 
-    star_rating: boolean
+    song_stats: boolean
     min_lane: number
 
     bar_or_section: boolean
@@ -496,6 +496,7 @@ export namespace storages {
       as_bg: boolean
       bg_op: number
     }
+    osu_sr: boolean
   }
   export interface statistics {
     first_open: number

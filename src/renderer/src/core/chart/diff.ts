@@ -4,7 +4,7 @@ import { utils } from '../utils'
 import { Storage } from '@renderer/core/storage'
 import { notify } from '@renderer/core/misc/notify'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
-import { calculateChartStats } from '@renderer/core/chart/calc-stat'
+import { calc_sr, calc_stats } from '@renderer/core/chart/calc-stat'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
@@ -180,7 +180,8 @@ export class Chart_diff extends StopClass {
       fill: 0,
       multi: 0,
       total_v2: 0,
-      total_v3: 0
+      total_v3: 0,
+      sr: 0
     })
     this.max_lane = ref(4)
     this.calc_max_lane()
@@ -843,8 +844,9 @@ export class Chart_diff extends StopClass {
   }
 
   update_sr() {
-    if (!Storage.settings.star_rating) return
-    this.sr.value = calculateChartStats(this.diff, this.chart.length)
+    if (!Storage.settings.song_stats) return
+    this.sr.value = calc_stats(this.diff, this.chart.length)
+    if (Storage.settings.osu_sr) this.sr.value.sr = calc_sr(this.diff)
   }
 
   get_beat_string(time: number) {
