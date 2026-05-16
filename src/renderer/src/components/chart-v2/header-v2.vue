@@ -21,6 +21,8 @@ function close_chart() {
   if (Chart.current) {
     Chart.current.save()
     Chart.current.audio.pause()
+    Chart.current.stop()
+    Chart.current.diff.stop()
   }
   Chart.current = undefined
   GlobalStat.route.change('start')
@@ -31,6 +33,9 @@ function open_exporter() {
 }
 function open_custom() {
   modal.ExportCustomModal.show({})
+}
+function open_backup() {
+  modal.LoadBackupModal.show({})
 }
 
 function start_play() {
@@ -61,6 +66,7 @@ function is_active(i: number, i1: number) {
         <div class="h-menu-btn-i">
           <div class="h-menu-btn-text" @click="open_exporter">导入/导出</div>
           <div class="h-menu-btn-text" @click="open_custom">Custom</div>
+          <div class="h-menu-btn-text" @click="open_backup">加载备份</div>
           <div class="h-menu-btn-text h-menu-btn-i-sep" @click="modal.SettingModal.show({})">
             设置
           </div>
