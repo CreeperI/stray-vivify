@@ -70,6 +70,6 @@ const chart_state = GlobalStat.chart_state
   display: flex;
   flex-direction: column;
   position: relative;
-  contain: strict;
+  contain: inline-size style paint layout;
 }
 </style>

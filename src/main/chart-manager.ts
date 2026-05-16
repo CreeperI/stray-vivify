@@ -199,7 +199,7 @@ export default class ChartManager {
     if (!chart) return
 
     const backupFolder = path.join(this.charts_folder, id, 'backup')
-    
+
     // Create backup folder if it doesn't exist
     // 如果备份文件夹不存在则创建
     if (!fs.existsSync(backupFolder)) {
@@ -215,10 +215,10 @@ export default class ChartManager {
     const hours = now.getHours().toString().padStart(2, '0')
     const minutes = now.getMinutes().toString().padStart(2, '0')
     const seconds = now.getSeconds().toString().padStart(2, '0')
-    
+
     let baseFilename = `${year}${month}${day}-${hours}${minutes}${seconds}.svb`
     let filePath = path.join(backupFolder, baseFilename)
-    
+
     // If file exists, add suffix with incrementing number
     // 如果文件已存在，添加递增序号后缀
     let counter = 1
@@ -244,7 +244,7 @@ export default class ChartManager {
     if (!chart) return []
 
     const backupFolder = path.join(this.charts_folder, id, 'backup')
-    
+
     // Return empty array if backup folder doesn't exist
     // 如果备份文件夹不存在则返回空数组
     if (!fs.existsSync(backupFolder)) {
@@ -253,8 +253,9 @@ export default class ChartManager {
 
     // Read all .svb files from backup folder
     // 读取备份文件夹中的所有 .svb 文件
-    const files = fs.readdirSync(backupFolder)
-      .filter(file => file.endsWith('.svb'))
+    const files = fs
+      .readdirSync(backupFolder)
+      .filter((file) => file.endsWith('.svb'))
       .sort((a, b) => {
         // Sort by filename (timestamp-based, so alphabetical sort works)
         // 按文件名排序（基于时间戳，所以字母排序有效）
@@ -276,7 +277,7 @@ export default class ChartManager {
     if (!chart) return undefined
 
     const backupPath = path.join(this.charts_folder, id, 'backup', backup_name)
-    
+
     // Check if backup file exists
     // 检查备份文件是否存在
     if (!fs.existsSync(backupPath)) {
@@ -401,7 +402,7 @@ export default class ChartManager {
     return 1
   }
 
-  create_from_osz(id: string, osz:OszReader) {
+  create_from_osz(id: string, osz: OszReader) {
     const folder = path.join(this.charts_folder, id)
     if (fs.existsSync(folder)) return 0
     fs.mkdirSync(folder)
@@ -435,9 +436,14 @@ export default class ChartManager {
       ],
       version: -1
     }
-    this.add_chart(id, chart.song.name, chart.song.composer, chart.song.bpm, s[0], chart.diffs.map(d =>
-      d.meta.diff1 + ' ' + d.meta.diff2
-    ))
+    this.add_chart(
+      id,
+      chart.song.name,
+      chart.song.composer,
+      chart.song.bpm,
+      s[0],
+      chart.diffs.map((d) => d.meta.diff1 + ' ' + d.meta.diff2)
+    )
     this.write_chart(id, chart)
     return chart
   }

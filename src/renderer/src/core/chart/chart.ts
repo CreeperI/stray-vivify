@@ -116,6 +116,7 @@ export class Chart extends StopClass {
   refs: {
     diff_ref: Ref<number>
   }
+  backup_last: number
 
   constructor() {
     super()
@@ -148,6 +149,7 @@ export class Chart extends StopClass {
       diff_ref: ref(-1)
     }
     this.hit_sounder = new HitSoundSystem(this, this.diff.shown)
+    this.backup_last = performance.now()
   }
 
   static get $current() {
@@ -497,6 +499,10 @@ export class Chart extends StopClass {
         })
       })
       GlobalStat.update_all_chart()
+      if (performance.now() - this.backup_last > 900e3) {
+        this.backup()
+        this.backup_last = performance.now()
+      }
     }
     return
   }
