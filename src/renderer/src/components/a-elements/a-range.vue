@@ -11,16 +11,16 @@ const model = defineModel<number>()
 </template>
 
 <style scoped>
-input[type='range'] {
+input {
   width: 80%;
   appearance: none;
   background-color: transparent;
   height: 20px;
   position: relative;
-  contain: strict;
+  contain: inline-size paint style;
 }
 
-input[type='range']::-webkit-slider-container {
+input::-webkit-slider-container {
   width: 100%;
   border: 1px solid var(--grey);
   border-radius: 0;
@@ -28,14 +28,14 @@ input[type='range']::-webkit-slider-container {
   padding: 0 5px;
 }
 
-input[type='range' i]::-webkit-slider-runnable-track {
+input::-webkit-slider-runnable-track {
   border: none;
   border-radius: 0;
   background-color: transparent;
   height: 100%;
 }
 
-input[type='range']::-webkit-slider-thumb {
+input::-webkit-slider-thumb {
   border-radius: 0;
   appearance: none;
   width: 4px;
