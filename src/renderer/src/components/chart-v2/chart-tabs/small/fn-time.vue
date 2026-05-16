@@ -14,14 +14,14 @@ const show_beat_time = computed(
 <template>
   <div class="fn-time">
     <label>
-      <span>{{ utils.toTimeStr(current_ms / 1000) }}</span>
-      <span style="font-size: 0.8rem; color: gray">
+      <span class="fn-time-str1">{{ utils.toTimeStr(current_ms / 1000) }}</span>
+      <span class="fn-time-str2">
         /{{ utils.toTimeStr(chart.length / 1000) }}
       </span>
       <template v-if="show_beat_time">
         <br />
-        <span>{{ chart.diff.get_beat_string(current_ms) }}</span>
-        <span style="font-size: 0.8rem; color: gray">
+        <span class="fn-time-str1">{{ chart.diff.get_beat_string(current_ms) }}</span>
+        <span class="fn-time-str2">
           /{{ chart.diff.section_list.length - 1 }}
         </span>
       </template>
@@ -55,7 +55,6 @@ input {
   gap: 15px 0;
   text-align: center;
   padding: 15px 0;
-  contain: layout paint style;
 }
 
 .fn-time > input {
@@ -74,5 +73,13 @@ input {
 .fn-time-hit-err {
   grid-column: span 2;
   text-align: center;
+}
+.fn-time-str1 {
+  width: 9rch;
+}
+.fn-time-str2 {
+  width: 7.2rch;
+  font-size: 0.8em;
+  color: gray;
 }
 </style>

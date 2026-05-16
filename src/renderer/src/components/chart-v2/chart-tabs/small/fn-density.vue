@@ -6,7 +6,6 @@ import { utils } from '@renderer/core/utils'
 
 const chart = Chart.$current
 const width = 300 + 20
-const _width_px = width + 'px'
 const data = chart.diff.density_data
 const path = chart.diff.density_path
 
@@ -63,7 +62,7 @@ function click() {
       <word-helper dec="点击以刷新" msg="线密度" />
     </div>
     <svg
-      :width="width"
+      width="320"
       height="250"
       preserveAspectRatio="none"
       @click="click"
@@ -134,6 +133,6 @@ function click() {
 .density-wrapper {
   columns: 1;
   text-align: center;
-  min-width: v-bind(_width_px);
+  min-width: 320px;
 }
 </style>

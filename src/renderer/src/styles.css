@@ -19,6 +19,7 @@
   min-width: min-content;
   scrollbar-width: none;
   height: 100%;
+  contain: layout style inline-size;
 }
 
 .fn-wrapper > * {
@@ -29,7 +30,6 @@
   box-shadow: 0 0 5px black;
   background: var(--darker-bgi);
   padding: 5px;
-  contain: inline-size layout;
 }
 
 .minw {
