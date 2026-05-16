@@ -16,20 +16,20 @@ import ExportCustom from '@renderer/components/modals/export-custom/export-custo
 import LoadBackupModal from '@renderer/components/modals/load-backup-modal.vue'
 
 export class modal<T extends Component> {
-  static SettingModal = new modal(SettingsModal, true)
-  static ConfirmModal = new modal(ConfirmModal)
-  static ShowInformationModal = new modal(ConfirmModal)
-  static VersionsModal = new modal(VersionsModal, true)
-  static CreditsModal = new modal(CreditsModal, true)
-  static AskIdModal = new modal(AskIdModal, true)
-  static ShortcutModal = new modal(ShortcutModal, true)
-  static InspectorModal = new modal(InspectorModal, true)
-  static IExporterModal = new modal(IexporterModal, true)
-  static MissingSkinModal = new modal(MissingSkinModal, true)
-  static LoadOszModal = new modal(LoadOszModal, true)
-  static ChartPreviewModal = new modal(ChartPreviewModal, true)
-  static ExportCustomModal = new modal(ExportCustom, true)
-  static LoadBackupModal = new modal(LoadBackupModal, true)
+  static SettingModal = new modal(SettingsModal)
+  static ConfirmModal = new modal(ConfirmModal, false)
+  static ShowInformationModal = new modal(ConfirmModal, false)
+  static VersionsModal = new modal(VersionsModal)
+  static CreditsModal = new modal(CreditsModal)
+  static AskIdModal = new modal(AskIdModal)
+  static ShortcutModal = new modal(ShortcutModal)
+  static InspectorModal = new modal(InspectorModal)
+  static IExporterModal = new modal(IexporterModal)
+  static MissingSkinModal = new modal(MissingSkinModal)
+  static LoadOszModal = new modal(LoadOszModal)
+  static ChartPreviewModal = new modal(ChartPreviewModal)
+  static ExportCustomModal = new modal(ExportCustom)
+  static LoadBackupModal = new modal(LoadBackupModal)
 
   component: T
   priority: number
@@ -37,7 +37,7 @@ export class modal<T extends Component> {
   should_catch: boolean
   opened: boolean
 
-  constructor(component: T, should_catch = false, priority = 0) {
+  constructor(component: T, should_catch = true, priority = 0) {
     this.component = component
 
     this.props = undefined
