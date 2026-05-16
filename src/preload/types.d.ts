@@ -307,6 +307,12 @@ export type Invoke = {
     }
     r: string | undefined
   }
+  'flash-frame': {
+    arg: {
+      flag: boolean
+    }
+    r: void
+  }
 }
 
 export type Send = {

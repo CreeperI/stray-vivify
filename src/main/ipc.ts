@@ -195,7 +195,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'close-osz': () => {
       OszReader.current = undefined
-      console.log("osz closed")
+      console.log('osz closed')
     },
     'export-preview-svg': (_, { id, svg_text }) => {
       chart_manager.write_svg_text(id, svg_text)
@@ -268,6 +268,9 @@ const Handler = (mw: Electron.BrowserWindow) => {
         return fs.readFileSync(path.join(file_paths.external, fname), 'utf-8')
       }
       return undefined
+    },
+    'flash-frame': (_, { flag = true     }) => {
+      mw.flashFrame(flag)
     }
   } as Required<IpcHandlers.invoke.handler>
 }
