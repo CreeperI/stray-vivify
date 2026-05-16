@@ -290,7 +290,7 @@ export type Invoke = {
   'store-backup': {
     arg: {
       id: string
-      data: string
+      data: ChartTypeV2.final  // Changed from string to ChartTypeV2.final for efficient compression
     }
     r: void
   }
@@ -305,7 +305,7 @@ export type Invoke = {
       id: string
       backup_name: string
     }
-    r: string | undefined
+    r: ChartTypeV2.final | undefined  // Changed from string to ChartTypeV2.final
   }
   'flash-frame': {
     arg: {

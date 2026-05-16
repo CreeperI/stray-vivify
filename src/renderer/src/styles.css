@@ -3,6 +3,7 @@
   user-select: none;
   scrollbar-width: thin;
   scrollbar-color: #b8dcee transparent;
+  outline: none;
 }
 
 ::-webkit-scrollbar-button {

@@ -101,13 +101,17 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'backup-chart': function (_, { id, data }) {
       chart_manager.backup_chart(id, data)
     },
-    'store-backup': function (_, { id, data }) {
-      chart_manager.write_backup(id, data)
+    'store-backup': async function (_, { id, data }) {
+      // Now data is ChartTypeV2.final, chart-manager will handle compression
+      // 现在data是ChartTypeV2.final，chart-manager将处理压缩
+      await chart_manager.write_backup(id, data)
     },
     'get-backup-list': function (_, { id }) {
       return chart_manager.get_backup_list(id)
     },
     'load-backup': function (_, { id, backup_name }) {
+      // Returns ChartTypeV2.final directly after decompression
+      // 直接返回解压后的ChartTypeV2.final
       return chart_manager.load_backup(id, backup_name)
     },
     'init-data': function (_) {

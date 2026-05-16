@@ -15,7 +15,6 @@ import { Chart_vsm } from '@renderer/core/chart/vsm'
 import { StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
-import { serialize } from '@renderer/core/chart/serialize'
 import nextFrame = utils.nextFrame
 
 function isBumper(n: ChartType.note | string) {
@@ -508,29 +507,24 @@ export class Chart extends StopClass {
   }
 
   /**
-   * Backup chart with compressed notes (binary .svb format)
-   * 备份谱面，使用压缩的 notes 数据（二进制 .svb 格式）
+   * Backup chart with efficient binary compression (binary .svb format)
+   * 备份谱面，使用高效的二进制压缩（二进制 .svb 格式）
    */
   async backup() {
-    // Create compressed final structure with binary encoded notes
-    // 创建压缩的 final 结构，使用二进制编码的 notes
-    const compressed: ChartTypeV2.compressed_final = {
+    // Create final structure - chart-manager will handle compression
+    // 创建final结构 - chart-manager将处理压缩
+    const final: ChartTypeV2.final = {
       song: this.song.save(),
       vsm: this.vsm.data,
       version: Storage.version,
-      diffs: this.diffs.map((diff) => ({
-        notes: Array.from(serialize.encodeToBuffer(diff.notes)), // Convert Uint8Array to number[]
-        timing: diff.timing,
-        meta: diff.meta,
-        override: diff.override
-      }))
+      diffs: this.diffs
     }
 
-    // Send to main process for backup
-    // 发送到主进程进行备份
+    // Send to main process for compression and backup
+    // 发送到主进程进行压缩和备份
     await Invoke('store-backup', {
       id: this.id,
-      data: JSON.stringify(compressed)
+      data: final
     })
   }
 
@@ -549,35 +543,20 @@ export class Chart extends StopClass {
    * @param backup_name - Backup filename
    */
   async load_backup(backup_name: string) {
-    const backupData = await Invoke('load-backup', {
+    const restoredData = await Invoke('load-backup', {
       id: this.id,
       backup_name
     })
 
-    if (!backupData) {
+    if (!restoredData) {
       notify.error('备份文件不存在或读取失败')
       return
     }
 
     try {
-      // Parse the compressed backup data
-      // 解析压缩的备份数据
-      const compressed: ChartTypeV2.compressed_final = JSON.parse(backupData)
-
-      // Decompress notes for each diff
-      // 解压每个 diff 的 notes
-      const restoredDiffs: ChartTypeV2.diff[] = compressed.diffs.map((diff) => ({
-        notes: serialize.decodeFromBuffer(new Uint8Array(diff.notes)),
-        timing: diff.timing,
-        meta: diff.meta,
-        override: diff.override
-      }))
-
-      // Restore chart data
-      // 恢复谱面数据
-      this.song.refs.value = { ...compressed.song }
-      this.vsm.data = compressed.vsm
-      this.diffs = restoredDiffs
+      this.song.refs.value = { ...restoredData.song }
+      this.vsm.data = restoredData.vsm
+      this.diffs = restoredData.diffs
 
       // Update current diff
       // 更新当前 diff
@@ -591,7 +570,6 @@ export class Chart extends StopClass {
 
       notify.success(`已从备份 ${backup_name} 恢复`)
     } catch (error) {
-      console.error('Failed to load backup:', error)
       notify.error('备份数据解析失败')
     }
   }

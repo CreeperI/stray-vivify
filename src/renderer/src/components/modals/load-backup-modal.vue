@@ -11,6 +11,23 @@ function load_backup(name: string) {
   chart.load_backup(name)
 }
 chart.get_backup_list().then((v) => (backups.value = v))
+function parse_name(str: string) {
+  const match = str.match(/^(\d{2})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})(?:-(\d+))?\.svb$/)
+  if (!match) return str
+
+  const [, year, month, day, hour, minute, second, num] = match
+  const fullYear = `20${year}`
+
+  return `${fullYear}年${month}月${day}日 ${hour}时${minute}分${second}秒${num ? ` #${num}` : ''}`
+}
+
+let once = false
+function do_backup() {
+  if (once) return
+  once = true
+  chart.backup()
+  chart.get_backup_list().then((v) => (backups.value = v.sort()))
+}
 </script>
 
 <template>
@@ -18,9 +35,13 @@ chart.get_backup_list().then((v) => (backups.value = v))
     <template #header>Load Backup</template>
     <div v-if="backups.length" class="backup-contain">
       <template v-for="i in backups">
-        <div>{{ i }}</div>
+        <div>{{ parse_name(i) }}</div>
         <a-button2 msg="加载" @click="load_backup(i)" />
       </template>
+    </div>
+    <div v-else class="backup-empty">
+      没有备份哦……来一个？
+      <a-button2 msg="来！！！" @click="do_backup" />
     </div>
   </simple-modal>
 </template>
@@ -29,6 +50,14 @@ chart.get_backup_list().then((v) => (backups.value = v))
 .backup-contain {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0 5px;
+  gap: 5px;
+  justify-items: center;
+}
+.backup-empty {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
 </style>

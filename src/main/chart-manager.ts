@@ -9,6 +9,7 @@ import { find_png, find_song } from './stray'
 import * as child_process from 'node:child_process'
 import { ChartTypeV2 } from '../preload/chart-types'
 import { OszReader } from './osz-reader'
+import { serialize } from './serialize'
 
 function timestr() {
   const date = new Date()
@@ -192,9 +193,9 @@ export default class ChartManager {
    * Write backup file with timestamp-based naming (binary .svb format)
    * 写入备份文件，使用时间戳命名（二进制 .svb 格式）
    * @param id - Chart ID
-   * @param data - Compressed chart data as JSON string with binary encoded notes
+   * @param data - Chart final data to compress and store
    */
-  write_backup(id: string, data: string) {
+  async write_backup(id: string, chartData: ChartTypeV2.final) {
     const chart = this.data.find((v) => v.id === id)
     if (!chart) return
 
@@ -228,9 +229,54 @@ export default class ChartManager {
       counter++
     }
 
-    // Write the backup file
-    // 写入备份文件
-    fs.writeFileSync(filePath, data, 'utf-8')
+    // Compress each diff and create the backup structure
+    // 压缩每个diff并创建备份结构
+    const compressedDiffs = chartData.diffs.map((diff) => serialize.compressDiff(diff))
+
+    // Create a header with metadata
+    // 创建包含元数据的头部
+    const header = {
+      version: chartData.version,
+      song: chartData.song,
+      vsm: chartData.vsm,
+      diffCount: chartData.diffs.length
+    }
+    const headerBuffer = Buffer.from(JSON.stringify(header))
+
+    // Combine all buffers: [header_length(4)][header][diff_count(4)][diff1_length(4)][diff1][diff2_length(4)][diff2]...
+    // 组合所有缓冲区
+    let totalSize = 4 + headerBuffer.length + 4
+    for (const diffBuffer of compressedDiffs) {
+      totalSize += 4 + diffBuffer.length
+    }
+
+    const finalBuffer = Buffer.alloc(totalSize)
+    let offset = 0
+
+    // Write header
+    // 写入头部
+    finalBuffer.writeUInt32BE(headerBuffer.length, offset)
+    offset += 4
+    headerBuffer.copy(finalBuffer, offset)
+    offset += headerBuffer.length
+
+    // Write diff count
+    // 写入diff数量
+    finalBuffer.writeUInt32BE(compressedDiffs.length, offset)
+    offset += 4
+
+    // Write each compressed diff
+    // 写入每个压缩的diff
+    for (const diffBuffer of compressedDiffs) {
+      finalBuffer.writeUInt32BE(diffBuffer.length, offset)
+      offset += 4
+      diffBuffer.copy(finalBuffer, offset)
+      offset += diffBuffer.length
+    }
+
+    // Write the backup file as binary
+    // 以二进制形式写入备份文件
+    fs.writeFileSync(filePath, finalBuffer)
   }
 
   /**
@@ -270,9 +316,9 @@ export default class ChartManager {
    * 加载备份文件并返回其内容
    * @param id - Chart ID
    * @param backup_name - Backup filename
-   * @returns Backup data as JSON string, or undefined if not found
+   * @returns Restored ChartTypeV2.final object, or undefined if not found
    */
-  load_backup(id: string, backup_name: string): string | undefined {
+  load_backup(id: string, backup_name: string): ChartTypeV2.final | undefined {
     const chart = this.data.find((v) => v.id === id)
     if (!chart) return undefined
 
@@ -284,10 +330,47 @@ export default class ChartManager {
       return undefined
     }
 
-    // Read and return backup content
-    // 读取并返回备份内容
+    // Read and decompress backup content
+    // 读取并解压缩备份内容
     try {
-      return fs.readFileSync(backupPath, 'utf-8')
+      const fileBuffer = fs.readFileSync(backupPath)
+      let offset = 0
+
+      // Read header length and data
+      // 读取头部长度和数据
+      const headerLength = fileBuffer.readUInt32BE(offset)
+      offset += 4
+      const headerJson = fileBuffer.slice(offset, offset + headerLength).toString('utf-8')
+      offset += headerLength
+      const header = JSON.parse(headerJson) as {
+        version: number
+        song: ChartTypeV2.song
+        vsm: ChartTypeV2.vsm[]
+        diffCount: number
+      }
+
+      // Read diff count
+      // 读取diff数量
+      const diffCount = fileBuffer.readUInt32BE(offset)
+      offset += 4
+
+      // Decompress each diff
+      // 解压缩每个diff
+      const diffs: ChartTypeV2.diff[] = []
+      for (let i = 0; i < diffCount; i++) {
+        const diffLength = fileBuffer.readUInt32BE(offset)
+        offset += 4
+        const diffBuffer = fileBuffer.slice(offset, offset + diffLength)
+        offset += diffLength
+        diffs.push(serialize.decompressDiff(diffBuffer))
+      }
+
+      return {
+        version: header.version,
+        song: header.song,
+        vsm: header.vsm,
+        diffs
+      }
     } catch (error) {
       console.error('Failed to load backup:', error)
       return undefined
