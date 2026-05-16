@@ -7,7 +7,6 @@ import {
   WatchOptions,
   WatchSource
 } from 'vue'
-import { GlobalStat } from '@renderer/core/globalStat'
 
 const events = ['audio-time-update', 'fuck-shown', 'scale-changed', 'meter-changed'] as const
 
@@ -26,7 +25,6 @@ class eventHub {
     return () => this.off(event, fn)
   }
   dispatch(event: eventNames) {
-    if (GlobalStat.is_dev) console.log("Eventhub dispatched:", event)
     if (this.handlers[event]) {
       this.handlers[event].forEach((x) => x())
     }
@@ -47,7 +45,7 @@ export const EventHub = new eventHub()
 export class StopClass {
   private stop_functions: (() => void)[] = []
   stop() {
-    console.log("stopclass terminated", this)
+    console.log('stopclass terminated', this)
     this.stop_functions.forEach((x) => x())
   }
   add_stop(fn: () => void) {
