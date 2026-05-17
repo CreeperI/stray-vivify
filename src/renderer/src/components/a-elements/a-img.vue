@@ -6,7 +6,8 @@ defineProps<{ src: string }>()
 </script>
 
 <template>
-  <img v-if="shown" :src="src" alt="" @error="shown = false" />
+  <img v-bind="$attrs" v-if="shown" :src="src" alt="" @error="shown = false" />
+  <slot v-else></slot>
 </template>
 
 <style scoped></style>

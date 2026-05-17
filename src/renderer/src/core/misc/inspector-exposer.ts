@@ -8,10 +8,10 @@ import { Invoke } from '@renderer/core/ipc'
 import { Storage } from '@renderer/core/storage'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { CheckSkin } from '@renderer/core/misc/check-skin'
-import { Listener } from '@renderer/core/listener'
 import { utils } from '@renderer/core/utils'
 import { WordHelper } from '@renderer/core/word-helper'
 import { toRaw, toValue, unref } from 'vue'
+import { EventHub } from '@renderer/core/misc/eventhub'
 
 // @ts-expect-error
 window.sv = {
@@ -27,7 +27,7 @@ window.sv = {
   store: Storage,
   frame: FrameRate,
   skin: CheckSkin,
-  listener: Listener,
+  eventhub: EventHub,
   utils: utils,
   wordhelper: WordHelper,
   wh: WordHelper,

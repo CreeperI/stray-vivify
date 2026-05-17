@@ -76,8 +76,6 @@ export default class ChartManager {
           path.join(path.dirname(fp), 'vs-chart.json'),
           path.join(folder, 'vs-chart.json')
         )
-      }
-      if (fs.existsSync(path.join(path.dirname(fp), 'vs-chart.json'))) {
         const chart = JSON.parse(
           fs.readFileSync(path.join(folder, 'vs-chart.json'), 'utf-8')
         ) as ChartTypeV2.final
@@ -695,11 +693,11 @@ export default class ChartManager {
     // so we got those folders excluded in json!
     for (const folder of folders) {
       if (fs.existsSync(path.join(this.charts_folder, folder, 'vs-chart.json'))) {
+        const song = find_song(path.join(this.charts_folder, folder), 'song')
+        if (!song) continue
         const chart = JSON.parse(
           fs.readFileSync(path.join(this.charts_folder, folder, 'vs-chart.json'), 'utf-8')
         ) as ChartTypeV2.final
-        const song = find_song(path.join(this.charts_folder, folder), 'song')
-        if (!song) continue
         // old version fuck
         if (!chart.version) continue
         this.add_chart(
