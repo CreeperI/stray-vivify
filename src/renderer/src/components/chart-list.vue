@@ -31,7 +31,9 @@ async function import_chart() {
   if (state) return
   const song = await Invoke('ask-song')
   if (!song) return
-  const r = await Invoke('import-song', { id: song.path, path: song.path })
+  const id = await modal.AskIdModal.show({all: GlobalStat.all_chart.map(x => x.id)}) as undefined | string
+  if (!id) return
+  const r = await Invoke('import-song', { id: id, path: song.path })
   console.log(r)
   await GlobalStat.update_all_chart()
   shown.value = GlobalStat.all_chart

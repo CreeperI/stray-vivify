@@ -11,18 +11,22 @@ import IexporterGml from '@renderer/components/modals/iexporter-gml.vue'
 const chart = Chart.$current
 
 async function read_vsb() {
-  const r1 = await Invoke('ask-file', {file: ['vsb文件', 'vsb']})
+  const r1 = await Invoke('ask-file', { file: ['vsb文件', 'vsb'] })
   if (!r1) {
+    return
+  }
+  const r2 = await Invoke('read-vsb', { fp: r1 })
+  if (!r2) {
     notify.error('读取vsb失败……')
     return
   }
-  chart.load_vsb(await Invoke('read-vsb', { fp: r1 }))
+  chart.load_vsb(r2)
 }
 
 async function read_vsc() {
   const r1 = await Invoke('ask-file', { file: ['vsc文件', 'vsc'] })
   if (!r1) return notify.error('读取vsc失败……')
-  const r2 = await Invoke('open-file-utf', { path:r1 })
+  const r2 = await Invoke('open-file-utf', { path: r1 })
   if (!r2) return notify.error('读取vsc失败……')
 
   chart.load_vsc(r2)
@@ -30,7 +34,7 @@ async function read_vsc() {
 async function read_vsm() {
   const r1 = await Invoke('ask-file', { file: ['vsm文件', 'vsm'] })
   if (!r1) return notify.error('读取vsm失败……')
-  const r2 = await Invoke('open-file-utf', { path:r1 })
+  const r2 = await Invoke('open-file-utf', { path: r1 })
   if (!r2) return notify.error('读取vsm失败……')
   chart.load_vsm(r2)
 }

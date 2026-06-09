@@ -1,8 +1,8 @@
 import path, { extname } from 'node:path'
 import fs from 'fs'
-import { charts_data, IpcHandlers } from '../preload/types'
+import { charts_data } from '../preload/types'
 import * as electron from 'electron'
-import { dialog, ipcMain, shell } from 'electron'
+import { dialog, shell } from 'electron'
 import { file_paths } from './fp-parser'
 import AdmZip from 'adm-zip'
 import { find_png, find_song } from './stray'
@@ -21,7 +21,7 @@ export default class ChartManager {
   private data: charts_data = []
   private readonly json_path: string
 
-  constructor(private mw: Electron.BrowserWindow) {
+  constructor() {
     this.charts_folder = file_paths.charts
     this.json_path = path.join(this.charts_folder, 'charts.json')
     this.read_json()
@@ -386,42 +386,18 @@ export default class ChartManager {
     shell.showItemInFolder(path.join(this.charts_folder, id, fp))
   }
 
-  async import_chart() {
-    const sender = this.mw.webContents.send.bind(this.mw.webContents) as IpcHandlers.send.send
-    const zip_file = dialog.showOpenDialogSync({
-      properties: ['openFile'],
-      filters: [{ name: 'stray-vivify chart', extensions: ['svc', 'zip'] }]
-    })
-    if (!zip_file) return
-    const zip = new AdmZip(zip_file[0])
+  async import_chart(fp: string, id: string) {
+    if (!fs.existsSync(fp)) return
+    const zip = new AdmZip(fp)
     const zip_entry = zip.getEntries()
     const json = zip_entry.find((v) => v.entryName === 'vs-chart.json')
     const song = zip_entry.find((v) => {
       return ['.mp3', '.wav', '.ogg', '.m4a'].includes(path.extname(v.entryName))
     })
     if (!json || !song) {
-      await sender('notify-error', { msg: 'zip corrupted', dur: 1000 })
       return
     }
     const chart_data = JSON.parse(json.getData().toString('utf-8')) as ChartTypeV2.final
-    const id = (await new Promise((r) => {
-      sender('ask-id', {
-        ids: this.id_list(),
-        def: path
-          .basename(zip_file[0])
-          .replace(path.extname(zip_file[0]), '')
-          .toLowerCase()
-          .replace(' ', '')
-      })
-      ipcMain.once('return-id', (_, id: undefined | string) => {
-        if (!id) r(0)
-        else r(id)
-      })
-    })) as string | 0
-    if (id == 0) {
-      await sender('notify-normal', { msg: '取消导入。', dur: 1000 })
-      return
-    }
     try {
       fs.mkdirSync(path.join(this.charts_folder, id))
       zip.extractAllTo(path.join(this.charts_folder, id))
@@ -443,9 +419,7 @@ export default class ChartManager {
           path.extname(song.entryName),
           []
         )
-    } catch (e) {
-      sender('notify-error', { msg: '导入失败', dur: 1000 })
-    }
+    } catch (e) {}
   }
 
   import_sprite(id: string) {

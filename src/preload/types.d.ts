@@ -145,7 +145,10 @@ export type Invoke = {
     r: void
   }
   'import-zip': {
-    arg: {}
+    arg: {
+      fp: string
+      id: string
+    }
     r: Promise<void>
   }
   'remove-chart': {
@@ -202,17 +205,24 @@ export type Invoke = {
   }
   'read-osz': {
     arg: {}
-    r: { diff?: ChartTypeV2.diff[];
-      song?: ChartTypeV2.song;
-      // here pix stands for the max-index of imageData[], would be [0, img.length - 1]
-      pix: number } | undefined
+    r:
+      | {
+          diff?: ChartTypeV2.diff[]
+          song?: ChartTypeV2.song
+          // here pix stands for the max-index of imageData[], would be [0, img.length - 1]
+          pix: number
+        }
+      | undefined
   }
   'close-osz': {
     arg: {}
     r: void
   }
-  'import-from-osz': {
-    arg: {}
+  'import-osz': {
+    arg: {
+      fp: string
+      id: string
+    }
     r: Promise<number> | undefined
   }
   'import-osz-pics': {
@@ -290,7 +300,7 @@ export type Invoke = {
   'store-backup': {
     arg: {
       id: string
-      data: ChartTypeV2.final  // Changed from string to ChartTypeV2.final for efficient compression
+      data: ChartTypeV2.final // Changed from string to ChartTypeV2.final for efficient compression
     }
     r: void
   }
@@ -305,7 +315,7 @@ export type Invoke = {
       id: string
       backup_name: string
     }
-    r: ChartTypeV2.final | undefined  // Changed from string to ChartTypeV2.final
+    r: ChartTypeV2.final | undefined // Changed from string to ChartTypeV2.final
   }
   'flash-frame': {
     arg: {

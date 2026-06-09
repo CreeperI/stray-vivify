@@ -18,18 +18,7 @@ export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
 }
 
 const Handler = (mw: Electron.BrowserWindow) => {
-  const chart_manager = new ChartManager(mw)
-  const sender = mw.webContents.send.bind(mw.webContents) as IpcHandlers.send.send
-  function ask_id() {
-    return new Promise<string | undefined>((resolve) => {
-      sender('ask-id', { ids: chart_manager.id_list() })
-      console.log(`[${Date.now()}]Asked id`)
-      ipcMain.once('return-id', (_, id: undefined | string) => {
-        console.log(`[${Date.now()}]Got id: ${id}`)
-        resolve(id)
-      })
-    })
-  }
+  const chart_manager = new ChartManager()
   return {
     'ask-song': function (_) {
       const x = dialog.showOpenDialogSync({
@@ -65,9 +54,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'save-chart': function (_, { id, data }) {
       chart_manager.write_chart(id, JSON.parse(data))
     },
-    'import-song': async function (_, { path: music_path }) {
-      const id = (await ask_id()) as string | undefined
-      if (id == undefined) return { state: 'cancelled' }
+    'import-song': async function (_, {id, path: music_path }) {
       return chart_manager.import_song(music_path, id)
     },
     'open-song': function (_, { id }) {
@@ -136,8 +123,8 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'export-zip': (_, { id }) => {
       chart_manager.export_zip(id)
     },
-    'import-zip': function (_) {
-      return chart_manager.import_chart()
+    'import-zip': function (_, {fp, id}) {
+      return chart_manager.import_chart(fp, id)
     },
     'remove-chart': function (_, { id }) {
       chart_manager.remove_chart(id)
@@ -176,17 +163,10 @@ const Handler = (mw: Electron.BrowserWindow) => {
         pix: osz.getImages().length
       }
     },
-    'import-from-osz': async () => {
-      const fp = dialog.showOpenDialogSync({
-        properties: ['openFile'],
-        filters: [{ name: 'OSZ', extensions: ['osz'] }]
-      })
-      if (!fp) return 0
+    'import-osz': async (_, {fp, id}) => {
       const osz = OszReader.create(fp[0])
       const song = osz.getAudioFile()
       if (!song) return 0
-      const id = await ask_id()
-      if (!id) return 0
       chart_manager.create_from_osz(id, osz)
       return 1
     },
