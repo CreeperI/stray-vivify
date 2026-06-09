@@ -1,4 +1,5 @@
 import { ChartTypeV2 } from '../preload/chart-types'
+import { Buffer } from 'buffer'
 
 class Mod {
   B: number
@@ -88,82 +89,7 @@ class VividStasisChart {
   }
 }
 
-enum EaseType {
-  linear = 1,
-  outElastic = 2,
-  inExpo = 3,
-  outExpo = 4,
-  inOutExpo = 5,
-  inQuad = 6,
-  outQuad = 7,
-  inOutQuad = 8,
-  inCubic = 9,
-  outCubic = 10,
-  inOutCubic = 11,
-  outBack = 12,
-  inSine = 13,
-  outSine = 14,
-  inOutSine = 15,
-  outQuart = 16,
-  inOutCirc = 17,
-  inCirc = 18,
-  outCirc = 19
-}
 
-enum GlobalModType {
-  unknown = 0,
-  prx = 1,
-  prxb = 2,
-  prxc = 3,
-  pry = 4,
-  pryb = 5,
-  pryc = 6,
-  prsx = 7,
-  pra = 8,
-  przm = 9,
-  przmb = 10,
-  przx = 11,
-  przy = 12,
-  prrx = 13,
-  prry = 14,
-  prrz = 15,
-  prrzb = 16,
-  shxs = 17,
-  shxp = 18,
-  shxa = 19,
-  shys = 20,
-  shyp = 21,
-  shya = 22,
-  scrollspeed = 23,
-  noterot = 24,
-  velocity = 25,
-  spinradius = 26,
-  spiny = 27,
-  spinx = 28,
-  driven = 29,
-  beat = 30,
-  wave = 31,
-  hom = 32,
-  przmc = 33,
-  prxd = 34,
-  pryd = 35,
-  prct = 36,
-  prcb = 37,
-  prcl = 39,
-  prcr = 40,
-  prvib = 41,
-  shct = 42,
-  shft = 43,
-  shcb = 44,
-  shfb = 45,
-  shcl = 46,
-  shfl = 47,
-  shcr = 48,
-  shfr = 49
-}
-
-export { Mod, PerFrame, ModData, NoteExtra, Note, Mods, VividStasisChart, EaseType, GlobalModType }
-import { Buffer } from 'buffer'
 
 class MessageBuffer {
   private buffer: Uint8Array
@@ -319,11 +245,7 @@ class MessageBuffer {
   }
 
   writeUInt32(val: number): void {
-    this.buffer[this.position] = val & 0xff
-    this.buffer[this.position + 1] = (val >> 8) & 0xff
-    this.buffer[this.position + 2] = (val >> 16) & 0xff
-    this.buffer[this.position + 3] = (val >> 24) & 0xff
-    this.position += 4
+    this.writeInt32(val)
   }
 
   writeInt32(val: number): void {
@@ -391,48 +313,47 @@ class MessageBuffer {
 }
 
 function TypeToBufferType(t: number): number {
-  if (t === 176) {
-    return 1
+  switch (t) {
+    case 176:
+      return 1
+
+    case 177:
+      return 2
+
+    case 178:
+      return 5
+
+    case 179:
+      return 6
+
+    case 181:
+      return 7
+
+    case 182:
+      return 8
+
+    case 183:
+      return 10
+
+    case 184:
+      return 11
+
+    case 1:
+    case 2:
+    case 4:
+    case 5:
+      return 8
+
+    case 3:
+    case 6:
+      return 1
+
+    case 7:
+      return 2
+    default: return 8
   }
-  if (t === 177) {
-    return 2
-  }
-  if (t === 178) {
-    return 5
-  }
-  if (t === 179) {
-    return 6
-  }
-  if (t === 181) {
-    return 7
-  }
-  if (t === 182) {
-    return 8
-  }
-  if (t === 183) {
-    return 10
-  }
-  if (t === 184) {
-    return 11
-  }
-  if ([1, 2, 4, 5].includes(t)) {
-    return 8
-  }
-  if ([3, 6].includes(t)) {
-    return 1
-  }
-  if (t === 7) {
-    return 2
-  }
-  return 2
 }
 
-function getModNameFromByte(mod: number): string {
-  if (mod && 128 === 128) {
-    return mod.toString()
-  }
-  return GlobalModType[mod]
-}
 
 function note2width(t: number) {
   switch (t) {
@@ -462,55 +383,13 @@ class VsbParser {
   run(): VividStasisChart {
     this.chart.notes = []
     while (true) {
-      const flag = this.reader.readByte()
+      const flag = this.reader.readSByte()
       if (flag === 192) {
         while (true) {
           const flag2 = this.reader.readByte()
           if (flag2 === 160) {
             this.readNote()
           } else if (flag2 === 193) {
-            break
-          }
-        }
-      } else if (flag === 224) {
-        const modData = new ModData()
-        modData.Obj = 'obj_base_gimmick'
-        modData.Proxies = 1
-        const modList: Mod[] = []
-        const perFrameList: PerFrame[] = []
-        while (true) {
-          const flag3 = this.reader.readByte()
-          if (flag3 === 228) {
-            modData.Proxies = this.reader.readSByte()
-          } else if (flag3 === 229) {
-            modData.Obj = this.reader.readString()
-          } else if (flag3 === 226) {
-            while (true) {
-              const flag4 = this.reader.readByte()
-              if (flag4 === 223) {
-                const m = new Mod()
-                m.B = this.reader.readFloat()
-                m.D = this.reader.readFloat()
-                m.E = this.reader.readSByte()
-                m.V1 = this.reader.readFloat()
-                m.V2 = this.reader.readFloat()
-                m.M = getModNameFromByte(this.reader.readSByte())
-                m.P = this.reader.readSByte()
-                modList.push(m)
-              } else if (flag4 === 236) {
-                const p = new PerFrame()
-                p.B = this.reader.readFloat()
-                p.E = this.reader.readFloat()
-                p.F = this.reader.readString()
-                perFrameList.push(p)
-              } else if (flag4 === 227) {
-                break
-              }
-            }
-            this.chart.mods.ModList = modList
-            this.chart.mods.PerFrameList = perFrameList
-            this.chart.mods.modData = modData
-          } else if (flag3 === 225) {
             break
           }
         }
@@ -560,23 +439,22 @@ class VsbParser {
       const flag = this.reader.readByte()
       if (flag === 161) {
         break
-      }
-      if (flag === 162) {
-        note.type = this.reader.readSByte()
+      } else if (flag === 162) {
+        note.type = this.reader.readByte()
       } else if (flag === 163) {
-        note.lane = this.reader.readSByte()
+        note.lane = this.reader.readByte()
       } else if (flag === 164) {
         note.time = this.reader.readFloat()
       } else if (flag === 166) {
         const extra: NoteExtra[] = []
         while (true) {
-          const type = this.reader.readByte()
+          const type = this.reader.readSByte()
           if (type === 167) {
             break
           }
           const id = this.reader.readSByte()
           try {
-            const value = this.reader.readByNoteType(TypeToBufferType(type))
+            const value = this.reader.readByType(TypeToBufferType(type)) as number
             const NE = new NoteExtra()
             NE.id = id
             NE.value = value
