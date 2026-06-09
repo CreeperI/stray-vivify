@@ -10,6 +10,7 @@ import { onUnmounted } from 'vue'
 import ChartMain from '@renderer/components/chart-v2/chart-tabs/chart-main.vue'
 import ChartVsm from '@renderer/components/chart-v2/chart-tabs/chart-vsm.vue'
 import { EventHub } from '@renderer/core/misc/eventhub'
+import { ModalTarget } from '@kolirt/vue-modal'
 
 const active = GlobalStat.refs.chart_tab
 active.value = 2
@@ -57,6 +58,7 @@ const chart_state = GlobalStat.chart_state
       <chart-main v-if="active == 2" />
       <chart-timing v-if="active == 3" />
       <chart-vsm v-if="active == 4" />
+      <ModalTarget />
     </template>
     <preview v-if="chart_state == 1" />
     <playfield v-if="chart_state == 2" />

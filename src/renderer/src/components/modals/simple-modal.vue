@@ -52,7 +52,7 @@ const props = defineProps({
 
   &.size-1 {
     width: 100%;
-    max-width: 30vw;
+    max-width: 35vw;
   }
 
   &.size-2 {

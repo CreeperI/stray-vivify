@@ -30,7 +30,7 @@ const show_version = computed(() => {
     <Header v-if="state != 'editor'" />
     <ChartList v-if="state == 'start'" />
     <ChartV2 v-if="state == 'editor'" />
-    <ModalTarget />
+    <ModalTarget v-if="state != 'editor'" />
     <a-button
       v-if="show_version"
       :msg="`Version: ${Version.str}`"
