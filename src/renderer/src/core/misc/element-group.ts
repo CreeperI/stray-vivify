@@ -12,12 +12,13 @@ export class ElementGroup<T extends Element, createFrom> {
     this.mounted = false
   }
   recreate(...arg: createFrom[]) {
-    this.unmount()
+    const elements = this.elements.slice()
     utils.clear_arr(this.elements)
     arg.forEach((v) => {
-      const el = this.createElement(v)
+      const el = elements.shift()?.[0] || this.createElement(v)
       if (el) this.elements.push([el, v])
     })
+    elements.forEach((v) => v[0].remove())
     this.mount()
   }
   unmount() {

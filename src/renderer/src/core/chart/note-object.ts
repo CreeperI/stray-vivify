@@ -60,20 +60,29 @@ export class NoteObject {
     this.e.src = NoteProps.getSrc(note)
     this.e.alt = `${this.e.src}不见了？`
     this.e.classList.add('note-v2')
-    if ('snm' in note) {
+    if ('snm' in note) this.set_css_note(lane_width)
+    else this.set_css_ln(lane_width, max_lane)
+
+    this.e.setAttribute('data-shown-note', '')
+  }
+  set_css_note(lane_width: number) {
+    if ('snm' in this.note) {
       this.e.style.cssText = [
-        `z-index: ${9 - note.width}`,
-        `width: ${lane_width * note.width}px`,
-        `left: ${note.lane * lane_width + 56}px`
+        `z-index: ${9 - this.note.width}`,
+        `width: ${lane_width * this.note.width}px`,
+        `left: ${this.note.lane * lane_width + 56}px`
       ].join(';')
-    } else {
+    }
+  }
+  set_css_ln(lane_width: number, max_lane: number) {
+    if ('len' in this.note) {
       const sliceHeight = 43
-      const width = note.len * mul.value - 0.5 * sliceHeight
-      const borderSrc = NoteProps.borderSrc(note, max_lane)
+      const width = this.note.len * mul.value - 0.5 * sliceHeight
+      const borderSrc = NoteProps.borderSrc(this.note, max_lane)
       this.e.style.cssText = [
-        `z-index: ${5 - note.width}`,
-        `width: ${lane_width * note.width}px`,
-        `left: ${note.lane * lane_width + 56}px`,
+        `z-index: ${9 - this.note.width}`,
+        `width: ${lane_width * this.note.width}px`,
+        `left: ${this.note.lane * lane_width + 56}px`,
         // LN things
         'border: none',
         `border-top: transparent solid ${width}px`,
@@ -83,7 +92,6 @@ export class NoteObject {
         `height: ${43 * (lane_width / 130)}px`
       ].join(';')
     }
-    this.e.setAttribute('data-shown-note', '')
   }
 
   update_position(t: number, offset1: number) {

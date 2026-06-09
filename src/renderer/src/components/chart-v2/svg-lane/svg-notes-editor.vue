@@ -426,6 +426,85 @@ function update_notes_objects_height() {
     if ('len' in x.note) x.e.style.borderTopWidth = x.note.len * mul.value - 0.5 * 43 + 'px'
   })
 }
+/*
+A diff calculation i wrote, but seems not updating so fast thus throw it away
+
+
+let controller = new AbortController()
+function new_object(old_obj: NoteObject[], noteIx: number) {
+  const old = old_obj.find((x) => x.index == noteIx)
+  if (old) return old
+  const note = to_note(noteIx)
+  const another_same = old_obj.find(
+    (x) =>
+      x.note.width == note.width && x.note.lane == note.lane && 'snm' in x.note == 'snm' in note
+  )
+  if (another_same) {
+    another_same.note = note
+    if ('snm' in note) another_same.set_css_note(lane_width)
+    else another_same.set_css_ln(lane_width, max_lane)
+    return another_same
+  }
+  return  new NoteObject(noteIx, note, lane_width, max_lane)
+}
+function update_note_objects_list() {
+  const old_objects = objects.slice()
+  utils.clear_arr(objects)
+  controller.abort('no reason')
+  controller = new AbortController()
+  toRaw(diff.shown.value).forEach((noteIx) => {
+    const obj = new_object(old_objects, noteIx)
+    objects.push(obj)
+    utils.remove(old_objects, obj)
+    if (disable_pending) return
+    Intervals.wait_resume.then(() => {
+      obj.e.addEventListener(
+        'dragend',
+        () => {
+          dragging.value = undefined
+          selected.value = []
+          update_notes_objects_dragging()
+        },
+        { signal: controller.signal }
+      )
+      obj.e.addEventListener(
+        'contextmenu',
+        (e) => {
+          e.preventDefault()
+          del_note(noteIx)
+        },
+        { signal: controller.signal }
+      )
+      obj.e.addEventListener(
+        'click',
+        (e) => {
+          if (e.ctrlKey) {
+            const ix = selected.value.findIndex((x) => x == noteIx)
+            if (ix == -1) {
+              selected.value.push(noteIx)
+              obj.set_gold(true)
+            } else {
+              obj.set_gold(false)
+              selected.value.splice(ix, 1)
+            }
+          }
+        },
+        { signal: controller.signal }
+      )
+      obj.e.addEventListener(
+        'dragstart',
+        (e) => {
+          ondragstart(e, noteIx)
+        },
+        { signal: controller.signal }
+      )
+    })
+  })
+  old_objects.forEach(x => x.unmount())
+  LaneNotesRef.value!.append(...objects.map((x) => x.e))
+  update_notes_objects_position()
+  diff.update_element_svg_width(svg_width)
+}*/
 function update_note_objects_list() {
   objects.forEach((x) => x.unmount())
   utils.clear_arr(objects)

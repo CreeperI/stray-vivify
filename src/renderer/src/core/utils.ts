@@ -10,7 +10,8 @@ export namespace utils {
   }
 
   export function remove<T>(arr: T[], v: T) {
-    arr.splice(arr.indexOf(v), 1)
+    const ix = arr.indexOf(v)
+    if (ix >= 0) arr.splice(ix, 1)
   }
 
   export function round(val: number, digit = 0) {
