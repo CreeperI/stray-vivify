@@ -11,14 +11,19 @@ import { EventHub } from '@renderer/core/misc/eventhub'
 import { NoteObject } from '@renderer/core/chart/note-object'
 import { Intervals } from '@renderer/core/misc/intervals'
 import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
+import { Chart_diff } from '@renderer/core/chart/diff'
 import useSvgSizing = GlobalStat.useSvgSizing
 
 useUpdateFrameRate('svg-notes')
 const chart = Chart.$current
-const { disable_pending = false } = defineProps<{
+const { disable_pending = false, diff_index = -1 } = defineProps<{
+  diff_index?: number
   disable_pending?: boolean
 }>()
-const diff = inject('diff', chart.diff)
+const diff = (() => {
+  if (diff_index != -1) return Chart_diff.useCreateDiff(chart, diff_index)
+  return inject("diff", chart.diff)
+})()
 console.log(`loaded diff: ${diff.diff_index.value}`, JSON.stringify(diff.diff.meta))
 const to_note = diff.to_note
 
