@@ -723,11 +723,6 @@ export class Chart_diff extends StopClass {
         .filter((x) => utils.between(x[0], visible))
     }
     this.shown_timing = this.timing.filter((x) => utils.between(x.time, visible))
-    this.element_groups.section.recreate(...this.shown_timing_list.section_list)
-    this.element_groups.bar_text.recreate(...this.shown_timing_list.bar_list)
-    this.element_groups.beat_line.recreate(...this.shown_timing_list.beat_list)
-    this.element_groups.bpm_text.recreate(...this.shown_timing)
-    this.element_groups.tick.recreate(...this.shown_timing_list.ticks)
   }
 
   isVisible(n: ChartTypeV2.note, visible: [number, number]): boolean {
@@ -983,7 +978,7 @@ export class Chart_diff extends StopClass {
     return this.notes.findIndex((x) => utils.is_equal(n, x))
   }
 
-  private force_fuck() {
+  force_fuck() {
     this.fuck_shown(this.chart.audio.current_time, true)
   }
 }

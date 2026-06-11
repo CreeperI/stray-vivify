@@ -55,7 +55,7 @@ export class StopClass {
     this.stop_functions.push(() => wr.stop())
   }
 
-  watch(source: WatchSource, cb: WatchCallback, options?: WatchOptions) {
+  watch<T>(source: WatchSource<T>, cb: WatchCallback<T>, options?: WatchOptions) {
     this.add_watch(VueWatch(source, cb, options))
   }
 

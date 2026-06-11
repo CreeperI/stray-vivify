@@ -105,4 +105,6 @@ export namespace GlobalStat {
     func_keys.value.ctrl = e.ctrlKey
     func_keys.value.alt = e.altKey
   })
+
+  export const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
 }

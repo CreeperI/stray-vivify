@@ -37,7 +37,11 @@ const sr = chart.diff.sr
     <div v-if="Storage.settings.song_stats" class="counter-sr">
       <div class="sr" @click="chart.diff.update_sr()">
         <word-helper :msg="`Lv. ${(sr.total_v3 / 50).toFixed(2)}`" dec="开玩笑的，点击刷新" />
-        <word-helper :msg="`${sr.sr.toFixed(2)}*`" dec="如果这是张osu谱有多少概率rank？"></word-helper>
+        <word-helper
+          v-if="Storage.settings.osu_sr"
+          :msg="`${sr.sr.toFixed(2)}*`"
+          dec="如果这是张osu谱有多少概率rank？"
+        ></word-helper>
       </div>
       <div>CHIP</div>
       <stat-line str="note" />

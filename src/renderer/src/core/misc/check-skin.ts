@@ -12,23 +12,23 @@ export namespace CheckSkin {
     '2l.png': 0,
     '2m.png': 0,
     '2r.png': 0,
-    // '2lh.png': 0,
-    // '2mh.png': 0,
-    // '2rh.png': 0,
+    '2lh.png': 0,
+    '2mh.png': 0,
+    '2rh.png': 0,
     '2sl.png': 0,
     '2sm.png': 0,
-    '2sr.png': 0
-    // '3b.png': 0,
-    // '3l.png': 0,
-    // '3lh.png': 0,
-    // '3r.png': 0,
-    // '3rh.png': 0,
-    // '3sl.png': 0,
-    // '3sr.png': 0,
-    // '4.png': 0,
-    // '4b.png': 0,
-    // '4h.png': 0,
-    // '4s.png': 0
+    '2sr.png': 0,
+    '3b.png': 0,
+    '3l.png': 0,
+    '3lh.png': 0,
+    '3r.png': 0,
+    '3rh.png': 0,
+    '3sl.png': 0,
+    '3sr.png': 0,
+    '4.png': 0,
+    '4b.png': 0,
+    '4h.png': 0,
+    '4s.png': 0
   })
 
   export async function check_skin() {

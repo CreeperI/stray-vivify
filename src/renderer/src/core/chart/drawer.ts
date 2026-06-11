@@ -1,0 +1,339 @@
+import {
+  Application,
+  ApplicationOptions,
+  Assets,
+  Container,
+  ContainerOptions,
+  Graphics,
+  Sprite,
+  Text,
+  TextStyle,
+  Texture
+} from 'pixi.js'
+import { ChartTypeV2 } from '@preload/chart-types'
+import { toRaw } from 'vue'
+import { Storage } from '@renderer/core/storage'
+import { StopClass } from '@renderer/core/misc/eventhub'
+import { NoteProps } from '@renderer/core/chart/note-object'
+import { Chart_diff } from '@renderer/core/chart/diff'
+import { Chart } from '@renderer/core/chart/chart'
+import { GlobalStat } from '@renderer/core/globalStat'
+
+const mul = Storage.computes.mul
+export const Textures: Record<string, Texture> = {
+  '1.png': (await Assets.load('stray:/__skin__/1.png')) as Texture,
+  '1b.png': (await Assets.load('stray:/__skin__/1b.png')) as Texture,
+  '1lh.png': (await Assets.load('stray:/__skin__/1lh.png')) as Texture,
+  '1rh.png': (await Assets.load('stray:/__skin__/1rh.png')) as Texture,
+  '2b.png': (await Assets.load('stray:/__skin__/2b.png')) as Texture,
+  '2l.png': (await Assets.load('stray:/__skin__/2l.png')) as Texture,
+  '2m.png': (await Assets.load('stray:/__skin__/2m.png')) as Texture,
+  '2r.png': (await Assets.load('stray:/__skin__/2r.png')) as Texture,
+  '2lh.png': (await Assets.load('stray:/__skin__/2lh.png')) as Texture,
+  '2mh.png': (await Assets.load('stray:/__skin__/2mh.png')) as Texture,
+  '2rh.png': (await Assets.load('stray:/__skin__/2rh.png')) as Texture,
+  '2sl.png': (await Assets.load('stray:/__skin__/2sl.png')) as Texture,
+  '2sm.png': (await Assets.load('stray:/__skin__/2sm.png')) as Texture,
+  '2sr.png': (await Assets.load('stray:/__skin__/2sr.png')) as Texture,
+  '3b.png': (await Assets.load('stray:/__skin__/3b.png')) as Texture,
+  '3l.png': (await Assets.load('stray:/__skin__/3l.png')) as Texture,
+  '3lh.png': (await Assets.load('stray:/__skin__/3lh.png')) as Texture,
+  '3r.png': (await Assets.load('stray:/__skin__/3r.png')) as Texture,
+  '3rh.png': (await Assets.load('stray:/__skin__/3rh.png')) as Texture,
+  '3sl.png': (await Assets.load('stray:/__skin__/3sl.png')) as Texture,
+  '3sr.png': (await Assets.load('stray:/__skin__/3sr.png')) as Texture,
+  '4.png': (await Assets.load('stray:/__skin__/4.png')) as Texture,
+  '4b.png': (await Assets.load('stray:/__skin__/4b.png')) as Texture,
+  '4h.png': (await Assets.load('stray:/__skin__/4h.png')) as Texture,
+  '4s.png': (await Assets.load('stray:/__skin__/4s.png')) as Texture
+}
+export const BaseWidth = Textures['1.png'].width
+export const BaseHeight = Textures['1.png'].height
+
+export const SCREEN_HEIGHT = window.screen.height
+
+export class DrawerExtension<T extends Sprite | Text | Graphics, createFrom> extends StopClass {
+  elements: Map<createFrom, T>
+  createSprite: (arg: createFrom) => T | null
+  container: Container<T>
+  constructor(
+    createSprite: (arg: createFrom) => T | null,
+    containOption?: Partial<ContainerOptions>
+  ) {
+    super()
+    this.elements = new Map()
+    // @ts-ignore wtf
+    this.container = new Container<T>({ cullable: true, ...containOption })
+    this.createSprite = createSprite
+  }
+  recreate(...arg: createFrom[]) {
+    this.elements.clear()
+    this.container.removeChild(...this.container.children)
+    arg.forEach((v) => {
+      const el = this.createSprite(v)
+      if (el) {
+        this.elements.set(v, el)
+        this.container.addChild(el)
+      }
+    })
+  }
+  update(fn: (value: T, key: createFrom) => void) {
+    this.elements.forEach(fn)
+  }
+}
+
+export class DiffDrawer extends StopClass {
+  diff: Chart_diff
+  chart: Chart
+  app: Application
+  sizing: {
+    lane_width: number
+    total_width: number
+    x_expand: number
+  }
+  drawers: {
+    notes: DrawerExtension<Sprite, number>
+    ln: DrawerExtension<Sprite, number>
+    beat: DrawerExtension<Graphics, [number, number]>
+    left_text: DrawerExtension<Text, [number, number]>
+    bpm_text: DrawerExtension<Text, ChartTypeV2.timing>
+    tick: DrawerExtension<Text, [number, number]>
+  }
+  constructor(
+    diff: Chart_diff,
+    sizing: { lane_width: number; total_width: number; x_expand: number }
+  ) {
+    super()
+    this.diff = diff
+    this.chart = diff.chart
+    this.app = new Application()
+    const max_lane = diff.max_lane.value
+    const to_note = diff.to_note
+    this.sizing = sizing
+
+    /* drawer inits */
+    {
+      const note_drawer = new DrawerExtension(
+        (i: number) => {
+          const note = to_note(i)
+          const texture = Textures[NoteProps.base_src(note, 4)]
+          const sprite = new Sprite({
+            texture,
+            label: `${note.time}:${note.lane}`
+          })
+          sprite.x = this.x_of(note.lane)
+          sprite.y = 0
+          sprite.width = Storage.settings.lane_width * note.width
+          sprite.zIndex = 4 - note.width
+          return sprite
+        },
+        { label: 'note', zIndex: 10 }
+      )
+
+      const ln_drawer = new DrawerExtension(
+        (i: number) => {
+          const note = to_note(i)
+          if ('snm' in note) return null
+          const border_texture = Textures[NoteProps.base_border_src(note, 4)]
+          const border = new Sprite({
+            texture: border_texture,
+            label: String(note.time)
+          })
+          border.x = this.x_of(note.lane)
+          border.height = note.len * mul.value - 0.5 * BaseHeight
+          return border
+        },
+        { label: 'ln', zIndex: 9, cullable: false }
+      )
+      const _lix_text_style = new TextStyle({
+        fill: 'white',
+        fontFamily: 'Arial',
+        fontSize: GlobalStat.rem,
+        dropShadow: {},
+        align: 'center'
+      })
+      const Lix_drawer = new DrawerExtension(([_ms, ix]: [number, number]) => {
+        const _ix = Storage.settings.bar_from_0 ? ix : ix + 1
+        const t = new Text({ text: String(_ix), style: _lix_text_style })
+        t.anchor = 0.5
+        t.x = 25
+        return t
+      })
+
+      const _color_of_level = (lvl: number): string => {
+        return Storage.settings.sprites['bar_color' + lvl] ?? '#ffffff'
+      }
+      const beat_drawer = new DrawerExtension(
+        ([_ms, lvl]: [number, number]) => {
+          const g = new Graphics()
+            .rect(
+              0,
+              0,
+              sizing.total_width - sizing.x_expand - 100,
+              Storage.settings.sprites.bar_length
+            )
+            .fill(_color_of_level(lvl))
+          g.x = 50
+          g.width = sizing.total_width - sizing.x_expand - 100
+          g.height = Storage.settings.sprites.bar_length
+          return g
+        },
+        { label: 'beat', zIndex: 1 }
+      )
+      const _bpm_text_style = new TextStyle({
+        fill: 'pink',
+        fontFamily: 'Arial',
+        fontSize: GlobalStat.rem,
+        dropShadow: {},
+        align: 'center'
+      })
+      const bpm_text_drawer = new DrawerExtension<Text, ChartTypeV2.timing>(
+        (timing) => {
+          const t = new Text({ text: String(timing.bpm), style: _bpm_text_style })
+          t.anchor = 0.5
+          t.x = 25
+          return t
+        },
+        { label: 'bpm_text' }
+      )
+      const _tick_text_style = new TextStyle({
+        fontFamily: 'Arial',
+        align: 'left',
+        fontSize: GlobalStat.rem,
+        fill: 'white',
+        dropShadow: {}
+      })
+      const tick_drawer = new DrawerExtension(
+        ([_ms, tick]: [number, number]) => {
+          if (tick < 2) return null
+          const t = new Text({ text: `.${tick}`, alpha: 0.7, style: _tick_text_style })
+          t.anchor = { x: 0, y: 0.5 }
+          t.x = 50 + max_lane * this.sizing.lane_width + 15
+          return t
+        },
+        { label: 'tick' }
+      )
+      this.drawers = {
+        notes: note_drawer,
+        ln: ln_drawer,
+        beat: beat_drawer,
+        left_text: Lix_drawer,
+        bpm_text: bpm_text_drawer,
+        tick: tick_drawer
+      }
+    }
+    /* decoration line */
+    {
+      const decoration = new Container({ label: 'decorations', zIndex: 999 })
+      decoration.addChild(
+        new Graphics().rect(50, SCREEN_HEIGHT - 80, this.sizing.total_width - 100, 80).fill('gray')
+      )
+
+      decoration.addChild(new Graphics().rect(44, 0, 6, SCREEN_HEIGHT).fill('white'))
+      decoration.addChild(
+        new Graphics().rect(this.sizing.total_width - 50, 0, 6, SCREEN_HEIGHT).fill('white')
+      )
+
+      decoration.addChild(
+        new Graphics().rect(50, SCREEN_HEIGHT - 80, this.sizing.total_width - 100, 6).fill('white')
+      )
+      this.app.stage.addChild(decoration)
+    }
+    this.app.stage.addChild(
+      this.drawers.beat.container,
+      this.drawers.ln.container,
+      this.drawers.notes.container,
+      this.drawers.left_text.container,
+      this.drawers.bpm_text.container,
+      this.drawers.tick.container
+    )
+
+    this.add_on('audio-time-update', () => this.update())
+    this.add_on('scale-changed', () => {
+      this.ln_reheight()
+      this.update()
+    })
+    this.add_on('fuck-shown', () => this.recreate())
+    this.add_on('meter-changed', () =>
+      this.drawers.beat.recreate(...this.diff.shown_timing_list.beat_list)
+    )
+  }
+  update() {
+    const time = this.chart.audio.current_time
+    const offset1 = Storage.settings.offset1
+    const m = mul.value
+    const to_note = this.diff.to_note
+    this.drawers.notes.update((sprite, i) => {
+      sprite.y = SCREEN_HEIGHT - (to_note(i).time - time - offset1) * m - 80 - BaseHeight
+    })
+    this.drawers.ln.update((sprite, i) => {
+      const ln = to_note(i) as ChartTypeV2.hold_note
+      sprite.y =
+        SCREEN_HEIGHT -
+        (ln.time - time - offset1) * m -
+        ln.len * m +
+        0.5 * BaseHeight -
+        80 -
+        BaseHeight
+    })
+    const beat_dy = Storage.settings.sprites.bar_dy
+    this.drawers.beat.update((g, [ms, _]) => {
+      g.y =
+        SCREEN_HEIGHT -
+        (ms - time - offset1) * m +
+        beat_dy +
+        (BaseWidth / 130) * (BaseHeight / 2) -
+        80 -
+        BaseHeight
+    })
+    this.drawers.left_text.update((t, [ms, _]) => {
+      t.y =
+        SCREEN_HEIGHT -
+        (ms - time - offset1) * m -
+        80 -
+        BaseHeight +
+        (BaseWidth / 130) * (BaseHeight / 2)
+    })
+    this.drawers.bpm_text.update((t, timing) => {
+      t.y =
+        SCREEN_HEIGHT -
+        (timing.time - time - offset1) * m +
+        GlobalStat.rem -
+        80 -
+        BaseHeight +
+        (BaseWidth / 130) * (BaseHeight / 2)
+    })
+    this.drawers.tick.update((t, [ms, _]) => {
+      t.y =
+        SCREEN_HEIGHT -
+        (ms - time - offset1) * m +
+        (BaseWidth / 130) * (BaseHeight / 2) -
+        80 -
+        BaseHeight
+    })
+  }
+  recreate() {
+    this.drawers.notes.recreate(...toRaw(this.diff.shown.value))
+    this.drawers.ln.recreate(...toRaw(this.diff.shown.value))
+    this.drawers.beat.recreate(...this.diff.shown_timing_list.beat_list)
+    if (Storage.settings.bar_or_section)
+      this.drawers.left_text.recreate(...this.diff.shown_timing_list.section_list)
+    else this.drawers.left_text.recreate(...this.diff.shown_timing_list.bar_list)
+
+    this.drawers.bpm_text.recreate(...this.diff.shown_timing)
+    this.drawers.tick.recreate(...this.diff.shown_timing_list.ticks)
+  }
+  ln_reheight() {
+    const to_note = this.diff.to_note
+    this.drawers.ln.update((g, i) => {
+      const note = to_note(i) as ChartTypeV2.hold_note
+      g.height = note.len * mul.value
+    })
+  }
+  x_of(lane: number) {
+    return lane * this.sizing.lane_width + 50
+  }
+  init(options: Partial<ApplicationOptions>) {
+    return this.app.init({ height: SCREEN_HEIGHT, ...options })
+  }
+}

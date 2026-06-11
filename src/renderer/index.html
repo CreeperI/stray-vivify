@@ -6,8 +6,9 @@
   <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
   <meta
     content="default-src 'self' data:;
-      script-src 'self'; style-src 'self' 'unsafe-inline';
-       img-src 'self' stray: blob: data:; media-src 'self' blob: stray: "
+      script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline';
+       img-src 'self' stray: blob: data:; media-src 'self' blob: stray:;
+       worker-src 'self' blob:"
     http-equiv="Content-Security-Policy"
   />
 </head>

@@ -9,8 +9,9 @@ import { modal } from '@renderer/core/misc/modal'
 import { Invoke } from '@renderer/core/ipc'
 import ATextInput from '@renderer/components/a-elements/a-text-input.vue'
 import ACheckbox2 from '@renderer/components/a-elements/a-checkbox2.vue'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, onUnmounted } from 'vue'
 import { EventHub } from '@renderer/core/misc/eventhub'
+import { Chart } from '@renderer/core/chart/chart'
 
 const r = Storage._ref
 
@@ -20,6 +21,7 @@ const ds = defineComponent({
     return () => h('div', { class: 'ds' }, slots.default?.())
   }
 })
+onUnmounted(() => Chart.current?.diff.force_fuck())
 </script>
 
 <template>

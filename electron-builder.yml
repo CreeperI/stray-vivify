@@ -13,6 +13,8 @@ files:
   - '!skin/**'
   - "!**/.idea/*"
   - "!**/node_modules/*"
+  - "!external/"
+  - "!.lingma/"
 asarUnpack:
   - resources/**
   - src/renderer/public/**

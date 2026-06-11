@@ -5,8 +5,11 @@ const mul = Storage.computes.mul
 export namespace NoteProps {
   const note_style = 'stray:/__skin__'
   export function getSrc(note: ChartTypeV2.note, max = 4): string {
+    return note_style + '/' + base_src(note, max)
+  }
+  export function base_src(note: ChartTypeV2.note, max = 4): string {
     if (note.width == 0) return ''
-    let str = note_style + '/' + note.width
+    let str = note.width + ""
     if (note.width == max) return str + '.png'
     if ('snm' in note) {
       if (note.snm == 1) return str + 'b.png'
@@ -26,8 +29,11 @@ export namespace NoteProps {
   }
 
   export function borderSrc(note: ChartTypeV2.note, max = 4): string {
+    return note_style + '/' + base_border_src(note, max)
+  }
+  export function base_border_src(note: ChartTypeV2.note, max = 4): string {
     if (note.width == 0) return ''
-    let str = note_style + '/' + note.width
+    let str =  note.width + ""
     if (note.width == 1) {
       if (note.lane < max / 2) str += 'l'
       else str += 'r'
