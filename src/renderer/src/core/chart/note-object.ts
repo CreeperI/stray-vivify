@@ -80,7 +80,7 @@ export class NoteObject {
       const width = this.note.len * mul.value - 0.5 * sliceHeight
       const borderSrc = NoteProps.borderSrc(this.note, max_lane)
       this.e.style.cssText = [
-        `z-index: ${9 - this.note.width}`,
+        `z-index: ${4 - this.note.width}`,
         `width: ${lane_width * this.note.width}px`,
         `left: ${this.note.lane * lane_width + 56}px`,
         // LN things
