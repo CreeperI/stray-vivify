@@ -25,6 +25,8 @@ const ipcRenderer = window.electron.ipcRenderer
         <div>{{ stages.intervals }}</div>
         <div>Load Animation Frame</div>
         <div>{{ stages.animation_frame }}</div>
+        <div>Load Skin</div>
+        <div>{{ stages.check_skin }}</div>
       </div>
       <div class="win-func">
         <div @click="ipcRenderer.send('window-min')">0</div>

@@ -4,13 +4,19 @@ import { utils } from '@renderer/core/utils'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { Invoke } from '@renderer/core/ipc'
 import { closeModal } from '@kolirt/vue-modal'
-import { CheckSkin } from '@renderer/core/misc/check-skin'
+import { Skin } from '@renderer/core/misc/skin'
 
-const status = CheckSkin.status
+const status = Skin.status
 function open_folder() {
   Invoke('open-skin-folder')
 }
-const missings = utils.keyof(status).filter((x) => status[x] == 1)
+const missings = utils.keyof(status).filter((x) => status[x] == null)
+const no1 = missings.includes('1.png')
+if (no1) {
+  // onUnmounted(() => {
+  //   GlobalStat.close_app()
+  // })
+}
 </script>
 
 <template>

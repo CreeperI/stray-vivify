@@ -7,7 +7,7 @@ import { ShortCuts } from '@renderer/core/misc/shortcut'
 import { Invoke } from '@renderer/core/ipc'
 import { Storage } from '@renderer/core/storage'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
-import { CheckSkin } from '@renderer/core/misc/check-skin'
+import { Skin } from '@renderer/core/misc/skin'
 import { utils } from '@renderer/core/utils'
 import { WordHelper } from '@renderer/core/word-helper'
 import { toRaw, toValue, unref } from 'vue'
@@ -26,7 +26,7 @@ window.sv = {
   invoke: Invoke,
   store: Storage,
   frame: FrameRate,
-  skin: CheckSkin,
+  skin: Skin,
   eventhub: EventHub,
   utils: utils,
   wordhelper: WordHelper,

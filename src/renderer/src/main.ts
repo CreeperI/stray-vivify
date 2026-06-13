@@ -11,13 +11,13 @@ import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { modal } from '@renderer/core/misc/modal'
 import { Intervals } from '@renderer/core/misc/intervals'
-import { CheckSkin } from '@renderer/core/misc/check-skin'
 import { Log, MemoryUsage, MouseTracker } from '@renderer/core/misc/inspector'
 import { expose_variables } from '@renderer/core/misc/inspector-exposer'
 import { load_external_mods } from '@renderer/core/chart/vsm-objects'
 import { load_external_tips } from '@renderer/core/misc/startup-tips'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Preinit } from '@renderer/core/misc/preinit'
+import { Skin } from '@renderer/core/misc/skin'
 
 const app = createApp(App).use(
   createModal({
@@ -92,10 +92,11 @@ async function main() {
       modal.VersionsModal.show({})
     }
   }
+  await Skin.check_skin()
+  Preinit.Stages.check_skin = true
   Preinit.finish_init()
 }
 
 load_ipc_handlers()
-main()
-CheckSkin.check_skin()
 app.mount('#app')
+main()

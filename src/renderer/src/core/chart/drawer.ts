@@ -18,37 +18,10 @@ import { NoteProps } from '@renderer/core/chart/note-object'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
+import { Skin } from '@renderer/core/misc/skin'
+const getTexture = Skin.getTexture
 
 const mul = Storage.computes.mul
-export const Textures: Record<string, Texture> = {
-  '1.png': (await Assets.load('stray:/__skin__/1.png')) as Texture,
-  '1b.png': (await Assets.load('stray:/__skin__/1b.png')) as Texture,
-  '1lh.png': (await Assets.load('stray:/__skin__/1lh.png')) as Texture,
-  '1rh.png': (await Assets.load('stray:/__skin__/1rh.png')) as Texture,
-  '2b.png': (await Assets.load('stray:/__skin__/2b.png')) as Texture,
-  '2l.png': (await Assets.load('stray:/__skin__/2l.png')) as Texture,
-  '2m.png': (await Assets.load('stray:/__skin__/2m.png')) as Texture,
-  '2r.png': (await Assets.load('stray:/__skin__/2r.png')) as Texture,
-  '2lh.png': (await Assets.load('stray:/__skin__/2lh.png')) as Texture,
-  '2mh.png': (await Assets.load('stray:/__skin__/2mh.png')) as Texture,
-  '2rh.png': (await Assets.load('stray:/__skin__/2rh.png')) as Texture,
-  '2sl.png': (await Assets.load('stray:/__skin__/2sl.png')) as Texture,
-  '2sm.png': (await Assets.load('stray:/__skin__/2sm.png')) as Texture,
-  '2sr.png': (await Assets.load('stray:/__skin__/2sr.png')) as Texture,
-  '3b.png': (await Assets.load('stray:/__skin__/3b.png')) as Texture,
-  '3l.png': (await Assets.load('stray:/__skin__/3l.png')) as Texture,
-  '3lh.png': (await Assets.load('stray:/__skin__/3lh.png')) as Texture,
-  '3r.png': (await Assets.load('stray:/__skin__/3r.png')) as Texture,
-  '3rh.png': (await Assets.load('stray:/__skin__/3rh.png')) as Texture,
-  '3sl.png': (await Assets.load('stray:/__skin__/3sl.png')) as Texture,
-  '3sr.png': (await Assets.load('stray:/__skin__/3sr.png')) as Texture,
-  '4.png': (await Assets.load('stray:/__skin__/4.png')) as Texture,
-  '4b.png': (await Assets.load('stray:/__skin__/4b.png')) as Texture,
-  '4h.png': (await Assets.load('stray:/__skin__/4h.png')) as Texture,
-  '4s.png': (await Assets.load('stray:/__skin__/4s.png')) as Texture
-}
-export const BaseWidth = Textures['1.png'].width
-export const BaseHeight = Textures['1.png'].height
 
 export const SCREEN_HEIGHT = window.screen.height
 

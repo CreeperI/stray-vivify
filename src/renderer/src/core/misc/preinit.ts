@@ -11,6 +11,7 @@ export namespace Preinit {
     all_chart: false,
     debugs: false,
     intervals: false,
-    animation_frame: false
+    animation_frame: false,
+    check_skin: false,
   })
 }
