@@ -38,14 +38,7 @@ onMounted(() => {
 
   drawer.init({ width: width }).then(() => {
     container.value?.appendChild(drawer.app.canvas)
-    drawer.app.canvas.addEventListener('mousemove', editor.update_pending, true)
-    drawer.app.canvas.addEventListener('mouseenter', editor.mousein)
-    drawer.app.canvas.addEventListener('mouseleave', editor.mouseout)
-    drawer.app.canvas.addEventListener('click', (e) => editor.pending.on_click(e))
-    drawer.app.canvas.addEventListener('mouseup', () => {
-      editor.pending.drop()
-      editor.shadow.show()
-    })
+    editor.event_handle()
     diff.force_fuck()
     EventHub.dispatch('audio-time-update')
     container.value?.focus()

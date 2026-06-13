@@ -4,6 +4,7 @@ import {
   Container,
   ContainerOptions,
   Graphics,
+  Rectangle,
   Sprite,
   Text,
   TextStyle
@@ -17,6 +18,7 @@ import { Chart_diff } from '@renderer/core/chart/diff'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Skin } from '@renderer/core/misc/skin'
+
 const getTexture = Skin.getTexture
 
 const mul = Storage.computes.mul
@@ -332,6 +334,19 @@ export class DiffDrawer extends StopClass {
     return lane * this.sizing.lane_width + 50
   }
   init(options: Partial<ApplicationOptions>) {
-    return this.app.init({ height: SCREEN_HEIGHT, ...options })
+    this.setculling()
+    return this.app.init({ ...options, height: SCREEN_HEIGHT })
+  }
+  setculling() {
+    this.app.stage.cullable = true
+    this.app.stage.cullArea = new Rectangle(0, 0, this.sizing.total_width, SCREEN_HEIGHT)
+  }
+  event_time(eY: number) {
+    const t= (
+      (SCREEN_HEIGHT - eY - 0.5 * Skin.height(this.sizing.lane_width) - 80) / mul.value +
+      this.chart.audio.current_time
+    )
+    if (GlobalStat.func_keys.value.alt) return t
+    else return this.diff.nearest(t, true)
   }
 }

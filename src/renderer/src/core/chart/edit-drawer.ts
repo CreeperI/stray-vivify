@@ -1,6 +1,6 @@
-import { Chart, event_time } from '@renderer/core/chart/chart'
+import { Chart } from '@renderer/core/chart/chart'
 import { NoteProps } from '@renderer/core/chart/note-object'
-import { BlurFilter, FederatedPointerEvent, Graphics, Sprite } from 'pixi.js'
+import { BlurFilter, Graphics, Sprite } from 'pixi.js'
 import { Storage } from '@renderer/core/storage'
 import { DiffDrawer, DrawerExtension } from '@renderer/core/chart/drawer'
 import { ChartTypeV2 } from '@preload/chart-types'
@@ -10,11 +10,26 @@ import { notify } from '@renderer/core/misc/notify'
 import { utils } from '@renderer/core/utils'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Skin } from '@renderer/core/misc/skin'
+import NoteClipboard = GlobalStat.NoteClipboard
 
 const getTexture = Skin.getTexture
 
 const { clipboard, selected } = GlobalStat.NoteClipboard
 const mul = Storage.computes.mul
+const pointer_last = {
+  x: 0,
+  y: 0
+}
+/**
+ * @property p Pending
+ * @property s select
+ * @property d shadow
+ * */
+const psd = {
+  p: null as null | Pending,
+  s: null as null | Select,
+  d: null as null | Shadow
+}
 
 class Pending {
   diff_drawer: DiffDrawer
@@ -82,6 +97,8 @@ class Pending {
       this.update_pending()
     })
     this.diff_drawer.add_on('audio-time-update', () => this.update_pending())
+    this.bind_clipboard()
+    psd.p = this
   }
 
   get select() {
@@ -92,8 +109,7 @@ class Pending {
     return Storage.note.snm
   }
 
-  set snm(v: number) {
-    Storage.note.set_snm(v)
+  set snm(_) {
     this.recreate()
   }
 
@@ -141,14 +157,23 @@ class Pending {
   }
 
   get pending_note(): ChartTypeV2.note[] {
+    const to_note = this.diff.to_note
     if (this.dragging) {
-      const to_note = this.diff.to_note
       return this.dragging_notes.map((ix) => {
         const note = to_note(ix)
         return {
           ...note,
           time: this.time + (note.time - this.dragging_base_time) - this.dragging_delta,
           lane: this.lane + (note.lane - this.dragging_base_lane)
+        }
+      })
+    }
+    if (GlobalStat.NoteClipboard.clipboard.value.length) {
+      return clipboard.value.map((x) => {
+        const _note = to_note(x)
+        return {
+          ..._note,
+          time: this.time + _note.time
         }
       })
     }
@@ -167,6 +192,10 @@ class Pending {
     else return Storage.note.w
   }
 
+  get select_raw() {
+    return toRaw(selected.value)
+  }
+
   update_pending() {
     this.drawer.note.update((g, note) => {
       g.x = this.diff_drawer.x_of(note.lane)
@@ -182,6 +211,13 @@ class Pending {
       )
     })
   }
+  update_ln() {
+    this.drawer.ln.update((g, note) => {
+      if ('len' in note) {
+        g.height = this.diff_drawer.get_height_ln(note.len, mul.value)
+      }
+    })
+  }
 
   recreate() {
     this.drawer.note.recreate(...this.pending_note)
@@ -194,13 +230,14 @@ class Pending {
     this.drawer.ln.container.visible = v
   }
 
-  on_click(e: FederatedPointerEvent) {
+  on_click() {
     if (GlobalStat.chart_state.value != 0) return
-    if (clipboard.value.length) return
+    if (clipboard.value.length) {
+      this.diff.add_notes_with_undo(this.pending_note)
+      GlobalStat.NoteClipboard.clear()
+      return
+    }
     if (Storage.note.w == 0) {
-      if (selected.value && !e.ctrlKey) {
-        GlobalStat.NoteClipboard.clear()
-      }
       return
     }
 
@@ -214,28 +251,33 @@ class Pending {
         this.hold_fixed = true
         this.hold_fixed_time = this.time
       }
+      this.recreate()
       return
     } else {
       if (!this.diff.add_notes_with_undo(this.pending_note)) notify.error('添加note失败。')
     }
   }
+  on_right() {
+    this.hold_fixed = false
+    this.len = 0
+    this.hold_fixed_time = 0
+    this.recreate()
+    this.update_pending()
+  }
 
   /** trigger on mousedown */
   pre_drag_start() {
     this.pre_drag = true
-    console.log('pre-drag-start')
   }
 
   pre_drag_end() {
     this.pre_drag = false
-    console.log('pre-drag-end')
   }
 
   /* trigger on mousemove */
   drag_start(ix: number) {
     if (!this.pre_drag) return
     if (this.dragging) return
-    console.log('drag-start')
 
     this.dragging = true
     const to_note = this.diff.to_note
@@ -258,7 +300,6 @@ class Pending {
     this.len = 0
     this.update_dragging_visible()
     this.recreate()
-    console.log()
   }
 
   cancel_drag() {
@@ -275,7 +316,6 @@ class Pending {
 
   drop() {
     if (!this.dragging) return
-    console.log('drop')
     if (!this.diff.remove_note_with_undo(...this.dragging_notes)) {
       notify.error('删除note失败。')
       return this.cancel_drag()
@@ -294,6 +334,47 @@ class Pending {
 
     this.diff_drawer.drawers.notes.update(x)
     this.diff_drawer.drawers.ln.update(x)
+  }
+
+  bind_clipboard() {
+    NoteClipboard.copy = () => this.copy()
+    NoteClipboard.cut = () => this.cut()
+    NoteClipboard.paste = () => this.paste()
+  }
+
+  copy() {
+    if (!this.select) return
+    const to_note = this.diff.to_note
+    const min = Math.min(...this.select_raw.map((x) => to_note(x).time))
+    clipboard.value = this.select_raw.map((x) => {
+      const note = to_note(x)
+      return {
+        ...note,
+        time: note.time - min
+      }
+    })
+    selected.value = []
+    this.recreate()
+  }
+  cut() {
+    if (!this.select) return
+    const to_note = this.diff.to_note
+    const min = Math.min(...this.select_raw.map((x) => to_note(x).time))
+    clipboard.value = this.select_raw.map((x) => {
+      const note = to_note(x)
+      return {
+        ...note,
+        time: note.time - min
+      }
+    })
+    this.diff.remove_note_with_undo(...selected.value)
+    selected.value = []
+    this.recreate()
+  }
+  paste() {
+    this.diff.add_notes_with_undo(this.pending_note)
+    clipboard.value = []
+    this.recreate()
   }
 }
 class Shadow {
@@ -324,6 +405,7 @@ class Shadow {
         filters: [new BlurFilter({ strength: 5 })]
       }
     )
+    psd.d = this
   }
   shadow_height(note: ChartTypeV2.note) {
     if ('len' in note) return note.len * mul.value + 0.5 * Skin.BaseHeight + 2 * this.width
@@ -363,13 +445,102 @@ class Shadow {
     this.drawer.container.visible = true
   }
 }
+class Select {
+  rect: Graphics
+  selecting = false
+  start_time = 0
+  base_x = 0
+  drawer: DiffDrawer
+  constructor(drawer: DiffDrawer) {
+    this.rect = new Graphics({ label: 'select-rect' }).fill('#b8dcee')
+    this.drawer = drawer
+    this.rect.alpha = 0.6
+    this.rect.visible = false
+    this.rect.zIndex = 15
+    drawer.app.stage.addChild(this.rect)
+    this.rect.x = 0
+    this.rect.y = 0
+    this.drawer.add_on('audio-time-update', () => {
+      this.update(pointer_last.x, this.drawer.event_time(pointer_last.y))
+    })
+    psd.s = this
+  }
+  on_mousedown(e: MouseEvent) {
+    if (this.selecting) return
+    if (Storage.note.w != 0) return
+    this.selecting = true
+    this.rect.visible = true
+    this.base_x = e.offsetX
+    this.start_time = this.drawer.event_time(e.offsetY)
+    document.addEventListener('mouseup', () => this.on_mouseup(pointer_last.x), {
+      once: true
+    })
+  }
+  update(mouseX: number, mousetime: number) {
+    if (!this.selecting) return
+    const height = Math.abs(mousetime - this.start_time) * mul.value
+    const width = Math.abs(mouseX - this.base_x)
+    const x = Math.min(mouseX, this.base_x)
+    const y =
+      this.drawer.get_y(
+        Math.max(mousetime, this.start_time),
+        this.drawer.chart.audio.current_time,
+        mul.value
+      ) +
+      0.5 * Skin.height(this.drawer.sizing.lane_width)
+    this.rect.clear()
+    this.rect.rect(x, y, width, height).fill('#b8dcee')
+  }
+  on_mouseup(eX: number) {
+    if (!this.selecting) return
+    const diff = this.drawer.diff
+    const mouse_time = this.drawer.event_time(pointer_last.y)
+
+    // main select
+    const bar_width = this.drawer.sizing.total_width - 100 - this.drawer.sizing.x_expand
+    const max_lane = this.drawer.diff.max_lane.value
+    const lane0 = ((eX - 50) / (bar_width - 100)) * max_lane
+    const lane1 = ((this.base_x - 50) / (bar_width - 100)) * max_lane
+    const lane_min = Math.min(lane0, lane1)
+    const lane_max = Math.max(lane0, lane1)
+
+    const time0 = Math.min(mouse_time, this.start_time)
+    const time1 = Math.max(mouse_time, this.start_time)
+    if (GlobalStat.func_keys.value.ctrl)
+      selected.value.push(
+        ...utils.indexes_of(diff.notes, (n, ix) => {
+          if (n.time >= time0 && n.time <= time1) {
+            if (selected.value.includes(ix)) return false
+            if (n.lane + 0.25 >= lane_min && n.lane + n.width - 0.25 <= lane_max) return true
+          }
+          return false
+        })
+      )
+    else
+      selected.value = utils.indexes_of(diff.notes, (n) => {
+        if (n.time >= time0 && n.time <= time1)
+          if (n.lane + 0.25 >= lane_min && n.lane + n.width - 0.25 <= lane_max) return true
+        return false
+      })
+
+    psd.d?.recreate()
+    this.cleanup()
+  }
+  cleanup() {
+    this.selecting = false
+    // this.rect.visible = false
+    this.base_x = 0
+    this.start_time = 0
+    this.rect.clear()
+  }
+}
 export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
   const diff = chart.diff
   const { lane_width } = this.sizing
 
   function change_select(n: number) {
     if (selected.value.includes(n)) {
-      selected.value = selected.value.filter((x) => x != n)
+      utils.remove(selected.value, n)
     } else {
       selected.value.push(n)
     }
@@ -395,6 +566,7 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     })
     sprite.on('mousedown', (ev) => {
       if (!ev.ctrlKey && !ev.altKey) pending.pre_drag_start()
+      ev.stopPropagation()
     })
     sprite.on('rightclick', () => del_note(i))
     sprite.on('mousemove', () => {
@@ -444,6 +616,8 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     { label: 'editor-ln', zIndex: 9, cullable: false }
   )
   const shadow = new Shadow(this)
+  const pending = new Pending(this, chart)
+  const select = new Select(this)
 
   const listen_handle = () => {
     this.add_on('audio-time-update', () => {
@@ -459,17 +633,22 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
       shadow.update_scale()
     })
   }
-  const pending = new Pending(this, chart)
+  const __drawer = this
   function update_pending(e: MouseEvent) {
     if (GlobalStat.chart_state.value != 0) return
     if (!chart.audio.paused) return
-    const mouse_time = event_time(e, chart, mul.value, chart.audio.current_time)
+    const mouse_time = __drawer.event_time(e.offsetY)
+    if (!pending.dragging) {
+      if (select.selecting) return select.update(e.offsetX, mouse_time)
+    }
     if (pending.hold_fixed) {
       pending.len = Math.abs(mouse_time - pending.hold_fixed_time)
       if (mouse_time <= pending.hold_fixed_time) {
         // so the user is 倒着拉条
         pending.time = pending.hold_fixed_time - pending.len
       }
+      pending.recreate()
+      pending.update_pending()
       return
     }
     // this is initial value referring the % of the mouse
@@ -478,7 +657,8 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     const width = pending.pending_width
     lane = utils.clamp(Math.floor(lane * (diff.max_lane.value - width + 1)), 0, max_lane - width)
 
-    pending.time = mouse_time
+    if (e.altKey) pending.time = mouse_time
+    else pending.time = diff.nearest(mouse_time)
     pending.lane = lane
     pending.snm = Storage.note.snm
 
@@ -493,14 +673,38 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
   }
   utils.stopWatch(chart.audio.refs.paused, (v) => (pending.display = v))
 
+  const event_handle = () => {
+    this.app.canvas.addEventListener(
+      'mousemove',
+      (e) => {
+        update_pending(e)
+
+        pointer_last.x = e.offsetX
+        pointer_last.y = e.offsetY
+      },
+      true
+    )
+    this.app.canvas.addEventListener('mouseenter', mousein)
+    this.app.canvas.addEventListener('mouseleave', mouseout)
+    this.app.canvas.addEventListener('mousedown', (e) => {
+      if (e.button == 2) pending.on_right()
+      if (e.button == 0) pending.on_click()
+    })
+    this.app.canvas.addEventListener('mouseup', (e) => {
+      pending.drop()
+      shadow.show()
+      select.on_mouseup(e.offsetX)
+    })
+    this.app.canvas.addEventListener('mousedown', (e) => {
+      select.on_mousedown(e)
+    })
+  }
   return {
     note_drawer,
     ln_drawer,
     shadow,
     pending: pending,
-    mousein,
-    mouseout,
     listen_handle,
-    update_pending
+    event_handle
   }
 }

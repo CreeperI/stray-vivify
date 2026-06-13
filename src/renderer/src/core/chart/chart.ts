@@ -12,7 +12,7 @@ import { Invoke } from '@renderer/core/ipc'
 import { utils } from '@renderer/core/utils'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { Chart_vsm } from '@renderer/core/chart/vsm'
-import { StopClass } from '@renderer/core/misc/eventhub'
+import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import nextFrame = utils.nextFrame
@@ -770,8 +770,10 @@ export class Chart extends StopClass {
     const meter = Storage.settings.meter
     const current_bpm = this.diff.bpm_of_time(current_time)?.bpm ?? 120
 
+    EventHub.pause()
     this.audio.set_current_time(this.diff.nearest(current_time))
     const scr = Math.round((4 / meter) * (60 / current_bpm) * Math.sign(deltaY) * 1000)
+    EventHub.resume()
     if (Storage.settings.reverse_scroll) {
       this.audio.set_current_time(this.audio.current_time + scr)
     } else {
