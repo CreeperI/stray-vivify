@@ -14,6 +14,7 @@ type eventNames = (typeof events)[number]
 
 class eventHub {
   handlers: Partial<Record<eventNames, (() => void)[]>>
+  paused = false
   constructor() {
     this.handlers = {}
   }
@@ -25,6 +26,7 @@ class eventHub {
     return () => this.off(event, fn)
   }
   dispatch(event: eventNames) {
+    if (this.paused) return
     if (this.handlers[event]) {
       this.handlers[event].forEach((x) => x())
     }
@@ -37,6 +39,12 @@ class eventHub {
   use(event: eventNames, fn: () => void) {
     onMounted(() => EventHub.on(event, fn))
     onUnmounted(() => EventHub.off(event, fn))
+  }
+  pause() {
+    this.paused = true
+  }
+  resume() {
+    this.paused = false
   }
 }
 

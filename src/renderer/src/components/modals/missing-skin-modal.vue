@@ -5,6 +5,8 @@ import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { Invoke } from '@renderer/core/ipc'
 import { closeModal } from '@kolirt/vue-modal'
 import { Skin } from '@renderer/core/misc/skin'
+import { onUnmounted } from 'vue'
+import { GlobalStat } from '@renderer/core/globalStat'
 
 const status = Skin.status
 function open_folder() {
@@ -13,9 +15,9 @@ function open_folder() {
 const missings = utils.keyof(status).filter((x) => status[x] == null)
 const no1 = missings.includes('1.png')
 if (no1) {
-  // onUnmounted(() => {
-  //   GlobalStat.close_app()
-  // })
+  onUnmounted(() => {
+    GlobalStat.close_app()
+  })
 }
 </script>
 
@@ -27,6 +29,12 @@ if (no1) {
       <div class="skin-names">
         <div v-for="sk in missings">{{ sk }}</div>
       </div>
+      <br v-if="no1" />
+      <strong v-if="no1">
+        缺少1.png会导致sv无法正常计算
+        <br />
+        sv将会在这个提示关闭后紫砂
+      </strong>
     </div>
     <template #footer>
       <a-button2 msg="打开skin文件夹" @click="open_folder" />

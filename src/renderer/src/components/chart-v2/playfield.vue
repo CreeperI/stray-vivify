@@ -1,13 +1,11 @@
 <script lang="ts" setup>
 import { Chart } from '@renderer/core/chart/chart'
-import SvgLane from '@renderer/components/chart-v2/svg-lane/svg-lane.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { utils } from '@renderer/core/utils'
 import { Storage, Version } from '@renderer/core/storage'
 import AImg from '@renderer/components/a-elements/a-img.vue'
 import { notify } from '@renderer/core/misc/notify'
-import SvgNotesPlaying from '@renderer/components/chart-v2/svg-lane/svg-notes-playing.vue'
 import { Invoke } from '@renderer/core/ipc'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { ChartTypeV2 } from '@preload/chart-types'
@@ -220,9 +218,6 @@ function title_ize(s: string) {
       <div v-if="setting.sprite" class="pf-sprite">
         <a-img :src="img_src" alt="" />
       </div>
-      <svg-lane>
-        <svg-notes-playing />
-      </svg-lane>
       <div class="pf-inf">
         <slot name="info"></slot>
         <div>{{ click_sec }}/sec</div>

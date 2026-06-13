@@ -37,7 +37,9 @@ export namespace Skin {
     for (const key of utils.keyof(status)) {
       try {
         status[key] = (await Assets.load(`stray:/__skin__/${key}`)) as Texture
-      } catch (e) {}
+      } catch (e) {
+        is_missing = true
+      }
     }
     if (is_missing) {
       modal.MissingSkinModal.show({})
@@ -53,4 +55,7 @@ export namespace Skin {
   }
   export let BaseWidth =  130
   export let BaseHeight = 43
+  export function height(width: number) {
+    return Math.round(width / BaseWidth * BaseHeight)
+  }
 }

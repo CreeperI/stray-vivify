@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { Chart } from '@renderer/core/chart/chart'
-import SvgLane from '@renderer/components/chart-v2/svg-lane/svg-lane.vue'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { utils } from '@renderer/core/utils'
@@ -10,7 +9,6 @@ import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter
 import { notify } from '@renderer/core/misc/notify'
 import { Invoke } from '@renderer/core/ipc'
 import TickCircle from '@renderer/components/chart-v2/chart-tabs/small/tick-circle.vue'
-import SvgNotesEditor from '@renderer/components/chart-v2/svg-lane/svg-notes-editor.vue'
 
 const chart = Chart.$current
 
@@ -148,11 +146,7 @@ onUnmounted(() => {
       <div v-if="setting.sprite" class="pf-sprite">
         <a-img :src="img_src" alt="" />
       </div>
-      <slot>
-        <svg-lane>
-          <svg-notes-editor :disable_pending="true" />
-        </svg-lane>
-      </slot>
+      <slot> </slot>
 
       <tick-circle v-if="Storage.settings.record_field.show_circles" />
 

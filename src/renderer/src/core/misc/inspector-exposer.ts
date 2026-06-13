@@ -12,6 +12,7 @@ import { utils } from '@renderer/core/utils'
 import { WordHelper } from '@renderer/core/word-helper'
 import { toRaw, toValue, unref } from 'vue'
 import { EventHub } from '@renderer/core/misc/eventhub'
+import { GlobalStat } from '@renderer/core/globalStat'
 
 // @ts-expect-error
 window.sv = {
@@ -35,7 +36,8 @@ window.sv = {
     toRaw: toRaw,
     toValue: toValue,
     unref: unref
-  }
+  },
+  gs: GlobalStat
 }
 
 export function expose_variables() {}
