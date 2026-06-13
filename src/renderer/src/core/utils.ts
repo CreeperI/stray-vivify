@@ -212,6 +212,7 @@ export namespace utils {
   export function keyof<T extends object>(obj: T) {
     return Object.keys(obj) as (keyof T)[]
   }
+  /* Max - Min */
   export function range(...args: number[]) {
     return Math.max(...args) - Math.min(...args)
   }
@@ -320,6 +321,10 @@ export namespace utils {
     const x = watch(source, cb, options)
     onUnmounted(x.stop)
     return x
+  }
+
+  export function get_len(note: ChartTypeV2.note) {
+    return "len" in note ? note.len : 0
   }
 }
 

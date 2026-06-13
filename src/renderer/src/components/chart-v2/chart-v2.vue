@@ -11,6 +11,7 @@ import ChartMain from '@renderer/components/chart-v2/chart-tabs/chart-main.vue'
 import ChartVsm from '@renderer/components/chart-v2/chart-tabs/chart-vsm.vue'
 import { EventHub } from '@renderer/core/misc/eventhub'
 import { ModalTarget } from '@kolirt/vue-modal'
+import { Chart } from '@renderer/core/chart/chart'
 
 const active = GlobalStat.refs.chart_tab
 active.value = 2
@@ -43,6 +44,7 @@ function fuck_wheel(e: WheelEvent) {
     if (current_meter_left == -1) return
     Storage.data.value.settings.meter =
       _meters[Math.max(current_meter_left - (e.deltaY > 0 ? 1 : -1), 0)] ?? 64
+    Chart.current?.diff.update_meter()
     EventHub.dispatch('meter-changed')
   }
 }

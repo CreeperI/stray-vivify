@@ -31,7 +31,9 @@ async function import_chart() {
   if (state) return
   const song = await Invoke('ask-song')
   if (!song) return
-  const id = await modal.AskIdModal.show({all: GlobalStat.all_chart.map(x => x.id)}) as undefined | string
+  const id = (await modal.AskIdModal.show({ all: GlobalStat.all_chart.map((x) => x.id) })) as
+    | undefined
+    | string
   if (!id) return
   const r = await Invoke('import-song', { id: id, path: song.path })
   console.log(r)
@@ -57,7 +59,6 @@ function delete_proj(id: string, name: string) {
       .then(() => {
         GlobalStat.update_all_chart()
       })
-      .catch()
   } else {
     Invoke('remove-chart', { id })
   }
@@ -133,7 +134,7 @@ const tip = utils.random(StartUpTips)
               <div class="chart-unit-id">id: {{ chart.id }}</div>
             </div>
             <a-img :src="`stray:///__sprite__/${chart.id}`" class="chart-unit-bg">
-              <img alt="???" class="chart-unit-bg" src="/song.jpg" style="opacity: 0.3;" />
+              <img alt="???" class="chart-unit-bg" src="/song.jpg" style="opacity: 0.3" />
             </a-img>
           </div>
         </TransitionGroup>
@@ -146,8 +147,10 @@ const tip = utils.random(StartUpTips)
 <style scoped>
 .chart-list-wrapper {
   display: grid;
-  grid-template-columns: 4fr 5fr;
+  grid-template-columns: 45vw 55vw;
+  justify-content: space-between;
   height: calc(100vh - 2rem);
+  width: 100vw;
 }
 
 .chart-list-left {
@@ -198,6 +201,9 @@ const tip = utils.random(StartUpTips)
 .sd-title {
   font-size: 1.5rem;
   height: 1.8rem;
+  max-width: 35vw;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 .sd-info {
   width: 50%;
@@ -206,6 +212,7 @@ const tip = utils.random(StartUpTips)
   gap: 25px;
   align-content: space-evenly;
   margin-top: 15px;
+  max-width: 90%;
 }
 .sd-info > span:first-child {
   text-align: left;
@@ -224,6 +231,7 @@ const tip = utils.random(StartUpTips)
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow-x: hidden;
 }
 
 .charts-func {

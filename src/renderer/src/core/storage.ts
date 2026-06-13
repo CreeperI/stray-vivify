@@ -51,6 +51,13 @@ const note = {
   },
   change_hold() {
     this.set_hold(!this.hold.value)
+  },
+  set_snm(v: number) {
+    if (v == 0) {
+      this.set_s(false)
+      this.set_b(false)
+    } else if (v == 1) this.set_b(true)
+    else if (v == 2) this.set_s(true)
   }
 }
 

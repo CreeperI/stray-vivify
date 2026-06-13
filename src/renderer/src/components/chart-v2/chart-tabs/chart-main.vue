@@ -6,8 +6,7 @@ import FnEditor from '@renderer/components/chart-v2/chart-tabs/small/fn-editor.v
 import FnTime from '@renderer/components/chart-v2/chart-tabs/small/fn-time.vue'
 import FnDebug from '@renderer/components/chart-v2/chart-tabs/small/fn-debug.vue'
 import FnEditTools from '@renderer/components/chart-v2/chart-tabs/small/fn-edit-tools.vue'
-import PixiLane from '@renderer/components/chart-v2/svg-lane/pixi-lane.vue'
-import SvgLane from '@renderer/components/chart-v2/svg-lane/svg-lane.vue'
+import PixiEditor from '@renderer/components/chart-v2/svg-lane/pixi-editor.vue'
 </script>
 
 <template>
@@ -18,7 +17,7 @@ import SvgLane from '@renderer/components/chart-v2/svg-lane/svg-lane.vue'
       <fn-density />
     </div>
     <!--  when comparing in bg-mode  -->
-    <pixi-lane />
+    <pixi-editor />
     <div class="chart-fn fn-wrapper">
       <fn-editor />
       <fn-time />

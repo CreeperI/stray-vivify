@@ -155,11 +155,6 @@ export class Chart_diff extends StopClass {
     )
     this.density_data = ref([0])
     this.density_path = ref('')
-    this.add_on('meter-changed', () => {
-      console.log(Storage.settings.meter)
-      this.update_beat_line_list()
-      this.update_t(this.visible)
-    })
     this.element_groups = {
       bar_text: diff_elements.create_bartext(),
       beat_line: diff_elements.create_beatline(),
@@ -193,6 +188,11 @@ export class Chart_diff extends StopClass {
     Chart_diff.all.push(this)
 
     this.add_stop(EventHub.on('audio-time-update', () => this.update()))
+  }
+  update_meter() {
+    console.log(Storage.settings.meter)
+    this.update_beat_line_list()
+    this.update_t(this.visible)
   }
 
   get diff() {
@@ -595,7 +595,7 @@ export class Chart_diff extends StopClass {
     this.push_undo(() => {
       undo.forEach((v) => v())
     })
-    this.fuck_shown(this.chart.audio.current_time, true)
+    this.force_fuck()
     return r.every((v) => v)
   }
 

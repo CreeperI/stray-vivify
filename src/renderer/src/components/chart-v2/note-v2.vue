@@ -11,7 +11,7 @@ const { note } = defineProps<{
 }>()
 const max_width = Chart.$current.diff.max_lane.value
 const mul = Storage.computes.mul
-const lane_width = inject<number>('lane_width') ?? Storage.settings.lane_width
+const lane_width = inject<number>('lane_width', Storage.settings.lane_width)
 
 const borderSrc = () => NoteProps.borderSrc(note, max_width)
 const getSrc = () => NoteProps.getSrc(note, max_width)
