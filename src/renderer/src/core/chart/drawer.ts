@@ -1,14 +1,12 @@
 import {
   Application,
   ApplicationOptions,
-  Assets,
   Container,
   ContainerOptions,
   Graphics,
   Sprite,
   Text,
-  TextStyle,
-  Texture
+  TextStyle
 } from 'pixi.js'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { toRaw } from 'vue'
@@ -40,8 +38,7 @@ export class DrawerExtension<T extends Sprite | Text | Graphics, createFrom> ext
     this.createSprite = createSprite
   }
   recreate(...arg: createFrom[]) {
-    this.elements.clear()
-    this.container.removeChild(...this.container.children)
+    this.remove()
     arg.forEach((v) => {
       const el = this.createSprite(v)
       if (el) {
@@ -50,8 +47,46 @@ export class DrawerExtension<T extends Sprite | Text | Graphics, createFrom> ext
       }
     })
   }
+
+  /*recreate(...arg: createFrom[]) {
+    const oldKeys = new Set(this.elements.keys())
+    const newKeys = new Set(arg)
+
+    const toRemove = [...oldKeys].filter((k) => !newKeys.has(k))
+    const toAdd = [...newKeys].filter((k) => !oldKeys.has(k))
+
+    toRemove.forEach((key) => {
+      const el = this.elements.get(key)
+      if (el) {
+        this.container.removeChild(el)
+        el.destroy()
+        this.elements.delete(key)
+      }
+    })
+
+    toAdd.forEach((key) => {
+      const el = this.createSprite(key)
+      if (el) {
+        this.elements.set(key, el)
+        this.container.addChild(el)
+      }
+    })
+  }*/
   update(fn: (value: T, key: createFrom) => void) {
     this.elements.forEach(fn)
+  }
+  reparent(parent: Container<T>) {
+    this.elements.forEach((v) => {
+      parent.reparentChild(v)
+    })
+    this.container = parent
+  }
+  remove() {
+    this.container.removeChild(...this.container.children)
+    this.elements.forEach((sprite) => {
+      sprite.destroy()
+    })
+    this.elements.clear()
   }
 }
 
@@ -89,7 +124,7 @@ export class DiffDrawer extends StopClass {
       const note_drawer = new DrawerExtension(
         (i: number) => {
           const note = to_note(i)
-          const texture = Textures[NoteProps.base_src(note, 4)]
+          const texture = getTexture(NoteProps.base_src(note, 4))
           const sprite = new Sprite({
             texture,
             label: `${note.time}:${note.lane}`
@@ -107,13 +142,13 @@ export class DiffDrawer extends StopClass {
         (i: number) => {
           const note = to_note(i)
           if ('snm' in note) return null
-          const border_texture = Textures[NoteProps.base_border_src(note, 4)]
+          const border_texture = getTexture(NoteProps.base_border_src(note, 4))
           const border = new Sprite({
             texture: border_texture,
             label: String(note.time)
           })
           border.x = this.x_of(note.lane)
-          border.height = note.len * mul.value - 0.5 * BaseHeight
+          border.height = note.len * mul.value - 0.5 * Skin.BaseHeight
           return border
         },
         { label: 'ln', zIndex: 9, cullable: false }
@@ -227,62 +262,52 @@ export class DiffDrawer extends StopClass {
       this.update()
     })
     this.add_on('fuck-shown', () => this.recreate())
-    this.add_on('meter-changed', () =>
+    this.add_on('meter-changed', () => {
       this.drawers.beat.recreate(...this.diff.shown_timing_list.beat_list)
+      this.update()
+    })
+  }
+  get_y(t: number, c: number, m: number) {
+    return SCREEN_HEIGHT - (t - c - Storage.settings.offset1) * m - 80 - Skin.BaseHeight
+  }
+  get_height_ln(len: number, m: number) {
+    return len * m - 0.5 * Skin.BaseHeight
+  }
+  get_y_ln(t: number, c: number, m: number, len: number) {
+    return this.get_y(t, c, m) - this.get_height_ln(len, m)
+  }
+  get_y_line(t: number, c: number, m: number) {
+    return (
+      SCREEN_HEIGHT -
+      (t - c - Storage.settings.offset1) * m +
+      (Skin.BaseWidth / 130) * (Skin.BaseHeight / 2) -
+      80 -
+      Skin.BaseHeight
     )
   }
   update() {
     const time = this.chart.audio.current_time
-    const offset1 = Storage.settings.offset1
     const m = mul.value
     const to_note = this.diff.to_note
     this.drawers.notes.update((sprite, i) => {
-      sprite.y = SCREEN_HEIGHT - (to_note(i).time - time - offset1) * m - 80 - BaseHeight
+      sprite.y = this.get_y(to_note(i).time, time, m)
     })
     this.drawers.ln.update((sprite, i) => {
       const ln = to_note(i) as ChartTypeV2.hold_note
-      sprite.y =
-        SCREEN_HEIGHT -
-        (ln.time - time - offset1) * m -
-        ln.len * m +
-        0.5 * BaseHeight -
-        80 -
-        BaseHeight
+      sprite.y = this.get_y_ln(ln.time, time, m, ln.len)
     })
     const beat_dy = Storage.settings.sprites.bar_dy
     this.drawers.beat.update((g, [ms, _]) => {
-      g.y =
-        SCREEN_HEIGHT -
-        (ms - time - offset1) * m +
-        beat_dy +
-        (BaseWidth / 130) * (BaseHeight / 2) -
-        80 -
-        BaseHeight
+      g.y = this.get_y_line(ms, time, m) + beat_dy
     })
     this.drawers.left_text.update((t, [ms, _]) => {
-      t.y =
-        SCREEN_HEIGHT -
-        (ms - time - offset1) * m -
-        80 -
-        BaseHeight +
-        (BaseWidth / 130) * (BaseHeight / 2)
+      t.y = this.get_y_line(ms, time, m)
     })
     this.drawers.bpm_text.update((t, timing) => {
-      t.y =
-        SCREEN_HEIGHT -
-        (timing.time - time - offset1) * m +
-        GlobalStat.rem -
-        80 -
-        BaseHeight +
-        (BaseWidth / 130) * (BaseHeight / 2)
+      t.y = this.get_y_line(timing.time, time, m) + GlobalStat.rem
     })
     this.drawers.tick.update((t, [ms, _]) => {
-      t.y =
-        SCREEN_HEIGHT -
-        (ms - time - offset1) * m +
-        (BaseWidth / 130) * (BaseHeight / 2) -
-        80 -
-        BaseHeight
+      t.y = this.get_y_line(ms, time, m)
     })
   }
   recreate() {
