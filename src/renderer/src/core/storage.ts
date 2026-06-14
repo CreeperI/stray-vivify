@@ -109,7 +109,6 @@ const storage = ref<storages.storage_scheme>({
     },
     density_data_count: 100,
     mouse_tracker: false,
-    debug_window: false,
     frame_time: true,
     hit_sound: true,
     svg_shown_parts: {
@@ -168,7 +167,8 @@ const storage = ref<storages.storage_scheme>({
       as_bg: false,
       bg_op: 70
     },
-    osu_sr: false
+    osu_sr: false,
+    disable_inspect: false,
   },
   version: Version.val,
   shortcut: '',

@@ -55,13 +55,15 @@ async function main() {
   Invoke('leave-fullscreen')
   Preinit.Stages.all_chart = true
 
-  Log.handle()
+  const disable_inspect = Storage.settings.disable_inspect
+  if (!disable_inspect) Log.handle()
   ShortCuts.handle()
   MouseTracker.init()
   expose_variables()
   load_external_mods()
   load_external_tips()
-  setInterval(() => FrameRate.refresh(), 1000)
+  FrameRate.try_kill(disable_inspect)
+  if (!disable_inspect) setInterval(() => FrameRate.refresh(), 1000)
   Preinit.Stages.debugs = true
 
   Storage.init_interval()

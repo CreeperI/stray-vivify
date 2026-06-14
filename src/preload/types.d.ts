@@ -441,7 +441,6 @@ export namespace storages {
 
     // debug
     mouse_tracker: boolean
-    debug_window: boolean
 
     hit_sound: boolean
     hit_volume: number
@@ -513,6 +512,7 @@ export namespace storages {
       bg_op: number
     }
     osu_sr: boolean
+    disable_inspect: boolean
   }
   export interface statistics {
     first_open: number

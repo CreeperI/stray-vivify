@@ -16,6 +16,7 @@ export class _FrameRateClass {
   // the use-times recent calls take
   recent: number[]
   refs: _frameRateRef
+  call_counts: number[]
   // 平均值
   private _avg: number
   // 标准差
@@ -26,7 +27,6 @@ export class _FrameRateClass {
   private _min: number
   private _call_count_last: number
   private last_call: number
-  call_counts: number[]
 
   constructor() {
     this._cv = 0
@@ -96,6 +96,15 @@ export class _FrameRateClass {
   immediate() {
     this._call_count_last++
   }
+
+  kill() {
+    const empty = () => {}
+    this.calc = empty
+    this.refresh = empty
+    this.start = empty
+    this.end = empty
+    this.immediate = empty
+  }
 }
 
 const aniFrame = new _FrameRateClass()
@@ -114,10 +123,18 @@ class _FPS extends _FrameRateClass {
 }
 const invalidator = new _FrameRateClass()
 export const FrameRate = {
+  killed: false,
   refresh() {
+    if (this.killed) return
     invalidator.start()
     all.forEach((v) => v.refresh())
     invalidator.end()
+  },
+  try_kill(disable_inspect: boolean) {
+    if (disable_inspect) {
+      all.forEach((v) => v.kill())
+      this.killed = true
+    }
   },
   aniFrame: aniFrame,
   invalidator: invalidator,

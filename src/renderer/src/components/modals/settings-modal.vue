@@ -252,11 +252,8 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <div>Mouse Tracker</div>
         <a-checkbox2 v-model="r.settings.mouse_tracker" />
         <ds>osu!std同款鼠标</ds>
-        <div>Debug Widget</div>
-        <a-checkbox2 v-model="r.settings.debug_window" />
-        <ds>
-          在time下面显示一个开发的时候赛的东西。参考意义不大，但是据说能够加快一些渲染速度。我也不知道为什么。
-        </ds>
+        <a-checkbox2 v-model="r.settings.disable_inspect" />
+        <ds>开启后会禁用报错提示。能够在极限情况下提升性能（比如240FPS）。不建议开启。</ds>
       </div>
     </div>
     <template #footer>

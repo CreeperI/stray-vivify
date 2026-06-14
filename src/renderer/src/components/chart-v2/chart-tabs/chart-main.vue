@@ -4,7 +4,6 @@ import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter
 import FnDensity from '@renderer/components/chart-v2/chart-tabs/small/fn-density.vue'
 import FnEditor from '@renderer/components/chart-v2/chart-tabs/small/fn-editor.vue'
 import FnTime from '@renderer/components/chart-v2/chart-tabs/small/fn-time.vue'
-import FnDebug from '@renderer/components/chart-v2/chart-tabs/small/fn-debug.vue'
 import FnEditTools from '@renderer/components/chart-v2/chart-tabs/small/fn-edit-tools.vue'
 import PixiEditor from '@renderer/components/chart-v2/svg-lane/pixi-editor.vue'
 </script>
@@ -22,7 +21,6 @@ import PixiEditor from '@renderer/components/chart-v2/svg-lane/pixi-editor.vue'
       <fn-editor />
       <fn-time />
       <fn-edit-tools />
-      <fn-debug />
     </div>
   </div>
 </template>
