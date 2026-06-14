@@ -144,7 +144,7 @@ export class Chart extends StopClass {
     this.refs = {
       diff_ref: ref(-1)
     }
-    this.hit_sounder = new HitSoundSystem(this, this.diff.shown)
+    this.hit_sounder = new HitSoundSystem(this)
     this.backup_last = performance.now()
   }
 
@@ -413,6 +413,7 @@ export class Chart extends StopClass {
 
   on_update() {
     this.audio.update()
+    if (!this.audio.paused) this.hit_sounder.play_hit()
   }
 
   async save() {

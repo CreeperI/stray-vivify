@@ -49,12 +49,12 @@ input {
 
 .fn-time {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 7fr 6fr;
   align-items: center;
   justify-items: center;
   gap: 15px 0;
   text-align: center;
-  padding: 15px 10px;
+  padding: 15px 15px 15px 10px;
   box-sizing: border-box;
 }
 

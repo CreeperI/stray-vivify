@@ -1,5 +1,5 @@
 import { Chart } from '@renderer/core/chart/chart'
-import { Ref, watch } from 'vue'
+import { watch } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { notify } from '@renderer/core/misc/notify'
@@ -12,14 +12,15 @@ export class HitSoundSystem {
   private maxVoices = 64
   private activeVoices: Array<{ source: AudioBufferSourceNode; endTime: number }> = []
   private chart: Chart
-  private shown: Ref<number[]>
   private last_trigger: number
 
-  constructor(chart: Chart, shown: Ref<number[]>) {
+  constructor(chart: Chart) {
     this.chart = chart
-    this.shown = shown
     this.initWebAudio()
     this.last_trigger = -Infinity
+  }
+  get shown() {
+    return this.chart.diff.shown
   }
 
   on_unpause() {
@@ -36,21 +37,20 @@ export class HitSoundSystem {
 
     const last = this.last_trigger
     const current = this.chart.audio.current_time - Storage.settings.offset3
+    if (last == current) return
 
     // Find note in current time window
-    const hitNote = this.shown.value.some((x) =>
-      utils.between(this.chart.diff.notes[x].time, [last, current]) &&
-      'snm' in this.chart.diff.notes[x]
-        ? this.chart.diff.notes[x].snm != 1
-        : true
-    )
-    this.last_trigger = this.chart.audio.current_time
+    const hitNote = this.shown.some((x) => {
+      if (!utils.between(x.time, [last, current])) return false
+      if ('snm' in x) return x.snm != 1
+      return true
+    })
+    this.last_trigger = this.chart.audio.current_time - Storage.settings.offset3
 
     if (hitNote) {
       if (this.activeVoices.length >= this.maxVoices) {
         this.activeVoices.shift()
       }
-
       try {
         const source = this.audioContext.createBufferSource()
         source.buffer = this.audioBuffer
@@ -87,14 +87,14 @@ export class HitSoundSystem {
       const response = await fetch('stray:/__hit__/')
       if (!response.ok) {
         this.hit_error = true
-        return console.error("Hitsound unfound")
+        return console.error('Hitsound unfound')
       }
 
       const arrayBuffer = await response.arrayBuffer()
       this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer)
     } catch (error) {
       this.hit_error = true
-      notify.error("打击音无法加载。请检查打击音文件是否有效。")
+      notify.error('打击音无法加载。请检查打击音文件是否有效。')
     }
   }
 }

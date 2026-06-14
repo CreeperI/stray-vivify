@@ -43,18 +43,17 @@ export namespace GlobalStat {
     chart_state.value = v
   }
 
-  export namespace NoteClipboard {
-    export const selected = ref<number[]>([])
-    export const clipboard = ref<ChartTypeV2.note[]>([])
+  export const NoteClipboard = {
+    selected: [] as ChartTypeV2.note[],
+    clipboard: ref<ChartTypeV2.note[]>([]),
+    clear() {
+      this.clipboard.value = []
+      this.selected = []
+    },
 
-    export function clear() {
-      clipboard.value = []
-      selected.value = []
-    }
-
-    export let copy = () => {}
-    export let cut = () => {}
-    export let paste = () => {}
+    copy: () => {},
+    cut: () => {},
+    paste: () => {}
   }
 
   export let is_dev = false

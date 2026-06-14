@@ -73,7 +73,7 @@ export class Chart_diff extends StopClass {
   diff_index: Ref<number>
   undo: (() => void)[][]
   redo: (() => void)[][]
-  shown: Ref<number[]>
+  shown: ChartTypeV2.note[]
   last_update: number
   // 小节线
   bar_list: ms[]
@@ -135,7 +135,7 @@ export class Chart_diff extends StopClass {
     })
     this.undo = []
     this.redo = []
-    this.shown = ref([])
+    this.shown = []
     this.last_update = 0
     this.bar_list = []
     this.beat_list = []
@@ -252,8 +252,7 @@ export class Chart_diff extends StopClass {
   }
 
   get current_density() {
-    return this.shown.value.filter((x) => {
-      const n = this.notes[x]
+    return this.shown.filter((n) => {
       if (n['snm'] == 1) return false
       return 'len' in n
         ? n.time + n.len > this.chart.audio.current_time && n.time < this.chart.audio.current_time
@@ -711,7 +710,7 @@ export class Chart_diff extends StopClass {
       t - Storage.settings.pooling.ahead,
       t + Storage.computes.visible.value + Storage.settings.pooling.ahead
     ] as [number, number]
-    this.shown.value = utils.indexes_of(this.notes, (n) => {
+    this.shown = this.notes.filter((n) => {
       return this.isVisible(n, visible)
     })
     this.last_update = t
@@ -955,11 +954,9 @@ export class Chart_diff extends StopClass {
 
     fix_note(note)
 
-    const nearest = this.shown.value.find(
-      (x) => Math.abs(this.notes[x].time - note.time) <= Storage.settings.nearest
-    )
+    const nearest = this.shown.find((x) => Math.abs(x.time - note.time) <= Storage.settings.nearest)
     if (nearest) {
-      note.time = this.notes[nearest].time
+      note.time = nearest.time
     }
 
     const pos = this.binarySearchTimePosition(note.time)

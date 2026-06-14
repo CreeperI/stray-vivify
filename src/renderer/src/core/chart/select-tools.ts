@@ -7,8 +7,7 @@ export const EditorTools = {
   mutiplier: timeMultiplier
 }
 
-function test(nids: number[]) {
-  const notes: ChartTypeV2.note[] = nids.map((nid) => Chart.$current.diff.to_note(nid))
+function test(notes: ChartTypeV2.note[]) {
   let maxTime = -1
   let minTime = 2147483647
   notes.forEach((note) => {
@@ -20,8 +19,7 @@ function test(nids: number[]) {
   })
 }
 
-function mirror(nids: number[]) {
-  const notes: ChartTypeV2.note[] = nids.map((nid) => Chart.$current.diff.to_note(nid))
+function mirror(notes: ChartTypeV2.note[]) {
   const maxLane = Chart.$current.diff.max_lane.value
   notes.forEach((note) => {
     note.lane = maxLane - note.lane - note.width
@@ -29,9 +27,8 @@ function mirror(nids: number[]) {
   Chart.current?.fuck_shown(true)
 }
 
-function timeMultiplier(nids: number[], multiplier: number, baseOnZero: boolean) {
+function timeMultiplier(notes: ChartTypeV2.note[], multiplier: number, baseOnZero: boolean) {
   let minTime = 2147483647
-  const notes: ChartTypeV2.note[] = nids.map((nid) => Chart.$current.diff.to_note(nid))
   notes.forEach((note) => {
     minTime = Math.min(minTime, note.time)
   })

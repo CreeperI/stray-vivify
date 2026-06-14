@@ -11,7 +11,6 @@ import { Chart_diff } from '@renderer/core/chart/diff'
 import { Skin } from '@renderer/core/misc/skin'
 import NoteClipboard = GlobalStat.NoteClipboard
 
-const { clipboard, selected } = GlobalStat.NoteClipboard
 const mul = Storage.computes.mul
 const pointer_last = {
   x: 0,
@@ -76,7 +75,7 @@ class Pending {
   }
 
   get select() {
-    return !!selected.value.length
+    return !!NoteClipboard.selected.length
   }
 
   get snm() {
@@ -143,7 +142,7 @@ class Pending {
       })
     }
     if (GlobalStat.NoteClipboard.clipboard.value.length) {
-      return clipboard.value.map((x) => {
+      return NoteClipboard.clipboard.value.map((x) => {
         const _note = to_note(x)
         return {
           ..._note,
@@ -167,7 +166,7 @@ class Pending {
   }
 
   get select_raw() {
-    return toRaw(selected.value)
+    return toRaw(NoteClipboard.selected)
   }
 
   update_pending() {
@@ -206,7 +205,7 @@ class Pending {
 
   on_click() {
     if (GlobalStat.chart_state.value != 0) return
-    if (clipboard.value.length) {
+    if (NoteClipboard.clipboard.value.length) {
       this.diff.add_notes_with_undo(this.pending_note)
       GlobalStat.NoteClipboard.clear()
       return
@@ -249,20 +248,19 @@ class Pending {
   }
 
   /* trigger on mousemove */
-  drag_start(ix: number) {
+  drag_start(note: ChartTypeV2.note) {
     if (!this.pre_drag) return
     if (this.dragging) return
 
     this.dragging = true
-    const to_note = this.diff.to_note
     if (this.select) {
-      if (selected.value.includes(ix)) {
-        this.dragging_notes = toRaw(selected.value).map((x) => to_note(x))
+      if (NoteClipboard.selected.includes(note)) {
+        this.dragging_notes = NoteClipboard.selected.map((x) => x)
       }
-    } else this.dragging_notes = [to_note(ix)]
-    this.dragging_base_lane = Math.min(...this.dragging_notes.map((x) => to_note(x).lane))
-    this.dragging_base_time = Math.min(...this.dragging_notes.map((x) => to_note(x).time))
-    this.dragging_delta = to_note(ix).time - this.dragging_base_time
+    } else this.dragging_notes = [note]
+    this.dragging_base_lane = Math.min(...this.dragging_notes.map((x) => x.lane))
+    this.dragging_base_time = Math.min(...this.dragging_notes.map((x) => x.time))
+    this.dragging_delta = note.time - this.dragging_base_time
     this.dragging_width = utils.range(
       ...this.dragging_notes
         .map((n) => {
@@ -301,9 +299,8 @@ class Pending {
   }
 
   update_dragging_visible() {
-    const to_note = this.diff.to_note
     const x = this.dragging
-      ? (g: Sprite, ix: number) => (g.visible = !this.dragging_notes.includes(to_note(ix)))
+      ? (g: Sprite, note: ChartTypeV2.note) => (g.visible = !this.dragging_notes.includes(note))
       : (g: Sprite) => (g.visible = true)
 
     this.diff_drawer.drawers.notes.update(x)
@@ -319,40 +316,40 @@ class Pending {
   copy() {
     if (!this.select) return
     const to_note = this.diff.to_note
-    const min = Math.min(...this.select_raw.map((x) => to_note(x).time))
-    clipboard.value = this.select_raw.map((x) => {
+    const min = Math.min(...NoteClipboard.selected.map((x) => to_note(x).time))
+    NoteClipboard.clipboard.value = NoteClipboard.selected.map((x) => {
       const note = to_note(x)
       return {
         ...note,
         time: note.time - min
       }
     })
-    selected.value = []
+    NoteClipboard.selected = []
     this.recreate()
   }
   cut() {
     if (!this.select) return
     const to_note = this.diff.to_note
     const min = Math.min(...this.select_raw.map((x) => to_note(x).time))
-    clipboard.value = this.select_raw.map((x) => {
+    NoteClipboard.clipboard.value = this.select_raw.map((x) => {
       const note = to_note(x)
       return {
         ...note,
         time: note.time - min
       }
     })
-    this.diff.remove_note_with_undo(...selected.value)
-    selected.value = []
+    this.diff.remove_note_with_undo(...NoteClipboard.selected)
+    NoteClipboard.selected = []
     this.recreate()
   }
   paste() {
     this.diff.add_notes_with_undo(this.pending_note)
-    clipboard.value = []
+    NoteClipboard.clipboard.value = []
     this.recreate()
   }
 }
 class Shadow {
-  drawer: DrawerExtension<Graphics, number>
+  drawer: DrawerExtension<Graphics, ChartTypeV2.note>
   diff_drawer: DiffDrawer
   diff: Chart_diff
   chart: Chart
@@ -362,11 +359,9 @@ class Shadow {
     this.chart = diff_drawer.diff.chart
     this.diff = diff_drawer.diff
     this.diff_drawer = diff_drawer
-    const to_note = diff_drawer.diff.to_note
     const lane_width = diff_drawer.sizing.lane_width
     this.drawer = new DrawerExtension(
-      (i: number) => {
-        const note = to_note(i)
+      (note: ChartTypeV2.note) => {
         const gh = this.shadow_height(note)
         const gw = lane_width * note.width + 2 * width
         const g = new Graphics().rect(0, 0, gw, gh).fill('gold')
@@ -396,7 +391,7 @@ class Shadow {
     })
   }
   recreate() {
-    this.drawer.recreate(...toRaw(selected.value))
+    this.drawer.recreate(...NoteClipboard.selected)
     this.update()
   }
   update_scale() {
@@ -481,17 +476,17 @@ class Select {
     const time0 = Math.min(mouse_time, this.start_time)
     const time1 = Math.max(mouse_time, this.start_time)
     if (GlobalStat.func_keys.value.ctrl)
-      selected.value.push(
-        ...utils.indexes_of(diff.notes, (n, ix) => {
+      NoteClipboard.selected.push(
+        ...diff.notes.filter((n) => {
           if (n.time >= time0 && n.time <= time1) {
-            if (selected.value.includes(ix)) return false
+            if (NoteClipboard.selected.includes(n)) return false
             if (n.lane + 0.25 >= lane_min && n.lane + n.width - 0.25 <= lane_max) return true
           }
           return false
         })
       )
     else
-      selected.value = utils.indexes_of(diff.notes, (n) => {
+      NoteClipboard.selected = diff.notes.filter((n) => {
         if (n.time >= time0 && n.time <= time1)
           if (n.lane + 0.25 >= lane_min && n.lane + n.width - 0.25 <= lane_max) return true
         return false
@@ -512,29 +507,29 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
   const diff = chart.diff
   const { lane_width } = this.sizing
 
-  function change_select(n: number) {
-    if (selected.value.includes(n)) {
-      utils.remove(selected.value, n)
+  function change_select(n: ChartTypeV2.note) {
+    if (NoteClipboard.selected.includes(n)) {
+      utils.remove(NoteClipboard.selected, n)
     } else {
-      selected.value.push(n)
+      NoteClipboard.selected.push(n)
     }
     shadow.recreate()
   }
-  function del_note(n: number) {
+  function del_note(n: ChartTypeV2.note) {
     if (pending.hold_fixed) return
-    if (selected.value.includes(n)) {
-      diff.remove_note_with_undo(...selected.value)
-      utils.clear_arr(selected.value)
+    if (NoteClipboard.selected.includes(n)) {
+      diff.remove_note_with_undo(...NoteClipboard.selected)
+      utils.clear_arr(NoteClipboard.selected)
       return
     }
     if (!diff.remove_note_with_undo(to_note(n))) notify.error('删除note失败。')
   }
 
   const to_note = chart.diff.to_note
-  function _handle(sprite: Sprite, i: number) {
+  function _handle(sprite: Sprite, note: ChartTypeV2.note) {
     sprite.on('click', (ev) => {
       if (ev.ctrlKey) {
-        change_select(i)
+        change_select(note)
         ev.stopPropagation()
       }
     })
@@ -542,11 +537,11 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
       if (!ev.ctrlKey && !ev.altKey) pending.pre_drag_start()
       ev.stopPropagation()
     })
-    sprite.on('rightclick', () => del_note(i))
+    sprite.on('rightclick', () => del_note(note))
     sprite.on('mousemove', () => {
       // show() at pixi-editor.vue
       if (pending.pre_drag) shadow.drawer.remove()
-      pending.drag_start(i)
+      pending.drag_start(note)
     })
     sprite.on('mouseup', () => {
       pending.pre_drag_end()
@@ -554,21 +549,19 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     sprite.eventMode = 'static'
   }
   const note_drawer = new DrawerExtension(
-    (i: number) => {
-      const note = to_note(i)
+    (note: ChartTypeV2.note) => {
       const sprite = NoteDrawer.createNote.apply(this, [note])
       if (!sprite) return null
-      _handle(sprite, i)
+      _handle(sprite, note)
       return sprite
     },
     { label: 'editor-note', zIndex: 10 }
   )
   const ln_drawer = new DrawerExtension(
-    (i: number) => {
-      const note = to_note(i)
+    (note: ChartTypeV2.note) => {
       const border = NoteDrawer.createLn.apply(this, [note])
       if (!border) return null
-      _handle(border, i)
+      _handle(border, note)
       border.eventMode = 'static'
       return border
     },
@@ -583,7 +576,7 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
       shadow.update()
     })
     this.add_on('fuck-shown', () => {
-      const v = toRaw(diff.shown.value)
+      const v = diff.shown
       note_drawer.recreate(...v)
       ln_drawer.recreate(...v)
       this.update()

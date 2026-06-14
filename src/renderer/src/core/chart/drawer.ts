@@ -133,8 +133,8 @@ export class DiffDrawer extends StopClass {
     x_expand: number
   }
   drawers: {
-    notes: DrawerExtension<Sprite, number>
-    ln: DrawerExtension<Sprite, number>
+    notes: DrawerExtension<Sprite, ChartTypeV2.note>
+    ln: DrawerExtension<Sprite, ChartTypeV2.note>
     beat: DrawerExtension<Graphics, [number, number]>
     left_text: DrawerExtension<Text, [number, number]>
     bpm_text: DrawerExtension<Text, ChartTypeV2.timing>
@@ -150,23 +150,20 @@ export class DiffDrawer extends StopClass {
     this.diff = diff
     this.chart = diff.chart
     this.app = new Application()
-    const to_note = diff.to_note
     this.sizing = sizing
     this.max_lane = diff.max_lane.value
 
     /* drawer inits */
     {
       const note_drawer = new DrawerExtension(
-        (i: number) => {
-          const note = to_note(i)
+        (note: ChartTypeV2.note) => {
           return NoteDrawer.createNote.apply(this, [note])
         },
         { label: 'note', zIndex: 10 }
       )
 
       const ln_drawer = new DrawerExtension(
-        (i: number) => {
-          const note = to_note(i)
+        (note: ChartTypeV2.note) => {
           return NoteDrawer.createLn.apply(this, [note])
         },
         { label: 'ln', zIndex: 9, cullable: false }
@@ -341,8 +338,8 @@ export class DiffDrawer extends StopClass {
   }
 
   recreate() {
-    this.drawers.notes.recreate(...toRaw(this.diff.shown.value))
-    this.drawers.ln.recreate(...toRaw(this.diff.shown.value))
+    this.drawers.notes.recreate(...toRaw(this.diff.shown))
+    this.drawers.ln.recreate(...toRaw(this.diff.shown))
     this.drawers.beat.recreate(...this.diff.shown_timing_list.beat_list)
     if (Storage.settings.bar_or_section)
       this.drawers.left_text.recreate(...this.diff.shown_timing_list.section_list)
