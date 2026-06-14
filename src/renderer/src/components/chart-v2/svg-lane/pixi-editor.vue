@@ -22,10 +22,12 @@ const drawer = new DiffDrawer(diff, { lane_width, total_width: width, x_expand }
 onMounted(() => {
   const editor = editable_note_drawer.call(drawer, chart)
   drawer.drawers.notes.container.removeFromParent()
+  drawer.drawers.notes.stop()
   drawer.drawers.notes = editor.note_drawer
   drawer.app.stage.addChild(drawer.drawers.notes.container)
 
   drawer.drawers.ln.container.removeFromParent()
+  drawer.drawers.ln.stop()
   drawer.drawers.ln = editor.ln_drawer
   drawer.app.stage.addChild(drawer.drawers.ln.container)
 

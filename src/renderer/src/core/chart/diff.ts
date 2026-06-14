@@ -189,12 +189,6 @@ export class Chart_diff extends StopClass {
 
     this.add_stop(EventHub.on('audio-time-update', () => this.update()))
   }
-  update_meter() {
-    console.log(Storage.settings.meter)
-    this.update_beat_line_list()
-    this.update_t(this.visible)
-  }
-
   get diff() {
     return this.chart.diffs[this.diff_index.value]
   }
@@ -395,6 +389,12 @@ export class Chart_diff extends StopClass {
     return max
   }
 
+  update_meter() {
+    console.log(Storage.settings.meter)
+    this.update_beat_line_list()
+    this.update_t(this.visible)
+  }
+
   update_on_diff_index() {
     console.log('update_on_diff_index')
     this.chart.set_header_name()
@@ -410,9 +410,20 @@ export class Chart_diff extends StopClass {
   }
 
   async update_density_path(force = false) {
-    if (!force || this.density_updating) return
+    if (!force && this.density_updating) return
     if (force && this.density_updating) {
       this.#__density_abort = true
+      await new Promise<void>((resolve) => {
+        const check = () => {
+          if (!this.density_updating) {
+            resolve()
+          } else {
+            utils.nextFrame().then(check)
+          }
+        }
+        check()
+      })
+      this.#__density_abort = false
     }
     const path = this.density_path
     const data = this.density_data
@@ -423,10 +434,11 @@ export class Chart_diff extends StopClass {
     const dt = 1500 / data.value.length
 
     this.density_updating = true
-    const d = data.value
+    const d = utils.deepCopy(toRaw(data.value))
     for (let i = 0; i < d.length; i++) {
       if (this.#__density_abort) {
         this.#__density_abort = false
+        this.density_updating = false
         return
       }
       const y = 240 - Math.floor((d[i] / max) * 230)
@@ -917,6 +929,10 @@ export class Chart_diff extends StopClass {
     return len / (60000 / bpm.bpm)
   }
 
+  force_fuck() {
+    this.fuck_shown(this.chart.audio.current_time, true)
+  }
+
   /** @returns if the note is successfully removed */
   private remove_note(v: ChartTypeV2.note) {
     const index = this.findNote(v)
@@ -976,9 +992,5 @@ export class Chart_diff extends StopClass {
 
   private findNote(n: ChartTypeV2.note): number {
     return this.notes.findIndex((x) => utils.is_equal(n, x))
-  }
-
-  force_fuck() {
-    this.fuck_shown(this.chart.audio.current_time, true)
   }
 }

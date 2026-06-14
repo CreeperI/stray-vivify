@@ -28,6 +28,7 @@ export class DrawerExtension<T extends Sprite | Text | Graphics, createFrom> ext
   elements: Map<createFrom, T>
   createSprite: (arg: createFrom) => T | null
   container: Container<T>
+  visible: boolean
   constructor(
     createSprite: (arg: createFrom) => T | null,
     containOption?: Partial<ContainerOptions>
@@ -37,6 +38,7 @@ export class DrawerExtension<T extends Sprite | Text | Graphics, createFrom> ext
     // @ts-ignore wtf
     this.container = new Container<T>({ cullable: true, ...containOption })
     this.createSprite = createSprite
+    this.visible = true
   }
   recreate(...arg: createFrom[]) {
     this.remove()
@@ -74,6 +76,7 @@ export class DrawerExtension<T extends Sprite | Text | Graphics, createFrom> ext
     })
   }*/
   update(fn: (value: T, key: createFrom) => void) {
+    if (!this.visible) return
     this.elements.forEach(fn)
   }
   reparent(parent: Container<T>) {

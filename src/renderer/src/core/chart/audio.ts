@@ -3,6 +3,7 @@ import { Chart } from '@renderer/core/chart/chart'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { EventHub } from '@renderer/core/misc/eventhub'
 import { Intervals } from '@renderer/core/misc/intervals'
+import { utils } from '@renderer/core/utils'
 
 type ms = number
 type second = number
@@ -109,7 +110,7 @@ export class Chart_audio {
   }
 
   set_current_time(v: ms) {
-    v = Math.floor(Math.max(-5000, v))
+    v = Math.floor(utils.clamp(v, -5000, this.length + 3000))
     this.pause()
     this._current_time = v
     this.refs.current_ms.value = v
