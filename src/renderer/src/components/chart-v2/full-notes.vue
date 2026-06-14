@@ -3,7 +3,8 @@ import { computed, ref } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { Storage } from '@renderer/core/storage'
 import { ChartTypeV2 } from '@preload/chart-types'
-import { NoteProps } from '@renderer/core/chart/note-object'
+
+import { NoteProps } from '@renderer/core/misc/note-props'
 
 const shown_parts = computed(() => Storage.data.value.settings.svg_shown_parts)
 

@@ -13,12 +13,12 @@ import { ChartTypeV2 } from '@preload/chart-types'
 import { toRaw } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import { StopClass } from '@renderer/core/misc/eventhub'
-import { NoteProps } from '@renderer/core/chart/note-object'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Skin } from '@renderer/core/misc/skin'
 import getTexture = Skin.getTexture
+import { NoteProps } from '@renderer/core/misc/note-props'
 
 const mul = Storage.computes.mul
 

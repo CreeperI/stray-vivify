@@ -191,7 +191,7 @@ export default class ChartManager {
    * Write backup file with timestamp-based naming (binary .svb format)
    * 写入备份文件，使用时间戳命名（二进制 .svb 格式）
    * @param id - Chart ID
-   * @param data - Chart final data to compress and store
+   * @param chartData - Chart final data to compress and store
    */
   async write_backup(id: string, chartData: ChartTypeV2.final) {
     const chart = this.data.find((v) => v.id === id)

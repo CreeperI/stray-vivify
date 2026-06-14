@@ -8,8 +8,6 @@ import { calc_sr, calc_stats } from '@renderer/core/chart/calc-stat'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
-import { ElementGroup } from '@renderer/core/misc/element-group'
-import { diff_elements } from '@renderer/core/chart/diff-element-groups'
 
 function parse_type(v: string) {
   switch (v) {
@@ -49,7 +47,6 @@ function fix_note(v: ChartTypeV2.note) {
     }
   }
 }
-const fs = parseFloat(getComputedStyle(document.documentElement).fontSize)
 
 export class Chart_diff extends StopClass {
   static all: Chart_diff[] = []
@@ -98,13 +95,6 @@ export class Chart_diff extends StopClass {
   density_data: Ref<number[]>
   density_path: Ref<string>
   density_updating: boolean = false
-  element_groups: {
-    bar_text: ElementGroup<SVGTextElement, [ms, number]>
-    beat_line: ElementGroup<SVGLineElement, [ms, number]>
-    section: ElementGroup<SVGTextElement, [ms, number]>
-    bpm_text: ElementGroup<SVGTextElement, ChartTypeV2.timing>
-    tick: ElementGroup<SVGTextElement, [ms, number]>
-  }
 
   on_operating: boolean
   operating_fns: (() => void)[]
@@ -154,13 +144,6 @@ export class Chart_diff extends StopClass {
     )
     this.density_data = ref([0])
     this.density_path = ref('')
-    this.element_groups = {
-      bar_text: diff_elements.create_bartext(),
-      beat_line: diff_elements.create_beatline(),
-      section: diff_elements.create_section(),
-      bpm_text: diff_elements.create_bpm(),
-      tick: diff_elements.create_tick()
-    }
 
     this.ticks = []
 
@@ -789,45 +772,6 @@ export class Chart_diff extends StopClass {
 
   update() {
     this.fuck_shown(this.chart.audio.current_time)
-  }
-  update_element_groups(lane_width: number, view3: number) {
-    const time = this.chart.audio.current_time
-    const section = Storage.settings.bar_or_section
-    const offset1 = Storage.settings.offset1
-    const mul = Storage.computes.mul.value
-    const bar_offset = (((lane_width - 130) / 130) * 43) / 4
-    if (section) {
-      this.element_groups.section.update(([el, [t, _]]) => {
-        el.setAttribute('y', String(view3 - (t - time - offset1) * mul - 80 - bar_offset))
-      })
-    } else {
-      this.element_groups.bar_text.update(([el, [t, _]]) => {
-        el.setAttribute('y', String(view3 - (t - time - offset1) * mul - 80 - bar_offset))
-      })
-    }
-    const bar_dy = 80 + Storage.settings.sprites.bar_dy + 43 / 2
-    this.element_groups.beat_line.update(([el, [t, _]]) => {
-      el.setAttribute('y1', String(view3 - (t - time - offset1) * mul - bar_dy))
-      el.setAttribute('y2', String(view3 - (t - time - offset1) * mul - bar_dy))
-    })
-    this.element_groups.bpm_text.update(([el, timing]) => {
-      el.setAttribute('y', String(view3 - (timing.time - time - offset1) * mul - 80 - bar_offset))
-    })
-    const dy = view3 - 80 - fs
-    this.element_groups.tick.update(([el, [t, _]]) => {
-      el.setAttribute('y', String(dy - (t - time - offset1) * mul))
-    })
-  }
-  update_element_svg_width(svg_width: number) {
-    this.element_groups.tick.update(([el, _]) => {
-      el.setAttribute('x', svg_width - 25 + 'px')
-    })
-    this.element_groups.beat_line.update(([el, _]) => {
-      el.setAttribute('x2', String(svg_width - 50))
-    })
-  }
-  update_element_meter() {
-    this.element_groups.beat_line.recreate(...this.shown_timing_list.beat_list)
   }
 
   sort_timing() {

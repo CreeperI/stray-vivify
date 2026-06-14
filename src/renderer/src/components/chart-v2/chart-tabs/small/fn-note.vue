@@ -8,7 +8,8 @@ import { utils } from '@renderer/core/utils'
 import SmallRefChoice from '@renderer/components/chart-v2/chart-tabs/small/small-ref-choice.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
-import { NoteProps } from '@renderer/core/chart/note-object'
+
+import { NoteProps } from '@renderer/core/misc/note-props'
 
 const { width, s, hold, b } = Storage.note
 
