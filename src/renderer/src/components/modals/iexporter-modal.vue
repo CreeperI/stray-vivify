@@ -31,23 +31,11 @@ async function read_vsc() {
 
   chart.load_vsc(r2)
 }
-async function read_vsm() {
-  const r1 = await Invoke('ask-file', { file: ['vsm文件', 'vsm'] })
-  if (!r1) return notify.error('读取vsm失败……')
-  const r2 = await Invoke('open-file-utf', { path: r1 })
-  if (!r2) return notify.error('读取vsm失败……')
-  chart.load_vsm(r2)
-}
 
 function write_vsc() {
   const chart = Chart.current
   if (!chart) throw new Error('?????')
   chart.write_current_vsc()
-}
-function write_vsm() {
-  const chart = Chart.current
-  if (!chart) throw new Error('????')
-  chart.write_current_vsm()
 }
 function export_svc() {
   Chart.$current.export_chart('svc')
@@ -72,7 +60,6 @@ function open_svg() {
         <div class="iexports">
           <a-button2 msg="导入vsb" @click="read_vsb" />
           <a-button2 msg="导入vsc" @click="read_vsc" />
-          <a-button2 msg="导入vsm" @click="read_vsm" />
           <a-button2 msg="导入osz" @click="import_osz" />
         </div>
       </Hide>
@@ -82,7 +69,6 @@ function open_svg() {
           <a-button2 msg="导出svc" @click="export_svc" />
           <a-button2 msg="导出zip" @click="export_zip" />
           <a-button2 v-if="chart.diff.notes.length != 0" msg="导出svg" @click="open_svg" />
-          <a-button2 msg="导出vsm" @click="write_vsm" />
         </div>
       </Hide>
       <Hide title="gml">

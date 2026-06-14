@@ -11,7 +11,6 @@ import { modal } from '@renderer/core/misc/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { utils } from '@renderer/core/utils'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
-import { Chart_vsm } from '@renderer/core/chart/vsm'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
@@ -102,7 +101,6 @@ export class Chart extends StopClass {
   audio: Chart_audio
   diff: Chart_diff
   playfield: Chart_playfield | null
-  vsm: Chart_vsm
   // for audio counting only
   length_end: ms
   shown_timing: ComputedRef<[ms, ms]>
@@ -139,7 +137,6 @@ export class Chart extends StopClass {
       }
     })
     this.diff = new Chart_diff(this)
-    this.vsm = new Chart_vsm(this)
     this.id = ''
     this.playfield = null
     this.sprite_err = ref(false)
@@ -168,8 +165,7 @@ export class Chart extends StopClass {
     return {
       song: this.song.save(),
       diffs: this.diffs,
-      version: Storage.version,
-      vsm: this.vsm.data
+      version: Storage.version
     }
   }
 
@@ -206,8 +202,7 @@ export class Chart extends StopClass {
         sprite: '???'
       },
       diffs: [Chart_diff.createDiff()],
-      version: Storage.version,
-      vsm: []
+      version: Storage.version
     }
   }
 
@@ -343,60 +338,6 @@ export class Chart extends StopClass {
     }, 200)
   }
 
-  load_vsm(r: string) {
-    const lines = r.split('\n').map((x) => x.replace('\r', ''))
-    const data = {
-      obj: 'obj_base_gimmick',
-      proxies: 0
-    }
-    const mods: ChartTypeV2.mod[] = []
-    for (const line of lines) {
-      if (!line) continue
-      if (line.startsWith('!')) {
-        const [key, value] = line.slice(1).split(':')
-        data[key] = value
-      }
-      if (line.includes(',')) {
-        const [beat, duration, easing, v1, v2, modname, proxy] = line.split(',')
-        if (beat.includes(':')) {
-          const [startBeat, endBeat, step] = beat.split(':')
-          const startT = this.diff.beat_to_time(parseInt(startBeat))
-          const endT = this.diff.beat_to_time(parseInt(endBeat))
-          const stepT = (60000 / this.diff.bpm_of_time(startT).bpm) * parseInt(step)
-          mods.push({
-            time: startT,
-            duration: parseInt(duration),
-            step: stepT,
-            repeat: Math.floor((endT - startT) / stepT),
-            easing: easing,
-            value1: parseFloat(v1),
-            value2: parseFloat(v2),
-            modname: modname,
-            proxy: parseInt(proxy)
-          })
-        } else {
-          const time = this.diff.beat_to_time(parseInt(beat))
-          mods.push({
-            time,
-            duration: parseInt(duration),
-            easing: easing,
-            value1: parseFloat(v1),
-            value2: parseFloat(v2),
-            modname: modname,
-            proxy: parseInt(proxy),
-            repeat: 0,
-            step: 0
-          })
-        }
-      }
-    }
-    const vsm = Chart_vsm.create_vsm()
-    vsm.obj = data.obj
-    vsm.proxies = parseInt(String(data.proxies))
-    vsm.mods = mods
-    this.vsm.add_vsm(vsm)
-  }
-
   fuck_shown(force = false) {
     this.diff.fuck_shown(this.audio.current_time, force)
   }
@@ -465,17 +406,9 @@ export class Chart extends StopClass {
       r.notes = Chart_diff.validate_notes(r.notes)
       return r
     })
-    if (v.vsm?.length) {
-      this.vsm.data = v.vsm.map((x) => {
-        let r = Chart_vsm.create_vsm()
-        utils.shallow_assign(r, x)
-        return r
-      })
-    }
     // this.diff.set_diff(this.diffs[this.diff_index])
     this.diff.diff_index.value = 0
     this.diff.set_diff(this.diffs[this.diff.diff_index.value])
-    this.vsm.set_vsm(this.vsm.data[this.vsm.vsm_index])
   }
 
   on_update() {
@@ -515,7 +448,6 @@ export class Chart extends StopClass {
     // 创建final结构 - chart-manager将处理压缩
     const final: ChartTypeV2.final = {
       song: this.song.save(),
-      vsm: this.vsm.data,
       version: Storage.version,
       diffs: this.diffs
     }
@@ -555,13 +487,11 @@ export class Chart extends StopClass {
 
     try {
       this.song.refs.value = { ...restoredData.song }
-      this.vsm.data = restoredData.vsm
       this.diffs = restoredData.diffs
 
       // Update current diff
       // 更新当前 diff
       this.diff.set_diff(this.diffs[this.diff.diff_index.value])
-      this.vsm.set_vsm(this.vsm.data[this.vsm.vsm_index])
 
       // Refresh display
       // 刷新显示
@@ -581,14 +511,6 @@ export class Chart extends StopClass {
       fname: this.diff.diff1
     }).then(() => notify.success('已导出为vsc!!!!!!!'))
   }
-  write_current_vsm(name?: string) {
-    Invoke('write-file', {
-      id: this.id,
-      fname: `${name ?? this.vsm.vsm.name}.vsm`,
-      data: Chart_vsm.to_vsm(this, this.vsm.vsm).join('\n')
-    }).then(() => notify.success('已导出为vsm!!!!!!!'))
-  }
-
   async export_chart(ext: 'svc' | 'zip') {
     const r = this.save()
     if (!r) return

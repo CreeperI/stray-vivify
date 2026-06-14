@@ -20,8 +20,6 @@ import ShortcutModalHeader from '@renderer/components/modals/shortcut-modal-head
         <shortcut-modal-single :short="ShortCuts.$fun('mine')" msg="地雷" />
         <shortcut-modal-single :short="ShortCuts.$fun('s')" msg="s" />
         <shortcut-modal-single :short="ShortCuts.$fun('hold')" msg="面" />
-        <shortcut-modal-single :short="ShortCuts.$fun('mod-single')" msg="Mod:单" />
-        <shortcut-modal-single :short="ShortCuts.$fun('mod-repeat')" msg="Mod:重复" />
 
         <shortcut-modal-header msg="CTRL家族" />
         <shortcut-modal-single :short="ShortCuts.$fun('undo')" msg="撤销" />

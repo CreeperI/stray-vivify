@@ -236,7 +236,6 @@ export default class ChartManager {
     const header = {
       version: chartData.version,
       song: chartData.song,
-      vsm: chartData.vsm,
       diffCount: chartData.diffs.length
     }
     const headerBuffer = Buffer.from(JSON.stringify(header))
@@ -343,7 +342,6 @@ export default class ChartManager {
       const header = JSON.parse(headerJson) as {
         version: number
         song: ChartTypeV2.song
-        vsm: ChartTypeV2.vsm[]
         diffCount: number
       }
 
@@ -366,7 +364,6 @@ export default class ChartManager {
       return {
         version: header.version,
         song: header.song,
-        vsm: header.vsm,
         diffs
       }
     } catch (error) {
@@ -480,15 +477,6 @@ export default class ChartManager {
         sprite: '',
         ref: ''
       },
-      vsm: [
-        {
-          obj: 'obj_base_gimmick',
-          proxies: 0,
-          mods: [],
-          mpfs: [],
-          name: '#DEFAULT'
-        }
-      ],
       version: -1
     }
     this.add_chart(

@@ -7,7 +7,6 @@ import Preview from '@renderer/components/chart-v2/preview.vue'
 import Playfield from '@renderer/components/chart-v2/playfield.vue'
 import { onUnmounted } from 'vue'
 import ChartMain from '@renderer/components/chart-v2/chart-tabs/chart-main.vue'
-import ChartVsm from '@renderer/components/chart-v2/chart-tabs/chart-vsm.vue'
 import { EventHub } from '@renderer/core/misc/eventhub'
 import { ModalTarget } from '@kolirt/vue-modal'
 import { Chart } from '@renderer/core/chart/chart'
@@ -20,7 +19,7 @@ function on_keydown(e: KeyboardEvent) {
   if (e.altKey || e.ctrlKey) return
   e.preventDefault()
   active.value += 1
-  if (active.value > 4) active.value = 1
+  if (active.value > 3) active.value = 1
 }
 
 document.addEventListener('keydown', on_keydown)
@@ -58,7 +57,6 @@ const chart_state = GlobalStat.chart_state
       <song-info v-if="active == 1" />
       <chart-main v-if="active == 2" />
       <chart-timing v-if="active == 3" />
-      <chart-vsm v-if="active == 4" />
       <ModalTarget />
     </template>
     <preview v-if="chart_state == 1" />

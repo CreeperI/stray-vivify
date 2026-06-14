@@ -125,37 +125,15 @@ export namespace ChartTypeV2 {
     diff2: string
     diff_name: string
   }
-  export type mod = {
-    time: number
-    // repeat-count
-    repeat: number
-    // time between two starts
-    step: number
-    duration: number
-    easing: string
-    value1: number
-    value2: number
-    modname: string
-    proxy: number
-  }
-
   export type mpf = {
     time: number
     end: number
     func: string
   }
-  export type vsm = {
-    obj: string
-    proxies: number
-    mpfs: mpf[]
-    mods: mod[]
-    name: string
-  }
 
   export type final = {
     diffs: diff[]
     song: song
-    vsm: vsm[]
     version: number
   }
 

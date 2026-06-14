@@ -39,8 +39,6 @@ const functions = [
   's',
   'mine',
   'hold',
-  'mod-single',
-  'mod-repeat',
 ] as const
 
 type SC_save = {
@@ -302,8 +300,5 @@ new ShortCuts(
 )
 
 new ShortCuts('refresh', 'r', () => RefreshAll.refreshAll(), false, true)
-
-new ShortCuts('mod-repeat', 'w', () => Chart.current?.vsm.enable_repeat())
-new ShortCuts("mod-single", 'q', () => Chart.current?.vsm.disable_repeat())
 
 new ShortCuts("error", "F3", () => { throw new Error("Thrown by shortcut call")})
