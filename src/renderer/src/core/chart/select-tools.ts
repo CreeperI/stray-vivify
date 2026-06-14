@@ -24,7 +24,7 @@ function mirror(notes: ChartTypeV2.note[]) {
   notes.forEach((note) => {
     note.lane = maxLane - note.lane - note.width
   })
-  Chart.current?.fuck_shown(true)
+  Chart.current?.diff.force_fuck()
 }
 
 function timeMultiplier(notes: ChartTypeV2.note[], multiplier: number, baseOnZero: boolean) {
@@ -39,5 +39,5 @@ function timeMultiplier(notes: ChartTypeV2.note[], multiplier: number, baseOnZer
       note.len = Math.round(note.len * multiplier)
     }
   })
-  Chart.current?.fuck_shown(true)
+  Chart.current?.diff.force_fuck()
 }

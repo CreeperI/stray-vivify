@@ -338,9 +338,6 @@ export class Chart extends StopClass {
     }, 200)
   }
 
-  fuck_shown(force = false) {
-    this.diff.fuck_shown(this.audio.current_time, force)
-  }
 
   set_path(p: string) {
     this.path = p
@@ -382,14 +379,14 @@ export class Chart extends StopClass {
         msg: '这是最后一张谱面了。这样做会清空已有的note哦。要继续吗？<br>timing将会保留。'
       }).then(() => {
         this.diff.notes = []
-        this.fuck_shown(true)
+        this.diff.force_fuck()
       })
     else
       modal.ConfirmModal.show({ msg: '确定要删除这个diff吗……不能撤回哦。' }).then(() => {
         this.diffs.splice(this.diff.diff_index.value, 1)
         this.diff.diff_index.value = 0
         this.diff.update_on_diff_index()
-        this.fuck_shown(true)
+        this.diff.force_fuck()
         RefreshAll.refresh('diff-choice')
       })
   }
@@ -496,7 +493,7 @@ export class Chart extends StopClass {
 
       // Refresh display
       // 刷新显示
-      this.fuck_shown(true)
+      this.diff.force_fuck()
       GlobalStat.update_all_chart()
 
       notify.success(`已从备份 ${backup_name} 恢复`)
