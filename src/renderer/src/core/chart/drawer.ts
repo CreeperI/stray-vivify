@@ -18,8 +18,7 @@ import { Chart_diff } from '@renderer/core/chart/diff'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Skin } from '@renderer/core/misc/skin'
-
-const getTexture = Skin.getTexture
+import getTexture = Skin.getTexture
 
 const mul = Storage.computes.mul
 
@@ -92,6 +91,35 @@ export class DrawerExtension<T extends Sprite | Text | Graphics, createFrom> ext
   }
 }
 
+export namespace NoteDrawer {
+  export function createNote(this: DiffDrawer, note: ChartTypeV2.note) {
+    const texture = getTexture(NoteProps.base_src(note, 4))
+    if (!texture) return null
+    const sprite = new Sprite({
+      texture,
+      label: `${note.time}:${note.lane}`
+    })
+    sprite.x = this.x_of(note.lane)
+    sprite.y = 0
+    sprite.width = Storage.settings.lane_width * note.width
+    sprite.zIndex = 4 - note.width
+    return sprite
+  }
+  export function createLn(this: DiffDrawer, note: ChartTypeV2.note) {
+    if ('snm' in note) return null
+    const border_texture = getTexture(NoteProps.base_border_src(note, 4))
+    if (!border_texture) return null
+    const border = new Sprite({
+      texture: border_texture,
+      label: String(note.time)
+    })
+    border.x = this.x_of(note.lane)
+    border.height = note.len * mul.value - 0.5 * Skin.BaseHeight
+    border.y = this.get_y_ln(note.time, this.chart.audio.current_time, mul.value, note.len)
+    return border
+  }
+}
+
 export class DiffDrawer extends StopClass {
   diff: Chart_diff
   chart: Chart
@@ -109,6 +137,8 @@ export class DiffDrawer extends StopClass {
     bpm_text: DrawerExtension<Text, ChartTypeV2.timing>
     tick: DrawerExtension<Text, [number, number]>
   }
+  max_lane: number
+
   constructor(
     diff: Chart_diff,
     sizing: { lane_width: number; total_width: number; x_expand: number }
@@ -117,25 +147,16 @@ export class DiffDrawer extends StopClass {
     this.diff = diff
     this.chart = diff.chart
     this.app = new Application()
-    const max_lane = diff.max_lane.value
     const to_note = diff.to_note
     this.sizing = sizing
+    this.max_lane = diff.max_lane.value
 
     /* drawer inits */
     {
       const note_drawer = new DrawerExtension(
         (i: number) => {
           const note = to_note(i)
-          const texture = getTexture(NoteProps.base_src(note, 4))
-          const sprite = new Sprite({
-            texture,
-            label: `${note.time}:${note.lane}`
-          })
-          sprite.x = this.x_of(note.lane)
-          sprite.y = 0
-          sprite.width = Storage.settings.lane_width * note.width
-          sprite.zIndex = 4 - note.width
-          return sprite
+          return NoteDrawer.createNote.apply(this, [note])
         },
         { label: 'note', zIndex: 10 }
       )
@@ -143,15 +164,7 @@ export class DiffDrawer extends StopClass {
       const ln_drawer = new DrawerExtension(
         (i: number) => {
           const note = to_note(i)
-          if ('snm' in note) return null
-          const border_texture = getTexture(NoteProps.base_border_src(note, 4))
-          const border = new Sprite({
-            texture: border_texture,
-            label: String(note.time)
-          })
-          border.x = this.x_of(note.lane)
-          border.height = note.len * mul.value - 0.5 * Skin.BaseHeight
-          return border
+          return NoteDrawer.createLn.apply(this, [note])
         },
         { label: 'ln', zIndex: 9, cullable: false }
       )
@@ -218,7 +231,7 @@ export class DiffDrawer extends StopClass {
           if (tick < 2) return null
           const t = new Text({ text: `.${tick}`, alpha: 0.7, style: _tick_text_style })
           t.anchor = { x: 0, y: 0.5 }
-          t.x = 50 + max_lane * this.sizing.lane_width + 15
+          t.x = 50 + this.max_lane * this.sizing.lane_width + 15
           return t
         },
         { label: 'tick' }
@@ -233,22 +246,7 @@ export class DiffDrawer extends StopClass {
       }
     }
     /* decoration line */
-    {
-      const decoration = new Container({ label: 'decorations', zIndex: 999 })
-      decoration.addChild(
-        new Graphics().rect(50, SCREEN_HEIGHT - 80, this.sizing.total_width - 100, 80).fill('gray')
-      )
-
-      decoration.addChild(new Graphics().rect(44, 0, 6, SCREEN_HEIGHT).fill('white'))
-      decoration.addChild(
-        new Graphics().rect(this.sizing.total_width - 50, 0, 6, SCREEN_HEIGHT).fill('white')
-      )
-
-      decoration.addChild(
-        new Graphics().rect(50, SCREEN_HEIGHT - 80, this.sizing.total_width - 100, 6).fill('white')
-      )
-      this.app.stage.addChild(decoration)
-    }
+    this.create_decoration()
     this.app.stage.addChild(
       this.drawers.beat.container,
       this.drawers.ln.container,
@@ -263,21 +261,46 @@ export class DiffDrawer extends StopClass {
       this.ln_reheight()
       this.update()
     })
-    this.add_on('fuck-shown', () => this.recreate())
+    // here as diff_index will trigger shown
+    this.add_on('fuck-shown', () => {
+      this.try_resize()
+      this.recreate()
+    })
     this.add_on('meter-changed', () => {
       this.drawers.beat.recreate(...this.diff.shown_timing_list.beat_list)
       this.update()
     })
   }
+
+  create_decoration() {
+    const decoration = new Container({ label: 'decorations', zIndex: 999 })
+    decoration.addChild(
+      new Graphics().rect(50, SCREEN_HEIGHT - 80, this.sizing.total_width - 100, 80).fill('gray')
+    )
+
+    decoration.addChild(new Graphics().rect(44, 0, 6, SCREEN_HEIGHT).fill('white'))
+    decoration.addChild(
+      new Graphics().rect(this.sizing.total_width - 50, 0, 6, SCREEN_HEIGHT).fill('white')
+    )
+
+    decoration.addChild(
+      new Graphics().rect(50, SCREEN_HEIGHT - 80, this.sizing.total_width - 100, 6).fill('white')
+    )
+    this.app.stage.addChild(decoration)
+  }
+
   get_y(t: number, c: number, m: number) {
     return SCREEN_HEIGHT - (t - c - Storage.settings.offset1) * m - 80 - Skin.BaseHeight
   }
+
   get_height_ln(len: number, m: number) {
     return len * m - 0.5 * Skin.BaseHeight
   }
+
   get_y_ln(t: number, c: number, m: number, len: number) {
     return this.get_y(t, c, m) - this.get_height_ln(len, m)
   }
+
   get_y_line(t: number, c: number, m: number) {
     return (
       SCREEN_HEIGHT -
@@ -287,6 +310,7 @@ export class DiffDrawer extends StopClass {
       Skin.BaseHeight
     )
   }
+
   update() {
     const time = this.chart.audio.current_time
     const m = mul.value
@@ -312,6 +336,7 @@ export class DiffDrawer extends StopClass {
       t.y = this.get_y_line(ms, time, m)
     })
   }
+
   recreate() {
     this.drawers.notes.recreate(...toRaw(this.diff.shown.value))
     this.drawers.ln.recreate(...toRaw(this.diff.shown.value))
@@ -323,6 +348,7 @@ export class DiffDrawer extends StopClass {
     this.drawers.bpm_text.recreate(...this.diff.shown_timing)
     this.drawers.tick.recreate(...this.diff.shown_timing_list.ticks)
   }
+
   ln_reheight() {
     const to_note = this.diff.to_note
     this.drawers.ln.update((g, i) => {
@@ -330,23 +356,46 @@ export class DiffDrawer extends StopClass {
       g.height = note.len * mul.value
     })
   }
+
   x_of(lane: number) {
     return lane * this.sizing.lane_width + 50
   }
+
   init(options: Partial<ApplicationOptions>) {
     this.setculling()
     return this.app.init({ ...options, height: SCREEN_HEIGHT })
   }
+
   setculling() {
     this.app.stage.cullable = true
     this.app.stage.cullArea = new Rectangle(0, 0, this.sizing.total_width, SCREEN_HEIGHT)
   }
+
   event_time(eY: number) {
-    const t= (
+    const t =
       (SCREEN_HEIGHT - eY - 0.5 * Skin.height(this.sizing.lane_width) - 80) / mul.value +
       this.chart.audio.current_time
-    )
     if (GlobalStat.func_keys.value.alt) return t
     else return this.diff.nearest(t, true)
+  }
+
+  resize() {
+    const ml = this.diff.max_lane.value
+    this.sizing.total_width = this.sizing.x_expand + ml * this.sizing.lane_width + 100
+    this.app.renderer.resize(this.sizing.total_width, SCREEN_HEIGHT)
+    const old = this.app.stage.getChildByLabel('decorations')
+    if (old) this.app.stage.removeChild(old)
+    if (this.app.canvas)
+      if (this.app.canvas.parentElement)
+        this.app.canvas.parentElement.style.width = `${this.sizing.total_width}px`
+    this.create_decoration()
+    this.setculling()
+  }
+
+  try_resize() {
+    if (this.diff.max_lane.value != this.max_lane) {
+      this.max_lane = this.diff.max_lane.value
+      this.resize()
+    }
   }
 }

@@ -1,8 +1,7 @@
 import { Chart } from '@renderer/core/chart/chart'
-import { NoteProps } from '@renderer/core/chart/note-object'
 import { BlurFilter, Graphics, Sprite } from 'pixi.js'
 import { Storage } from '@renderer/core/storage'
-import { DiffDrawer, DrawerExtension } from '@renderer/core/chart/drawer'
+import { DiffDrawer, DrawerExtension, NoteDrawer } from '@renderer/core/chart/drawer'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { toRaw } from 'vue'
@@ -11,8 +10,6 @@ import { utils } from '@renderer/core/utils'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Skin } from '@renderer/core/misc/skin'
 import NoteClipboard = GlobalStat.NoteClipboard
-
-const getTexture = Skin.getTexture
 
 const { clipboard, selected } = GlobalStat.NoteClipboard
 const mul = Storage.computes.mul
@@ -56,36 +53,13 @@ class Pending {
     this.dragging = false
     const pending_note_drawer = new DrawerExtension(
       (note: ChartTypeV2.note) => {
-        const texture = getTexture(NoteProps.base_src(note, 4))
-        const sprite = new Sprite({
-          texture,
-          label: `${note.time}:${note.lane}`
-        })
-        sprite.x = this.diff_drawer.x_of(note.lane)
-        sprite.y = this.diff_drawer.get_y(note.time, chart.audio.current_time, mul.value)
-        sprite.width = Storage.settings.lane_width * note.width
-        sprite.zIndex = 4 - note.width
-        return sprite
+        return NoteDrawer.createNote.apply(this.diff_drawer, [note])
       },
       { label: 'pending_note', zIndex: 11, alpha: 0.7 }
     )
     const pending_ln_drawer = new DrawerExtension(
       (note: ChartTypeV2.note) => {
-        if ('snm' in note) return null
-        const border_texture = getTexture(NoteProps.base_border_src(note, 4))
-        const border = new Sprite({
-          texture: border_texture,
-          label: String(note.time)
-        })
-        border.x = this.diff_drawer.x_of(note.lane)
-        border.height = note.len * mul.value - 0.5 * Skin.BaseHeight
-        border.y = this.diff_drawer.get_y_ln(
-          note.time,
-          chart.audio.current_time,
-          mul.value,
-          note.len
-        )
-        return border
+        return NoteDrawer.createLn.apply(this.diff_drawer, [note])
       },
       { label: 'pending_ln', zIndex: 10, alpha: 0.7 }
     )
@@ -570,7 +544,7 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     })
     sprite.on('rightclick', () => del_note(i))
     sprite.on('mousemove', () => {
-      // show at pixi-editor
+      // show() at pixi-editor.vue
       if (pending.pre_drag) shadow.drawer.remove()
       pending.drag_start(i)
     })
@@ -582,18 +556,9 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
   const note_drawer = new DrawerExtension(
     (i: number) => {
       const note = to_note(i)
-      const texture = getTexture(NoteProps.base_src(note, 4))
-      const sprite = new Sprite({
-        texture,
-        label: `${note.time}:${note.lane}`
-      })
-      sprite.x = this.x_of(note.lane)
-      sprite.y = 0
-      sprite.width = Storage.settings.lane_width * note.width
-      sprite.zIndex = 4 - note.width
-
+      const sprite = NoteDrawer.createNote.apply(this, [note])
+      if (!sprite) return null
       _handle(sprite, i)
-
       return sprite
     },
     { label: 'editor-note', zIndex: 10 }
@@ -601,14 +566,8 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
   const ln_drawer = new DrawerExtension(
     (i: number) => {
       const note = to_note(i)
-      if ('snm' in note) return null
-      const border_texture = getTexture(NoteProps.base_border_src(note, 4))
-      const border = new Sprite({
-        texture: border_texture,
-        label: String(note.time)
-      })
-      border.x = this.x_of(note.lane)
-      border.height = note.len * mul.value - 0.5 * Skin.BaseHeight
+      const border = NoteDrawer.createLn.apply(this, [note])
+      if (!border) return null
       _handle(border, i)
       border.eventMode = 'static'
       return border
