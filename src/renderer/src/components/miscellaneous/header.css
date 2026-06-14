@@ -12,6 +12,7 @@
   z-index: var(--z-header);
   height: 2rem;
 }
+
 .header-wrapper > div {
   user-select: none;
 }
@@ -82,18 +83,22 @@
   left: 0;
   width: max-content;
   padding: 5px 10px;
+  min-width: 100%;
 }
 
 .h-menu-btn-i > .h-menu-btn-text {
   transition: background-color 0.2s linear;
   font-size: 0.95rem;
   padding: 0 3px;
-  width: 100%;
+  min-width: 100%;
   margin: 0;
+  text-align: left;
 }
+
 .h-menu-btn-i > .h-menu-btn-text:hover {
   background: #303156;
 }
+
 .h-menu-btn-i > .h-menu-btn-i-sep {
   border-top: 1px solid #b8dcee;
   border-radius: 0 0 5px 5px;
@@ -132,6 +137,7 @@
   background-color: #ff1145;
   color: #0d1418;
 }
+
 .header-active {
   background-color: #3c3e6e;
 }

@@ -88,6 +88,7 @@ const pkey = RefreshAll.generate_key('song-cover')
       <song-info-single v-model="chart.diff.diff1" name="难度" />
       <song-info-single v-model="chart.diff.diff2" name="等级" />
       <song-info-single v-model="chart.diff.charter" name="谱师" />
+      <song-info-single v-model.number="chart.diff.rating_string" name="定数" />
     </div>
   </div>
 </template>

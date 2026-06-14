@@ -220,6 +220,18 @@ export class Chart_diff extends StopClass {
     this.chart.set_header_name()
     RefreshAll.refresh('diff-choice')
   }
+  get rating() {
+    return this.diff.meta.rating
+  }
+  set rating(v) {
+    this.diff.meta.rating = v
+  }
+  get rating_string() {
+    return this.rating.toString()
+  }
+  set rating_string(v: string) {
+    this.rating = parseFloat(v)
+  }
 
   get charter() {
     return this.diff.meta.charter
@@ -282,7 +294,8 @@ export class Chart_diff extends StopClass {
         diff_name: '',
         diff1: ['Finale', 'Encore', 'Backstage', 'Terminal'][Math.floor(Math.random() * 4)],
         diff2: Math.floor(Math.random() * 20) + '+',
-        charter: Storage.data.value.username ?? '???'
+        charter: Storage.data.value.username ?? '???',
+        rating: 1.31
       }
     }
   }

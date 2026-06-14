@@ -260,7 +260,8 @@ function convertToDiff(beatmap: OsuBeatmap, isMania: boolean): ChartTypeV2.diff 
       charter: (beatmap.metadata.Creator as string) || '',
       diff1: (beatmap.metadata.Version as string) || '',
       diff2: keyCount.toString(), // Store key count in diff2
-      diff_name: (beatmap.metadata.Version as string) || ''
+      diff_name: (beatmap.metadata.Version as string) || '',
+      rating: 0
     }
   }
 

@@ -123,6 +123,7 @@ export namespace ChartTypeV2 {
     charter: string
     diff1: string
     diff2: string
+    rating: number
     diff_name: string
   }
   export type mpf = {

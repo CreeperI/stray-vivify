@@ -2,25 +2,29 @@
 import { modal } from '@renderer/core/misc/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
-import "./header.css"
+import './header.css'
 
 const ipcRenderer = window.electron.ipcRenderer
 
 const isMax = GlobalStat.window_max_state
 async function import_svc() {
-  const fp = await Invoke("ask-file", {file: ["Chart", "zip", "svc"]})
+  const fp = await Invoke('ask-file', { file: ['Chart', 'zip', 'svc'] })
   if (!fp) return
-  const id = await modal.AskIdModal.show({all: GlobalStat.all_chart.map(x => x.id)}) as undefined | string
+  const id = (await modal.AskIdModal.show({ all: GlobalStat.all_chart.map((x) => x.id) })) as
+    | undefined
+    | string
   if (!id) return
-  await Invoke("import-zip", {fp: fp, id: id})
+  await Invoke('import-zip', { fp: fp, id: id })
   await GlobalStat.update_all_chart()
 }
 async function import_osz() {
-  const fp = await Invoke("ask-file", {file: ["OSZ", "osz"]})
+  const fp = await Invoke('ask-file', { file: ['OSZ', 'osz'] })
   if (!fp) return
-  const id = await modal.AskIdModal.show({all: GlobalStat.all_chart.map(x => x.id)}) as undefined | string
+  const id = (await modal.AskIdModal.show({ all: GlobalStat.all_chart.map((x) => x.id) })) as
+    | undefined
+    | string
   if (!id) return
-  await Invoke("import-osz", {fp: fp, id: id})
+  await Invoke('import-osz', { fp: fp, id: id })
   await GlobalStat.update_all_chart()
 }
 </script>
@@ -48,3 +52,10 @@ async function import_osz() {
     </div>
   </div>
 </template>
+
+<style scoped>
+.h-menu-btn-i > .h-menu-btn-text {
+  font-size: 1rem;
+  text-align: center;
+}
+</style>
