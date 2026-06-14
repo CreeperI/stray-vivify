@@ -9,7 +9,7 @@ import { notify } from '@renderer/core/misc/notify'
 import { utils } from '@renderer/core/utils'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Skin } from '@renderer/core/misc/skin'
-import NoteClipboard = GlobalStat.NoteClipboard
+import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
 
 const mul = Storage.computes.mul
 const pointer_last = {
@@ -141,7 +141,7 @@ class Pending {
         }
       })
     }
-    if (GlobalStat.NoteClipboard.clipboard.value.length) {
+    if (NoteClipboard.clipboard.value.length) {
       return NoteClipboard.clipboard.value.map((x) => {
         const _note = to_note(x)
         return {
@@ -207,7 +207,7 @@ class Pending {
     if (GlobalStat.chart_state.value != 0) return
     if (NoteClipboard.clipboard.value.length) {
       this.diff.add_notes_with_undo(this.pending_note)
-      GlobalStat.NoteClipboard.clear()
+      NoteClipboard.clear()
       return
     }
     if (Storage.note.w == 0) {
@@ -437,10 +437,11 @@ class Select {
   on_mousedown(e: MouseEvent) {
     if (this.selecting) return
     if (Storage.note.w != 0) return
+    console.log('md')
     this.selecting = true
     this.rect.visible = true
     this.base_x = e.offsetX
-    this.start_time = this.drawer.event_time(e.offsetY)
+    this.start_time = this.drawer.mouse_time(e.offsetY)
     document.addEventListener('mouseup', () => this.on_mouseup(pointer_last.x), {
       once: true
     })
@@ -497,7 +498,7 @@ class Select {
   }
   cleanup() {
     this.selecting = false
-    // this.rect.visible = false
+    this.rect.visible = false
     this.base_x = 0
     this.start_time = 0
     this.rect.clear()
@@ -591,7 +592,10 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     if (!chart.audio.paused) return
     const mouse_time = __drawer.event_time(e.offsetY)
     if (!pending.dragging) {
-      if (select.selecting) return select.update(e.offsetX, mouse_time)
+      if (select.selecting) {
+        console.log('selecting-')
+        return select.update(e.offsetX, __drawer.mouse_time(e.offsetY))
+      }
     }
     if (pending.hold_fixed) {
       pending.len = Math.abs(mouse_time - pending.hold_fixed_time)

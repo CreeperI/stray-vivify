@@ -6,6 +6,7 @@ import { modal } from '@renderer/core/misc/modal'
 import { notify } from '@renderer/core/misc/notify'
 import { Invoke } from '@renderer/core/ipc'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
+import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
 
 const functions = [
   'redo',
@@ -242,7 +243,7 @@ new ShortCuts(
   'copy',
   'c',
   () => {
-    GlobalStat.NoteClipboard.copy()
+    NoteClipboard.copy()
   },
   false,
   true
@@ -251,7 +252,7 @@ new ShortCuts(
   'paste',
   'v',
   () => {
-    GlobalStat.NoteClipboard.paste()
+    NoteClipboard.paste()
   },
   false,
   true
@@ -260,7 +261,7 @@ new ShortCuts(
   'cut',
   'x',
   () => {
-    GlobalStat.NoteClipboard.cut()
+    NoteClipboard.cut()
   },
   false,
   true

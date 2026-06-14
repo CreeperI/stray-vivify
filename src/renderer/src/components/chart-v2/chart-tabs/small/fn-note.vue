@@ -9,6 +9,7 @@ import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import SmallRefChoice from '@renderer/components/chart-v2/chart-tabs/small/small-ref-choice.vue'
 import { Chart } from '@renderer/core/chart/chart'
+import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
 
 const { width, s, hold, b } = Storage.note
 
@@ -31,7 +32,7 @@ const pending_note = computed(() => {
     }
   }
 }) as ComputedRef<ChartTypeV2.note>
-const select = GlobalStat.NoteClipboard.selected
+const select = NoteClipboard.selected
 const select_max = computed(() => Math.max(...select.map((x) => to_note(x).time)))
 const select_min = computed(() => Math.min(...select.map((x) => to_note(x).time)))
 const select_ln = computed(() => select.filter((x) => 'len' in to_note(x)).length)

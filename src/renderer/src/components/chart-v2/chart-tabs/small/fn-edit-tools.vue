@@ -4,8 +4,9 @@ import { EditorTools } from '@renderer/core/chart/select-tools'
 import { ref } from 'vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
+import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
 
-const selectedNID = GlobalStat.NoteClipboard.selected
+const selectedNID = NoteClipboard.selected
 const toolMultiArgs = ref({
   multiVal: 1,
   baseZero: false

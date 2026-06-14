@@ -3,7 +3,6 @@ import { charts_data } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
 import { Version } from '@renderer/core/storage'
-import { ChartTypeV2 } from '@preload/chart-types'
 
 export namespace GlobalStat {
   type routes = 'start' | 'wait' | 'editor'
@@ -41,19 +40,6 @@ export namespace GlobalStat {
   export const chart_state = ref(0) as Ref<0 | 1 | 2>
   export function set_state(v: 0 | 1 | 2) {
     chart_state.value = v
-  }
-
-  export const NoteClipboard = {
-    selected: [] as ChartTypeV2.note[],
-    clipboard: ref<ChartTypeV2.note[]>([]),
-    clear() {
-      this.clipboard.value = []
-      this.selected = []
-    },
-
-    copy: () => {},
-    cut: () => {},
-    paste: () => {}
   }
 
   export let is_dev = false

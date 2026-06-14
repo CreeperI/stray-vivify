@@ -371,10 +371,14 @@ export class DiffDrawer extends StopClass {
     this.app.stage.cullArea = new Rectangle(0, 0, this.sizing.total_width, SCREEN_HEIGHT)
   }
 
-  event_time(eY: number) {
-    const t =
-      (SCREEN_HEIGHT - eY - 0.5 * Skin.height(this.sizing.lane_width) - 80) / mul.value +
+  mouse_time(eY) {
+    return       (SCREEN_HEIGHT - eY - 0.5 * Skin.height(this.sizing.lane_width) - 80) / mul.value +
       this.chart.audio.current_time
+
+  }
+
+  event_time(eY: number) {
+    const t = this.mouse_time(eY)
     if (GlobalStat.func_keys.value.alt) return t
     else return this.diff.nearest(t, true)
   }
