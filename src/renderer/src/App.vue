@@ -13,6 +13,7 @@ import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { computed } from 'vue'
 import { Preinit } from '@renderer/core/misc/preinit'
 import PreInitPage from '@renderer/components/miscellaneous/pre-init-page.vue'
+import HeaderV2 from '@renderer/components/miscellaneous/header-v2.vue'
 
 const state = GlobalStat.route.route
 // @ts-ignore i just dont understand why this sucks
@@ -23,12 +24,14 @@ const show_version = computed(() => {
   if (Storage.settings.always_version) return true
   else return state.value != 'editor'
 })
+const active = GlobalStat.refs.chart_tab
 </script>
 
 <template>
   <template v-if="Initialized">
     <Header v-if="state != 'editor'" />
     <ChartList v-if="state == 'start'" />
+    <HeaderV2 v-if="state == 'editor'" v-model="active" />
     <ChartV2 v-if="state == 'editor'" />
     <ModalTarget v-if="state != 'editor'" />
     <a-button

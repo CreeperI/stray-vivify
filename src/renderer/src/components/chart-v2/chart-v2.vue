@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import HeaderV2 from '@renderer/components/chart-v2/header-v2.vue'
 import SongInfo from '@renderer/components/chart-v2/chart-tabs/song-info.vue'
 import { Storage } from '@renderer/core/storage'
 import ChartTiming from '@renderer/components/chart-v2/chart-tabs/chart-timing.vue'
@@ -18,6 +17,7 @@ active.value = 2
 
 function on_keydown(e: KeyboardEvent) {
   if (e.key != 'Tab') return
+  if (e.altKey || e.ctrlKey) return
   e.preventDefault()
   active.value += 1
   if (active.value > 4) active.value = 1
@@ -55,7 +55,6 @@ const chart_state = GlobalStat.chart_state
 <template>
   <div :data-cs="chart_state" class="chart-v2-wrapper" @wheel="fuck_wheel">
     <template v-if="chart_state == 0">
-      <header-v2 v-model="active" />
       <song-info v-if="active == 1" />
       <chart-main v-if="active == 2" />
       <chart-timing v-if="active == 3" />
