@@ -1,4 +1,4 @@
-import { inject, Ref, ref } from 'vue'
+import { Ref, ref } from 'vue'
 import { charts_data } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
@@ -24,10 +24,6 @@ export namespace GlobalStat {
       console.log(JSON.stringify(arg))
     }
   }
-  export const window_size = {
-    height: screen.availHeight,
-    width: screen.availWidth
-  }
   export const refs = {
     chart_tab: ref(2),
     header_display: ref(''),
@@ -38,43 +34,13 @@ export namespace GlobalStat {
   }
   // 0 - charting 1 - recording 2 - playing
   export const chart_state = ref(0) as Ref<0 | 1 | 2>
-  export function set_state(v: 0 | 1 | 2) {
-    chart_state.value = v
-  }
+
 
   export let is_dev = false
   export async function check_dev() {
     is_dev = await Invoke('is-dev')
     if (is_dev) Version.str += '-dev'
     return is_dev
-  }
-
-  export const SvgSizing = {
-    max_lane: 4,
-    lane_width: 130,
-    svg_width: 520,
-    bar_length: 500,
-    view_port: [0, 0, 520, window.screen.height],
-    taskBarHeight: screen.height - screen.availHeight
-  }
-  export function useSvgSizing() {
-    const lane_width = inject<number>('lane_width', 130)
-    const max_lane = SvgSizing.max_lane
-    const svg_width = max_lane * lane_width + 2 * 50 + 12
-    const bar_length = max_lane * lane_width + 12
-    const view_port = [0, 0, svg_width, window.screen.height]
-    return {
-      // literally
-      lane_width,
-      // full width of svg
-      svg_width,
-      // the noteboard, ie lanes and LR borders
-      bar_length,
-      // viewPort="114514"
-      view_port,
-      taskBarHeight: screen.height - screen.availHeight,
-      max_lane: SvgSizing.max_lane
-    }
   }
 
   export async function close_app() {

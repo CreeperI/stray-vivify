@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { GlobalStat } from '@renderer/core/globalStat'
 import { EditorTools } from '@renderer/core/chart/select-tools'
 import { ref } from 'vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'

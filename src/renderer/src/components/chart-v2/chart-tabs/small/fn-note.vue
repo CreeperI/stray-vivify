@@ -1,15 +1,14 @@
 <script lang="ts" setup>
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
-import NoteV2 from '@renderer/components/chart-v2/note-v2.vue'
 import SmallDiffChoice from '@renderer/components/chart-v2/chart-tabs/small/small-diff-choice.vue'
 import { computed, ComputedRef } from 'vue'
 import { ChartTypeV2 } from '@preload/chart-types'
-import { GlobalStat } from '@renderer/core/globalStat'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import SmallRefChoice from '@renderer/components/chart-v2/chart-tabs/small/small-ref-choice.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
+import { NoteProps } from '@renderer/core/chart/note-object'
 
 const { width, s, hold, b } = Storage.note
 
@@ -110,7 +109,11 @@ const select_chip = computed(() => select.length - select_ln.value)
       </div>
     </div>
     <div class="note-pending">
-      <note-v2 :note="pending_note" style="position: static" />
+      <img
+        :alt="NoteProps.base_src(pending_note)"
+        :src="NoteProps.getSrc(pending_note)"
+        style="position: static"
+      />
     </div>
   </div>
 </template>

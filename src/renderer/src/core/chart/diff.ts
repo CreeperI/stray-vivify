@@ -8,7 +8,6 @@ import { calc_sr, calc_stats } from '@renderer/core/chart/calc-stat'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
-import { GlobalStat } from '@renderer/core/globalStat'
 import { ElementGroup } from '@renderer/core/misc/element-group'
 import { diff_elements } from '@renderer/core/chart/diff-element-groups'
 
@@ -404,7 +403,6 @@ export class Chart_diff extends StopClass {
     this.calc_max_lane()
     this.update_sr()
     RefreshAll.refresh('svg-lane')
-    GlobalStat.SvgSizing.max_lane = this.max_lane.value
     utils.nextFrame().then(() => this.force_fuck())
   }
 
