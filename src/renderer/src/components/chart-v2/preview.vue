@@ -9,6 +9,7 @@ import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter
 import { notify } from '@renderer/core/misc/notify'
 import { Invoke } from '@renderer/core/ipc'
 import TickCircle from '@renderer/components/chart-v2/chart-tabs/small/tick-circle.vue'
+import PixiLane from '@renderer/components/chart-v2/svg-lane/pixi-lane.vue'
 
 const chart = Chart.$current
 
@@ -146,7 +147,9 @@ onUnmounted(() => {
       <div v-if="setting.sprite" class="pf-sprite">
         <a-img :src="img_src" alt="" />
       </div>
-      <slot> </slot>
+      <slot>
+        <pixi-lane />
+      </slot>
 
       <tick-circle v-if="Storage.settings.record_field.show_circles" />
 

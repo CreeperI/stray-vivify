@@ -9,6 +9,7 @@ import { notify } from '@renderer/core/misc/notify'
 import { Invoke } from '@renderer/core/ipc'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { ChartTypeV2 } from '@preload/chart-types'
+import PixiLane from '@renderer/components/chart-v2/svg-lane/pixi-lane.vue'
 
 const chart = Chart.$current
 const playfield = chart.$playfield
@@ -218,6 +219,7 @@ function title_ize(s: string) {
       <div v-if="setting.sprite" class="pf-sprite">
         <a-img :src="img_src" alt="" />
       </div>
+      <pixi-lane />
       <div class="pf-inf">
         <slot name="info"></slot>
         <div>{{ click_sec }}/sec</div>
