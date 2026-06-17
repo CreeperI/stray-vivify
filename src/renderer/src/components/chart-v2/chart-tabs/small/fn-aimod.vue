@@ -17,7 +17,7 @@ function seek(t: number) {
 
 <template>
   <div class="ai-mod-wrapper">
-    <div @click="update()"><word-helper dec="点击以刷新" msg="ai_mod" /></div>
+    <div @click="update()"><word-helper dec="点击以刷新" msg="aiMod" /></div>
     <div v-if="aimod.length > 0" class="ai-mod">
       <div>时间</div>
       <div>内容</div>

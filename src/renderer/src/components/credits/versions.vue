@@ -348,6 +348,32 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>使用时长统计：添加了为旧版本 vs-charter-ev 的检查。</div>
       <div>禁用了首页一句话中的动画效果。</div>
     </Build>
+    <Build build="9.9" d="17" m="6" title="0.9.9" y="2026">
+      <template #header> stray/vivify alpha </template>
+      <template #bugs>
+        <div>修复了某些触发器完全不会触发的问题。</div>
+        <div>修复了部分曲名过长会导致chart-list显示炸掉的问题。</div>
+        <div>修复了无法读取部分vsb的问题。</div>
+        <div>修复了多选情况下会乱删note的问题。</div>
+        <div>修复了密度折线在切换diff时乱跳的问题。</div>
+      </template>
+      <template #qol>
+        <div>修改了定时器的逻辑，避免在播放音频的时候执行函数导致的卡顿。</div>
+        <div>禁用了多开。</div>
+        <div>调整了设置页面的样式，添加了一些解释。</div>
+      </template>
+      <div>添加了备份功能。（这真是ai写的，有问题也别太急因为我也很难修）</div>
+      <div>现在使用pixi.js进行渲染。应该快多了。</div>
+      <div>添加了vue-devtools，可以尝试添加--dt的启动参数。</div>
+      <div>添加了一个关闭所有inspect的设置，可以在极限情况下提高性能。</div>
+      <div>修改了skin检查，现在强制要求1.png存在。不建议缺失皮肤。</div>
+      <div>移除了所有mod内容。</div>
+      <div>添加了vsb导出。（感谢@RGBProductions的支持）</div>
+      <div>移除了fn-debug，FPS显示可能日后再加。</div>
+      <div>添加了aiMod。</div>
+      <div>移除了很多地方的reactivity，感觉会快一点点。</div>
+      <div>添加了一个复制timing list的按钮。</div>
+    </Build>
   </div>
 </template>
 
