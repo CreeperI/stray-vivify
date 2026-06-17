@@ -255,6 +255,9 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'flash-frame': (_, { flag = true     }) => {
       mw.flashFrame(flag)
-    }
+    },
+    'write-vsb': (_, { id, diff, vsm })=> {
+      chart_manager.write_vsb(id, diff, vsm)
+  }
   } as Required<IpcHandlers.invoke.handler>
 }

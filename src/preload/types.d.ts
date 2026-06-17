@@ -323,6 +323,14 @@ export type Invoke = {
     }
     r: void
   }
+  'write-vsb': {
+    arg: {
+      id: string
+      diff: ChartTypeV2.diff
+      vsm?: string
+    }
+    r: void
+  }
 }
 
 export type Send = {

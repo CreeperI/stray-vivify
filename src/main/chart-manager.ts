@@ -10,6 +10,7 @@ import * as child_process from 'node:child_process'
 import { ChartTypeV2 } from '../preload/chart-types'
 import { OszReader } from './osz-reader'
 import { serialize } from './serialize'
+import { to_vsb_data } from './vsb-writer'
 
 function timestr() {
   const date = new Date()
@@ -296,7 +297,7 @@ export default class ChartManager {
 
     // Read all .svb files from backup folder
     // 读取备份文件夹中的所有 .svb 文件
-    const files = fs
+    return fs
       .readdirSync(backupFolder)
       .filter((file) => file.endsWith('.svb'))
       .sort((a, b) => {
@@ -304,8 +305,6 @@ export default class ChartManager {
         // 按文件名排序（基于时间戳，所以字母排序有效）
         return b.localeCompare(a) // Newest first
       })
-
-    return files
   }
 
   /**
@@ -599,6 +598,16 @@ export default class ChartManager {
         (...a) => console.log(...a)
       )
     shell.showItemInFolder(path.join(exported_path, 'info.json'))
+  }
+
+  write_vsb(id: string, diff: ChartTypeV2.diff, vsm_path?: string) {
+    const chart = this.data.find((v) => v.id === id)
+    if (!chart) return
+    const vsm = vsm_path ? (fs.readFileSync(vsm_path, 'utf-8') ?? '') : ''
+    fs.writeFileSync(
+      path.join(this.charts_folder, id, diff.meta.diff1 + '.vsb'),
+      Buffer.from(to_vsb_data(diff, vsm))
+    )
   }
 
   private _export_chart(id: string, ext: string) {

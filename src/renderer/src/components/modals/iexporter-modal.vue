@@ -51,6 +51,14 @@ function import_osz() {
 function open_svg() {
   modal.ChartPreviewModal.show({})
 }
+async function write_vsb(load_vsm= false) {
+  if (load_vsm) {
+    const r1 = await Invoke('ask-file', { file: ['vsm', 'vsm'] })
+    if (!r1) return
+   return Invoke("write-vsb", {id: chart.id, vsm: r1, diff: chart.diff.diff})
+  }
+  Invoke("write-vsb", {id: chart.id, diff: chart.diff.diff})
+}
 </script>
 
 <template>
@@ -69,6 +77,8 @@ function open_svg() {
           <a-button2 msg="导出svc" @click="export_svc" />
           <a-button2 msg="导出zip" @click="export_zip" />
           <a-button2 v-if="chart.diff.notes.length != 0" msg="导出svg" @click="open_svg" />
+          <a-button2 msg="导出vsb"  @click="write_vsb"/>
+          <a-button2 msg="导出vsb+mod" @click="write_vsb(true)" />
         </div>
       </Hide>
       <Hide title="gml">
