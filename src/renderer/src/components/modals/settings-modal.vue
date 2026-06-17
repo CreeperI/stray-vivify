@@ -102,11 +102,6 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <a-number-input v-model="r.settings.diff_reference.main_lw" min="1" />
         <div>参考难度lane width</div>
         <a-number-input v-model="r.settings.diff_reference.ref_lw" min="1" />
-        <div>显示为背景</div>
-        <a-checkbox2 v-model="r.settings.diff_reference.as_bg" />
-        <ds
-          >将参考难度和编辑难度显示在同一个轨道板中。勾选此项会忽略左右颠倒和参考难度lane-width的设置。</ds
-        >
         <div>背景不透明度</div>
         <a-number-input v-model="r.settings.diff_reference.bg_op" max="100" min="0" />
         <ds>背景模式下：参考难度的不透明度。</ds>

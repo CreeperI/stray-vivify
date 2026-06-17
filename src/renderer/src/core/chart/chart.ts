@@ -399,7 +399,7 @@ export class Chart extends StopClass {
     this.song.set_song(v.song)
     this.diffs = v.diffs.map((x) => {
       let r = Chart_diff.createDiff()
-      utils.shallow_assign(r as Required<ChartTypeV2.diff>, x)
+      utils.assign(r as Required<ChartTypeV2.diff>, x)
       r.notes = Chart_diff.validate_notes(r.notes)
       return r
     })
