@@ -194,6 +194,13 @@ export namespace utils {
       return (isNegative ? '-' : '') + formattedMinutes + ':' + formattedSeconds
     }
   }
+  export function toLocalTime(time: number) {
+    const date = new Date(time)
+    const hours = ((date.getHours() +8)%24).toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    const seconds = date.getSeconds().toString().padStart(2, '0')
+    return `${hours}:${minutes}:${seconds}`
+  }
 
   export function ms2str(ms: number, fix = 3) {
     return toTimeStr(ms / 1000, fix)

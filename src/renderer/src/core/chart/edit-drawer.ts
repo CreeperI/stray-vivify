@@ -495,7 +495,7 @@ class Select {
 
     psd.d?.recreate()
     this.cleanup()
-    RefreshAll.refresh("select")
+    RefreshAll.refresh('select')
   }
   cleanup() {
     this.selecting = false
@@ -629,6 +629,10 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     pending.display = false
   }
   utils.stopWatch(chart.audio.refs.paused, (v) => (pending.display = v))
+  utils.stopWatch(Storage.note.width, () => {
+    pending.recreate()
+    pending.update_pending()
+  })
 
   const event_handle = () => {
     this.app.canvas.addEventListener(

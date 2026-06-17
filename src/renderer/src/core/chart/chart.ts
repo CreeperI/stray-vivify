@@ -113,7 +113,7 @@ export class Chart extends StopClass {
   refs: {
     diff_ref: Ref<number>
   }
-  backup_last: number
+  backup_last = ref({ time: performance.now(), init: true })
 
   constructor() {
     super()
@@ -145,7 +145,6 @@ export class Chart extends StopClass {
       diff_ref: ref(-1)
     }
     this.hit_sounder = new HitSoundSystem(this)
-    this.backup_last = performance.now()
   }
 
   static get $current() {
@@ -338,7 +337,6 @@ export class Chart extends StopClass {
     }, 200)
   }
 
-
   set_path(p: string) {
     this.path = p
   }
@@ -413,13 +411,14 @@ export class Chart extends StopClass {
     if (!this.audio.paused) this.hit_sounder.play_hit()
   }
 
-  async save() {
+  async save(do_notify = false) {
     if (this.audio.ele) {
       FrameRate.save.start()
       this.diff.validate_chart()
       await nextFrame()
       Invoke('save-chart', { id: this.id, data: JSON.stringify(this.chart) })
       FrameRate.save.end()
+      if (do_notify) notify.success('保存成功！')
       await nextFrame()
       await Invoke('update-chart-data', {
         id: this.id,
@@ -429,9 +428,8 @@ export class Chart extends StopClass {
         })
       })
       GlobalStat.update_all_chart()
-      if (performance.now() - this.backup_last > 900e3) {
+      if (performance.now() - this.backup_last.value.time > 900e3) {
         this.backup()
-        this.backup_last = performance.now()
       }
     }
     return
@@ -456,7 +454,9 @@ export class Chart extends StopClass {
       id: this.id,
       data: final
     })
-    notify.success("已备份！")
+    notify.success('已备份！')
+    this.backup_last.value.time = performance.now()
+    this.backup_last.value.init = false
   }
 
   /**

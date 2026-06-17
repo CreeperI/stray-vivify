@@ -38,6 +38,9 @@ function open_custom() {
 function open_backup() {
   modal.LoadBackupModal.show({})
 }
+function open_chart_folder() {
+  Invoke('open-path', { id: Chart.current?.id ?? '', path: 'chart' })
+}
 
 function start_play() {
   Chart.$current.init_playfield()
@@ -68,6 +71,7 @@ function is_active(i: number, i1: number) {
           <div class="h-menu-btn-text" @click="open_exporter">导入/导出</div>
           <div class="h-menu-btn-text" @click="open_custom">Custom</div>
           <div class="h-menu-btn-text" @click="open_backup">加载备份</div>
+          <div class="h-menu-btn-text" @click="open_chart_folder">打开谱面文件夹</div>
           <div class="h-menu-btn-text h-menu-btn-i-sep" @click="modal.SettingModal.show({})">
             设置
           </div>

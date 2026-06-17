@@ -371,6 +371,22 @@ export default class ChartManager {
     }
   }
 
+  delete_backup(id: string, backup_name: string) {
+    const chart = this.data.find((v) => v.id === id)
+    if (!chart) return
+
+    const backupPath = path.join(this.charts_folder, id, 'backup', backup_name)
+
+    // Check if backup file exists
+    // 检查备份文件是否存在
+    if (!fs.existsSync(backupPath)) {
+      return
+    }
+
+    // Delete backup file
+    // 删除备份文件
+    fs.unlinkSync(backupPath)
+  }
   export_svc(id: string) {
     this._export_chart(id, '.svc')
   }
@@ -380,6 +396,9 @@ export default class ChartManager {
 
   show_file(id: string, fp: string) {
     shell.showItemInFolder(path.join(this.charts_folder, id, fp))
+  }
+  show_folder(id: string, fp:string) {
+    shell.openPath(path.join(this.charts_folder, id, fp))
   }
 
   async import_chart(fp: string, id: string) {
@@ -608,6 +627,13 @@ export default class ChartManager {
       path.join(this.charts_folder, id, diff.meta.diff1 + '.vsb'),
       Buffer.from(to_vsb_data(diff, vsm))
     )
+    shell.showItemInFolder(path.join(this.charts_folder, id, diff.meta.diff1 + '.vsb'))
+  }
+
+  show_chart(id: string) {
+    const chart = this.data.find((v) => v.id === id)
+    if (!chart) return
+    shell.showItemInFolder(path.join(this.charts_folder, id, 'vs-chart.json'))
   }
 
   private _export_chart(id: string, ext: string) {

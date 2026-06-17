@@ -126,11 +126,6 @@ export namespace ChartTypeV2 {
     rating: number
     diff_name: string
   }
-  export type mpf = {
-    time: number
-    end: number
-    func: string
-  }
 
   export type final = {
     diffs: diff[]

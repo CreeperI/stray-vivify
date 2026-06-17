@@ -89,7 +89,7 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <ds>在启用Beat的时候自动开启。</ds>
         <div>Beat从0开始</div>
         <a-checkbox2 v-model="r.settings.bar_from_0" />
-        <div>note吸附范围</div>
+        <div>note时间容差</div>
         <a-number-input v-model="r.settings.nearest" />
         <ds>摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间</ds>
         <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
@@ -247,6 +247,7 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <div>Mouse Tracker</div>
         <a-checkbox2 v-model="r.settings.mouse_tracker" />
         <ds>osu!std同款鼠标</ds>
+        <div>禁用Inspector</div>
         <a-checkbox2 v-model="r.settings.disable_inspect" />
         <ds>开启后会禁用报错提示。能够在极限情况下提升性能（比如240FPS）。不建议开启。</ds>
       </div>

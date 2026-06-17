@@ -70,6 +70,7 @@ async function main() {
   Intervals.on(1e4, () => {
     if (Storage.settings.auto_save) Chart.current?.save()
     Chart.current?.diff.update_tick_list()
+    Chart.current?.diff.check_aimod()
   })
   Intervals.on(1000, () => {
     Chart_diff.all.forEach((v) => v.update_diff_counts())

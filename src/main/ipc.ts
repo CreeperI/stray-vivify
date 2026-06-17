@@ -54,7 +54,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'save-chart': function (_, { id, data }) {
       chart_manager.write_chart(id, JSON.parse(data))
     },
-    'import-song': async function (_, {id, path: music_path }) {
+    'import-song': async function (_, { id, path: music_path }) {
       return chart_manager.import_song(music_path, id)
     },
     'open-song': function (_, { id }) {
@@ -123,7 +123,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'export-zip': (_, { id }) => {
       chart_manager.export_zip(id)
     },
-    'import-zip': function (_, {fp, id}) {
+    'import-zip': function (_, { fp, id }) {
       return chart_manager.import_chart(fp, id)
     },
     'remove-chart': function (_, { id }) {
@@ -163,7 +163,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
         pix: osz.getImages().length
       }
     },
-    'import-osz': async (_, {fp, id}) => {
+    'import-osz': async (_, { fp, id }) => {
       const osz = OszReader.create(fp[0])
       const song = osz.getAudioFile()
       if (!song) return 0
@@ -253,11 +253,17 @@ const Handler = (mw: Electron.BrowserWindow) => {
       }
       return undefined
     },
-    'flash-frame': (_, { flag = true     }) => {
+    'flash-frame': (_, { flag = true }) => {
       mw.flashFrame(flag)
     },
-    'write-vsb': (_, { id, diff, vsm })=> {
+    'write-vsb': (_, { id, diff, vsm }) => {
       chart_manager.write_vsb(id, diff, vsm)
-  }
+    },
+    'delete-backup': (_, { id, backup_name }) => {
+      chart_manager.delete_backup(id, backup_name)
+    },
+    'open-path': (_, { id, path: fname }) => {
+      chart_manager.show_folder(id, fname)
+    }
   } as Required<IpcHandlers.invoke.handler>
 }

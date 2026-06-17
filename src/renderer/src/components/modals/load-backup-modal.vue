@@ -3,6 +3,7 @@ import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { ref } from 'vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
+import { Invoke } from '@renderer/core/ipc'
 
 const backups = ref<string[]>([])
 const chart = Chart.$current
@@ -28,6 +29,13 @@ function do_backup() {
   chart.backup()
   chart.get_backup_list().then((v) => (backups.value = v.sort()))
 }
+async function delete_backup(name: string) {
+  Invoke('delete-backup', { id: chart.id, backup_name: name })
+  chart.get_backup_list().then((v) => (backups.value = v.sort()))
+}
+async function show_backup() {
+  Invoke('open-path', { id: chart.id, path: "backup" })
+}
 </script>
 
 <template>
@@ -37,19 +45,23 @@ function do_backup() {
       <template v-for="i in backups">
         <div>{{ parse_name(i) }}</div>
         <a-button2 msg="加载" @click="load_backup(i)" />
+        <a-button2 style="color: #ff8686" msg="删除" @click="delete_backup(i)" />
       </template>
     </div>
     <div v-else class="backup-empty">
       没有备份哦……来一个？
       <a-button2 msg="来！！！" @click="do_backup" />
     </div>
+    <template #footer>
+      <a-button2 msg="打开备份文件夹" @click="show_backup" />
+    </template>
   </simple-modal>
 </template>
 
 <style scoped>
 .backup-contain {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 2fr 1fr 1fr;
   gap: 5px;
   justify-items: center;
 }

@@ -331,6 +331,20 @@ export type Invoke = {
     }
     r: void
   }
+  'delete-backup': {
+    arg: {
+      id: string
+      backup_name: string
+    }
+    r: void
+  }
+  'open-path': {
+    arg: {
+      id: string
+      path: string
+    }
+    r: void
+  }
 }
 
 export type Send = {

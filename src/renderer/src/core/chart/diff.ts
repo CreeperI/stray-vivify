@@ -8,6 +8,7 @@ import { calc_sr, calc_stats } from '@renderer/core/chart/calc-stat'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
+import { aiMod } from '@renderer/core/chart/ai-mod'
 
 function parse_type(v: string) {
   switch (v) {
@@ -102,6 +103,7 @@ export class Chart_diff extends StopClass {
   sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
   #__density_abort = false
+  ai_mod = ref<[number,string][]>([])
 
   constructor(chart: Chart, index?: number) {
     super()
@@ -944,5 +946,9 @@ export class Chart_diff extends StopClass {
 
   private findNote(n: ChartTypeV2.note): number {
     return this.notes.findIndex((x) => utils.is_equal(n, x))
+  }
+
+  check_aimod() {
+    this.ai_mod.value = aiMod(this.diff)
   }
 }
