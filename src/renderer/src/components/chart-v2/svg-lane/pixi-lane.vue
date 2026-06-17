@@ -5,15 +5,16 @@ import { DiffDrawer } from '@renderer/core/chart/drawer'
 import { Storage } from '@renderer/core/storage'
 import { EventHub } from '@renderer/core/misc/eventhub'
 import { GlobalStat } from '@renderer/core/globalStat'
+import { Chart_diff } from '@renderer/core/chart/diff'
 
-const { lane_width = Storage.settings.lane_width, x_expand = 0 } = defineProps<{
+const { lane_width = Storage.settings.lane_width, x_expand = 0, diff_index = -1 } = defineProps<{
   lane_width?: number
   x_expand?: number
   diff_index?: number
 }>()
 
 const chart = Chart.$current
-const diff = chart.diff
+const diff = diff_index == -1 ? chart.diff : Chart_diff.useCreateDiff(chart, diff_index)
 
 const container = useTemplateRef<HTMLDivElement>('pixi-container')
 const width = diff.max_lane.value * lane_width + x_expand + 2 * 50

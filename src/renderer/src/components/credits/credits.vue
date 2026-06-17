@@ -46,6 +46,8 @@ const total = computed(() => utils.toTimeStr(Storage.data.value.statistics.used_
         <a-href href="https://space.bilibili.com/432834039">-Re-Again-</a-href>
         <a-href href="https://space.bilibili.com/501410744">InvalidData</a-href>
       </span>
+      <span>vsb导出</span>
+      <span><a-href href="https://github.com/RGBproductions/">RGBproductions</a-href></span>
     </div>
     <div class="credits-head">Special Thanks</div>
     <div class="credits-4col">

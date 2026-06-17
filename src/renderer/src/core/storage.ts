@@ -164,7 +164,6 @@ const storage = ref<storages.storage_scheme>({
       main_lw: 130,
       ref_lw: 80,
       reverse: false,
-      as_bg: false,
       bg_op: 70
     },
     osu_sr: false,

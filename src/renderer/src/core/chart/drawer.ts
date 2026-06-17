@@ -104,7 +104,7 @@ export namespace NoteDrawer {
     })
     sprite.x = this.x_of(note.lane)
     sprite.y = 0
-    sprite.width = Storage.settings.lane_width * note.width
+    sprite.width = this.sizing.lane_width * note.width
     sprite.zIndex = 4 - note.width
     return sprite
   }
