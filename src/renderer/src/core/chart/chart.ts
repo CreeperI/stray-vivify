@@ -456,6 +456,7 @@ export class Chart extends StopClass {
       id: this.id,
       data: final
     })
+    notify.success("已备份！")
   }
 
   /**

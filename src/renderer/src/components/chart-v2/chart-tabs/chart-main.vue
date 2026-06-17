@@ -8,6 +8,7 @@ import FnEditTools from '@renderer/components/chart-v2/chart-tabs/small/fn-edit-
 import PixiEditor from '@renderer/components/chart-v2/svg-lane/pixi-editor.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import DiffRef from '@renderer/components/chart-v2/svg-lane/diff-ref.vue'
+import FnExport from '@renderer/components/chart-v2/chart-tabs/small/fn-export.vue'
 
 const chart = Chart.$current
 const d_ref = chart.refs.diff_ref
@@ -26,6 +27,7 @@ const d_ref = chart.refs.diff_ref
     <div class="chart-fn fn-wrapper">
       <fn-editor />
       <fn-time />
+      <fn-export />
       <fn-edit-tools />
     </div>
   </div>
