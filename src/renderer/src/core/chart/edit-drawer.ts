@@ -10,6 +10,7 @@ import { utils } from '@renderer/core/utils'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Skin } from '@renderer/core/misc/skin'
 import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const mul = Storage.computes.mul
 const pointer_last = {
@@ -437,7 +438,6 @@ class Select {
   on_mousedown(e: MouseEvent) {
     if (this.selecting) return
     if (Storage.note.w != 0) return
-    console.log('md')
     this.selecting = true
     this.rect.visible = true
     this.base_x = e.offsetX
@@ -495,6 +495,7 @@ class Select {
 
     psd.d?.recreate()
     this.cleanup()
+    RefreshAll.refresh("select")
   }
   cleanup() {
     this.selecting = false
@@ -580,6 +581,7 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
       const v = diff.shown
       note_drawer.recreate(...v)
       ln_drawer.recreate(...v)
+      shadow.update()
       this.update()
     })
     this.add_on('scale-changed', () => {
@@ -593,7 +595,6 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     const mouse_time = __drawer.event_time(e.offsetY)
     if (!pending.dragging) {
       if (select.selecting) {
-        console.log('selecting-')
         return select.update(e.offsetX, __drawer.mouse_time(e.offsetY))
       }
     }

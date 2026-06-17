@@ -4,27 +4,29 @@ import { ref } from 'vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
-const selectedNID = NoteClipboard.selected
+const selectedNID = () => NoteClipboard.selected
 const toolMultiArgs = ref({
   multiVal: 1,
   baseZero: false
 })
 console.log(toolMultiArgs.value)
+const rkey = RefreshAll.generate_key('select')
 </script>
 
 <template>
-  <div v-if="selectedNID.length > 0" class="edit-frame">
+  <div v-if="selectedNID().length > 0" :key="rkey" class="edit-frame">
     <p style="text-align: center">想做些什么呢？</p>
     <div class="edit-button-frame">
       <div>
-        <div class="edit-button" @click="EditorTools.mirror(selectedNID)">对称</div>
+        <div class="edit-button" @click="EditorTools.mirror(selectedNID())">对称</div>
       </div>
       <div>
         <div
           class="edit-button"
           @click="
-            EditorTools.mutiplier(selectedNID, toolMultiArgs.multiVal, toolMultiArgs.baseZero)
+            EditorTools.mutiplier(selectedNID(), toolMultiArgs.multiVal, toolMultiArgs.baseZero)
           "
         >
           TimeMultiply

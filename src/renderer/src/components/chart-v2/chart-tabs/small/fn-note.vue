@@ -6,14 +6,13 @@ import { ChartTypeV2 } from '@preload/chart-types'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import SmallRefChoice from '@renderer/components/chart-v2/chart-tabs/small/small-ref-choice.vue'
-import { Chart } from '@renderer/core/chart/chart'
 import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
 
 import { NoteProps } from '@renderer/core/misc/note-props'
+import { RefreshAll } from '@renderer/core/misc/refresh-all'
 
 const { width, s, hold, b } = Storage.note
 
-const to_note = Chart.$current.diff.to_note
 const pending_note = computed(() => {
   if (hold.value) {
     return {
@@ -32,12 +31,8 @@ const pending_note = computed(() => {
     }
   }
 }) as ComputedRef<ChartTypeV2.note>
-const select = NoteClipboard.selected
-const select_max = computed(() => Math.max(...select.map((x) => to_note(x).time)))
-const select_min = computed(() => Math.min(...select.map((x) => to_note(x).time)))
-const select_ln = computed(() => select.filter((x) => 'len' in to_note(x)).length)
-const select_chip = computed(() => select.length - select_ln.value)
-// console.log(select)
+const select = () => NoteClipboard.selected
+const rkey = RefreshAll.generate_key('select')
 </script>
 
 <template>
@@ -90,21 +85,25 @@ const select_chip = computed(() => select.length - select_ln.value)
         长条
       </div>
     </div>
-    <div v-if="width == 0" class="note-select-wrapper">
-      <div v-if="select.length == 0" class="note-select">Select</div>
+    <div v-if="width == 0" :key="rkey" class="note-select-wrapper">
+      <div v-if="select().length == 0" class="note-select">Select</div>
       <div v-else>
         <div>
-          <div>已选中 {{ select.length }}</div>
+          <div>已选中 {{ select().length }}</div>
           <div>
-            {{ select.length }} notes (
-            <template v-if="select_chip">{{ select_chip }}米</template>
-            <template v-if="select_ln">{{ select_ln }}面</template>
+            {{ select().length }} notes (
+            <template v-if="select().filter((x) => 'snm' in x).length">
+              {{ select().filter((x) => 'snm' in x).length }}米
+            </template>
+            <template v-if="select().filter((x) => 'len' in x).length">
+              {{ select().filter((x) => 'len' in x).length }}面
+            </template>
             )
           </div>
           <div>
-            {{ utils.toTimeStr(select_min / 1000) }}
+            {{ utils.toTimeStr(Math.min(...select().map((x) => x.time)) / 1000) }}
             ~
-            {{ utils.toTimeStr(select_max / 1000) }}
+            {{ utils.toTimeStr(Math.max(...select().map((x) => x.time)) / 1000) }}
           </div>
         </div>
       </div>

@@ -8,7 +8,6 @@ export const NoteClipboard = {
     this.clipboard.value = []
     this.selected = []
   },
-
   copy: () => {},
   cut: () => {},
   paste: () => {}

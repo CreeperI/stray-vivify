@@ -13,12 +13,12 @@ export namespace RefreshAll {
   }
   export function refresh(key: string) {
     if (key in keys) {
-      keys[key].value = Math.random().toFixed(3)
+      keys[key].value = Math.random().toFixed(8)
     }
   }
   export function refreshAll() {
     for (const k of utils.keyof(keys)) {
-      keys[k].value = Math.random().toFixed(3)
+      keys[k].value = Math.random().toFixed(8)
     }
   }
 }
