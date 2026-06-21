@@ -2,7 +2,6 @@ import { Ref, ref } from 'vue'
 import { charts_data } from '@preload/types'
 import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
-import { Version } from '@renderer/core/storage'
 
 export namespace GlobalStat {
   type routes = 'start' | 'wait' | 'editor'
@@ -34,14 +33,6 @@ export namespace GlobalStat {
   }
   // 0 - charting 1 - recording 2 - playing
   export const chart_state = ref(0) as Ref<0 | 1 | 2>
-
-
-  export let is_dev = false
-  export async function check_dev() {
-    is_dev = await Invoke('is-dev')
-    if (is_dev) Version.str += '-dev'
-    return is_dev
-  }
 
   export async function close_app() {
     const current = Chart.current

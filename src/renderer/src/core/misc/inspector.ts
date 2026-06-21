@@ -2,7 +2,6 @@ import { Ref, ref, watch } from 'vue'
 import { Invoke } from '@renderer/core/ipc'
 import { Storage } from '@renderer/core/storage'
 import { notify } from '@renderer/core/misc/notify'
-import { GlobalStat } from '@renderer/core/globalStat'
 
 export namespace ChartSize {
   export const data = ref({
@@ -80,7 +79,7 @@ export const Log = {
   }),
   error_list: ref([]) as Ref<log[]>,
   need_img: ref([]) as Ref<[string, number][]>,
-  handle() {
+  handle(disable_inspect: boolean) {
     window.addEventListener(
       'error',
       (e) => {
@@ -96,7 +95,7 @@ export const Log = {
           }
           return
         }
-        Log.err(msg)
+        Log.error(msg)
         if (Storage.settings.err_notify) {
           notify.error('发生未捕获的错误！请查看Inspector。')
         }
@@ -107,27 +106,32 @@ export const Log = {
     window.addEventListener('unhandledrejection', (e) => {
       let msg = e.reason
       if (msg == 'opened') return
-      Log.err(msg)
+      Log.error(msg)
       if (Storage.settings.err_notify) {
         notify.error('发生未捕获的错误！请查看Inspector。')
       }
       this.fix_max()
     })
-    if (GlobalStat.is_dev) return
+    if (disable_inspect) return
     const keys = ['log', 'warn', 'error', 'debug']
     for (const key of keys) {
       const old: Function = console[key]
       console[key] = function (...args: any) {
         old.call(console, ...args)
         args = args.map((v) => {
-          if (typeof v === 'object') return JSON.stringify(v)
+          if (typeof v === 'object')
+            try {
+              return JSON.stringify(v)
+            } catch (e) {
+              // pass
+            }
           else return v
         })
         Log[key](args.join(' '))
       }
     }
   },
-  err(msg: string) {
+  error(msg: string) {
     this.error_list.value.push({
       level: 'err',
       msg,

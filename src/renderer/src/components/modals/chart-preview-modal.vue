@@ -6,7 +6,6 @@ import { Chart } from '@renderer/core/chart/chart'
 import { toRef } from 'vue'
 import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import ALabel from '@renderer/components/a-elements/a-label.vue'
-import { GlobalStat } from '@renderer/core/globalStat'
 import { Storage } from '@renderer/core/storage'
 
 function write_png() {
@@ -14,7 +13,6 @@ function write_png() {
 }
 
 const shown_ticks = toRef(Storage.data.value.settings.svg_shown_parts)
-const is_dev = GlobalStat.is_dev
 </script>
 
 <template>
@@ -30,7 +28,7 @@ const is_dev = GlobalStat.is_dev
         <a-label label="谱面信息">
           <a-checkbox v-model="shown_ticks.diff" />
         </a-label>
-        <a-label v-if="is_dev" label="水印">
+        <a-label label="水印">
           <a-checkbox v-model="shown_ticks.sv" />
         </a-label>
         <a-label label="timing">

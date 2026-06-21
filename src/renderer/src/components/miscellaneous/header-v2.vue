@@ -39,7 +39,7 @@ function open_backup() {
   modal.LoadBackupModal.show({})
 }
 function open_chart_folder() {
-  Invoke('open-path', { id: Chart.current?.id ?? '', path: 'chart' })
+  Invoke('open-path', { id: Chart.current?.id ?? '', path: '' })
 }
 
 function start_play() {

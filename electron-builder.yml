@@ -14,7 +14,7 @@ files:
   - "!**/.idea/*"
   - "!**/node_modules/*"
   - "!external/"
-  - "!.lingma/"
+  - "!**/.lingma/*"
 asarUnpack:
   - resources/**
   - src/renderer/public/**

@@ -808,7 +808,7 @@ export class Chart_diff extends StopClass {
 
   update_sr() {
     if (!Storage.settings.song_stats) return
-    this.sr.value = calc_stats(this.diff, this.chart.length)
+    this.sr.value = calc_stats(this.diff)
     if (Storage.settings.osu_sr) this.sr.value.sr = calc_sr(this.diff)
   }
 

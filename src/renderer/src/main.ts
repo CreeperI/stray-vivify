@@ -51,12 +51,11 @@ async function main() {
   Preinit.Stages.load_settings = true
 
   await GlobalStat.update_all_chart()
-  await GlobalStat.check_dev()
   Invoke('leave-fullscreen')
   Preinit.Stages.all_chart = true
 
   const disable_inspect = Storage.settings.disable_inspect
-  if (!disable_inspect) Log.handle()
+  Log.handle(disable_inspect)
   ShortCuts.handle()
   MouseTracker.init()
   expose_variables()

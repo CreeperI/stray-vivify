@@ -469,13 +469,13 @@ class Select {
     // main select
     const bar_width = this.drawer.sizing.total_width - 100 - this.drawer.sizing.x_expand
     const max_lane = this.drawer.diff.max_lane.value
-    const lane0 = ((eX - 50) / (bar_width - 100)) * max_lane
-    const lane1 = ((this.base_x - 50) / (bar_width - 100)) * max_lane
+    const lane0 = ((eX - 50) / (bar_width)) * max_lane
+    const lane1 = ((this.base_x - 50) / (bar_width)) * max_lane
     const lane_min = Math.min(lane0, lane1)
     const lane_max = Math.max(lane0, lane1)
 
-    const time0 = Math.min(mouse_time, this.start_time)
-    const time1 = Math.max(mouse_time, this.start_time)
+    const time0 = Math.min(mouse_time, this.start_time) - 50
+    const time1 = Math.max(mouse_time, this.start_time) + 50
     if (GlobalStat.func_keys.value.ctrl)
       NoteClipboard.selected.push(
         ...diff.notes.filter((n) => {
