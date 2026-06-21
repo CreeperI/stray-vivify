@@ -45,9 +45,6 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <ds>每个lane的宽度。以像素为单位。</ds>
         <div>最小Lane</div>
         <a-number-input v-model="r.settings.min_lane" class="in" min="1" />
-        <div class="ds"></div>
-        <div>显示底部#Timing黑字</div>
-        <a-checkbox2 v-model="r.settings.show_bpm_bottom" />
         <div>右侧分音</div>
         <a-checkbox2 v-model="r.settings.show_ticks" />
 

@@ -674,6 +674,14 @@ export class Chart_diff extends StopClass {
     if (time <= 0) time = 0
     return this.timing.findLast((v) => v.time <= time) ?? this.timing[0]
   }
+  timing_of_time(time:ms) {
+    if (time <= 0) time = 0
+    const ix = this.timing.findLastIndex((v) => v.time <= time) ?? 0
+    return {
+      timing: this.timing[ix],
+      ix: ix
+    }
+  }
 
   push_undo(fn: () => void) {
     if (this.on_operating) this.operating_fns.push(fn)

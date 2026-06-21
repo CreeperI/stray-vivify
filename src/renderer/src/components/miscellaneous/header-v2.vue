@@ -59,10 +59,12 @@ const on = GlobalStat.refs.chart_tab
 function is_active(i: number, i1: number) {
   return i == i1 ? 'header-active' : ''
 }
+
+const cs = GlobalStat.chart_state
 </script>
 
 <template>
-  <div class="header-wrapper">
+  <div v-if="cs == 0" class="header-wrapper">
     <div class="header-top">
       <img alt="wug" class="header-yq" src="/yq.jpg" />
       <div class="header-menu-ul">

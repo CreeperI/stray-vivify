@@ -25,7 +25,3 @@ const main_lw = computed(() => Storage.settings.diff_reference.main_lw)
     </template>
 
 </template>
-
-<style scoped>
-
-</style>

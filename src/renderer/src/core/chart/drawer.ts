@@ -17,8 +17,8 @@ import { Chart_diff } from '@renderer/core/chart/diff'
 import { Chart } from '@renderer/core/chart/chart'
 import { GlobalStat } from '@renderer/core/globalStat'
 import { Skin } from '@renderer/core/misc/skin'
-import getTexture = Skin.getTexture
 import { NoteProps } from '@renderer/core/misc/note-props'
+import getTexture = Skin.getTexture
 
 const mul = Storage.computes.mul
 
@@ -41,17 +41,6 @@ export class DrawerExtension<T extends Sprite | Text | Graphics, createFrom> ext
     this.visible = true
   }
   recreate(...arg: createFrom[]) {
-    this.remove()
-    arg.forEach((v) => {
-      const el = this.createSprite(v)
-      if (el) {
-        this.elements.set(v, el)
-        this.container.addChild(el)
-      }
-    })
-  }
-
-  /*recreate(...arg: createFrom[]) {
     const oldKeys = new Set(this.elements.keys())
     const newKeys = new Set(arg)
 
@@ -74,7 +63,7 @@ export class DrawerExtension<T extends Sprite | Text | Graphics, createFrom> ext
         this.container.addChild(el)
       }
     })
-  }*/
+  }
   update(fn: (value: T, key: createFrom) => void) {
     if (!this.visible) return
     this.elements.forEach(fn)
@@ -123,6 +112,35 @@ export namespace NoteDrawer {
   }
 }
 
+const bpm_drawer = () => {
+  return {
+    text: new Text({
+      style: new TextStyle({
+        fill: 'black',
+        fontFamily: 'Arial',
+        fontSize: 16,
+        dropShadow: false,
+        align: 'center'
+      }),
+      zIndex: 1000
+    }),
+    last_str: '',
+    update(diff: Chart_diff) {
+      const time = diff.timing_of_time(diff.chart.audio.current_time)
+      const str = `Timing #${time.ix} ${time.timing.bpm.toFixed(2)}bpm ${time.timing.num}/${time.timing.den}`
+      if (str != this.last_str) {
+        this.text.text = str
+        this.last_str = str
+      }
+    },
+    init(total_width: number) {
+      this.text.x = 0.5 * total_width
+      this.text.y = SCREEN_HEIGHT - 40
+      this.text.anchor = 0.5
+    }
+  }
+}
+
 export class DiffDrawer extends StopClass {
   diff: Chart_diff
   chart: Chart
@@ -139,6 +157,7 @@ export class DiffDrawer extends StopClass {
     left_text: DrawerExtension<Text, [number, number]>
     bpm_text: DrawerExtension<Text, ChartTypeV2.timing>
     tick: DrawerExtension<Text, [number, number]>
+    bottom_bpm: ReturnType<typeof bpm_drawer>
   }
   max_lane: number
 
@@ -206,13 +225,13 @@ export class DiffDrawer extends StopClass {
       const _bpm_text_style = new TextStyle({
         fill: 'pink',
         fontFamily: 'Arial',
-        fontSize: GlobalStat.rem,
+        fontSize: GlobalStat.rem * 0.8,
         dropShadow: {},
         align: 'center'
       })
       const bpm_text_drawer = new DrawerExtension<Text, ChartTypeV2.timing>(
         (timing) => {
-          const t = new Text({ text: String(timing.bpm), style: _bpm_text_style })
+          const t = new Text({ text: String(timing.bpm).slice(0, 6), style: _bpm_text_style })
           t.anchor = 0.5
           t.x = 25
           return t
@@ -242,8 +261,10 @@ export class DiffDrawer extends StopClass {
         beat: beat_drawer,
         left_text: Lix_drawer,
         bpm_text: bpm_text_drawer,
-        tick: tick_drawer
+        tick: tick_drawer,
+        bottom_bpm: bpm_drawer()
       }
+      this.drawers.bottom_bpm.init(this.sizing.total_width)
     }
     /* decoration line */
     this.create_decoration()
@@ -253,7 +274,8 @@ export class DiffDrawer extends StopClass {
       this.drawers.notes.container,
       this.drawers.left_text.container,
       this.drawers.bpm_text.container,
-      this.drawers.tick.container
+      this.drawers.tick.container,
+      this.drawers.bottom_bpm.text
     )
 
     this.add_on('audio-time-update', () => this.update())
@@ -335,6 +357,7 @@ export class DiffDrawer extends StopClass {
     this.drawers.tick.update((t, [ms, _]) => {
       t.y = this.get_y_line(ms, time, m)
     })
+    this.drawers.bottom_bpm.update(this.diff)
   }
 
   recreate() {
@@ -372,9 +395,10 @@ export class DiffDrawer extends StopClass {
   }
 
   mouse_time(eY) {
-    return       (SCREEN_HEIGHT - eY - 0.5 * Skin.height(this.sizing.lane_width) - 80) / mul.value +
+    return (
+      (SCREEN_HEIGHT - eY - 0.5 * Skin.height(this.sizing.lane_width) - 80) / mul.value +
       this.chart.audio.current_time
-
+    )
   }
 
   event_time(eY: number) {

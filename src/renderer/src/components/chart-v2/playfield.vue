@@ -446,7 +446,7 @@ img {
 .pf-inf {
   position: absolute;
   right: 50px;
-  bottom: 50px;
+  bottom: 80px;
   text-align: right;
 }
 .pf-diff {

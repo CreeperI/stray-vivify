@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, protocol, shell, session } from 'electron'
 import { join } from 'path'
 import { electronApp, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -123,6 +123,10 @@ function createWindow(): void {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
     // globalShortcut.register('F11', () => window_max(mainWindow))
+    const pixiDevToolsPath = 'L:\\playground\\chrome'
+    session.defaultSession.loadExtension(pixiDevToolsPath).catch((err) => {
+      console.log('Failed to load PixiJS DevTools extension:', err)
+    })
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }

@@ -44,6 +44,8 @@ onMounted(() => {
     diff.force_fuck()
     EventHub.dispatch('audio-time-update')
     container.value?.focus()
+  }).catch(() => {
+
   })
 })
 function fuck_wheel(e: WheelEvent) {
@@ -65,13 +67,3 @@ defineExpose({ drawer: drawer })
     @wheel.capture="fuck_wheel"
   />
 </template>
-
-<style>
-.pixi-container {
-  position: relative;
-}
-.pixi-container > canvas {
-  position: absolute;
-  bottom: 0;
-}
-</style>

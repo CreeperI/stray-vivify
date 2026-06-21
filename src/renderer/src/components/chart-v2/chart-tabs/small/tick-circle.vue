@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { Chart } from '@renderer/core/chart/chart'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Storage } from '@renderer/core/storage'
+import { EventHub } from '@renderer/core/misc/eventhub'
 
 const chart = Chart.$current
 const current_time = chart.audio.refs.current_ms
@@ -34,26 +35,29 @@ function circle_color(t: number) {
   else str += 'yellow'
   return str + ';'
 }
+const key = ref('0')
+EventHub.use('fuck-shown', () => {
+  key.value = Math.random().toString()
+  shown_t.ticks = chart.diff.shown_timing_list.ticks
+  console.log(shown_t.ticks)
+})
 </script>
 
 <template>
   <div v-if="show_circle" class="pf-circles">
     <div class="circles-left">
       <img alt="" class="ticks-icon" src="/yq.jpg" />
-      <div class="circles-sv">
-<!--        stray/vivify <br />-->
-<!--        Analyser-->
-      </div>
+      <div class="circles-sv">stray/vivify</div>
       <div class="circles-timing">
         <div>BPM</div>
-        <div>{{ current_timing.bpm }}</div>
+        <div>{{ current_timing.bpm.toPrecision(5) }}</div>
         <div>#{{ current_timing_ix + 1 }}/{{ timing_length }}</div>
       </div>
     </div>
     <div class="circles-right">
       <div class="circles-line" />
       <div class="circles-divider" />
-      <div class="circles-tick">
+      <div :key="key" class="circles-tick">
         <div
           v-for="[tm, tick] in shown_t.ticks"
           :style="time_left(current_time, tm)"
@@ -86,6 +90,7 @@ function circle_color(t: number) {
   display: flex;
   z-index: 3;
   background: #000000;
+  border-top: 2px solid white;
 }
 .circles-left {
   padding-left: 15px;
@@ -114,6 +119,7 @@ function circle_color(t: number) {
   grid-template-rows: 1fr 1fr 1fr;
   justify-items: center;
   padding-left: 15px;
+  max-width: 6rem;
 }
 .circles-right {
   flex-grow: 1;
