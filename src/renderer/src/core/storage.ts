@@ -98,7 +98,6 @@ const storage = ref<storages.storage_scheme>({
       bar_op: 0,
       bar_dy: 0
     },
-    delete_no_confirm: false,
     time_max_length: 50,
     judgement: {
       p1: 25,

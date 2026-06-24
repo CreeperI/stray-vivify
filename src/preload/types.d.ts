@@ -443,7 +443,6 @@ export namespace storages {
       bar_color7: string
     }
 
-    delete_no_confirm: boolean
     time_max_length: number
 
     judgement: {

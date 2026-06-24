@@ -38,8 +38,6 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <ds>会帮你自动填到谱师栏</ds>
         <div>显示stray/vivify图标</div>
         <a-checkbox2 v-model="r.settings.stray_logo" />
-        <div>跳过删除确认</div>
-        <a-checkbox2 v-model="r.settings.delete_no_confirm" />
 
         <setting-header msg="Lane部分" />
         <div>lane-width (px)</div>

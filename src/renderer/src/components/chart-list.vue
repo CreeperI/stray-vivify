@@ -47,22 +47,43 @@ function open_proj(id: string) {
   Chart.open_chart(id)
 }
 
-function delete_proj(id: string, name: string) {
-  if (state) return
+function try_delete(id: string) {
+  /*if (state) return
   if (!Storage._ref.value.settings.delete_no_confirm) {
     modal.ConfirmModal.show({
       msg: `确定要删除${name} (id: ${id})吗？不可以撤销的哦！<br><small>设置中可以关闭此确认。</small>`
     })
       .then(() => {
+        debugger
         return Invoke('remove-chart', { id })
       })
+      .catch(() => {})
       .then(() => {
         GlobalStat.update_all_chart()
       })
   } else {
     Invoke('remove-chart', { id })
-  }
+  }*/
+  if (state) return
+  to_delete.value = id
+  reconfirm.value = true
 }
+
+function do_delete(id: string) {
+  if (state) return
+  Invoke('remove-chart', { id }).then(() => {
+    GlobalStat.update_all_chart()
+  })
+  delete_cancel()
+}
+
+function delete_cancel() {
+  to_delete.value = undefined
+  reconfirm.value = false
+}
+
+const to_delete = ref<string>()
+const reconfirm = ref(false)
 
 function detail(id: string) {
   if (state) return
@@ -125,7 +146,7 @@ const tip = utils.random(StartUpTips)
             :key="chart.id"
             class="chart-unit"
             @click="open_proj(chart.id)"
-            @contextmenu="delete_proj(chart.id, chart.name)"
+            @contextmenu="try_delete(chart.id)"
             @mouseenter="detail(chart.id)"
           >
             <div class="chart-unit-name">{{ chart.name }}</div>
@@ -136,6 +157,17 @@ const tip = utils.random(StartUpTips)
             <a-img :src="`stray:///__sprite__/${chart.id}`" class="chart-unit-bg">
               <img alt="???" class="chart-unit-bg" src="/song.jpg" style="opacity: 0.3" />
             </a-img>
+            <transition>
+              <div v-if="to_delete == chart.id" class="chart-unit-delete">
+                <div>真的要删掉吗？</div>
+                <a-button2
+                  msg="我确定！"
+                  style="color: #e66"
+                  @click.capture.stop="do_delete(chart.id)"
+                />
+                <a-button2 msg="算了算了" @click.capture.stop="delete_cancel" />
+              </div>
+            </transition>
           </div>
         </TransitionGroup>
         <div v-if="shown.length == 0">这里没有歌哦。试试导入和更换搜索方式吧！</div>
@@ -168,10 +200,12 @@ const tip = utils.random(StartUpTips)
   position: relative;
   padding-top: 10%;
 }
+
 .su-logo {
   padding-top: 5%;
   width: 260px;
 }
+
 .su-tip {
   position: relative;
   color: gold;
@@ -179,6 +213,7 @@ const tip = utils.random(StartUpTips)
   height: 1.5rem;
   line-height: 1.5rem;
 }
+
 .su-greeting {
   text-align: center;
 }
@@ -205,6 +240,7 @@ const tip = utils.random(StartUpTips)
   text-overflow: ellipsis;
   overflow: hidden;
 }
+
 .sd-info {
   width: 50%;
   display: grid;
@@ -214,19 +250,23 @@ const tip = utils.random(StartUpTips)
   margin-top: 15px;
   max-width: 90%;
 }
+
 .sd-info > span:first-child {
   text-align: left;
 }
+
 .sd-info > span:last-child {
   text-align: right;
   text-wrap: nowrap;
   text-overflow: ellipsis;
 }
+
 .sd-diff {
   width: 50%;
   text-overflow: ellipsis;
   text-align: left;
 }
+
 .chart-list-right {
   display: flex;
   flex-direction: column;
@@ -270,8 +310,9 @@ const tip = utils.random(StartUpTips)
   transform: translateX(calc(0 - var(--ch-transform-len)));
   border: 4px solid transparent;
   width: calc(100% - 10px);
+  padding-top: 5px;
 
-  --ch-transform-len: 0.4rem;
+  --ch-transform-len: 0.5rem;
 }
 
 .chart-unit {
@@ -282,14 +323,17 @@ const tip = utils.random(StartUpTips)
   transform: translateX(var(--ch-transform-len));
   padding: 5px;
   border-radius: 5px;
-  min-height: 2rem;
+  min-height: 2.2rem;
+  position: relative;
+  max-width: calc(100% - 5px);
 }
+
 .chart-unit:last-child {
   margin-bottom: 120px;
 }
 
 .chart-unit:hover {
-  transform: translateX(0);
+  transform: translateX(2px);
 }
 
 .chart-unit:hover > .chart-unit-cid {
@@ -299,6 +343,7 @@ const tip = utils.random(StartUpTips)
 .chart-unit > div {
   user-select: none;
 }
+
 .chart-unit:hover .chart-unit-name {
   box-shadow: 0 0 2px black;
   background-color: rgba(0, 0, 0, 0.4);
@@ -326,6 +371,7 @@ const tip = utils.random(StartUpTips)
   width: min-content;
   transition: all 0.2s ease;
   height: 1.2rem;
+  max-width: 50vw;
 }
 
 .chart-unit-cid {
@@ -343,6 +389,22 @@ const tip = utils.random(StartUpTips)
   opacity: 0.7;
   flex-grow: 1;
   padding-right: 10px;
+}
+
+.chart-unit-delete {
+  display: grid;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  backdrop-filter: blur(4px);
+  grid-template-columns: 4fr 1fr 1fr;
+  padding-left: 5px;
+  box-sizing: border-box;
+  background-color: rgba(0, 0, 0, 0.4);
+  align-items: center;
+  box-shadow: red 0 0 4px;
 }
 
 .v-move, /* 对移动中的元素应用的过渡 */
