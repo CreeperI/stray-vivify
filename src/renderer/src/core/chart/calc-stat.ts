@@ -11,9 +11,12 @@ type time_sec = number
 type lane = number
 ////////////
 
-export function calc_stats(diff: ChartTypeV2.diff): ChartTypeV2.SongStats {
+export function calc_stats(
+  diff: ChartTypeV2.diff,
+  songLengthMs: time_ms
+): ChartTypeV2.SongStats {
   FrameRate.calc_sr.start()
-  const songLengthMs = utils.range(...diff.notes.map(x => x.time))
+
   let noteStat: number,
     speedStat: number,
     techStat: number,

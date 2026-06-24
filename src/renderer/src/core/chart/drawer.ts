@@ -112,7 +112,7 @@ export namespace NoteDrawer {
   }
 }
 
-const bpm_drawer = () => {
+const bpm_drawer = function() {
   return {
     text: new Text({
       style: new TextStyle({

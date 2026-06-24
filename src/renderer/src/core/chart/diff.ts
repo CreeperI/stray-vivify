@@ -102,8 +102,8 @@ export class Chart_diff extends StopClass {
 
   sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
-  #__density_abort = false
   ai_mod = ref<[number,string][]>([])
+  #__density_abort = false
 
   constructor(chart: Chart, index?: number) {
     super()
@@ -677,7 +677,7 @@ export class Chart_diff extends StopClass {
   }
   timing_of_time(time:ms) {
     if (time <= 0) time = 0
-    const ix = this.timing.findLastIndex((v) => v.time <= time) ?? 0
+    const ix = Math.max(this.timing.findLastIndex((v) => v.time <= time), 0)
     return {
       timing: this.timing[ix],
       ix: ix
@@ -817,7 +817,7 @@ export class Chart_diff extends StopClass {
 
   update_sr() {
     if (!Storage.settings.song_stats) return
-    this.sr.value = calc_stats(this.diff)
+    this.sr.value = calc_stats(this.diff, this.chart.length)
     if (Storage.settings.osu_sr) this.sr.value.sr = calc_sr(this.diff)
   }
 
@@ -898,6 +898,10 @@ export class Chart_diff extends StopClass {
     this.fuck_shown(this.chart.audio.current_time, true)
   }
 
+  check_aimod() {
+    this.ai_mod.value = aiMod(this.diff)
+  }
+
   /** @returns if the note is successfully removed */
   private remove_note(v: ChartTypeV2.note) {
     const index = this.findNote(v)
@@ -955,9 +959,5 @@ export class Chart_diff extends StopClass {
 
   private findNote(n: ChartTypeV2.note): number {
     return this.notes.findIndex((x) => utils.is_equal(n, x))
-  }
-
-  check_aimod() {
-    this.ai_mod.value = aiMod(this.diff)
   }
 }
