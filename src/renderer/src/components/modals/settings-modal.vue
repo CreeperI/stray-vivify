@@ -38,6 +38,8 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <ds>会帮你自动填到谱师栏</ds>
         <div>显示stray/vivify图标</div>
         <a-checkbox2 v-model="r.settings.stray_logo" />
+        <div>跳过删除确认</div>
+        <a-checkbox2 v-model="r.settings.delete_no_confirm" />
 
         <setting-header msg="Lane部分" />
         <div>lane-width (px)</div>
@@ -62,13 +64,12 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <a-checkbox2 v-model="r.settings.always_version" />
         <div>osu!mania难度计算</div>
         <a-checkbox2 v-model="r.settings.osu_sr" />
+        <ds>Claude写的，大概不准。</ds>
 
         <setting-header msg="编辑功能" />
 
         <div>滚轮反转</div>
         <a-checkbox2 v-model="r.settings.reverse_scroll" />
-        <div>跳过删除确认</div>
-        <a-checkbox2 v-model="r.settings.delete_no_confirm" />
         <div>报错时notify</div>
         <a-checkbox2 v-model="r.settings.err_notify" />
         <div>延迟（视觉）</div>
@@ -88,7 +89,8 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <a-checkbox2 v-model="r.settings.bar_from_0" />
         <div>note时间容差</div>
         <a-number-input v-model="r.settings.nearest" />
-        <ds>摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间</ds>
+        <ds>摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间。
+          <br>在AiMod中，时间相差不大于该值的note会被认定为同一时间。</ds>
         <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
         <a-checkbox2 v-model="r.settings.auto_save" />
         <ds>在播放的时候会暂停。</ds>
@@ -152,37 +154,6 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
           min="0.1"
           step="0.01"
         />
-
-        <setting-header msg="mod编辑" />
-
-        <div>mod按照名字排序</div>
-        <a-checkbox2 v-model="r.settings.sv.sort_by_name" />
-        <div>简化obj名</div>
-        <a-checkbox2 v-model="r.settings.sv.short_obj" />
-        <div>note不透明度</div>
-        <a-number-input v-model="r.settings.sv.opacity" max="100" min="0" />
-        <div>lane width</div>
-        <a-number-input v-model="r.settings.sv.lane_width" min="20" />
-        <div>指示线宽度</div>
-        <a-number-input v-model="r.settings.sv.pending_width" min="1" />
-        <div>指示线颜色</div>
-        <a-color-input v-model="r.settings.sv.pending_stroke" />
-        <div>指示线不透明度</div>
-        <a-number-input v-model="r.settings.sv.pending_opacity" max="100" min="0" />
-        <div>右侧拓展宽度</div>
-        <a-number-input v-model="r.settings.sv.expand_width" />
-        <div>颜色：单次mod</div>
-        <a-color-input v-model="r.settings.sv.color_single" />
-        <div>颜色：重复mod-背景</div>
-        <a-color-input v-model="r.settings.sv.color_repeat_bg" />
-        <div>颜色：重复mod-前条</div>
-        <a-color-input v-model="r.settings.sv.color_repeat_fg" />
-        <div>颜色：新mod-单次</div>
-        <a-color-input v-model="r.settings.sv.color_pending_single" />
-        <div>颜色：新mod-重复</div>
-        <a-color-input v-model="r.settings.sv.color_pending_repeat" />
-        <div>颜色：mod文字</div>
-        <a-color-input v-model="r.settings.sv.color_text" />
 
         <setting-header msg="小节线" />
 

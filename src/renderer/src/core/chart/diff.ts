@@ -451,17 +451,18 @@ export class Chart_diff extends StopClass {
   update_bar_section_list() {
     this.bar_list = []
     this.section_list = []
+    const tolerance = Storage.settings.beat_tolerance
     const v = this.timing
     for (let i = 0; i < v.length; i++) {
       const part = v[i]
       const time_per_bar = (60 / part.bpm) * part.num * 1000
       const time_per_section = (60 / part.bpm) * part.den * 250
-      const part_end = this.timing_end_of(part, v, this.chart.length)
-      for (let time = part.time; time < part_end; time += time_per_bar) {
+      const part_end = this.timing_end_time(part, v, this.chart.length)
+      for (let time = part.time; time < part_end - tolerance; time += time_per_bar) {
         this.bar_list.push(time)
       }
-      for (let time = part.time; time < part_end; time += time_per_section) {
-        this.section_list.push(time)
+      for (let time1 = part.time; time1 < part_end - tolerance; time1 += time_per_section) {
+        this.section_list.push(time1)
       }
     }
   }
@@ -488,7 +489,7 @@ export class Chart_diff extends StopClass {
 
     for (let i = 0; i < v.length; i++) {
       const timing = v[i]
-      const end = this.timing_end_of(timing, v, this.chart.length)
+      const end = this.timing_end_time(timing, v, this.chart.length)
 
       const time_per_beat = (240 / (timing.bpm * den)) * 1000
       let beat_index = 0
@@ -514,7 +515,7 @@ export class Chart_diff extends StopClass {
     this.notes = this.toRaw.toSorted(utils.sort_notes)
   }
 
-  timing_end_of(t: ChartTypeV2.timing, timing: ChartTypeV2.timing[], max = Infinity) {
+  timing_end_time(t: ChartTypeV2.timing, timing: ChartTypeV2.timing[], max = Infinity) {
     const idx = timing.findIndex((v) => t.time == v.time)
     if (idx === -1) throw new Error()
     else if (idx == timing.length - 1) return max
@@ -522,7 +523,7 @@ export class Chart_diff extends StopClass {
   }
 
   timing_end(t: ChartTypeV2.timing) {
-    return this.timing_end_of(t, this.timing, this.chart.length)
+    return this.timing_end_time(t, this.timing, this.chart.length)
   }
 
   update_diff_counts() {
@@ -569,7 +570,7 @@ export class Chart_diff extends StopClass {
     this.counts.value.max_bpm = Math.max(...bpms)
 
     const bpm_length = this.timing.map(
-      (v) => [this.timing_end_of(v, this.timing, this.chart.length), v] as const
+      (v) => [this.timing_end_time(v, this.timing, this.chart.length), v] as const
     )
     const max_length = Math.max(...bpm_length.map((v) => v[0]))
     const max_timing = bpm_length.find((v) => v[0] == max_length)
@@ -866,7 +867,7 @@ export class Chart_diff extends StopClass {
       const part = v[i]
       // ms
       const time_per_4 = 60000 / part.bpm
-      const part_end = this.timing_end_of(part, v)
+      const part_end = this.timing_end_time(part, v)
       const part_index_start = all_times.findIndex((v) => v >= part.time)
       const part_index_end = all_times.findIndex((v) => v >= part_end) - 1
       const part_times =

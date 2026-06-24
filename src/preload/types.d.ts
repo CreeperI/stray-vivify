@@ -492,35 +492,11 @@ export namespace storages {
     }
 
     auto_save: boolean
-
     exporter: {
       sv: boolean
       crop: boolean
     }
     nearest: number
-
-    sv: {
-      sort_by_name: boolean
-      short_obj: boolean
-      lane_width: number
-      opacity: number
-      pending_stroke: string
-      pending_opacity: number
-      pending_width: number
-      expand_width: number
-
-      mod_width: number
-      mod_gap: number
-      repeat_gap: number
-      proxy_gap: number
-
-      color_single: string
-      color_repeat_bg: string
-      color_repeat_fg: string
-      color_pending_single: string
-      color_pending_repeat: string
-      color_text: string
-    }
     color_stats: boolean
 
     always_version: boolean
@@ -534,6 +510,7 @@ export namespace storages {
     }
     osu_sr: boolean
     disable_inspect: boolean
+    beat_tolerance: number
   }
   export interface statistics {
     first_open: number
