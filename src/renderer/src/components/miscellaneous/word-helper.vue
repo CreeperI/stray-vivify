@@ -36,7 +36,6 @@ onUnmounted(() => {
   text-decoration: underline #b8dcee 1px;
   cursor: help;
   user-select: none;
-  text-wrap: nowrap;
   width: min-content;
 }
 </style>

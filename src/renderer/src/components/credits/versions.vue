@@ -374,6 +374,16 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>移除了很多地方的reactivity，感觉会快一点点。</div>
       <div>添加了一个复制timing list的按钮。</div>
     </Build>
+    <Build build="0.9.10" y="2026" m="6" d="25">
+      <div>移除了vsb导出。</div>
+      <div>将所有vs-chart重命名为chart。</div>
+      <div>现在会自动检测无效的谱面并移除之。</div>
+      <div>添加了load-song页面。</div>
+      <div>调整了加载曲目长度的逻辑。</div>
+      <div>调整了曲目列表右键删除的操作，移除了删除确认的设置。</div>
+      <div>添加了beat宽容时间。参见设置。</div>
+      <div>添加了底部bpm显示，调整了左侧bpm显示的有效数字，移除了底部bpm显示的设置（即关不掉底部bpm显示）。</div>
+    </Build>
   </div>
 </template>
 
@@ -381,5 +391,6 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
 .version-wrapper {
   display: flex;
   flex-direction: column-reverse;
+  overflow-x: hidden;
 }
 </style>

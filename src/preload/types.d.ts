@@ -501,6 +501,7 @@ export namespace storages {
     }
     osu_sr: boolean
     disable_inspect: boolean
+
     beat_tolerance: number
   }
   export interface statistics {
