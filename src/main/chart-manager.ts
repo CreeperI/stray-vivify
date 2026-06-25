@@ -27,6 +27,8 @@ export default class ChartManager {
     this.read_json()
     this.rename()
     this.possible_charts()
+    this.unexists()
+    this.write_json()
   }
 
   add_chart(
@@ -402,7 +404,9 @@ export default class ChartManager {
     if (!fs.existsSync(fp)) return
     const zip = new AdmZip(fp)
     const zip_entry = zip.getEntries()
-    const json = zip_entry.find((v) => v.entryName === 'chart.json')
+    const json = zip_entry.find(
+      (v) => v.entryName === 'chart.json' || v.entryName == 'vs-chart.json'
+    )
     const song = zip_entry.find((v) => {
       return ['.mp3', '.wav', '.ogg', '.m4a'].includes(path.extname(v.entryName))
     })
@@ -413,6 +417,7 @@ export default class ChartManager {
     try {
       fs.mkdirSync(path.join(this.charts_folder, id))
       zip.extractAllTo(path.join(this.charts_folder, id))
+      this.rename()
       if (chart_data.version)
         this.add_chart(
           id,
@@ -701,8 +706,26 @@ export default class ChartManager {
       .readdirSync(this.charts_folder)
       .filter((v) => fs.lstatSync(path.join(this.charts_folder, v)).isDirectory())
     for (const folder of folders) {
-      if (fs.existsSync(path.join(this.charts_folder, folder, 'chart.json'))) {
-        fs.renameSync(path.join(this.charts_folder, folder, 'chart.json'), 'chart.json')
+      if (fs.existsSync(path.join(this.charts_folder, folder, 'vs-chart.json'))) {
+        fs.renameSync(
+          path.join(this.charts_folder, folder, 'vs-chart.json'),
+          path.join(this.charts_folder, folder, 'chart.json')
+        )
+      }
+    }
+  }
+
+  private unexists() {
+    const to_delete: string[] = []
+    for (const datum of this.data) {
+      if (!fs.existsSync(path.join(this.charts_folder, datum.id))) {
+        to_delete.push(datum.id)
+      }
+    }
+    for (const datum of to_delete) {
+      const ix = this.data.findIndex((v) => v.id == datum)
+      if (ix >= 0) {
+        this.data.splice(ix, 1)
       }
     }
   }
