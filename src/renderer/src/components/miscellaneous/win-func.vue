@@ -51,4 +51,8 @@ function close() {
   background-color: #ff1145;
   color: #0d1418;
 }
+.header-wrapper > .header-win-func {
+  position: absolute;
+  right: 0;
+}
 </style>

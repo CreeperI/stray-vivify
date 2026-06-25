@@ -108,7 +108,7 @@ const rkey = RefreshAll.generate_key('select')
         </div>
       </div>
     </div>
-    <div class="note-pending">
+    <div v-else class="note-pending">
       <img
         :alt="NoteProps.base_src(pending_note)"
         :src="NoteProps.getSrc(pending_note)"

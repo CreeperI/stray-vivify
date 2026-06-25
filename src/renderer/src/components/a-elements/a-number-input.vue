@@ -46,7 +46,7 @@ function wheel(e: WheelEvent) {
     :min="min"
     :max="max"
     @input="handleInput"
-    @wheel.prevent="wheel"
+    @wheel.passive.prevent="wheel"
   />
 </template>
 

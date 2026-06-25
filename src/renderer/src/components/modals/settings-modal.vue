@@ -68,8 +68,6 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
 
         <div>滚轮反转</div>
         <a-checkbox2 v-model="r.settings.reverse_scroll" />
-        <div>报错时notify</div>
-        <a-checkbox2 v-model="r.settings.err_notify" />
         <div>延迟（视觉）</div>
         <a-number-input v-model="r.settings.offset1" class="in" />
         <div>密度采样间隔</div>
@@ -87,8 +85,10 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <a-checkbox2 v-model="r.settings.bar_from_0" />
         <div>note时间容差</div>
         <a-number-input v-model="r.settings.nearest" />
-        <ds>摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间。
-          <br>在AiMod中，时间相差不大于该值的note会被认定为同一时间。</ds>
+        <ds
+          >摆放note时，会自动对齐至已存在的最近(+-本数值ms)的note的时间。
+          <br />在AiMod中，时间相差不大于该值的note会被认定为同一时间。</ds
+        >
         <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
         <a-checkbox2 v-model="r.settings.auto_save" />
         <ds>在播放的时候会暂停。</ds>
@@ -215,7 +215,10 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <ds>osu!std同款鼠标</ds>
         <div>禁用Inspector</div>
         <a-checkbox2 v-model="r.settings.disable_inspect" />
-        <ds>开启后会禁用报错提示。能够在极限情况下提升性能（比如240FPS）。不建议开启。</ds>
+        <ds>开启后会禁用报错提示（下面这个）。能够在极限情况下提升性能（比如240FPS）。不建议开启。</ds>
+        <div>报错时notify</div>
+        <a-checkbox2 v-model="r.settings.err_notify" />
+        <ds>不建议关闭。</ds>
       </div>
     </div>
     <template #footer>
