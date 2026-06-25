@@ -8,7 +8,6 @@ import Playfield from '@renderer/components/chart-v2/playfield.vue'
 import { onUnmounted } from 'vue'
 import ChartMain from '@renderer/components/chart-v2/chart-tabs/chart-main.vue'
 import { EventHub } from '@renderer/core/misc/eventhub'
-import { ModalTarget } from '@kolirt/vue-modal'
 import { Chart } from '@renderer/core/chart/chart'
 
 const active = GlobalStat.refs.chart_tab
@@ -57,7 +56,6 @@ const chart_state = GlobalStat.chart_state
       <song-info v-if="active == 1" />
       <chart-main v-if="active == 2" />
       <chart-timing v-if="active == 3" />
-      <ModalTarget />
     </template>
     <preview v-if="chart_state == 1" />
     <playfield v-if="chart_state == 2" />
