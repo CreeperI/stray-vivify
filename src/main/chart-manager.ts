@@ -10,7 +10,6 @@ import * as child_process from 'node:child_process'
 import { ChartTypeV2 } from '../preload/chart-types'
 import { OszReader } from './osz-reader'
 import { serialize } from './serialize'
-import { to_vsb_data } from './vsb-writer'
 
 function timestr() {
   const date = new Date()
@@ -617,17 +616,6 @@ export default class ChartManager {
         (...a) => console.log(...a)
       )
     shell.showItemInFolder(path.join(exported_path, 'info.json'))
-  }
-
-  write_vsb(id: string, diff: ChartTypeV2.diff, vsm_path?: string) {
-    const chart = this.data.find((v) => v.id === id)
-    if (!chart) return
-    const vsm = vsm_path ? (fs.readFileSync(vsm_path, 'utf-8') ?? '') : ''
-    fs.writeFileSync(
-      path.join(this.charts_folder, id, diff.meta.diff1 + '.vsb'),
-      Buffer.from(to_vsb_data(diff, vsm))
-    )
-    shell.showItemInFolder(path.join(this.charts_folder, id, diff.meta.diff1 + '.vsb'))
   }
 
   show_chart(id: string) {

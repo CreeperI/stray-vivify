@@ -256,9 +256,6 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'flash-frame': (_, { flag = true }) => {
       mw.flashFrame(flag)
     },
-    'write-vsb': (_, { id, diff, vsm }) => {
-      chart_manager.write_vsb(id, diff, vsm)
-    },
     'delete-backup': (_, { id, backup_name }) => {
       chart_manager.delete_backup(id, backup_name)
     },

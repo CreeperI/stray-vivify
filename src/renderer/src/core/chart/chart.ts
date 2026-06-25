@@ -17,10 +17,6 @@ import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import nextFrame = utils.nextFrame
 import { LoadSong } from '@renderer/core/misc/load-song'
 
-function isBumper(n: ChartType.note | string) {
-  if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
-  return ['b', 's', 'mb'].includes(n.n)
-}
 function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
   const new_diff = Chart_diff.createDiff()
   new_diff.timing = []
@@ -95,7 +91,6 @@ export type ms = number
 
 export class Chart extends StopClass {
   static current: Chart | undefined = undefined
-  static isBumper = isBumper
   song: Chart_song
   diffs: ChartTypeV2.diff[]
   audio: Chart_audio
@@ -677,12 +672,5 @@ export class Chart extends StopClass {
     } else {
       this.audio.set_current_time(this.audio.current_time - scr)
     }
-  }
-
-  event_time(e: MouseEvent, chart: Chart, mul: number, cT: number) {
-    const bottom = window.innerHeight - e.pageY - 80 - 43 / 2
-    return Math.floor(
-      GlobalStat.func_keys.value.alt ? bottom / mul + cT : chart.diff.nearest(bottom / mul + cT)
-    )
   }
 }
