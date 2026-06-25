@@ -21,7 +21,7 @@ function onkeydown(e: KeyboardEvent) {
 const setting = computed(() => Storage.data.value.settings.record_field)
 const editor = computed(() => Storage.settings)
 const current_time = chart.audio.refs.current_ms
-const length = chart.length
+const length = chart.audio.length
 const current_timing = chart.diff.current_timing
 
 const img_src = ref(`stray:///__sprite__/${chart.id}`)

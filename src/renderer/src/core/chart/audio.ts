@@ -10,9 +10,7 @@ type second = number
 
 export class Chart_audio {
   chart: Chart
-  file_path: string | undefined
-  url: string | undefined
-  ele: undefined | HTMLAudioElement
+  ele: HTMLAudioElement
   refs: {
     current_ms: Ref<ms>
     play_rate: Ref<number>
@@ -24,15 +22,12 @@ export class Chart_audio {
   last: ms
   from_negative: boolean
   ended: boolean
+  length: ms
 
-  constructor(ch: Chart, file_path?: string, url?: string) {
+  constructor(ch: Chart, url: string, length: number) {
     this.chart = ch
-    this.file_path = file_path
-    this.url = url
-    this.ele = undefined
-    if (url) {
-      this.ele = new Audio(url)
-    }
+    this.length = length
+    this.ele = new Audio(url)
     this._play_rate = 1
     this._current_time = 0
     this.last = 0
@@ -105,10 +100,6 @@ export class Chart_audio {
     return this.ele as HTMLAudioElement
   }
 
-  get length() {
-    return (this.ele?.duration ?? -1) * 1000
-  }
-
   set_current_time(v: ms) {
     v = Math.floor(utils.clamp(v, -5000, this.length + 3000))
     this.pause()
@@ -130,23 +121,21 @@ export class Chart_audio {
   }
 
   set_ele_time(v: ms) {
-    if (this.ele) {
-      this.ele.currentTime = Math.max(v / 1000, 0)
-    }
+    this.ele.currentTime = Math.max(v / 1000, 0)
   }
 
   on_can_play_through(cb: () => void, options?: AddEventListenerOptions) {
-    if (this.ele) this.ele.addEventListener('canplaythrough', cb, options)
-    else console.warn('Trying to setting can-play-through callback on a empty audio!')
+    this.ele.addEventListener('canplaythrough', cb, options)
   }
 
   on_end(cb: () => void, options?: AddEventListenerOptions) {
-    if (this.ele) this.ele.addEventListener('ended', cb, options)
-    else console.warn('Trying to setting end callback on a empty audio!')
+    this.ele.addEventListener('ended', cb, options)
   }
 
   load_url(url: string) {
     this.ele = new Audio(url)
+  }
+  on_timeupdate() {
     this.ele.addEventListener('timeupdate', () => {
       if (this.paused) return
       if (this.from_negative) return
@@ -192,7 +181,7 @@ export class Chart_audio {
   }
 
   private set_current_time_from_updater(v: ms) {
-    v = Math.floor(Math.min(this.chart.length, Math.max(-5000, v)))
+    v = Math.floor(Math.min(this.chart.audio.length, Math.max(-5000, v)))
     this._current_time = v
     this.refs.current_ms.value = v
     if (v < 0) this.from_negative = true

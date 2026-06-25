@@ -111,32 +111,6 @@
   user-select: all;
 }
 
-.header-win-func {
-  height: 100%;
-  -webkit-app-region: no-drag;
-  font-family: Webdings, sans-serif;
-  display: flex;
-  position: absolute;
-  right: 0;
-  background-color: rgb(32, 33, 70);
-  z-index: var(--z-highest);
-}
-
-.header-win-func > div {
-  width: 4rem;
-  text-align: center;
-  transition: all 0.2s linear;
-  box-sizing: border-box;
-  cursor: pointer;
-  color: #b8dcee;
-  height: 100%;
-  line-height: var(--header-height);
-}
-
-.header-close:hover {
-  background-color: #ff1145;
-  color: #0d1418;
-}
 
 .header-active {
   background-color: #3c3e6e;

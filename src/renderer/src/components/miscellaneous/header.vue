@@ -3,10 +3,7 @@ import { modal } from '@renderer/core/misc/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 import './header.css'
-
-const ipcRenderer = window.electron.ipcRenderer
-
-const isMax = GlobalStat.window_max_state
+import WinFunc from '@renderer/components/miscellaneous/win-func.vue'
 async function import_svc() {
   const fp = await Invoke('ask-file', { file: ['Chart', 'zip', 'svc'] })
   if (!fp) return
@@ -44,12 +41,7 @@ async function import_osz() {
         </div>
       </div>
     </div>
-    <div class="header-win-func">
-      <div @click="ipcRenderer.send('window-min')">0</div>
-      <div v-if="isMax" @click="ipcRenderer.send('window-max')">2</div>
-      <div v-else @click="ipcRenderer.send('window-max')">1</div>
-      <div class="header-close" @click="GlobalStat.close_app()">r</div>
-    </div>
+    <win-func />
   </div>
 </template>
 

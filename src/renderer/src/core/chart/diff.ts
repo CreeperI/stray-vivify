@@ -457,7 +457,7 @@ export class Chart_diff extends StopClass {
       const part = v[i]
       const time_per_bar = (60 / part.bpm) * part.num * 1000
       const time_per_section = (60 / part.bpm) * part.den * 250
-      const part_end = this.timing_end_time(part, v, this.chart.length)
+      const part_end = this.timing_end_time(part, v, this.chart.audio.length)
       for (let time = part.time; time < part_end - tolerance; time += time_per_bar) {
         this.bar_list.push(time)
       }
@@ -489,7 +489,7 @@ export class Chart_diff extends StopClass {
 
     for (let i = 0; i < v.length; i++) {
       const timing = v[i]
-      const end = this.timing_end_time(timing, v, this.chart.length)
+      const end = this.timing_end_time(timing, v, this.chart.audio.length)
 
       const time_per_beat = (240 / (timing.bpm * den)) * 1000
       let beat_index = 0
@@ -523,7 +523,7 @@ export class Chart_diff extends StopClass {
   }
 
   timing_end(t: ChartTypeV2.timing) {
-    return this.timing_end_time(t, this.timing, this.chart.length)
+    return this.timing_end_time(t, this.timing, this.chart.audio.length)
   }
 
   update_diff_counts() {
@@ -563,14 +563,14 @@ export class Chart_diff extends StopClass {
     this.counts.value.total = v.notes.length + count.hold
     this.counts.value.total1 = v.notes.length
 
-    this.counts.value.avg_density = this.counts.value.total / (this.chart.length / 1000)
+    this.counts.value.avg_density = this.counts.value.total / (this.chart.audio.length / 1000)
 
     const bpms = this.timing.map((v) => v.bpm)
     this.counts.value.min_bpm = Math.min(...bpms)
     this.counts.value.max_bpm = Math.max(...bpms)
 
     const bpm_length = this.timing.map(
-      (v) => [this.timing_end_time(v, this.timing, this.chart.length), v] as const
+      (v) => [this.timing_end_time(v, this.timing, this.chart.audio.length), v] as const
     )
     const max_length = Math.max(...bpm_length.map((v) => v[0]))
     const max_timing = bpm_length.find((v) => v[0] == max_length)
@@ -768,7 +768,7 @@ export class Chart_diff extends StopClass {
   calc_density() {
     FrameRate.calc_density.start()
     const max_count = Storage.settings.density_data_count
-    const per_length = this.chart.length / max_count
+    const per_length = this.chart.audio.length / max_count
     const d: number[] = Array(max_count).fill(0)
     const notes = toRaw(this.notes)
     for (let i = 0; i < notes.length; i++) {
@@ -817,7 +817,7 @@ export class Chart_diff extends StopClass {
 
   update_sr() {
     if (!Storage.settings.song_stats) return
-    this.sr.value = calc_stats(this.diff, this.chart.length)
+    this.sr.value = calc_stats(this.diff, this.chart.audio.length)
     if (Storage.settings.osu_sr) this.sr.value.sr = calc_sr(this.diff)
   }
 

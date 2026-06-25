@@ -15,6 +15,7 @@ import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import nextFrame = utils.nextFrame
+import { LoadSong } from '@renderer/core/misc/load-song'
 
 function isBumper(n: ChartType.note | string) {
   if (typeof n == 'string') return ['b', 's', 'mb'].includes(n)
@@ -97,7 +98,6 @@ export class Chart extends StopClass {
   static isBumper = isBumper
   song: Chart_song
   diffs: ChartTypeV2.diff[]
-  path: string
   audio: Chart_audio
   diff: Chart_diff
   playfield: Chart_playfield | null
@@ -115,12 +115,12 @@ export class Chart extends StopClass {
   }
   backup_last = ref({ time: performance.now(), init: true })
 
-  constructor() {
+  constructor(id: string, blob_url: string, length: ms) {
     super()
+    this.id = id
     this.song = new Chart_song(this)
     this.diffs = [Chart_diff.createDiff()]
-    this.audio = new Chart_audio(this)
-    this.path = ''
+    this.audio = new Chart_audio(this, blob_url, length)
     this.length_end = -1
     this.shown_timing = computed(() => [
       this.audio.refs.current_ms.value,
@@ -137,7 +137,6 @@ export class Chart extends StopClass {
       }
     })
     this.diff = new Chart_diff(this)
-    this.id = ''
     this.playfield = null
     this.sprite_err = ref(false)
     this.bg_err = ref(false)
@@ -145,27 +144,10 @@ export class Chart extends StopClass {
       diff_ref: ref(-1)
     }
     this.hit_sounder = new HitSoundSystem(this)
-  }
 
-  static get $current() {
-    if (!this.current) throw new Error("where's my chart!")
-    return this.current
-  }
-
-  get length() {
-    return this.audio.length
-  }
-
-  get visible_timing() {
-    return this.audio.current_time + Storage.computes.visible.value
-  }
-
-  get chart(): ChartTypeV2.final {
-    return {
-      song: this.song.save(),
-      diffs: this.diffs,
-      version: Storage.version
-    }
+    this.length_end = this.audio.length + 3000
+    this.set_header_name()
+    this.audio.init_on_end()
   }
 
   /*static create_vsb(vsb_path: string): Promise<Chart> {
@@ -182,6 +164,19 @@ export class Chart extends StopClass {
       })
     })
   }*/
+
+  static get $current() {
+    if (!this.current) throw new Error("where's my chart!")
+    return this.current
+  }
+
+  get chart(): ChartTypeV2.final {
+    return {
+      song: this.song.save(),
+      diffs: this.diffs,
+      version: Storage.version
+    }
+  }
 
   get $playfield() {
     if (!this.playfield) this.init_playfield()
@@ -205,25 +200,17 @@ export class Chart extends StopClass {
     }
   }
 
-  static create(musicPath: string, musicURL: string): Promise<Chart> {
-    const chart = new Chart()
-    chart.audio.load_url(musicURL)
-    chart.set_path(musicPath)
-    return new Promise((resolve) => {
-      chart.audio.on_can_play_through(
-        () => {
-          chart.post_define()
-          resolve(chart)
-        },
-        { once: true }
-      )
-    })
-  }
-
   static async open_chart(id: string) {
+    GlobalStat.route.change("load-song")
     const file = await Invoke('open-song', { id })
-    const blob_path = URL.createObjectURL(await this.fetch_blob(id))
-    const chart = await this.create(id, blob_path)
+    LoadSong.status.open_song = true
+    const blob = await this.fetch_blob(id)
+    LoadSong.status.fetch_blob = true
+    const length = (await utils.audio_length(blob, GlobalStat.audioContext)) * 1000
+    LoadSong.status.audio_length = true
+    const blob_path = URL.createObjectURL(blob)
+    LoadSong.status.blob_path = true
+    const chart = new Chart(id, blob_path, length)
     if (file.data) {
       const data = this.parse_data(file.data)
       if (data.status == 'converted') {
@@ -233,7 +220,7 @@ export class Chart extends StopClass {
       chart.set_name(data.data.song.name)
       chart.diff.update_on_diff_index()
     }
-    chart.id = id
+    LoadSong.status.set_data = true
     this.current = chart
     GlobalStat.route.change('editor')
     Invoke('set-process-name', { name: `${chart.song.name} - stray/vivify` })
@@ -337,10 +324,6 @@ export class Chart extends StopClass {
     }, 200)
   }
 
-  set_path(p: string) {
-    this.path = p
-  }
-
   set_name(n: string) {
     this.song.name = n
   }
@@ -348,12 +331,6 @@ export class Chart extends StopClass {
   set_header_name() {
     GlobalStat.refs.header_display.value =
       this.song.name + ' - ' + this.diff.diff1 + ' ' + this.diff.diff2
-  }
-
-  post_define() {
-    this.length_end = this.length + 3000
-    this.set_header_name()
-    this.audio.init_on_end()
   }
 
   create_diff() {
@@ -701,11 +678,11 @@ export class Chart extends StopClass {
       this.audio.set_current_time(this.audio.current_time - scr)
     }
   }
-}
 
-export function event_time(e: MouseEvent, chart: Chart, mul: number, cT: number) {
-  const bottom = window.innerHeight - e.pageY - 80 - 43 / 2
-  return Math.floor(
-    GlobalStat.func_keys.value.alt ? bottom / mul + cT : chart.diff.nearest(bottom / mul + cT)
-  )
+  event_time(e: MouseEvent, chart: Chart, mul: number, cT: number) {
+    const bottom = window.innerHeight - e.pageY - 80 - 43 / 2
+    return Math.floor(
+      GlobalStat.func_keys.value.alt ? bottom / mul + cT : chart.diff.nearest(bottom / mul + cT)
+    )
+  }
 }

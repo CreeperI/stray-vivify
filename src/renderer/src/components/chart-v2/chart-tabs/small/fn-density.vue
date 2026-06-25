@@ -31,7 +31,7 @@ function mousemove(e: MouseEvent) {
     seeker.value.display = false
     return
   }
-  seeker.value.time = Math.floor((x / (width - 20)) * chart.length)
+  seeker.value.time = Math.floor((x / (width - 20)) * chart.audio.length)
   seeker.value.display = true
   seeker.value.x = e.offsetX
   if (flag) {
@@ -39,7 +39,7 @@ function mousemove(e: MouseEvent) {
   }
 }
 const current_x = computed(() => {
-  return (chart.audio.refs.current_ms.value / chart.length) * (width - 20) + 20
+  return (chart.audio.refs.current_ms.value / chart.audio.length) * (width - 20) + 20
 })
 function mouseout() {
   seeker.value.display = false

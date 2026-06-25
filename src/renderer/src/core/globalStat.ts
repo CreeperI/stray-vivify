@@ -4,9 +4,9 @@ import { Invoke } from '@renderer/core/ipc'
 import { Chart } from '@renderer/core/chart/chart'
 
 export namespace GlobalStat {
-  type routes = 'start' | 'wait' | 'editor'
+  type routes = 'start' | 'editor' | 'preinit' | 'load-song'
   export const route = {
-    route: ref('start' as routes),
+    route: ref<routes>('preinit'),
     change(p: routes) {
       this.route.value = p
     }
@@ -18,10 +18,10 @@ export namespace GlobalStat {
     all_chart_ref.value = all_chart
   }
   export const window_max_state = ref(false)
-  export function log(...args: any) {
-    for (const arg of args) {
-      console.log(JSON.stringify(arg))
-    }
+  export function update_window_max_state() {
+    window.electron.ipcRenderer.invoke('window-max-state').then((r) => {
+      GlobalStat.window_max_state.value = r
+    })
   }
   export const refs = {
     chart_tab: ref(2),
@@ -49,4 +49,6 @@ export namespace GlobalStat {
   })
 
   export const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
+
+  export const audioContext = new AudioContext()
 }

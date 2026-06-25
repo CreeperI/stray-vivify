@@ -15,18 +15,19 @@ const show_beat_time = computed(
   <div class="fn-time">
     <label>
       <span class="fn-time-str1">{{ utils.toTimeStr(current_ms / 1000) }}</span>
-      <span class="fn-time-str2">
-        /{{ utils.toTimeStr(chart.length / 1000) }}
-      </span>
+      <span class="fn-time-str2"> /{{ utils.toTimeStr(chart.audio.length / 1000) }} </span>
       <template v-if="show_beat_time">
         <br />
         <span class="fn-time-str1">{{ chart.diff.get_beat_string(current_ms) }}</span>
-        <span class="fn-time-str2">
-          /{{ chart.diff.section_list.length - 1 }}
-        </span>
+        <span class="fn-time-str2"> /{{ chart.diff.section_list.length - 1 }} </span>
       </template>
     </label>
-    <a-range v-model="writable_current_second" :max="chart.length / 1000" min="0" step="0.1" />
+    <a-range
+      v-model="writable_current_second"
+      :max="chart.audio.length / 1000"
+      min="0"
+      step="0.1"
+    />
     <label @click="writable_play_rate = 1">播放速度:{{ play_rate }}x</label>
     <a-range v-model="writable_play_rate" max="2" min="0.25" step="0.05" />
     <template v-if="Storage.settings.hit_sound">

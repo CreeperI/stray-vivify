@@ -5,12 +5,9 @@ import { Chart } from '@renderer/core/chart/chart'
 import { Invoke, Send } from '@renderer/core/ipc'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import './header.css'
+import WinFunc from '@renderer/components/miscellaneous/win-func.vue'
 
 const active = defineModel<number>()
-
-const sender = Send as (m: string) => void
-
-const isMax = GlobalStat.window_max_state
 
 const song_name = GlobalStat.refs.header_display
 
@@ -101,11 +98,6 @@ const cs = GlobalStat.chart_state
       </div>
       <div class="chart-name">{{ song_name }}</div>
     </div>
-    <div class="header-win-func">
-      <div @click="sender('window-min')">0</div>
-      <div v-if="isMax" @click="sender('window-max')">2</div>
-      <div v-else @click="sender('window-max')">1</div>
-      <div class="header-close" @click="GlobalStat.close_app()">r</div>
-    </div>
+    <win-func />
   </div>
 </template>

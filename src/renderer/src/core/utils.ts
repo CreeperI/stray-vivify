@@ -196,7 +196,7 @@ export namespace utils {
   }
   export function toLocalTime(time: number) {
     const date = new Date(time)
-    const hours = ((date.getHours() +8)%24).toString().padStart(2, '0')
+    const hours = ((date.getHours() + 8) % 24).toString().padStart(2, '0')
     const minutes = date.getMinutes().toString().padStart(2, '0')
     const seconds = date.getSeconds().toString().padStart(2, '0')
     return `${hours}:${minutes}:${seconds}`
@@ -331,7 +331,26 @@ export namespace utils {
   }
 
   export function get_len(note: ChartTypeV2.note) {
-    return "len" in note ? note.len : 0
+    return 'len' in note ? note.len : 0
+  }
+
+  export async function audio_length(blob: Blob, audioContext: AudioContext) {
+    try {
+      const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result as ArrayBuffer)
+        reader.onerror = reject
+        reader.readAsArrayBuffer(blob) // 关键：必须调用 readAsArrayBuffer
+      })
+
+      // 3. 创建 AudioContext 并解码数据
+      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+
+      // 4. 获取音频时长（单位：秒）
+      return audioBuffer.duration
+    } catch (error) {
+      return 10
+    }
   }
 }
 

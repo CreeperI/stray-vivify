@@ -13,6 +13,7 @@ import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { computed } from 'vue'
 import PreInitPage from '@renderer/components/miscellaneous/pre-init-page.vue'
 import HeaderV2 from '@renderer/components/miscellaneous/header-v2.vue'
+import LoadSongPage from '@renderer/components/miscellaneous/load-song-page.vue'
 
 const state = GlobalStat.route.route
 // @ts-ignore i just dont understand why this sucks
@@ -35,6 +36,7 @@ const active = GlobalStat.refs.chart_tab
     <ChartV2 />
   </template>
   <pre-init-page v-else-if="state == 'preinit'" />
+  <load-song-page v-else-if="state == 'load-song'" />
   <ModalTarget />
   <div id="n-c" class="notify-container" />
   <a-button

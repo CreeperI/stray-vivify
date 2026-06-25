@@ -1,9 +1,9 @@
-import { reactive, ref } from 'vue'
+import { reactive } from 'vue'
+import { GlobalStat } from '@renderer/core/globalStat'
 
 export namespace Preinit {
-  export const Initialized = ref(false)
   export function finish_init() {
-    Initialized.value = true
+    GlobalStat.route.change('start')
   }
 
   export const Stages = reactive({
@@ -12,6 +12,6 @@ export namespace Preinit {
     debugs: false,
     intervals: false,
     animation_frame: false,
-    check_skin: false,
+    check_skin: false
   })
 }

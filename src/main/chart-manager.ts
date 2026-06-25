@@ -397,7 +397,7 @@ export default class ChartManager {
   show_file(id: string, fp: string) {
     shell.showItemInFolder(path.join(this.charts_folder, id, fp))
   }
-  show_folder(id: string, fp:string) {
+  show_folder(id: string, fp: string) {
     shell.openPath(path.join(this.charts_folder, id, fp))
   }
 

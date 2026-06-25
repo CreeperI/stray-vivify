@@ -3,10 +3,11 @@ import { watch } from 'vue'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { notify } from '@renderer/core/misc/notify'
+import { GlobalStat } from '@renderer/core/globalStat'
 
+const audioContext = GlobalStat.audioContext
 export class HitSoundSystem {
   hit_error = false
-  private audioContext: AudioContext | null = null
   private audioBuffer: AudioBuffer | null = null
   private gainNode: GainNode | null = null
   private maxVoices = 64
@@ -28,11 +29,11 @@ export class HitSoundSystem {
   }
 
   public async play_hit() {
-    if (this.hit_error || !this.audioBuffer || !this.audioContext || !this.gainNode) {
+    if (this.hit_error || !this.audioBuffer  || !this.gainNode) {
       return
     }
 
-    const now = this.audioContext.currentTime
+    const now = audioContext.currentTime
     this.activeVoices = this.activeVoices.filter((v) => v.endTime > now)
 
     const last = this.last_trigger
@@ -52,7 +53,7 @@ export class HitSoundSystem {
         this.activeVoices.shift()
       }
       try {
-        const source = this.audioContext.createBufferSource()
+        const source = audioContext.createBufferSource()
         source.buffer = this.audioBuffer
         source.connect(this.gainNode)
         source.start(now)
@@ -70,8 +71,7 @@ export class HitSoundSystem {
 
   private async initWebAudio() {
     try {
-      this.audioContext = new AudioContext()
-      this.gainNode = this.audioContext.createGain()
+      this.gainNode = audioContext.createGain()
       watch(
         () => Storage.settings.hit_volume,
         (v) => {
@@ -82,7 +82,7 @@ export class HitSoundSystem {
           immediate: true
         }
       )
-      this.gainNode.connect(this.audioContext.destination)
+      this.gainNode.connect(audioContext.destination)
 
       const response = await fetch('stray:/__hit__/')
       if (!response.ok) {
@@ -91,7 +91,7 @@ export class HitSoundSystem {
       }
 
       const arrayBuffer = await response.arrayBuffer()
-      this.audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer)
+      this.audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
     } catch (error) {
       this.hit_error = true
       notify.error('打击音无法加载。请检查打击音文件是否有效。')
