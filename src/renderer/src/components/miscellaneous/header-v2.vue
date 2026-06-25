@@ -2,7 +2,7 @@
 import { GlobalStat } from '@renderer/core/globalStat'
 import { modal } from '@renderer/core/misc/modal'
 import { Chart } from '@renderer/core/chart/chart'
-import { Invoke, Send } from '@renderer/core/ipc'
+import { Invoke } from '@renderer/core/ipc'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import './header.css'
 import WinFunc from '@renderer/components/miscellaneous/win-func.vue'

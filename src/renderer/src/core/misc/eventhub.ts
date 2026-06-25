@@ -51,7 +51,11 @@ class eventHub {
 export const EventHub = new eventHub()
 
 export class StopClass {
+  static all: StopClass[] = []
   private stop_functions: (() => void)[] = []
+  constructor() {
+    StopClass.all.push(this)
+  }
   stop() {
     console.log('stopclass terminated', this)
     this.stop_functions.forEach((x) => x())

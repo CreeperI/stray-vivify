@@ -11,7 +11,7 @@ import { Skin } from '@renderer/core/misc/skin'
 import { utils } from '@renderer/core/utils'
 import { WordHelper } from '@renderer/core/word-helper'
 import { toRaw, toValue, unref } from 'vue'
-import { EventHub } from '@renderer/core/misc/eventhub'
+import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { GlobalStat } from '@renderer/core/globalStat'
 
 // @ts-expect-error
@@ -37,7 +37,8 @@ window.sv = {
     toValue: toValue,
     unref: unref
   },
-  gs: GlobalStat
+  gs: GlobalStat,
+  stop: StopClass
 }
 
 export function expose_variables() {}
