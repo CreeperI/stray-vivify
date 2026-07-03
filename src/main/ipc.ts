@@ -164,7 +164,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
       }
     },
     'import-osz': async (_, { fp, id }) => {
-      const osz = OszReader.create(fp[0])
+      const osz = OszReader.create(fp)
       const song = osz.getAudioFile()
       if (!song) return 0
       chart_manager.create_from_osz(id, osz)

@@ -107,6 +107,7 @@ export namespace NoteDrawer {
     })
     border.x = this.x_of(note.lane)
     border.height = note.len * mul.value - 0.5 * Skin.BaseHeight
+    border.width = this.sizing.lane_width * note.width
     border.y = this.get_y_ln(note.time, this.chart.audio.current_time, mul.value, note.len)
     return border
   }

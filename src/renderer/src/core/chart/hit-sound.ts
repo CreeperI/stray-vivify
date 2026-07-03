@@ -24,12 +24,16 @@ export class HitSoundSystem {
     return this.chart.diff.shown
   }
 
+  get enabled() {
+    return Storage.settings.hit_sound
+  }
+
   on_unpause() {
     this.last_trigger = this.chart.audio.current_time
   }
 
   public async play_hit() {
-    if (this.hit_error || !this.audioBuffer  || !this.gainNode) {
+    if (this.hit_error || !this.audioBuffer || !this.gainNode || !this.enabled) {
       return
     }
 

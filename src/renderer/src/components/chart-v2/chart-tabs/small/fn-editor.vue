@@ -4,6 +4,7 @@ import { Storage } from '@renderer/core/storage'
 import ARange from '@renderer/components/a-elements/a-range.vue'
 import ANumberInput from '@renderer/components/a-elements/a-number-input.vue'
 import { EventHub } from '@renderer/core/misc/eventhub'
+import { Chart } from '@renderer/core/chart/chart'
 
 const scale = computed({
   get() {
@@ -11,6 +12,7 @@ const scale = computed({
   },
   set(v) {
     Storage.settings.scale = v
+    EventHub.dispatch('scale-changed')
   }
 })
 const meter = computed({
@@ -19,6 +21,8 @@ const meter = computed({
   },
   set(v) {
     Storage.settings.meter = v
+    Chart.current?.diff.update_meter()
+    EventHub.dispatch('meter-changed')
   }
 })
 </script>
@@ -34,7 +38,6 @@ const meter = computed({
             :min="0.1"
             :step="0.1"
             style="width: 100%"
-            @update:model-value="EventHub.dispatch('scale-changed')"
           />
         </td>
         <td style="width: 15%">
@@ -50,7 +53,6 @@ const meter = computed({
             min="1"
             step="1"
             style="width: 100%"
-            @update:model-value="EventHub.dispatch('meter-changed')"
           />
         </td>
         <td>

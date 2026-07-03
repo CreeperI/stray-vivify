@@ -2,6 +2,7 @@ import AdmZip from 'adm-zip'
 import { basename, extname } from 'node:path'
 
 import { ChartTypeV2 } from '../preload/chart-types'
+import fs from 'fs'
 
 type diff = ChartTypeV2.diff
 
@@ -345,7 +346,7 @@ export class OszReader {
   private images: [Buffer, string][] = []
 
   constructor(fp_of_osz: string) {
-    this.zip = new AdmZip(fp_of_osz)
+    this.zip = new AdmZip(fs.readFileSync(fp_of_osz))
     this.zipEntries = this.zip.getEntries()
     this.parseBeatmaps()
   }
