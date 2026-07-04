@@ -14,6 +14,7 @@ import LoadOszModal from '@renderer/components/modals/load-osz-modal.vue'
 import ChartPreviewModal from '@renderer/components/modals/chart-preview-modal.vue'
 import ExportCustom from '@renderer/components/modals/export-custom/export-custom.vue'
 import LoadBackupModal from '@renderer/components/modals/load-backup-modal.vue'
+import AntiAddictModal from '@renderer/components/modals/anti-addict-modal.vue'
 
 export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal)
@@ -30,6 +31,7 @@ export class modal<T extends Component> {
   static ChartPreviewModal = new modal(ChartPreviewModal)
   static ExportCustomModal = new modal(ExportCustom)
   static LoadBackupModal = new modal(LoadBackupModal)
+  static AntiAddictionModal = new modal(AntiAddictModal)
 
   component: T
   priority: number

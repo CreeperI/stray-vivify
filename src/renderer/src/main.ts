@@ -18,6 +18,7 @@ import { load_external_tips } from '@renderer/core/misc/startup-tips'
 import { Chart_diff } from '@renderer/core/chart/diff'
 import { Preinit } from '@renderer/core/misc/preinit'
 import { Skin } from '@renderer/core/misc/skin'
+import { AntiAddiction } from '@renderer/core/misc/anti-addiction'
 
 const app = createApp(App).use(
   createModal({
@@ -48,6 +49,7 @@ function update_per_frame() {
 async function main() {
   const r = await Storage.set_from_storage()
   ShortCuts.fromJson(Storage.data.value.shortcut)
+  AntiAddiction.init()
   Preinit.Stages.load_settings = true
 
   await GlobalStat.update_all_chart()

@@ -503,6 +503,11 @@ export namespace storages {
     disable_inspect: boolean
 
     beat_tolerance: number
+    addict: {
+      enabled: boolean
+      minutes: number
+      popup: boolean
+    }
   }
   export interface statistics {
     first_open: number

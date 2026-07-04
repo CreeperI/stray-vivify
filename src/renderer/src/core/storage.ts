@@ -147,7 +147,12 @@ const storage = ref<storages.storage_scheme>({
     },
     osu_sr: false,
     disable_inspect: false,
-    beat_tolerance: 0
+    beat_tolerance: 0,
+    addict: {
+      enabled: true,
+      minutes: 30,
+      popup: true
+    }
   },
   version: Version.val,
   shortcut: '',

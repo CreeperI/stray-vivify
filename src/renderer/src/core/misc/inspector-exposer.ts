@@ -13,6 +13,7 @@ import { WordHelper } from '@renderer/core/word-helper'
 import { toRaw, toValue, unref } from 'vue'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { GlobalStat } from '@renderer/core/globalStat'
+import { AntiAddiction } from '@renderer/core/misc/anti-addiction'
 
 // @ts-expect-error
 window.sv = {
@@ -38,7 +39,8 @@ window.sv = {
     unref: unref
   },
   gs: GlobalStat,
-  stop: StopClass
+  stop: StopClass,
+  aa: AntiAddiction
 }
 
 export function expose_variables() {}

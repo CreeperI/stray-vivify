@@ -91,10 +91,24 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         </ds>
         <div>Beat容差</div>
         <a-number-input v-model="r.settings.beat_tolerance" />
-        <ds>有时候计算beat会在bpm切换处爆炸（指堆叠），本数值为：在每个bpm结束前多少ms不认为有beat。</ds>
+        <ds
+          >有时候计算beat会在bpm切换处爆炸（指堆叠），本数值为：在每个bpm结束前多少ms不认为有beat。</ds
+        >
         <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
         <a-checkbox2 v-model="r.settings.auto_save" />
         <ds>在播放的时候会暂停。</ds>
+
+        <setting-header msg="防沉迷提醒" />
+        <ds>我为什么要写这个？？？</ds>
+        <div>启用</div>
+        <a-checkbox2 v-model="r.settings.addict.enabled" />
+        <div>间隔（分钟）</div>
+        <a-number-input v-model="r.settings.addict.minutes" />
+        <div>使用弹窗</div>
+        <a-checkbox2 v-model="r.settings.addict.popup" />
+        <ds>
+          勾选此项，会使用类似本窗口的modal来进行提醒（可能破坏心情说是），不勾则会使用右上角的notify来进行提醒
+        </ds>
 
         <setting-header msg="难度参考" />
 
