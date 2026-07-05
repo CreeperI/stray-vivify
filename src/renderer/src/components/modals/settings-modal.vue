@@ -97,6 +97,9 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
         <a-checkbox2 v-model="r.settings.auto_save" />
         <ds>在播放的时候会暂停。</ds>
+        <div>note功能限制</div>
+        <a-checkbox2 v-model="r.settings.restrict_feature" />
+        <ds>限制sv的note选择功能，避免出现*你不想要*的那些note</ds>
 
         <setting-header msg="防沉迷提醒" />
         <ds>我为什么要写这个？？？</ds>

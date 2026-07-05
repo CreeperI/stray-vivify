@@ -3,15 +3,15 @@ import ACheckbox from '@renderer/components/a-elements/a-checkbox.vue'
 import SmallDiffChoice from '@renderer/components/chart-v2/chart-tabs/small/small-diff-choice.vue'
 import { computed, ComputedRef } from 'vue'
 import { ChartTypeV2 } from '@preload/chart-types'
-import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import SmallRefChoice from '@renderer/components/chart-v2/chart-tabs/small/small-ref-choice.vue'
 import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
 
 import { NoteProps } from '@renderer/core/misc/note-props'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
+import { NoteType } from '@renderer/core/misc/note-type'
 
-const { width, s, hold, b } = Storage.note
+const { width, s, hold, b } = NoteType
 
 const pending_note = computed(() => {
   if (hold.value) {
@@ -27,7 +27,7 @@ const pending_note = computed(() => {
       lane: 0,
       width: width.value,
       ani: [],
-      snm: Storage.note.snm
+      snm: NoteType.snm
     }
   }
 }) as ComputedRef<ChartTypeV2.note>
@@ -44,28 +44,28 @@ const rkey = RefreshAll.generate_key('select')
       <div
         :class="width == 1 ? 'chosen' : ''"
         class="note-width-btn"
-        @click="Storage.note.set_width(1)"
+        @click="NoteType.set_width(1)"
       >
         1
       </div>
       <div
         :class="width == 2 ? 'chosen' : ''"
         class="note-width-btn"
-        @click="Storage.note.set_width(2)"
+        @click="NoteType.set_width(2)"
       >
         2
       </div>
       <div
         :class="width == 3 ? 'chosen' : ''"
         class="note-width-btn"
-        @click="Storage.note.set_width(3)"
+        @click="NoteType.set_width(3)"
       >
         3
       </div>
       <div
         :class="width == 4 ? 'chosen' : ''"
         class="note-width-btn"
-        @click="Storage.note.set_width(4)"
+        @click="NoteType.set_width(4)"
       >
         4
       </div>

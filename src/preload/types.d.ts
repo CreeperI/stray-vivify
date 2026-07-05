@@ -508,6 +508,7 @@ export namespace storages {
       minutes: number
       popup: boolean
     }
+    restrict_feature: boolean
   }
   export interface statistics {
     first_open: number

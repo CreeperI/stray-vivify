@@ -8,59 +8,6 @@ export const Version = {
   val: 9.91,
   str: '0.9.10'
 }
-
-const note = {
-  width: ref(1),
-  s: ref(false),
-  b: ref(false),
-  hold: ref(false),
-  set_width(v: number) {
-    if (v == 1) this.s.value = false
-    if (v == this.w) this.width.value = 0
-    else this.width.value = v
-  },
-  set_s(v: boolean) {
-    this.s.value = v
-    this.b.value = false
-  },
-  set_b(v: boolean) {
-    this.b.value = v
-    this.s.value = false
-    this.hold.value = false
-  },
-  set_hold(v: boolean) {
-    this.hold.value = v
-    this.b.value = false
-  },
-  get w() {
-    return this.width.value
-  },
-  get h() {
-    return this.hold.value
-  },
-  get snm() {
-    if (this.s.value) return 2
-    else if (this.b.value) return 1
-    else return 0
-  },
-  change_b() {
-    this.set_b(!this.b.value)
-  },
-  change_s() {
-    this.set_s(!this.s.value)
-  },
-  change_hold() {
-    this.set_hold(!this.hold.value)
-  },
-  set_snm(v: number) {
-    if (v == 0) {
-      this.set_s(false)
-      this.set_b(false)
-    } else if (v == 1) this.set_b(true)
-    else if (v == 2) this.set_s(true)
-  }
-}
-
 const storage = ref<storages.storage_scheme>({
   settings: {
     scale: 10,
@@ -152,7 +99,8 @@ const storage = ref<storages.storage_scheme>({
       enabled: true,
       minutes: 30,
       popup: true
-    }
+    },
+    restrict_feature: false
   },
   version: Version.val,
   shortcut: '',
@@ -216,7 +164,6 @@ export const Storage = {
     }, 10000)
   },
   computes: computes,
-  note: note,
 
   __start_time: Date.now(),
   __update_last: Date.now(),

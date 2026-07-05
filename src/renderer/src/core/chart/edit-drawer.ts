@@ -11,6 +11,7 @@ import { Chart_diff } from '@renderer/core/chart/diff'
 import { Skin } from '@renderer/core/misc/skin'
 import { NoteClipboard } from '@renderer/core/misc/note-clipboard'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
+import { NoteType } from '@renderer/core/misc/note-type'
 
 const mul = Storage.computes.mul
 const pointer_last = {
@@ -80,7 +81,7 @@ class Pending {
   }
 
   get snm() {
-    return Storage.note.snm
+    return NoteType.snm
   }
 
   set snm(_) {
@@ -131,10 +132,8 @@ class Pending {
   }
 
   get pending_note(): ChartTypeV2.note[] {
-    const to_note = this.diff.to_note
     if (this.dragging) {
-      return this.dragging_notes.map((ix) => {
-        const note = to_note(ix)
+      return this.dragging_notes.map((note) => {
         return {
           ...note,
           time: this.time + (note.time - this.dragging_base_time) - this.dragging_delta,
@@ -144,26 +143,24 @@ class Pending {
     }
     if (NoteClipboard.clipboard.value.length) {
       return NoteClipboard.clipboard.value.map((x) => {
-        const _note = to_note(x)
         return {
-          ..._note,
-          time: this.time + _note.time
+          ...x,
+          time: this.time + x.time
         }
       })
     }
-    if (Storage.note.w == 0) return []
-    if (Storage.note.h)
-      return [{ time: this.time, lane: this.lane, width: Storage.note.w, len: this.len }]
-    else return [{ time: this.time, lane: this.lane, width: Storage.note.w, snm: this.snm }]
+    if (NoteType.w == 0) return []
+    if (NoteType.h) return [{ time: this.time, lane: this.lane, width: NoteType.w, len: this.len }]
+    else return [{ time: this.time, lane: this.lane, width: NoteType.w, snm: this.snm }]
   }
 
   get is_hold() {
-    return Storage.note.h
+    return NoteType.h
   }
 
   get pending_width() {
     if (this.dragging) return this.dragging_width
-    else return Storage.note.w
+    else return NoteType.w
   }
 
   get select_raw() {
@@ -211,11 +208,11 @@ class Pending {
       NoteClipboard.clear()
       return
     }
-    if (Storage.note.w == 0) {
+    if (NoteType.w == 0) {
       return
     }
 
-    if (Storage.note.hold.value) {
+    if (NoteType.hold.value) {
       if (this.hold_fixed) {
         if (!this.diff.add_notes_with_undo(this.pending_note)) notify.error('添加note失败。')
         this.len = 0
@@ -437,7 +434,7 @@ class Select {
   }
   on_mousedown(e: MouseEvent) {
     if (this.selecting) return
-    if (Storage.note.w != 0) return
+    if (NoteType.w != 0) return
     this.selecting = true
     this.rect.visible = true
     this.base_x = e.offsetX
@@ -469,8 +466,8 @@ class Select {
     // main select
     const bar_width = this.drawer.sizing.total_width - 100 - this.drawer.sizing.x_expand
     const max_lane = this.drawer.diff.max_lane.value
-    const lane0 = ((eX - 50) / (bar_width)) * max_lane
-    const lane1 = ((this.base_x - 50) / (bar_width)) * max_lane
+    const lane0 = ((eX - 50) / bar_width) * max_lane
+    const lane1 = ((this.base_x - 50) / bar_width) * max_lane
     const lane_min = Math.min(lane0, lane1)
     const lane_max = Math.max(lane0, lane1)
 
@@ -617,7 +614,7 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     if (e.altKey) pending.time = mouse_time
     else pending.time = diff.nearest(mouse_time)
     pending.lane = lane
-    pending.snm = Storage.note.snm
+    pending.snm = NoteType.snm
 
     pending.display = pending.time >= 0
     pending.update_pending()
@@ -629,7 +626,7 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     pending.display = false
   }
   utils.stopWatch(chart.audio.refs.paused, (v) => (pending.display = v))
-  utils.stopWatch(Storage.note.width, () => {
+  utils.stopWatch(NoteType.width, () => {
     pending.recreate()
     pending.update_pending()
   })
