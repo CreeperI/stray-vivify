@@ -374,7 +374,7 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>移除了很多地方的reactivity，感觉会快一点点。</div>
       <div>添加了一个复制timing list的按钮。</div>
     </Build>
-    <Build build="0.9.10" y="2026" m="6" d="25">
+    <Build build="0.9.10" d="25" m="6" y="2026">
       <div>移除了vsb导出。</div>
       <div>将所有vs-chart重命名为chart。</div>
       <div>现在会自动检测无效的谱面并移除之。</div>
@@ -382,7 +382,23 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>调整了加载曲目长度的逻辑。</div>
       <div>调整了曲目列表右键删除的操作，移除了删除确认的设置。</div>
       <div>添加了beat宽容时间。参见设置。</div>
-      <div>添加了底部bpm显示，调整了左侧bpm显示的有效数字，移除了底部bpm显示的设置（即关不掉底部bpm显示）。</div>
+      <div>
+        添加了底部bpm显示，调整了左侧bpm显示的有效数字，移除了底部bpm显示的设置（即关不掉底部bpm显示）。
+      </div>
+    </Build>
+    <Build build="0.9.11" d="5" m="7" y="2026">
+      <template #bugs>
+        <div>修复了导入osz时无法读取文件的问题。</div>
+        <div>修复了ln宽度不随设置改变的问题。</div>
+        <div>修复了右上角流速分音设置不会触发小节线重绘的问题。</div>
+        <div>
+          修复了内存释放并没有真的释放的问题。（但事实上还是没法严格地释放掉，除非我学会java）
+        </div>
+        <div>修复了设置里关闭打击音不能关闭打击音的问题。</div>
+      </template>
+      <div>调整了使用的electron版本。</div>
+      <div>添加了防沉迷提示，默认半小时，请去设置调一下。</div>
+      <div>添加了一个无意义tip。</div>
     </Build>
   </div>
 </template>
