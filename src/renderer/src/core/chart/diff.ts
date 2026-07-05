@@ -50,7 +50,7 @@ function fix_note(v: ChartTypeV2.note) {
 }
 
 export class Chart_diff extends StopClass {
-  static all: Chart_diff[] = []
+  static all: WeakSet<Chart_diff> = new WeakSet()
   chart: Chart
   counts: Ref<{
     chip: number
@@ -169,7 +169,7 @@ export class Chart_diff extends StopClass {
       this.watch(this.diff_index, () => {
         this.update_on_diff_index()
       })
-    Chart_diff.all.push(this)
+    Chart_diff.all.add(this)
 
     this.add_stop(EventHub.on('audio-time-update', () => this.update()))
   }

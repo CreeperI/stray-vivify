@@ -51,10 +51,10 @@ class eventHub {
 export const EventHub = new eventHub()
 
 export class StopClass {
-  static all: StopClass[] = []
+  static all: WeakSet<StopClass> = new WeakSet<StopClass>()
   private stop_functions: (() => void)[] = []
   constructor() {
-    StopClass.all.push(this)
+    StopClass.all.add(this)
   }
   stop() {
     console.log('stopclass terminated', this)

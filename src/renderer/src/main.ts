@@ -15,7 +15,6 @@ import { Log, MemoryUsage, MouseTracker } from '@renderer/core/misc/inspector'
 import { expose_variables } from '@renderer/core/misc/inspector-exposer'
 import { load_external_mods } from '@renderer/core/chart/vsm-objects'
 import { load_external_tips } from '@renderer/core/misc/startup-tips'
-import { Chart_diff } from '@renderer/core/chart/diff'
 import { Preinit } from '@renderer/core/misc/preinit'
 import { Skin } from '@renderer/core/misc/skin'
 import { AntiAddiction } from '@renderer/core/misc/anti-addiction'
@@ -74,7 +73,7 @@ async function main() {
     Chart.current?.diff.check_aimod()
   })
   Intervals.on(1000, () => {
-    Chart_diff.all.forEach((v) => v.update_diff_counts())
+    Chart.current?.diff.update_diff_counts()
     MemoryUsage.update()
     Storage.update_used_time()
 
