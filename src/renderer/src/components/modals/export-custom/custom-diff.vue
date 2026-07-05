@@ -18,25 +18,16 @@ const diff_indexs = defineModel<number[]>({ required: true })
 const can_pass_1 = computed(() => diff_indexs.value.some((x) => x != -1))
 
 function drop(ix: number) {
-  return function (e: DragEvent) {
-    if (!e.dataTransfer) return
-    const index = e.dataTransfer.getData('index')
-    if (!index) return
-    const num = parseInt(index)
-    if (num < 0 || num > 3 || isNaN(num)) return
-    diff_indexs.value[ix] = num
-  }
+  if (dragging == -1) return
+  diff_indexs.value[ix] = dragging
+  dragging = -1
 }
 function fuck_diff(ix: number) {
   diff_indexs.value[ix] = -1
 }
-
+let dragging = -1
 function start_diff_drag(ix: number) {
-  return function (e: DragEvent) {
-    if (!e.dataTransfer) return
-    e.dataTransfer?.setData('index', ix.toString())
-    e.dataTransfer.dropEffect = 'move'
-  }
+  dragging = ix
 }
 </script>
 
@@ -48,12 +39,7 @@ function start_diff_drag(ix: number) {
       </span>
       <template v-for="(ix, i) in STR">
         <div>{{ ix }}</div>
-        <div
-          style="overflow: hidden"
-          @click="fuck_diff(i)"
-          @drop="drop(i)($event)"
-          @dragover.prevent
-        >
+        <div style="overflow: hidden" @click="fuck_diff(i)" @drop="drop(i)" @dragover.prevent>
           {{
             diff_indexs[i] == -1
               ? ''
@@ -73,7 +59,7 @@ function start_diff_drag(ix: number) {
         v-for="(diff, ix) in chart.chart.diffs"
         class="diff-single"
         draggable="true"
-        @dragstart="start_diff_drag(ix)($event)"
+        @dragstart="start_diff_drag(ix)"
       >
         <div>{{ diff.meta.diff1 }} - {{ diff.meta.diff2 }}</div>
         <div>Charter: {{ diff.meta.charter }}</div>

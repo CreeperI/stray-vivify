@@ -42,7 +42,7 @@ defineProps<{
       <template v-for="ix in filter_STR()">
         <div class="grid-2-header">{{ STR[ix] }}</div>
         <div>定数</div>
-        <a-number-input v-model="info_data[`difficulty_constant_${ix + 1}`]" min="0" step="0.1" />
+        <a-number-input v-model="info_data[`difficulty_constant_${ix + 1}`]" min="0" step="0.001" />
         <div>定数显示</div>
         <a-text-input v-model="info_data[`difficulty_display_${ix + 1}`]" />
         <div>Charter</div>

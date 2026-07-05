@@ -168,7 +168,7 @@ function convertToDiff(beatmap: OsuBeatmap, isMania: boolean): ChartTypeV2.diff 
       const bpm = 60000 / tp.beatLength // Convert beat length to BPM
       timing.push({
         time: tp.time,
-        bpm: Math.round(bpm),
+        bpm: bpm,
         den: 4,
         num: tp.meter // Use the meter from the timing point
       })

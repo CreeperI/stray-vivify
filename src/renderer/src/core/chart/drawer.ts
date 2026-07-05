@@ -113,7 +113,7 @@ export namespace NoteDrawer {
   }
 }
 
-const bpm_drawer = function() {
+const bpm_drawer = function () {
   return {
     text: new Text({
       style: new TextStyle({
@@ -138,6 +138,9 @@ const bpm_drawer = function() {
       this.text.x = 0.5 * total_width
       this.text.y = SCREEN_HEIGHT - 40
       this.text.anchor = 0.5
+    },
+    on_resize(total_width: number) {
+      this.text.x = 0.5 * total_width
     }
   }
 }
@@ -371,6 +374,7 @@ export class DiffDrawer extends StopClass {
 
     this.drawers.bpm_text.recreate(...this.diff.shown_timing)
     this.drawers.tick.recreate(...this.diff.shown_timing_list.ticks)
+    this.drawers.bottom_bpm.update(this.diff)
   }
 
   ln_reheight() {
@@ -419,6 +423,7 @@ export class DiffDrawer extends StopClass {
         this.app.canvas.parentElement.style.width = `${this.sizing.total_width}px`
     this.create_decoration()
     this.setculling()
+    this.drawers.bottom_bpm.on_resize(this.sizing.total_width)
   }
 
   try_resize() {

@@ -25,19 +25,18 @@ export const NoteType = {
     this.s.value = v
     this.b.value = false
     this.hold.value = false
-    if (this.res && v) this.set_width(1)
+    if (this.res && v) this.width.value = 2
   },
   set_b(v: boolean) {
     this.b.value = v
     this.s.value = false
     this.hold.value = false
-    if (this.res && v) this.set_width(1)
   },
   set_hold(v: boolean) {
     this.hold.value = v
     this.b.value = false
     this.s.value = false
-    if (this.res && v) this.set_width(1)
+    if (this.res && v) this.width.value = 1
   },
   get w() {
     return this.width.value

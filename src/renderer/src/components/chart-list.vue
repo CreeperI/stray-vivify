@@ -97,14 +97,17 @@ const username = Storage.data.value.username
 const pass_days = (Date.now() - Storage.data.value.statistics.first_open) / (24 * 60 * 60 * 1000)
 const running = Storage.running_time
 const useLogo = computed(() => Storage.settings.stray_logo)
-const tip = utils.random(StartUpTips)
+const tip = ref(utils.random(StartUpTips))
+function random_tip() {
+  tip.value = utils.random(StartUpTips)
+}
 </script>
 
 <template>
   <div class="chart-list-wrapper">
     <div class="chart-list-left">
-      <img v-if="useLogo" alt="logo" class="su-logo" draggable="false" src="/sv.png" />
-      <div v-else class="su-title">stray/vivify</div>
+      <img v-if="useLogo" alt="logo" class="su-logo" draggable="false" src="/sv.png" @click="random_tip" />
+      <div v-else class="su-title" @click="random_tip">stray/vivify</div>
       <div class="su-tip" v-html="tip"></div>
       <div class="su-greeting">
         欢迎，{{ username }}<br />
@@ -189,7 +192,7 @@ const tip = utils.random(StartUpTips)
   position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: 1fr 3rem 6rem 10fr;
+  grid-template-rows: 1fr auto 6rem 10fr;
   justify-items: center;
   gap: 20px;
 }
@@ -199,19 +202,21 @@ const tip = utils.random(StartUpTips)
   text-align: center;
   position: relative;
   padding-top: 10%;
+  cursor: pointer;
 }
 
 .su-logo {
   padding-top: 5%;
   width: 260px;
+  cursor: pointer;
 }
 
 .su-tip {
   position: relative;
   color: gold;
   z-index: 15;
-  height: 1.5rem;
   line-height: 1.5rem;
+  max-width: 85%;
 }
 
 .su-greeting {
