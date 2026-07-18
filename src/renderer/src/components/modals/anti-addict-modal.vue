@@ -4,7 +4,7 @@ import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { AntiAddiction } from '@renderer/core/misc/anti-addiction'
 import { closeModal } from '@kolirt/vue-modal'
 
-const msg = defineProps<{ msg: string[] }>()
+defineProps<{ msg: string[] }>()
 function close_and_disable() {
   AntiAddiction.disable = true
   closeModal()
@@ -13,9 +13,9 @@ function close_and_disable() {
 
 <template>
   <simple-modal size="2">
-    {{ msg[0] }}
+    {{ msg[1] }}
     <br>
-    {{ msg[1]}}
+    <div class="by">--{{ msg[0] }}</div>
     <template #footer>
       <a-button2 msg="本次启动关闭" @click="close_and_disable" />
       <a-button2 msg="ok" @click="$emit('close')" />
@@ -23,4 +23,9 @@ function close_and_disable() {
   </simple-modal>
 </template>
 
-<style scoped></style>
+<style scoped>
+.by {
+  text-indent: 2rem;
+  opacity: 0.7;
+}
+</style>
