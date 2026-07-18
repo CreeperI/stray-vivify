@@ -2,6 +2,7 @@
 import { Preinit } from '@renderer/core/misc/preinit'
 import { GlobalStat } from '@renderer/core/globalStat'
 import "./loading.css"
+import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 const stages = Preinit.Stages
 const ipcRenderer = window.electron.ipcRenderer
 </script>
@@ -36,6 +37,9 @@ const ipcRenderer = window.electron.ipcRenderer
     <div>
       如果在某个阶段一直卡住说明大概率是出bug了。请检查控制台。
     </div>
+      <div>
+        <a-button2 msg="打开控制台" @click="ipcRenderer.send('open-dev')"/>
+      </div>
     </div>
   </div>
 </template>

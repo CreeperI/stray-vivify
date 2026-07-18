@@ -295,7 +295,6 @@ new ShortCuts(
   's',
   () => {
     Chart.current?.save(true)
-    notify.success('保存成功!!!')
   },
   false,
   true

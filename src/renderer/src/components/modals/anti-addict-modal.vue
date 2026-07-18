@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { AntiAddiction } from '@renderer/core/misc/anti-addiction'
@@ -14,11 +14,11 @@ function close_and_disable() {
 <template>
   <simple-modal size="2">
     {{ msg[1] }}
-    <br>
+    <br />
     <div class="by">--{{ msg[0] }}</div>
     <template #footer>
       <a-button2 msg="本次启动关闭" @click="close_and_disable" />
-      <a-button2 msg="ok" @click="$emit('close')" />
+      <a-button2 msg="ok" @click="closeModal()" />
     </template>
   </simple-modal>
 </template>

@@ -44,6 +44,14 @@ class Pending {
   dragging_base_lane = 0
   dragging_delta = 0
   dragging_notes: ChartTypeV2.note[] = []
+  /**
+   * a flag check for drag
+   *
+   * the event triggers follow the order of:
+   *    sprite.mousedown -> canvas.mousedown
+   * on sprite.mousedown would set this to true, preventing add-note of canvas.mousedown
+   * if none sprite is clicked, enables add-note
+   */
   pre_drag = false
   dragging_width = 0
 
@@ -202,6 +210,7 @@ class Pending {
   }
 
   on_click() {
+    if (psd.p?.pre_drag) return
     if (GlobalStat.chart_state.value != 0) return
     if (NoteClipboard.clipboard.value.length) {
       this.diff.add_notes_with_undo(this.pending_note)
@@ -533,6 +542,7 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
       }
     })
     sprite.on('mousedown', (ev) => {
+      console.log("sprite: mousedown")
       if (!ev.ctrlKey && !ev.altKey) pending.pre_drag_start()
       ev.stopPropagation()
     })
@@ -586,7 +596,7 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
     })
   }
   const __drawer = this
-  function update_pending(e: MouseEvent) {
+  function update_pending(e: { offsetX: number; offsetY: number; altKey: boolean }) {
     if (GlobalStat.chart_state.value != 0) return
     if (!chart.audio.paused) return
     const mouse_time = __drawer.event_time(e.offsetY)
@@ -629,6 +639,7 @@ export function editable_note_drawer(this: DiffDrawer, chart: Chart) {
   utils.stopWatch(NoteType.width, () => {
     pending.recreate()
     pending.update_pending()
+    update_pending({ offsetX: pointer_last.x, offsetY: pointer_last.y, altKey: true })
   })
 
   const event_handle = () => {
