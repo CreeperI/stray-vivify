@@ -14,8 +14,8 @@ import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
 import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
-import nextFrame = utils.nextFrame
 import { LoadSong } from '@renderer/core/misc/load-song'
+import nextFrame = utils.nextFrame
 
 function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
   const new_diff = Chart_diff.createDiff()
@@ -196,7 +196,7 @@ export class Chart extends StopClass {
   }
 
   static async open_chart(id: string) {
-    GlobalStat.route.change("load-song")
+    GlobalStat.route.change('load-song')
     const file = await Invoke('open-song', { id })
     LoadSong.status.open_song = true
     const blob = await this.fetch_blob(id)
@@ -476,11 +476,16 @@ export class Chart extends StopClass {
   }
 
   write_current_vsc() {
+    const fname = this.diff.diff1 + '.vsc'
     Invoke('write-file', {
       id: this.id,
       data: Chart_diff.to_vsc(this.diff.diff).join('\n'),
-      fname: this.diff.diff1
-    }).then(() => notify.success('已导出为vsc!!!!!!!'))
+      fname: fname
+    })
+      .then(() => notify.success('已导出为vsc!!!!!!!'))
+      .then(() => {
+        Invoke('show-file', { id: this.id, fname: fname })
+      })
   }
   async export_chart(ext: 'svc' | 'zip') {
     const r = this.save()
