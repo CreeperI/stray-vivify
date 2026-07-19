@@ -148,7 +148,7 @@ const Handler = (mw: Electron.BrowserWindow) => {
       chart_manager.show_file(id, fname)
     },
     'open-skin-folder': () => {
-      shell.showItemInFolder(path.join(file_paths.skin, '1.png'))
+      shell.openPath(file_paths.skin)
     },
     'read-osz': () => {
       const fp = dialog.showOpenDialogSync({

@@ -16,7 +16,7 @@ const rkey = RefreshAll.generate_key('select')
 </script>
 
 <template>
-  <div v-if="selectedNID().length > 0" :key="rkey" class="edit-frame">
+  <div v-show="selectedNID().length > 0" :key="rkey" class="edit-frame">
     <p style="text-align: center">想做些什么呢？</p>
     <div class="edit-button-frame">
       <div>

@@ -15,6 +15,7 @@ export namespace RefreshAll {
     if (key in keys) {
       keys[key].value = Math.random().toFixed(8)
     }
+    else console.warn("unused key "+ key)
   }
   export function refreshAll() {
     for (const k of utils.keyof(keys)) {

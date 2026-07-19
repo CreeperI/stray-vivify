@@ -113,6 +113,7 @@ export const Log = {
       this.fix_max()
     })
     if (disable_inspect) return
+    if (location.protocol == "http:") return
     const keys = ['log', 'warn', 'error', 'debug']
     for (const key of keys) {
       const old: Function = console[key]

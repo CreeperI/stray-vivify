@@ -91,9 +91,9 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         </ds>
         <div>Beat容差</div>
         <a-number-input v-model="r.settings.beat_tolerance" />
-        <ds
-          >有时候计算beat会在bpm切换处爆炸（指堆叠），本数值为：在每个bpm结束前多少ms不认为有beat。</ds
-        >
+        <ds>
+          有时候计算beat会在bpm切换处爆炸（指堆叠），本数值为：在每个bpm结束前多少ms不认为有beat。
+        </ds>
         <div class="rainbow-text-flow" style="font-size: 2rem; font-weight: bold">自动保存</div>
         <a-checkbox2 v-model="r.settings.auto_save" />
         <ds>在播放的时候会暂停。</ds>
