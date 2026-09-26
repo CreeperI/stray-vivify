@@ -106,7 +106,9 @@ export class Chart_audio {
     this._current_time = v
     this.refs.current_ms.value = v
     if (v < 0) this.from_negative = true
-    if (this.paused) this.set_ele_time(v)
+    // 不在这里同步 seek 音频元素：滚轮/拖动进度条会高频调用此函数，而 OGG 等格式的
+    // ele.currentTime 赋值会阻塞主线程（且越靠后越慢），是滚动卡顿的主因。
+    // 真正的 seek 统一推迟到 set_and_play() 播放前执行（那里会再 set_ele_time）。
     EventHub.dispatch('audio-time-update')
   }
 

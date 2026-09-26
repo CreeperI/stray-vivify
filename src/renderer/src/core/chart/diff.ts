@@ -49,6 +49,27 @@ function fix_note(v: ChartTypeV2.note) {
   }
 }
 
+/**
+ * 二分查找：在按 time 升序排列的 timing 列表中，返回满足 `timing[i].time <= t`
+ * 的最大下标；若所有 timing.time 都大于 t，返回 -1。
+ * 等价于 `timing.findLastIndex((v) => v.time <= t)`，但复杂度为 O(log n)。
+ */
+function bsearch_last_le(timing: ChartTypeV2.timing[], t: number): number {
+  let lo = 0
+  let hi = timing.length - 1
+  let ans = -1
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1
+    if (timing[mid].time <= t) {
+      ans = mid
+      lo = mid + 1
+    } else {
+      hi = mid - 1
+    }
+  }
+  return ans
+}
+
 export class Chart_diff extends StopClass {
   static all: WeakSet<Chart_diff> = new WeakSet()
   chart: Chart
@@ -139,10 +160,7 @@ export class Chart_diff extends StopClass {
     }
     this.shown_timing = []
     this.current_timing = computed(() =>
-      Math.max(
-        0,
-        this.timing.findLastIndex((v) => v.time <= this.chart.audio.refs.current_ms.value)
-      )
+      this.timing_of_time(this.chart.audio.refs.current_ms.value).ix
     )
     this.density_data = ref([0])
     this.density_path = ref('')
@@ -673,11 +691,12 @@ export class Chart_diff extends StopClass {
 
   bpm_of_time(time: ms) {
     if (time <= 0) time = 0
-    return this.timing.findLast((v) => v.time <= time) ?? this.timing[0]
+    const ix = bsearch_last_le(this.timing, time)
+    return ix >= 0 ? this.timing[ix] : this.timing[0]
   }
   timing_of_time(time:ms) {
     if (time <= 0) time = 0
-    const ix = Math.max(this.timing.findLastIndex((v) => v.time <= time), 0)
+    const ix = Math.max(bsearch_last_le(this.timing, time), 0)
     return {
       timing: this.timing[ix],
       ix: ix

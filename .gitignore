@@ -14,3 +14,4 @@ external/*
 !external/examples/
 pnpm-*
 /.lingma/
+PROJECT.md

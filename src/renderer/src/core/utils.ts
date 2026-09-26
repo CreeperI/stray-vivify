@@ -334,23 +334,58 @@ export namespace utils {
     return 'len' in note ? note.len : 0
   }
 
-  export async function audio_length(blob: Blob, audioContext: AudioContext) {
-    try {
-      const arrayBuffer = await new Promise<ArrayBuffer>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result as ArrayBuffer)
-        reader.onerror = reject
-        reader.readAsArrayBuffer(blob) // 关键：必须调用 readAsArrayBuffer
-      })
+  export async function decode_audio(blob: Blob, audioContext: AudioContext): Promise<AudioBuffer> {
+    const arrayBuffer = await blob.arrayBuffer()
+    return await audioContext.decodeAudioData(arrayBuffer)
+  }
 
-      // 3. 创建 AudioContext 并解码数据
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+  /**
+   * 将解码后的 AudioBuffer 编码为 16-bit PCM WAV Blob。
+   * OGG(Vorbis) 的 seek 很慢（长曲 / 大跨度跳转可达秒级），而 WAV 是未压缩格式，
+   * HTMLAudioElement 对其 currentTime 定位是 O(1)，拖动进度条即可即时响应。
+   */
+  export function encode_wav(buffer: AudioBuffer): Blob {
+    const numChannels = buffer.numberOfChannels
+    const sampleRate = buffer.sampleRate
+    const numFrames = buffer.length
+    const bytesPerSample = 2
+    const blockAlign = numChannels * bytesPerSample
+    const dataSize = numFrames * blockAlign
 
-      // 4. 获取音频时长（单位：秒）
-      return audioBuffer.duration
-    } catch (error) {
-      return 10
+    const ab = new ArrayBuffer(44 + dataSize)
+    const view = new DataView(ab)
+    const writeAscii = (offset: number, str: string) => {
+      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i))
     }
+
+    writeAscii(0, 'RIFF')
+    view.setUint32(4, 36 + dataSize, true)
+    writeAscii(8, 'WAVE')
+    writeAscii(12, 'fmt ')
+    view.setUint32(16, 16, true) // fmt chunk 大小
+    view.setUint16(20, 1, true) // PCM 编码
+    view.setUint16(22, numChannels, true)
+    view.setUint32(24, sampleRate, true)
+    view.setUint32(28, sampleRate * blockAlign, true) // 字节率
+    view.setUint16(32, blockAlign, true)
+    view.setUint16(34, 16, true) // 位深
+    writeAscii(36, 'data')
+    view.setUint32(40, dataSize, true)
+
+    const channels: Float32Array[] = []
+    for (let c = 0; c < numChannels; c++) channels.push(buffer.getChannelData(c))
+
+    let offset = 44
+    for (let i = 0; i < numFrames; i++) {
+      for (let c = 0; c < numChannels; c++) {
+        const s = Math.max(-1, Math.min(1, channels[c][i]))
+        const val = s < 0 ? s * 0x8000 : s * 0x7fff
+        view.setInt16(offset, val, true)
+        offset += 2
+      }
+    }
+
+    return new Blob([ab], { type: 'audio/wav' })
   }
 }
 

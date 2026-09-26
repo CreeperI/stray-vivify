@@ -201,9 +201,20 @@ export class Chart extends StopClass {
     LoadSong.status.open_song = true
     const blob = await this.fetch_blob(id)
     LoadSong.status.fetch_blob = true
-    const length = (await utils.audio_length(blob, GlobalStat.audioContext)) * 1000
+    let length: number
+    let blob_path: string
+    try {
+      const buffer = await utils.decode_audio(blob, GlobalStat.audioContext)
+      length = buffer.duration * 1000
+      // 转成 WAV(PCM) 再播放：OGG 的 seek 很慢，拖动进度条跨度过大会卡 1~2s；
+      // WAV 未压缩，currentTime 定位即时。
+      blob_path = URL.createObjectURL(utils.encode_wav(buffer))
+    } catch (e) {
+      // 解码失败时退回原始音频（旧的播放路径）
+      length = 10000
+      blob_path = URL.createObjectURL(blob)
+    }
     LoadSong.status.audio_length = true
-    const blob_path = URL.createObjectURL(blob)
     LoadSong.status.blob_path = true
     const chart = new Chart(id, blob_path, length)
     if (file.data) {
