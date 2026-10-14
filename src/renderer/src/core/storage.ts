@@ -93,6 +93,10 @@ const storage = ref<storages.storage_scheme>({
       bg_op: 70
     },
     disable_inspect: false,
+    fn_tabs: {
+      left: [1, 2, 3],
+      right: [4, 5, 6, 7, 8, 9]
+    },
     beat_tolerance: 0,
     addict: {
       enabled: true,

@@ -245,6 +245,7 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
       <a-button msg="查看Version" @click="modal.VersionsModal.show({})" />
       <a-button msg="Inspector" @click="modal.InspectorModal.show({})" />
       <a-button msg="快捷键设置" @click="modal.ShortcutModal.show({})" />
+      <a-button msg="Fn排列" @click="modal.FnTabsModal.show({})" />
       <a-button msg="Credits" @click="modal.CreditsModal.show({})" />
     </template>
   </SimpleModal>

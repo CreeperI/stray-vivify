@@ -15,6 +15,7 @@ import ChartPreviewModal from '@renderer/components/modals/chart-preview-modal.v
 import ExportCustom from '@renderer/components/modals/export-custom/export-custom.vue'
 import LoadBackupModal from '@renderer/components/modals/load-backup-modal.vue'
 import AntiAddictModal from '@renderer/components/modals/anti-addict-modal.vue'
+import FnTabsModal from '@renderer/components/modals/fn-tabs-modal.vue'
 
 export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal)
@@ -32,6 +33,7 @@ export class modal<T extends Component> {
   static ExportCustomModal = new modal(ExportCustom)
   static LoadBackupModal = new modal(LoadBackupModal)
   static AntiAddictionModal = new modal(AntiAddictModal)
+  static FnTabsModal = new modal(FnTabsModal)
 
   component: T
   priority: number

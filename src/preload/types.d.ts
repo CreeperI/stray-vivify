@@ -501,6 +501,11 @@ export namespace storages {
     }
     disable_inspect: boolean
 
+    /** chart-main 中 fn 的排列，数组内是 fn 的 id（见 core/misc/fn-tabs.ts） */
+    fn_tabs: {
+      left: number[]
+      right: number[]
+    }
     beat_tolerance: number
     addict: {
       enabled: boolean

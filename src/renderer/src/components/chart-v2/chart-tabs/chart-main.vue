@@ -1,38 +1,29 @@
 <script lang="ts" setup>
-import FnNote from '@renderer/components/chart-v2/chart-tabs/small/fn-note.vue'
-import FnCounter from '@renderer/components/chart-v2/chart-tabs/small/fn-counter.vue'
-import FnDensity from '@renderer/components/chart-v2/chart-tabs/small/fn-density.vue'
-import FnEditor from '@renderer/components/chart-v2/chart-tabs/small/fn-editor.vue'
-import FnTime from '@renderer/components/chart-v2/chart-tabs/small/fn-time.vue'
-import FnEditTools from '@renderer/components/chart-v2/chart-tabs/small/fn-edit-tools.vue'
 import PixiEditor from '@renderer/components/chart-v2/svg-lane/pixi-editor.vue'
 import { Chart } from '@renderer/core/chart/chart'
 import DiffRef from '@renderer/components/chart-v2/svg-lane/diff-ref.vue'
-import FnExport from '@renderer/components/chart-v2/chart-tabs/small/fn-export.vue'
-import FnAimod from '@renderer/components/chart-v2/chart-tabs/small/fn-aimod.vue'
-import FnMma from '@renderer/components/chart-v2/chart-tabs/small/fn-mma.vue'
+import { Storage } from '@renderer/core/storage'
+import { computed } from 'vue'
+import { fn_components, normalize_fn_tabs } from '@renderer/core/misc/fn-tabs'
 
 const chart = Chart.$current
 const d_ref = chart.refs.diff_ref
+
+const fn_tabs = computed(() => normalize_fn_tabs(Storage.settings.fn_tabs))
+const left_fns = computed(() => fn_components(fn_tabs.value.left))
+const right_fns = computed(() => fn_components(fn_tabs.value.right))
 </script>
 
 <template>
   <div class="chart-main">
-    <div class="chart-fn fn-wrapper">
-      <fn-note />
-      <fn-counter />
-      <fn-density />
+    <div v-if="left_fns.length" class="chart-fn fn-wrapper">
+      <component :is="fn.component" v-for="fn in left_fns" :key="fn.id" />
     </div>
     <!--  when comparing in bg-mode  -->
     <diff-ref v-if="d_ref != -1" />
     <pixi-editor v-else />
-    <div class="chart-fn fn-wrapper">
-      <fn-editor />
-      <fn-time />
-      <fn-export />
-      <fn-edit-tools />
-      <fn-aimod />
-      <fn-mma />
+    <div v-if="right_fns.length" class="chart-fn fn-wrapper">
+      <component :is="fn.component" v-for="fn in right_fns" :key="fn.id" />
     </div>
   </div>
 </template>
