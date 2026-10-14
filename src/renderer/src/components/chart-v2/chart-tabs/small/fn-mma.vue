@@ -13,6 +13,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
 import { Rework, Rework_Display, Rework_Types } from '@renderer/core/chart/rework'
 import { utils } from '@renderer/core/utils'
+import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 
 const chart = Chart.$current
 const diff = chart.diff
@@ -127,14 +128,17 @@ const modeTagClass = computed(() => `mode-${modeTag.value.toLowerCase()}`)
 /** 有几个画几个（不补空条、最多 5 条，由 Rework.presentPattern 保证） */
 const bars = computed<Rework_Types.PatternBarItem[]>(() => pattern.value?.bars ?? [])
 
+/**
+ * 被键型解析器忽略的 stacknote 数（同列音符落在 LN 体内 / LN 头相撞）。
+ * 显示在 mode tag 那一行（RC / LN / HB / Mix 旁边），不占状态行。
+ */
+const droppedNotes = computed(() => pattern.value?.droppedNotes ?? 0)
+
 const statusText = computed(() => {
   if (busy.value) return 'Analyzing…'
   if (fatals.value.length) return `[Error] ${fatals.value[0]}`
   if (!estimate.value) return 'No data（点击重新计算）'
-  // 解析器会直接忽略同列 LN 体内的 stacknote，这里如实提示被忽略的数量
-  const dropped = pattern.value?.droppedNotes ?? 0
-  const dropHint = dropped > 0 ? ` // -${dropped} stacked` : ''
-  return `${chart.song.name} [${diff.diff1} ${diff.diff2}] // Sunny // ${elapsedMs.value.toFixed(0)}ms${dropHint}`
+  return `${chart.song.name} [${diff.diff1} ${diff.diff2}] (${diff.charter}) // Sunny // ${elapsedMs.value.toFixed(0)}ms`
 })
 
 const statusKind = computed(() => {
@@ -153,7 +157,7 @@ const statusKind = computed(() => {
     <!-- ── star-block ─────────────────────────────────────────────── -->
     <div class="star-block">
       <div class="star-left">
-        <div class="star-value has-unit" :style="{ background: starBg, color: starFg }">
+        <div :style="{ background: starBg, color: starFg }" class="star-value has-unit">
           {{ starText }}<span class="star-unit">SR</span>
         </div>
         <div class="star-meta">LN%: {{ lnPercentText }}<br />Keys: {{ keysText }}</div>
@@ -169,8 +173,8 @@ const statusKind = computed(() => {
           <span
             v-for="lvl in [5, 4, 3, 2, 1]"
             :key="lvl"
-            class="star-dot"
             :class="{ lit: lvl <= starTipLevel }"
+            class="star-dot"
           />
         </div>
       </div>
@@ -183,16 +187,23 @@ const statusKind = computed(() => {
         <li v-for="(item, i) in bars" :key="i" class="cluster-item">
           <div class="cluster-label">{{ item.label }}</div>
           <div class="cluster-track">
-            <div class="cluster-fill" :style="{ width: item.width + '%' }" />
+            <div :style="{ width: item.width + '%' }" class="cluster-fill" />
           </div>
           <div class="cluster-subtype">{{ item.subtype }}</div>
         </li>
       </ol>
     </template>
 
-    <!-- ── mode tag ──────────────────────────────────────────────── -->
+    <!-- ── mode tag（右侧附被忽略的 stacknote 计数） ─────────────── -->
     <div class="mode-tag-group">
-      <span class="mode-tag" :class="modeTagClass">{{ modeTag }}</span>
+      <span :class="modeTagClass" class="mode-tag">{{ modeTag }}</span>
+      <word-helper
+        v-if="droppedNotes > 0"
+        :dec="`${droppedNotes} 个音符与同列 LN 冲突（落在 LN 体内或与 LN 尾同刻），键型分析已忽略它们`"
+        class="stacked-hint"
+      >
+        ({{ droppedNotes }} stacked)
+      </word-helper>
     </div>
 
     <div v-if="fatals.length > 1" class="mma-errors">
@@ -209,11 +220,12 @@ const statusKind = computed(() => {
   gap: 6px;
   min-width: 320px;
   padding: 12px 14px 14px;
-  border-radius: 14px;
+  border-radius: 12px;
   background: linear-gradient(180deg, rgba(24, 28, 40, 0.94), rgba(16, 18, 26, 0.94));
   border: 1px solid rgba(184, 220, 238, 0.22);
   color: #eaf3fb;
   user-select: none;
+  box-sizing: border-box;
 }
 
 /* ── status ──────────────────────────────────────────────────────── */
@@ -441,6 +453,13 @@ const statusKind = computed(() => {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #0d1016;
+}
+/* mode tag 旁被忽略的 stacknote 计数 */
+.stacked-hint {
+  font-size: 10px;
+  color: rgba(184, 220, 238, 0.62);
+  font-variant-numeric: tabular-nums;
+  cursor: help;
 }
 .mode-rc {
   background: #7afbff;

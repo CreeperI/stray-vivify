@@ -147,7 +147,11 @@ export namespace Rework_DiffNotes {
     return note.end !== undefined && note.end > note.time
   }
 
-  /** 供 .osu 文本序列化使用：把 lane 放在该列中心，保证 xToColumn 精确还原。 */
+  /**
+   * lane → `.osu` 的 x 坐标（该列中心）。
+   * 供键型分析路径使用：`PatternOsuParser.convertHitObjects` 内部会用
+   * `Rework_Parser.xToColumn(x, keys)` 把 x 还原成列，取列中心可保证往返无损。
+   */
   export function laneToX(lane: number, keys: number): number {
     return (lane + 0.5) * (512 / keys)
   }

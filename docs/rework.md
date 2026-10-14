@@ -300,10 +300,10 @@ Roxy / Azusa / Mixed 未移植，因此没出现"一趟 4–5 次完整 rework"�
 
 | 区块 | 内容 |
 | --- | --- |
-| 状态行 | `歌曲名 [diff1 diff2] // Sunny // <耗时>ms // -N stacked`；**点击整行重新计算** |
+| 状态行 | `歌曲名 [diff1 diff2] // Sunny // <耗时>ms`；**点击整行重新计算** |
 | star-block | 星数胶囊（背景/文字色由 `Rework_Display.starColorFor` / `pickReadableTextColor` 实时计算）+ `LN%` + `Keys` + 右胶囊（`Category`）+ 段位标签（`\|\|` 拆行）+ caption + 5 个星星点（段位级别） |
 | Pattern | 分隔行 + 进度条（有几个画几个，最多 5 条）；`bars.length === 0` 时整段隐藏 |
-| mode tag | `RC` / `LN` / `HB` / `Mix` 胶囊（无 SV 徽章） |
+| mode tag | `RC` / `LN` / `HB` / `Mix` 胶囊（无 SV 徽章）；右侧附 `(N stacked)` —— 被键型解析器忽略的 stacknote 数，仅 N > 0 时显示（带 tooltip 说明原因） |
 | 错误 | `fatals` 多于一条时在底部列出 |
 
 **固定选项**（无 UI，都在文件顶部常量）：`OD = 8.0`、`CLASSIC_MOD = false`（v2）、`ALWAYS_SHOW_LN = false`、算法 `Sunny`、不传 `useSvDetection`。
