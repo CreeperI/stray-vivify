@@ -224,7 +224,7 @@ export class DiffDrawer extends StopClass {
           g.height = Storage.settings.sprites.bar_length
           return g
         },
-        { label: 'beat', zIndex: 1 }
+        { label: 'beat', zIndex: 1, alpha: (Storage.settings.sprites.bar_op) / 100 }
       )
       const _bpm_text_style = new TextStyle({
         fill: 'pink',
