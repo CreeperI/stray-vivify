@@ -4,7 +4,7 @@ import { utils } from '../utils'
 import { Storage } from '@renderer/core/storage'
 import { notify } from '@renderer/core/misc/notify'
 import { FrameRate } from '@renderer/core/misc/frame-rates'
-import { calc_sr, calc_stats } from '@renderer/core/chart/calc-stat'
+import { calc_stats } from '@renderer/core/chart/calc-stat'
 import { ChartTypeV2 } from '@preload/chart-types'
 import { EventHub, StopClass } from '@renderer/core/misc/eventhub'
 import { RefreshAll } from '@renderer/core/misc/refresh-all'
@@ -123,7 +123,7 @@ export class Chart_diff extends StopClass {
 
   sr: Ref<ChartTypeV2.SongStats>
   max_lane: Ref<number>
-  ai_mod = ref<[number,string][]>([])
+  ai_mod = ref<[number, string][]>([])
   #__density_abort = false
 
   constructor(chart: Chart, index?: number) {
@@ -159,8 +159,8 @@ export class Chart_diff extends StopClass {
       section_list: []
     }
     this.shown_timing = []
-    this.current_timing = computed(() =>
-      this.timing_of_time(this.chart.audio.refs.current_ms.value).ix
+    this.current_timing = computed(
+      () => this.timing_of_time(this.chart.audio.refs.current_ms.value).ix
     )
     this.density_data = ref([0])
     this.density_path = ref('')
@@ -615,7 +615,7 @@ export class Chart_diff extends StopClass {
     for (let i = 0; i < v.length; i++) {
       r.push(this.add_note(v[i]))
       undo.push(() => {
-        this.remove_note(v[i])
+        this.undo_add(v[i])
       })
     }
     this.push_undo(() => {
@@ -639,7 +639,7 @@ export class Chart_diff extends StopClass {
     for (const ele of notes) {
       r.push(this.remove_note(ele))
       undo.push(() => {
-        this.add_note(ele)
+        this.undo_add(ele)
       })
     }
     this.push_undo(() => {
@@ -694,7 +694,7 @@ export class Chart_diff extends StopClass {
     const ix = bsearch_last_le(this.timing, time)
     return ix >= 0 ? this.timing[ix] : this.timing[0]
   }
-  timing_of_time(time:ms) {
+  timing_of_time(time: ms) {
     if (time <= 0) time = 0
     const ix = Math.max(bsearch_last_le(this.timing, time), 0)
     return {
@@ -837,7 +837,6 @@ export class Chart_diff extends StopClass {
   update_sr() {
     if (!Storage.settings.song_stats) return
     this.sr.value = calc_stats(this.diff, this.chart.audio.length)
-    if (Storage.settings.osu_sr) this.sr.value.sr = calc_sr(this.diff)
   }
 
   get_beat_string(time: number) {

@@ -92,7 +92,6 @@ const storage = ref<storages.storage_scheme>({
       reverse: false,
       bg_op: 70
     },
-    osu_sr: false,
     disable_inspect: false,
     beat_tolerance: 0,
     addict: {

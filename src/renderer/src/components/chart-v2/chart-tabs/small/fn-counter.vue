@@ -39,11 +39,6 @@ const sr = chart.diff.sr
         <word-helper :msg="`Lv. ${(sr.total_v3 / 50).toFixed(2)}`"
                      style="text-wrap: nowrap"
                      dec="开玩笑的，点击刷新" />
-        <word-helper
-          v-if="Storage.settings.osu_sr"
-          :msg="`${sr.sr.toFixed(2)}*`"
-          dec="如果这是张osu谱有多少概率rank？"
-        ></word-helper>
       </div>
       <div>CHIP</div>
       <stat-line str="note" />

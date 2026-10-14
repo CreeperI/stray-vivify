@@ -499,7 +499,6 @@ export namespace storages {
       reverse: boolean
       bg_op: number
     }
-    osu_sr: boolean
     disable_inspect: boolean
 
     beat_tolerance: number

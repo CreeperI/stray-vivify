@@ -60,9 +60,6 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <a-checkbox2 v-model="r.settings.color_stats" />
         <div>显示Version</div>
         <a-checkbox2 v-model="r.settings.always_version" />
-        <div>osu!mania难度计算</div>
-        <a-checkbox2 v-model="r.settings.osu_sr" />
-        <ds>Claude写的，大概不准。</ds>
 
         <setting-header msg="编辑功能" />
 
