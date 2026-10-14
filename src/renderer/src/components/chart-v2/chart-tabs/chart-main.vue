@@ -10,6 +10,7 @@ import { Chart } from '@renderer/core/chart/chart'
 import DiffRef from '@renderer/components/chart-v2/svg-lane/diff-ref.vue'
 import FnExport from '@renderer/components/chart-v2/chart-tabs/small/fn-export.vue'
 import FnAimod from '@renderer/components/chart-v2/chart-tabs/small/fn-aimod.vue'
+import FnMma from '@renderer/components/chart-v2/chart-tabs/small/fn-mma.vue'
 
 const chart = Chart.$current
 const d_ref = chart.refs.diff_ref
@@ -31,6 +32,7 @@ const d_ref = chart.refs.diff_ref
       <fn-export />
       <fn-edit-tools />
       <fn-aimod />
+      <fn-mma />
     </div>
   </div>
 </template>

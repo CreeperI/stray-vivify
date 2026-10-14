@@ -15,3 +15,5 @@ external/*
 pnpm-*
 /.lingma/
 PROJECT.md
+*~
+*.tsbuildinfo
