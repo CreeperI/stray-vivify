@@ -1,0 +1,121 @@
+name: Build Windows Release
+
+# 触发方式
+#   1. 手动触发（Actions → Build Windows Release → Run workflow）
+#         - version 留空：只构建并上传 artifact，不创建 Release
+#         - version 填 x.y.z（如 1.0.1，不带前导 v）：构建并创建该 tag 的 Release
+#   2. 推送形如 1.0.0 / 1.9.11 的 tag（不带前导 v）：构建并创建 Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '可选：版本号 x.y.z（不带前导 v）。填写后会创建同名 tag 的 Release；留空只构建并上传 artifact。'
+        required: false
+        type: string
+  push:
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-win-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-win:
+    name: Windows NSIS installer
+    # Windows 原生 runner：不需要 wine，也不需要 sudo（Vercel 那种 Linux 容器里两样都没有）
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          # 与 pnpm-lock.yaml (lockfileVersion 9.0) 和 pnpm-workspace.yaml 里的
+          # allowBuilds 设置匹配（allowBuilds 是 pnpm 11+ 的配置项）
+          version: 12
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Resolve version
+        id: version
+        shell: pwsh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          $v = ''
+          if ($env:EVENT_NAME -eq 'workflow_dispatch' -and $env:INPUT_VERSION) {
+            $v = $env:INPUT_VERSION.Trim()
+          }
+          elseif ($env:REF_NAME -match '^\d+\.\d+\.\d+$') {
+            $v = $env:REF_NAME
+          }
+
+          if ($v) {
+            if ($v -notmatch '^\d+\.\d+\.\d+$') {
+              throw "版本号 '$v' 必须是 x.y.z 格式（不带前导 v）。"
+            }
+            # 让产物名和 Release 的 tag 保持一致：
+            # artifactName = ${productName}-${version}-setup.${ext}
+            npm version $v --no-git-tag-version --allow-same-version
+            Add-Content -Path $env:GITHUB_OUTPUT -Value "release_tag=$v" -Encoding utf8
+            Write-Host "==> 构建 stray-vivify $v，并会创建 tag $v 的 Release"
+          }
+          else {
+            Write-Host "==> 使用 package.json 里的版本号构建，不创建 Release"
+          }
+
+      - name: Build Windows installer
+        # 等价于 `pnpm build:win`（= npm run build && electron-builder --win）：
+        # 先 typecheck + electron-vite build，再让 electron-builder 打 Windows NSIS 包。
+        # 额外的 --publish never 是必需的：在 CI 且当前提交有 tag 时，
+        # electron-builder 默认会尝试把产物发布到 electron-builder.yml 里那个
+        # generic 占位源（https://example.com/auto-updates），这里关掉，
+        # 改为由下面的 action 创建 GitHub Release。
+        run: pnpm build:win -- --publish never
+
+      - name: List dist output
+        shell: pwsh
+        run: |
+          Get-ChildItem dist -File |
+            Select-Object Name, @{ n = 'SizeMB'; e = { [math]::Round($_.Length / 1MB, 2) } } |
+            Format-Table -AutoSize
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: stray-vivify-windows-${{ github.ref_name }}
+          path: |
+            dist/*-setup.exe
+            dist/*-setup.exe.blockmap
+            dist/latest.yml
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.release_tag != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.release_tag }}
+          name: stray-vivify ${{ steps.version.outputs.release_tag }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/*-setup.exe
+            dist/*-setup.exe.blockmap
+            dist/latest.yml
