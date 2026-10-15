@@ -82,7 +82,9 @@ jobs:
 
       - name: Build Windows installer
         # 等价于 `pnpm build:win`（= npm run build && electron-builder --win）：
-        # 先 typecheck + electron-vite build，再让 electron-builder 打 Windows NSIS 包。
+        # 先 typecheck + electron-vite build，再让 electron-builder 打包。
+        # electron-builder.yml 里 win.target 现在只有 zip，所以产物就是
+        # stray-vivify-<version>-win-unpacked.zip（免安装包，也是程序内自动更新拉的那个文件）。
         # 额外的 --publish never 是必需的：在 CI 且当前提交有 tag 时，
         # electron-builder 默认会尝试把产物发布到 electron-builder.yml 里那个
         # generic 占位源（https://example.com/auto-updates），这里关掉，
@@ -100,10 +102,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: stray-vivify-windows-${{ github.ref_name }}
-          path: |
-            dist/*-setup.exe
-            dist/*-setup.exe.blockmap
-            dist/latest.yml
+          path: dist/*.zip
           if-no-files-found: error
           retention-days: 14
 
@@ -115,7 +114,6 @@ jobs:
           name: stray-vivify ${{ steps.version.outputs.release_tag }}
           generate_release_notes: true
           fail_on_unmatched_files: true
-          files: |
-            dist/*-setup.exe
-            dist/*-setup.exe.blockmap
-            dist/latest.yml
+          # 用 *.zip 而不是写死名字：程序内的自动更新优先找 *-win-unpacked.zip，
+          # 找不到就退回任意 .zip，所以产物名即使变了也能更新。
+          files: dist/*.zip

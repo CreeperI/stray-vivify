@@ -337,7 +337,70 @@ export type Invoke = {
     }
     r: void
   }
+  /** 检查 GitHub Release 上有没有新版本 */
+  'check-update': {
+    arg: {}
+    r: Promise<CheckUpdateResult>
+  }
+  /** 下载上面找到的免安装 zip 更新包 */
+  'download-update': {
+    arg: {}
+    r: Promise<DownloadUpdateResult>
+  }
+  /** 上次自动更新的结果（更新脚本写下的状态文件，读一次就删） */
+  'update-status': {
+    arg: {}
+    r: Promise<UpdateStatusResult>
+  }
 }
+
+/** check-update 的结果 */
+export type CheckUpdateResult =
+  | {
+      state: 'new'
+      /** 当前版本（app.getVersion()） */
+      current: string
+      /** 远端版本，如 1.1.0 */
+      version: string
+      /** release notes，已截断 */
+      notes: string
+      /** 更新包字节数，未知为 0 */
+      size: number
+      /** 更新包文件名 */
+      asset: string
+    }
+  | { state: 'latest'; current: string }
+  | { state: 'failed'; current: string; msg: string }
+
+/** download-update 的结果 */
+export type DownloadUpdateResult =
+  | {
+      state: 'success'
+      /** 更新包保存路径 */
+      path: string
+      /** 需要被覆盖的程序目录 */
+      install: string
+    }
+  | {
+      state: 'failed'
+      msg: string
+      /** 下载已经完成的更新包（失败时可以让用户手动解压） */
+      path?: string
+      install?: string
+    }
+
+/** update-status 的结果 */
+export type UpdateStatusResult =
+  | { state: 'none' }
+  | {
+      state: 'failed'
+      /** 下载下来的更新包 */
+      zip: string
+      /** 更新脚本写的日志 */
+      log: string
+      /** 原本要覆盖的程序目录 */
+      install: string
+    }
 
 export type Send = {
   'notify-normal': {

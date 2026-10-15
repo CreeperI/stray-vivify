@@ -18,6 +18,7 @@ import { load_external_tips } from '@renderer/core/misc/startup-tips'
 import { Preinit } from '@renderer/core/misc/preinit'
 import { Skin } from '@renderer/core/misc/skin'
 import { AntiAddiction } from '@renderer/core/misc/anti-addiction'
+import { CheckUpdate } from '@renderer/core/misc/check-update'
 
 const app = createApp(App).use(
   createModal({
@@ -98,6 +99,8 @@ async function main() {
   await Skin.check_skin()
   Preinit.Stages.check_skin = true
   Preinit.finish_init()
+  // 初始化完成后自动检查更新，有新版会弹确认框
+  CheckUpdate.check_update()
 }
 
 load_ipc_handlers()

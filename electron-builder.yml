@@ -20,7 +20,12 @@ asarUnpack:
   - src/renderer/public/**
 win:
   executableName: stray-vivify
-  target: nsis
+  # 只出免安装 zip（Release 里就这一个产物，程序内的自动更新也拉它）。
+  # artifactName 必须保持 <product>-<version>-win-unpacked.zip 的格式：
+  # src/main/update.ts 靠 "-win-unpacked.zip" 后缀在 Release 里找更新包。
+  # 想恢复 NSIS 安装包：target: [zip, nsis]
+  target: zip
+  artifactName: ${productName}-${version}-win-unpacked.${ext}
 nsis:
   artifactName: ${productName}-${version}-setup.${ext}
   shortcutName: ${productName}

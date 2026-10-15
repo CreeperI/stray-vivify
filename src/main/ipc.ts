@@ -7,6 +7,7 @@ import path, { basename, extname } from 'node:path'
 import ChartManager from './chart-manager'
 import { file_paths, folder_size } from './fp-parser'
 import { OszReader } from './osz-reader'
+import { check_update, download_update, read_update_status } from './update'
 import { ChartType } from '../preload/chart-types'
 
 export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
@@ -261,6 +262,10 @@ const Handler = (mw: Electron.BrowserWindow) => {
     },
     'open-path': (_, { id, path: fname }) => {
       chart_manager.show_folder(id, fname)
-    }
+    },
+    // 自动更新（见 src/main/update.ts）
+    'check-update': () => check_update(),
+    'download-update': () => download_update(mw),
+    'update-status': () => read_update_status()
   } as Required<IpcHandlers.invoke.handler>
 }
