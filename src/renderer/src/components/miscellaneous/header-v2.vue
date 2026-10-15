@@ -76,6 +76,7 @@ const cs = GlobalStat.chart_state
           </div>
           <div class="h-menu-btn-text" @click="do_refresh">刷新</div>
           <div class="h-menu-btn-text" @click="close_chart">关闭文件</div>
+          <div class="h-menu-btn-text" @click="modal.H2PModal.show({})">帮助</div>
         </div>
       </div>
       <div :class="is_active(on, 1)" class="header-menu-ul" @click="active = 1">

@@ -40,6 +40,9 @@ async function import_osz() {
           <div class="h-menu-btn-text" @click="import_osz">osz</div>
         </div>
       </div>
+      <div class="header-menu-ul">
+        <div class="h-menu-btn-text" @click="modal.H2PModal.show({})">帮助</div>
+      </div>
     </div>
     <win-func />
   </div>

@@ -16,6 +16,7 @@ import ExportCustom from '@renderer/components/modals/export-custom/export-custo
 import LoadBackupModal from '@renderer/components/modals/load-backup-modal.vue'
 import AntiAddictModal from '@renderer/components/modals/anti-addict-modal.vue'
 import FnTabsModal from '@renderer/components/modals/fn-tabs-modal.vue'
+import H2pModal from '@renderer/components/modals/h2p-modal.vue'
 
 export class modal<T extends Component> {
   static SettingModal = new modal(SettingsModal)
@@ -34,11 +35,12 @@ export class modal<T extends Component> {
   static LoadBackupModal = new modal(LoadBackupModal)
   static AntiAddictionModal = new modal(AntiAddictModal)
   static FnTabsModal = new modal(FnTabsModal)
+  static H2PModal = new modal(H2pModal)
 
   component: T
-  priority: number
+  readonly priority: number
   props: ComponentProps<T> | undefined
-  should_catch: boolean
+  private readonly should_catch: boolean
   opened: boolean
 
   constructor(component: T, should_catch = true, priority = 0) {
