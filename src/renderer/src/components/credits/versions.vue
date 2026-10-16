@@ -409,6 +409,17 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
         <div>调整了打开skin文件夹的行为，现在没有1.png也可以正常打开了。</div>
       </template>
     </Build>
+    <Build build="1.1.0" d="16" m="10" y="2026" title="Rework Originium">
+      <template #bugs>
+        <div>修复了小节线（不透明度）不生效的问题。</div>
+      </template>
+      <div>添加了Reform插件。</div>
+      <div>添加了一个tip</div>
+      <div>添加了How 2 play 使用说明，不过还没正式开始写，先放着</div>
+      <div>添加了自动更新功能。我不太确定能不能用，因为大家都是用的zip。</div>
+      <div>请输入文本。</div>
+      <div>将所有chart改为vs-chart以兼容旧版本。我错了我再也不瞎改了。</div>
+    </Build>
   </div>
 </template>
 

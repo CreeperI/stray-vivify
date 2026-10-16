@@ -32,8 +32,7 @@ async function import_chart() {
   const song = await Invoke('ask-song')
   if (!song) return
   const id = (await modal.AskIdModal.show({ all: GlobalStat.all_chart.map((x) => x.id) })) as
-    | undefined
-    | string
+    undefined | string
   if (!id) return
   const r = await Invoke('import-song', { id: id, path: song.path })
   console.log(r)
@@ -106,7 +105,14 @@ function random_tip() {
 <template>
   <div class="chart-list-wrapper">
     <div class="chart-list-left">
-      <img v-if="useLogo" alt="logo" class="su-logo" draggable="false" src="/sv.png" @click="random_tip" />
+      <img
+        v-if="useLogo"
+        alt="logo"
+        class="su-logo"
+        draggable="false"
+        src="/sv.png"
+        @click="random_tip"
+      />
       <div v-else class="su-title" @click="random_tip">stray/vivify</div>
       <div class="su-tip" v-html="tip"></div>
       <div class="su-greeting">
@@ -195,6 +201,11 @@ function random_tip() {
   grid-template-rows: 1fr auto 6rem 10fr;
   justify-items: center;
   gap: 20px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  padding-bottom: 250px;
 }
 
 .su-title {
