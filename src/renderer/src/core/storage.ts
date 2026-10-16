@@ -5,8 +5,8 @@ import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 
 export const Version = {
-  val: 10,
-  str: '1.0.0'
+  val: 11,
+  str: '1.1.0'
 }
 const storage = ref<storages.storage_scheme>({
   settings: {

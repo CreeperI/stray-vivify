@@ -9,12 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: '可选：版本号 x.y.z（不带前导 v）。填写后会创建同名 tag 的 Release；留空只构建并上传 artifact。'
+        description: 'x.y.z'
         required: false
         type: string
-  push:
-    tags:
-      - '[0-9]*.[0-9]*.[0-9]*'
 
 permissions:
   contents: write
