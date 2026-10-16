@@ -74,10 +74,10 @@ export default class ChartManager {
       fs.mkdirSync(folder)
       const song_path = path.join(folder, 'song' + path.extname(fp))
       fs.copyFileSync(fp, song_path)
-      if (fs.existsSync(path.join(path.dirname(fp), 'chart.json'))) {
-        fs.copyFileSync(path.join(path.dirname(fp), 'chart.json'), path.join(folder, 'chart.json'))
+      if (fs.existsSync(path.join(path.dirname(fp), 'vs-chart.json'))) {
+        fs.copyFileSync(path.join(path.dirname(fp), 'vs-chart.json'), path.join(folder, 'vs-chart.json'))
         const chart = JSON.parse(
-          fs.readFileSync(path.join(folder, 'chart.json'), 'utf-8')
+          fs.readFileSync(path.join(folder, 'vs-chart.json'), 'utf-8')
         ) as ChartTypeV2.final
         if (chart.version)
           this.add_chart(
@@ -101,7 +101,7 @@ export default class ChartManager {
       return {
         state: 'success',
         folder: song_path,
-        json: path.join(folder, 'chart.json')
+        json: path.join(folder, 'vs-chart.json')
       }
     } catch (e) {
       return {
@@ -145,9 +145,9 @@ export default class ChartManager {
 
   read_chart(id: string, ext: string) {
     const folder = path.join(this.charts_folder, id)
-    if (fs.existsSync(path.join(folder, 'chart.json'))) {
+    if (fs.existsSync(path.join(folder, 'vs-chart.json'))) {
       return {
-        data: fs.readFileSync(path.join(folder, 'chart.json'), 'utf-8'),
+        data: fs.readFileSync(path.join(folder, 'vs-chart.json'), 'utf-8'),
         path: path.join(folder, 'song' + ext)
       }
     }
@@ -174,7 +174,7 @@ export default class ChartManager {
     const chart = this.data.find((v) => v.id === id)
     if (chart) {
       fs.writeFileSync(
-        path.join(this.charts_folder, id, 'chart.json'),
+        path.join(this.charts_folder, id, 'vs-chart.json'),
         JSON.stringify(chd, null, 2)
       )
     }
@@ -596,8 +596,8 @@ export default class ChartManager {
     const _song = find_song(path.join(this.charts_folder, id), 'song')
     if (sv) {
       fs.copyFileSync(
-        path.join(this.charts_folder, id, 'chart.json'),
-        path.join(exported_path, 'chart.json')
+        path.join(this.charts_folder, id, 'vs-chart.json'),
+        path.join(exported_path, 'vs-chart.json')
       )
       const _png = find_png(path.join(this.charts_folder, id), 'song')
       if (_png) {
@@ -624,7 +624,7 @@ export default class ChartManager {
   show_chart(id: string) {
     const chart = this.data.find((v) => v.id === id)
     if (!chart) return
-    shell.showItemInFolder(path.join(this.charts_folder, id, 'chart.json'))
+    shell.showItemInFolder(path.join(this.charts_folder, id, 'vs-chart.json'))
   }
 
   private _export_chart(id: string, ext: string) {
@@ -633,7 +633,7 @@ export default class ChartManager {
     const zip = new AdmZip()
     const chart_folder = path.join(this.charts_folder, id)
     zip.addLocalFile(path.join(chart_folder, 'song' + chart.ext))
-    zip.addLocalFile(path.join(chart_folder, 'chart.json'))
+    zip.addLocalFile(path.join(chart_folder, 'vs-chart.json'))
     const sprite = find_png(chart_folder, 'song')
     if (sprite) zip.addLocalFile(path.join(chart_folder, sprite))
     const bg = find_png(chart_folder, 'bg')
@@ -680,11 +680,11 @@ export default class ChartManager {
 
     // so we got those folders excluded in json!
     for (const folder of folders) {
-      if (fs.existsSync(path.join(this.charts_folder, folder, 'chart.json'))) {
+      if (fs.existsSync(path.join(this.charts_folder, folder, 'vs-chart.json'))) {
         const song = find_song(path.join(this.charts_folder, folder), 'song')
         if (!song) continue
         const chart = JSON.parse(
-          fs.readFileSync(path.join(this.charts_folder, folder, 'chart.json'), 'utf-8')
+          fs.readFileSync(path.join(this.charts_folder, folder, 'vs-chart.json'), 'utf-8')
         ) as ChartTypeV2.final
         // old version fuck
         if (!chart.version) continue
@@ -706,10 +706,10 @@ export default class ChartManager {
       .readdirSync(this.charts_folder)
       .filter((v) => fs.lstatSync(path.join(this.charts_folder, v)).isDirectory())
     for (const folder of folders) {
-      if (fs.existsSync(path.join(this.charts_folder, folder, 'vs-chart.json'))) {
+      if (fs.existsSync(path.join(this.charts_folder, folder, 'chart.json'))) {
         fs.renameSync(
-          path.join(this.charts_folder, folder, 'vs-chart.json'),
-          path.join(this.charts_folder, folder, 'chart.json')
+          path.join(this.charts_folder, folder, 'chart.json'),
+          path.join(this.charts_folder, folder, 'vs-chart.json')
         )
       }
     }
