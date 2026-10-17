@@ -77,7 +77,7 @@ const storage = ref<storages.storage_scheme>({
       ahead: 5000,
       interval: 2000
     },
-    auto_save: false,
+    auto_save: true,
     exporter: {
       sv: false,
       crop: false

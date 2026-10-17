@@ -84,6 +84,9 @@ export namespace Rework_DiffNotes {
       return EVENT_PRIORITY[a.kind] - EVENT_PRIORITY[b.kind]
     })
 
+    const lastWide: number[] = new Array(keys).fill(-Infinity)
+
+    // main parse loop
     for (const event of events) {
       if (event.kind === 'end') {
         flag[event.lane] = false
@@ -99,12 +102,23 @@ export namespace Rework_DiffNotes {
           const rightmost = Math.min(note.lane + note.width - 1, keys - 1)
           let targetLane = note.lane
 
-          for (let lane = note.lane; lane <= rightmost; lane++) {
+          const possibleLanes: number[] = []
+          for (let lane = note.lane; lane < rightmost; lane++) {
             if (!flag[lane]) {
-              targetLane = lane
-              break
+              possibleLanes.push(lane)
             }
           }
+          targetLane = possibleLanes.length ? possibleLanes[0] : note.lane
+          if (possibleLanes.length) {
+            // if possible lane.
+            // from left to right, choose the farthest time and leftmost lane.
+            for (const possibleLane of possibleLanes) {
+              if (lastWide[possibleLane] > lastWide[targetLane]) {
+                targetLane = possibleLane
+              }
+            }
+          }
+          lastWide[targetLane] = note.time
 
           resultNotes.push({ time: note.time, lane: targetLane })
         }
