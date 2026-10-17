@@ -50,6 +50,9 @@
   height: 100%;
   transition: all 0.2s linear;
 }
+.header-menu-ul * {
+  -webkit-app-region: no-drag;
+}
 
 .h-menu-btn-text {
   margin: 0 15px;

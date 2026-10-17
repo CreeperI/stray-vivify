@@ -387,6 +387,11 @@ export namespace utils {
 
     return new Blob([ab], { type: 'audio/wav' })
   }
+
+  export function or(cond: boolean, val: any) {
+    if (cond) return val
+    return
+  }
 }
 
 // @ts-expect-error

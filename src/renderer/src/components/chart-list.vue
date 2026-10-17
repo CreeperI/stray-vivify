@@ -114,7 +114,7 @@ function random_tip() {
         @click="random_tip"
       />
       <div v-else class="su-title" @click="random_tip">stray/vivify</div>
-      <div class="su-tip" v-html="tip"></div>
+      <div class="su-tip" v-html="tip" :class="utils.or(tip.length > 100, 'su-long')" />
       <div class="su-greeting">
         欢迎，{{ username }}<br />
         这是你使用stray/vivify的第{{ pass_days.toFixed(0) }}天！ <br />
@@ -228,6 +228,10 @@ function random_tip() {
   z-index: 15;
   line-height: 1.5rem;
   max-width: 85%;
+}
+
+.su-long {
+  text-indent: 2em each-line;
 }
 
 .su-greeting {
