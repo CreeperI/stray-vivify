@@ -1,6 +1,6 @@
 import path, { extname } from 'node:path'
 import fs from 'fs'
-import { charts_data } from '../preload/types'
+import { charts_data, CustomSongInfo, ImportVspResult } from '../preload/types'
 import * as electron from 'electron'
 import { dialog, shell } from 'electron'
 import { file_paths } from './fp-parser'
@@ -14,6 +14,64 @@ import { serialize } from './serialize'
 function timestr() {
   const date = new Date()
   return `${date.getHours()}${date.getMinutes()}${date.getSeconds()}`
+}
+
+const VSP_DIFF_NAMES = ['Opening', 'Middle', 'Finale', 'Encore']
+
+/**
+ * Parse a game-readable .vsc file into the chart data structure used by the editor.
+ * Keep this in sync with Chart.load_vsc in the renderer.
+ */
+function parse_vsc(text: string): Pick<ChartTypeV2.diff, 'notes' | 'timing'> {
+  const notes: ChartTypeV2.note[] = []
+  const timing: ChartTypeV2.timing[] = []
+
+  for (const raw_line of text.split(/\r?\n/)) {
+    const line = raw_line.trim()
+    if (!line) continue
+    const [stime, stype, slane, sextra] = line.split(',')
+    const time = Number.parseFloat(stime)
+    const type = Number.parseInt(stype, 10)
+    const lane = Number.parseInt(slane, 10)
+    if (!Number.isFinite(time) || !Number.isFinite(type) || !Number.isFinite(lane)) continue
+
+    if (type == 2) {
+      // hold note: time,type,lane,end-time
+      if (!sextra) continue
+      const end_time = Number.parseFloat(sextra)
+      if (!Number.isFinite(end_time)) continue
+      notes.push({
+        time,
+        lane,
+        width: 1,
+        len: Math.max(end_time - time, 0)
+      })
+      continue
+    }
+
+    if (type == 3) {
+      // bpm change: time,type,lane,b:bpm|t:time|v:...|s:...
+      if (!sextra) continue
+      const bpm = Number.parseFloat(sextra.split('|')[0].replace(/^b:\s*/, ''))
+      if (!Number.isFinite(bpm)) continue
+      timing.push({ time, bpm, num: 4, den: 4 })
+      continue
+    }
+
+    let width = 1
+    let snm = 0
+    if (type == 1 || type == 7 || type == 8) width = 2
+    if (type == 6 || type == 7) snm = 1
+    if (type == 8) snm = 2
+    notes.push({ time, lane, width, snm })
+  }
+
+  notes.sort((a, b) => a.time - b.time)
+  timing.sort((a, b) => a.time - b.time)
+  if (timing.length == 0) {
+    timing.push({ time: 0, bpm: 120, num: 4, den: 4 })
+  }
+  return { notes, timing }
 }
 
 export default class ChartManager {
@@ -75,7 +133,10 @@ export default class ChartManager {
       const song_path = path.join(folder, 'song' + path.extname(fp))
       fs.copyFileSync(fp, song_path)
       if (fs.existsSync(path.join(path.dirname(fp), 'vs-chart.json'))) {
-        fs.copyFileSync(path.join(path.dirname(fp), 'vs-chart.json'), path.join(folder, 'vs-chart.json'))
+        fs.copyFileSync(
+          path.join(path.dirname(fp), 'vs-chart.json'),
+          path.join(folder, 'vs-chart.json')
+        )
         const chart = JSON.parse(
           fs.readFileSync(path.join(folder, 'vs-chart.json'), 'utf-8')
         ) as ChartTypeV2.final
@@ -463,6 +524,133 @@ export default class ChartManager {
     } catch (e) {
       return
     }
+  }
+
+  create_from_vsp(id: string, fp: string): ImportVspResult {
+    if (!fs.existsSync(fp)) return { state: 'failed', reason: '文件不存在' }
+    if (fs.existsSync(path.join(this.charts_folder, id))) return { state: 'existed' }
+
+    let zip: AdmZip
+    try {
+      zip = new AdmZip(fp)
+    } catch {
+      return { state: 'failed', reason: '不是有效的 ZIP 文件' }
+    }
+
+    let entries: AdmZip.IZipEntry[]
+    try {
+      entries = zip.getEntries().filter((v) => !v.isDirectory)
+    } catch {
+      return { state: 'failed', reason: '无法读取 ZIP 内容' }
+    }
+    const find_entry = (name: string) =>
+      entries.find((v) => path.basename(v.entryName).toLowerCase() == name)
+
+    const info_entry = find_entry('info.json')
+    if (!info_entry) return { state: 'failed', reason: '缺少 info.json' }
+    const music_entry = find_entry('music.ogg')
+    if (!music_entry) return { state: 'failed', reason: '缺少 music.ogg' }
+
+    let info: CustomSongInfo
+    try {
+      info = JSON.parse(info_entry.getData().toString('utf-8')) as CustomSongInfo
+    } catch {
+      return { state: 'failed', reason: 'info.json 解析失败' }
+    }
+    if (!info || typeof info != 'object') {
+      return { state: 'failed', reason: 'info.json 格式不正确' }
+    }
+
+    const constants = [
+      info.difficulty_constant_1,
+      info.difficulty_constant_2,
+      info.difficulty_constant_3,
+      info.difficulty_constant_4
+    ]
+    const displays = [
+      info.difficulty_display_1,
+      info.difficulty_display_2,
+      info.difficulty_display_3,
+      info.difficulty_display_4
+    ]
+    const designers = [
+      info.note_designer_1,
+      info.note_designer_2,
+      info.note_designer_3,
+      info.note_designer_4
+    ]
+
+    const diffs: ChartTypeV2.diff[] = []
+    for (let i = 0; i < VSP_DIFF_NAMES.length; i++) {
+      const vsc_entry = find_entry(VSP_DIFF_NAMES[i].toLowerCase() + '.vsc')
+      if (!vsc_entry) continue
+
+      let parsed: Pick<ChartTypeV2.diff, 'notes' | 'timing'>
+      try {
+        parsed = parse_vsc(vsc_entry.getData().toString('utf-8'))
+      } catch {
+        continue
+      }
+      const diff1 = i == 3 && !!info.enc_data ? 'Backstage' : VSP_DIFF_NAMES[i]
+      const rating = Number(constants[i])
+      diffs.push({
+        notes: parsed.notes,
+        timing: parsed.timing,
+        meta: {
+          charter: designers[i] ?? '',
+          diff1,
+          diff2: displays[i] ?? '',
+          rating: Number.isFinite(rating) ? rating : 0,
+          diff_name: diff1
+        }
+      })
+    }
+    if (diffs.length == 0) return { state: 'failed', reason: '没有可导入的 vsc 难度' }
+
+    const chart: ChartTypeV2.final = {
+      diffs,
+      song: {
+        name: info.name || 'song',
+        name_roman: info.formatted_name || info.name || '',
+        composer: info.artist || 'unknown',
+        composer_roman: info.artist || '',
+        bpm: info.bpm_display || 'unknown',
+        source: '',
+        sprite: '',
+        ref: ''
+      },
+      version: -1
+    }
+
+    const folder = path.join(this.charts_folder, id)
+    try {
+      fs.mkdirSync(folder)
+      fs.writeFileSync(path.join(folder, 'song.ogg'), music_entry.getData())
+      const image_entry = entries.find((v) => {
+        return /^jacket\.(png|jpe?g|gif|webp)$/i.test(path.basename(v.entryName))
+      })
+      if (image_entry) {
+        const image_ext = extname(image_entry.entryName).toLowerCase()
+        const app_image_ext = image_ext == '.jpeg' ? '.jpg' : image_ext
+        fs.writeFileSync(path.join(folder, 'song' + app_image_ext), image_entry.getData())
+      }
+      const preview_entry = find_entry('preview.ogg')
+      if (preview_entry) fs.writeFileSync(path.join(folder, 'preview.ogg'), preview_entry.getData())
+    } catch {
+      fs.rmSync(folder, { recursive: true, force: true })
+      return { state: 'failed', reason: '写入谱面文件失败' }
+    }
+
+    this.add_chart(
+      id,
+      chart.song.name,
+      chart.song.composer,
+      chart.song.bpm,
+      '.ogg',
+      chart.diffs.map((d) => d.meta.diff1 + ' ' + d.meta.diff2)
+    )
+    this.write_chart(id, chart)
+    return { state: 'success' }
   }
 
   create_with_buffer(id: string, buf: Buffer, ext: string) {

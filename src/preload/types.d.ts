@@ -86,6 +86,13 @@ export type Invoke = {
         }
     >
   }
+  'import-vsp': {
+    arg: {
+      fp: string
+      id: string
+    }
+    r: ImportVspResult
+  }
   'open-song': {
     arg: {
       id: string
@@ -599,6 +606,9 @@ export type charts_data = {
   ext: string
   diffs: string[]
 }[]
+
+export type ImportVspResult =
+  { state: 'success' } | { state: 'existed' } | { state: 'failed'; reason: string }
 
 export type CustomSongInfo = {
   chart_id: string

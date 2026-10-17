@@ -58,6 +58,9 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'import-song': async function (_, { id, path: music_path }) {
       return chart_manager.import_song(music_path, id)
     },
+    'import-vsp': function (_, { fp, id }) {
+      return chart_manager.create_from_vsp(id, fp)
+    },
     'open-song': function (_, { id }) {
       if (chart_manager.exists(id)) {
         return chart_manager.open_song(id)
