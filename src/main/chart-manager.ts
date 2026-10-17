@@ -636,8 +636,6 @@ export default class ChartManager {
     zip.addLocalFile(path.join(chart_folder, 'vs-chart.json'))
     const sprite = find_png(chart_folder, 'song')
     if (sprite) zip.addLocalFile(path.join(chart_folder, sprite))
-    const bg = find_png(chart_folder, 'bg')
-    if (bg) zip.addLocalFile(path.join(chart_folder, bg))
 
     zip.writeZip(path.join(this.charts_folder, id + ext))
     shell.showItemInFolder(path.join(this.charts_folder, id + ext))
