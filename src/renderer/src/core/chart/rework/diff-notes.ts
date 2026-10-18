@@ -90,20 +90,22 @@ export namespace Rework_DiffNotes {
     for (const event of events) {
       if (event.kind === 'end') {
         flag[event.lane] = false
+        lastWide[event.lane] = event.time
         continue
       }
 
       if (event.kind === 'note') {
-        const note = event.data
+        const note = event.data as ChartTypeV2.normal_note
 
         if (note.width === 1) {
           resultNotes.push({ time: note.time, lane: note.lane })
+          lastWide[note.lane] = note.time
         } else {
           const rightmost = Math.min(note.lane + note.width - 1, keys - 1)
           let targetLane = note.lane
 
           const possibleLanes: number[] = []
-          for (let lane = note.lane; lane < rightmost; lane++) {
+          for (let lane = note.lane; lane <= rightmost; lane++) {
             if (!flag[lane]) {
               possibleLanes.push(lane)
             }
@@ -113,17 +115,16 @@ export namespace Rework_DiffNotes {
             // if possible lane.
             // from left to right, choose the farthest time and leftmost lane.
             for (const possibleLane of possibleLanes) {
-              if (lastWide[possibleLane] > lastWide[targetLane]) {
+              if (lastWide[possibleLane] < lastWide[targetLane]) {
                 targetLane = possibleLane
               }
             }
           }
           lastWide[targetLane] = note.time
-
           resultNotes.push({ time: note.time, lane: targetLane })
         }
       } else {
-        const note = event.data
+        const note = event.data as ChartTypeV2.hold_note
         const end = event.end
 
         if (note.width === 1) {

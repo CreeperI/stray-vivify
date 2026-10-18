@@ -5,8 +5,8 @@ import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
 
 export const Version = {
-  val: 11,
-  str: '1.1.0'
+  val: 12,
+  str: '1.1.1'
 }
 const storage = ref<storages.storage_scheme>({
   settings: {
@@ -42,7 +42,7 @@ const storage = ref<storages.storage_scheme>({
       bar_color6: '#fff04e',
       bar_color7: '#4eeaff',
       bar_length: 6,
-      bar_op: 0,
+      bar_op: 100,
       bar_dy: 0
     },
     time_max_length: 50,
@@ -128,6 +128,8 @@ function patch(s: storages.storage_scheme) {
       // @ts-ignore
       s.settings.song_stats = s.settings.star_rating
     }
+    if (s.version < 12)
+      s.settings.sprites.bar_op = 100
   }
 }
 

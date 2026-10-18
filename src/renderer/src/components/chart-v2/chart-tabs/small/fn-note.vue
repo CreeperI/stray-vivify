@@ -33,6 +33,7 @@ const pending_note = computed(() => {
 }) as ComputedRef<ChartTypeV2.note>
 const select = () => NoteClipboard.selected
 const rkey = RefreshAll.generate_key('select')
+const mt = (note: ChartTypeV2.note) => 'len' in note ? note.len + note.time : note.time
 </script>
 
 <template>
@@ -103,7 +104,7 @@ const rkey = RefreshAll.generate_key('select')
           <div>
             {{ utils.toTimeStr(Math.min(...select().map((x) => x.time)) / 1000) }}
             ~
-            {{ utils.toTimeStr(Math.max(...select().map((x) => x.time)) / 1000) }}
+            {{ utils.toTimeStr(Math.max(...select().map(mt)) / 1000) }}
           </div>
         </div>
       </div>
