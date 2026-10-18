@@ -12,7 +12,6 @@ package-lock.json
 .prettierrc.yaml
 external/*
 !external/examples/
-pnpm-*
 /.lingma/
 PROJECT.md
 *~
