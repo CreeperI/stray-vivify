@@ -9,7 +9,18 @@ import { find_png, find_song } from './stray'
 import * as child_process from 'node:child_process'
 import { ChartTypeV2 } from '../preload/chart-types'
 import { OszReader } from './osz-reader'
+import { MczReader } from './mcz-reader'
 import { serialize } from './serialize'
+
+/**
+ * The surface shared by the chart packages we can read (osz / mcz).
+ */
+interface ChartPackReader {
+  getAudioFile(): [string, Buffer] | null
+  getImages(): [Buffer, string][]
+  get_diffs(): ChartTypeV2.diff[]
+  get_song(): ChartTypeV2.song | null
+}
 
 function timestr() {
   const date = new Date()
@@ -663,19 +674,27 @@ export default class ChartManager {
   }
 
   create_from_osz(id: string, osz: OszReader) {
+    return this.create_from_pack(id, osz)
+  }
+
+  create_from_mcz(id: string, mcz: MczReader) {
+    return this.create_from_pack(id, mcz)
+  }
+
+  private create_from_pack(id: string, pack: ChartPackReader) {
     const folder = path.join(this.charts_folder, id)
     if (fs.existsSync(folder)) return 0
     fs.mkdirSync(folder)
-    const s = osz.getAudioFile()
+    const s = pack.getAudioFile()
     if (!s) return
     fs.writeFileSync(path.join(folder, 'song' + s[0]), s[1])
-    const imgs = osz.getImages()
+    const imgs = pack.getImages()
     if (imgs.length != 0) {
       fs.writeFileSync(path.join(folder, 'song' + imgs[0][1]), imgs[0][0])
     }
     const chart: ChartTypeV2.final = {
-      diffs: osz.get_diffs(),
-      song: osz.get_song() || {
+      diffs: pack.get_diffs(),
+      song: pack.get_song() || {
         name: 'song',
         composer: 'unknown',
         bpm: 'unknown',
@@ -700,6 +719,14 @@ export default class ChartManager {
   }
 
   import_osz_sprite(id: string, buf: Buffer, ext: string) {
+    this.import_pack_sprite(id, buf, ext)
+  }
+
+  import_mcz_sprite(id: string, buf: Buffer, ext: string) {
+    this.import_pack_sprite(id, buf, ext)
+  }
+
+  private import_pack_sprite(id: string, buf: Buffer, ext: string) {
     const folder = path.join(this.charts_folder, id)
     if (fs.existsSync(path.join(folder, 'song' + ext))) fs.rmSync(path.join(folder, 'song' + ext))
     fs.writeFileSync(path.join(folder, 'song' + ext), buf)

@@ -7,6 +7,7 @@ import path, { basename, extname } from 'node:path'
 import ChartManager from './chart-manager'
 import { file_paths, folder_size } from './fp-parser'
 import { OszReader } from './osz-reader'
+import { MczReader } from './mcz-reader'
 import { check_update, download_update, read_update_status } from './update'
 import { ChartType } from '../preload/chart-types'
 
@@ -184,6 +185,38 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'close-osz': () => {
       OszReader.current = undefined
       console.log('osz closed')
+    },
+    'read-mcz': () => {
+      const fp = dialog.showOpenDialogSync({
+        properties: ['openFile'],
+        filters: [{ name: 'MCZ', extensions: ['mcz'] }]
+      })
+      if (!fp) return
+      const mcz = MczReader.create(fp[0])
+      return {
+        song: mcz.get_song(),
+        diff: mcz.get_diffs(),
+        pix: mcz.getImages().length,
+        warnings: mcz.get_warnings()
+      }
+    },
+    'import-mcz': async (_, { fp, id }) => {
+      const mcz = MczReader.create(fp)
+      const song = mcz.getAudioFile()
+      if (!song) return 0
+      chart_manager.create_from_mcz(id, mcz)
+      return 1
+    },
+    'import-mcz-pics': (_, { id, ix }) => {
+      const current = MczReader.current
+      if (!current) return
+      const images = current.getImages()
+      if (images.length == 0) return
+      chart_manager.import_mcz_sprite(id, images[ix][0], extname(images[ix][1]))
+    },
+    'close-mcz': () => {
+      MczReader.current = undefined
+      console.log('mcz closed')
     },
     'export-preview-svg': (_, { id, svg_text }) => {
       chart_manager.write_svg_text(id, svg_text)

@@ -48,10 +48,13 @@ function import_osz() {
   Chart.$current.import_osz()
 }
 
+function import_mcz() {
+  Chart.$current.import_mcz()
+}
+
 function open_svg() {
   modal.ChartPreviewModal.show({})
 }
-
 </script>
 
 <template>
@@ -62,6 +65,7 @@ function open_svg() {
           <a-button2 msg="导入vsb" @click="read_vsb" />
           <a-button2 msg="导入vsc" @click="read_vsc" />
           <a-button2 msg="导入osz" @click="import_osz" />
+          <a-button2 msg="导入mcz" @click="import_mcz" />
         </div>
       </Hide>
       <Hide :def="true" title="导出">

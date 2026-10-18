@@ -236,6 +236,34 @@ export type Invoke = {
     arg: { id: string; ix: number }
     r: void
   }
+  'read-mcz': {
+    arg: {}
+    r:
+      | {
+          diff?: ChartTypeV2.diff[]
+          song?: ChartTypeV2.song
+          // same as osz, the number of images that can be previewed
+          pix: number
+          // charts that were skipped or adjusted while reading
+          warnings?: string[]
+        }
+      | undefined
+  }
+  'close-mcz': {
+    arg: {}
+    r: void
+  }
+  'import-mcz': {
+    arg: {
+      fp: string
+      id: string
+    }
+    r: Promise<number> | undefined
+  }
+  'import-mcz-pics': {
+    arg: { id: string; ix: number }
+    r: void
+  }
   'export-preview-svg': {
     arg: { id: string; svg_text: string }
     r: void

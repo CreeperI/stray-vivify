@@ -48,7 +48,7 @@ onUnmounted(() => {
           </div>
         </div>
       </Hide>
-      <Hide :def="true" title="歌曲">
+      <Hide :def="true" title="歌曲信息">
         <div v-if="song" class="osz-song">
           <div>
             <strong>{{ song.name }}</strong> - {{ song.composer }}

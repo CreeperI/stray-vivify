@@ -531,6 +531,24 @@ export class Chart extends StopClass {
       notify.success('曲绘一份！')
     })
   }
+
+  async import_mcz() {
+    const r = await Invoke('read-mcz')
+    if (!r) return
+    modal.LoadMczModal.show({
+      diff: r.diff,
+      song: r.song,
+      pix: r.pix,
+      warnings: r.warnings
+    })
+  }
+
+  import_mcz_pics(ix: number) {
+    Invoke('import-mcz-pics', { id: this.id, ix: ix }).then(() => {
+      RefreshAll.refresh('song-cover')
+      notify.success('曲绘一份！')
+    })
+  }
   async write_png() {
     const svg = document.getElementById('chart-preview-svg')
     if (!svg) return

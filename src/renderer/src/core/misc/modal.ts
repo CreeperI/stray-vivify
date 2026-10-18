@@ -11,6 +11,7 @@ import InspectorModal from '@renderer/components/modals/inspector/inspector-moda
 import IexporterModal from '@renderer/components/modals/iexporter-modal.vue'
 import MissingSkinModal from '@renderer/components/modals/missing-skin-modal.vue'
 import LoadOszModal from '@renderer/components/modals/load-osz-modal.vue'
+import LoadMczModal from '@renderer/components/modals/load-mcz-modal.vue'
 import ChartPreviewModal from '@renderer/components/modals/chart-preview-modal.vue'
 import ExportCustom from '@renderer/components/modals/export-custom/export-custom.vue'
 import LoadBackupModal from '@renderer/components/modals/load-backup-modal.vue'
@@ -30,6 +31,7 @@ export class modal<T extends Component> {
   static IExporterModal = new modal(IexporterModal)
   static MissingSkinModal = new modal(MissingSkinModal)
   static LoadOszModal = new modal(LoadOszModal)
+  static LoadMczModal = new modal(LoadMczModal)
   static ChartPreviewModal = new modal(ChartPreviewModal)
   static ExportCustomModal = new modal(ExportCustom)
   static LoadBackupModal = new modal(LoadBackupModal)

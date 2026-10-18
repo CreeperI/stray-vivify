@@ -32,6 +32,15 @@ async function import_vsp() {
   await Invoke('import-vsp', { fp: fp, id: id })
   await GlobalStat.update_all_chart()
 }
+async function import_mcz() {
+  const fp = await Invoke('ask-file', { file: ['MCZ', 'mcz'] })
+  if (!fp) return
+  const id = (await modal.AskIdModal.show({ all: GlobalStat.all_chart.map((x) => x.id) })) as
+    undefined | string
+  if (!id) return
+  await Invoke('import-mcz', { fp: fp, id: id })
+  await GlobalStat.update_all_chart()
+}
 </script>
 
 <template>
@@ -47,6 +56,7 @@ async function import_vsp() {
           <div class="h-menu-btn-text" @click="import_svc">svc</div>
           <div class="h-menu-btn-text" @click="import_vsp">vsp</div>
           <div class="h-menu-btn-text" @click="import_osz">osz</div>
+          <div class="h-menu-btn-text" @click="import_mcz">mcz</div>
         </div>
       </div>
       <div class="header-menu-ul">

@@ -3,6 +3,7 @@ import { join } from 'path'
 import path, { basename, extname } from 'node:path'
 import { file_paths } from './fp-parser'
 import { OszReader } from './osz-reader'
+import { MczReader } from './mcz-reader'
 
 function convertPath(originalPath: string) {
   const match = originalPath.match(/^\/([a-zA-Z])\/(.*)$/)
@@ -101,6 +102,20 @@ export function stray_handler() {
           return new Response(Buffer.from(imgs[id][0]), {
             headers: {
               'Content-Type': 'image/' + imgs[id][1].slice(1),
+              'Content-Disposition': 'inline'
+            }
+          })
+        }
+      }
+    } else if (decodedUrl.includes('__mcz__')) {
+      if (MczReader.current) {
+        const imgs = MczReader.current.getImages()
+        const id = parseInt(decodedUrl.replace('/__mcz__/', ''))
+        if (imgs.length > id) {
+          const name = imgs[id][1]
+          return new Response(Buffer.from(imgs[id][0]), {
+            headers: {
+              'Content-Type': 'image/' + extname(name).slice(1),
               'Content-Disposition': 'inline'
             }
           })
