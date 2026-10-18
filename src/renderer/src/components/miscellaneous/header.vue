@@ -2,9 +2,9 @@
 import { modal } from '@renderer/core/misc/modal'
 import { Invoke } from '@renderer/core/ipc'
 import { GlobalStat } from '@renderer/core/globalStat'
-import { notify } from '@renderer/core/misc/notify'
 import './header.css'
 import WinFunc from '@renderer/components/miscellaneous/win-func.vue'
+
 async function import_svc() {
   const fp = await Invoke('ask-file', { file: ['Chart', 'zip', 'svc'] })
   if (!fp) return
@@ -29,7 +29,7 @@ async function import_vsp() {
   const id = (await modal.AskIdModal.show({ all: GlobalStat.all_chart.map((x) => x.id) })) as
     undefined | string
   if (!id) return
-  const r = await Invoke('import-vsp', { fp: fp, id: id })
+  await Invoke('import-vsp', { fp: fp, id: id })
   await GlobalStat.update_all_chart()
 }
 </script>
