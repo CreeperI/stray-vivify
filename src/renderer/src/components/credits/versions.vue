@@ -420,6 +420,16 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>请输入文本。</div>
       <div>将所有chart改为vs-chart以兼容旧版本。我错了我再也不瞎改了。</div>
     </Build>
+    <Build build="1.1.1" y="2026" m="10" d="18">
+      <template #bugs>
+        <div>修复了header无法响应hover的问题。</div>
+      </template>
+      <div>更新了electron版本到44.7.2</div>
+      <div>调整了构建产物，现在体积能进一步压缩了。</div>
+      <div>添加了导入vsp和mcz。</div>
+      <div>调整了svc的内容，现在不再包含bg了。</div>
+      <div>调整了rework的自动拆谱算法。现在会尽可能把bumper串拆成切。</div>
+    </Build>
   </div>
 </template>
 
