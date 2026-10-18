@@ -7,25 +7,38 @@ files:
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml,pnpm-workspace.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!charts/**'
   - '!skin/**'
   - "!**/.idea/*"
-  - "!**/node_modules/*"
   - "!external/"
   - "!**/.lingma/*"
+  # pixi.js 只在 renderer 里用，已经被 Vite 打进 out/renderer，
+  # 运行期不会再从 node_modules 里 require（main/preload 都没引用它）。
+  # 整包约 68MB，其中一半还是 .map 和 UMD 构建，全部不要。
+  - "!node_modules/pixi.js/**"
+  - "!node_modules/@pixi/**"
+  - "!node_modules/gifuct-js/**"
+  # 非运行期文件：sourcemap / 文档 / 许可证正文
+  - "!**/*.md"
+  - "!**/*.map"
+  - "!**/{LICENSE,LICENCE,COPYING,CHANGELOG,HISTORY,AUTHORS}*"
 asarUnpack:
   - resources/**
-  - src/renderer/public/**
 win:
   executableName: stray-vivify
+  # 只保留中英文语言包，其余 53 个 locale 不再打包（省约 46MB）
+  electronLanguages:
+    - zh-CN
+    - en-US
   # 只出免安装 zip（Release 里就这一个产物，程序内的自动更新也拉它）。
   # artifactName 必须保持 <product>-<version>-win-unpacked.zip 的格式：
   # src/main/update.ts 靠 "-win-unpacked.zip" 后缀在 Release 里找更新包。
   # 想恢复 NSIS 安装包：target: [zip, nsis]
   target: zip
   artifactName: ${productName}-${version}-win-unpacked.${ext}
+  icon: build/icon.ico
 nsis:
   artifactName: ${productName}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -42,6 +55,7 @@ mac:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+  icon: build/icon.icns
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -51,6 +65,7 @@ linux:
     - deb
   maintainer: electronjs.org
   category: Utility
+  icon: build/icon.png
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: true

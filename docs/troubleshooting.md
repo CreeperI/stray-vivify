@@ -80,7 +80,7 @@ icacls "D:\code" | Select-String 'Mandatory Label'
 把根目录的完整性级别改回 `Medium`（Windows 的常规级别）：
 
 ```powershell
-icacls "D:\code\stray-vivify" /setintegritylevel (OI)(CI)Medium
+icacls "D:\code\stray-vivify" /setintegritylevel Medium
 ```
 
 Windows 会自动把新的继承属性传播到已有子目录，**不需要**加 `/T` 递归。随后直接 `pnpm dev` 即可，不需要任何额外启动参数。

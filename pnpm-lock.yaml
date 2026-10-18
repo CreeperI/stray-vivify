@@ -14,9 +14,6 @@ importers:
       '@electron-toolkit/utils':
         specifier: ^3.0.0
         version: 3.0.0(electron@44.8.0(supports-color@7.2.0))
-      pixi.js:
-        specifier: ^8.19.0
-        version: 8.22.0
     devDependencies:
       '@electron-toolkit/eslint-config':
         specifier: ^1.0.2
@@ -81,6 +78,9 @@ importers:
       eslint-plugin-vue:
         specifier: ^9.33.0
         version: 9.33.0(eslint@8.57.1(supports-color@7.2.0))(supports-color@7.2.0)
+      pixi.js:
+        specifier: ^8.19.0
+        version: 8.22.0
       prettier:
         specifier: ^3.8.3
         version: 3.9.10
