@@ -16,6 +16,7 @@
       "@preload/*": [
         "src/preload/*"
       ]
-    }
+    },
+    "moduleResolution": "bundler"
   }
 }

@@ -10,6 +10,7 @@ import FnExport from '@renderer/components/chart-v2/chart-tabs/small/fn-export.v
 import FnEditTools from '@renderer/components/chart-v2/chart-tabs/small/fn-edit-tools.vue'
 import FnAimod from '@renderer/components/chart-v2/chart-tabs/small/fn-aimod.vue'
 import FnMma from '@renderer/components/chart-v2/chart-tabs/small/fn-mma.vue'
+import FnTesseract from '@renderer/components/chart-v2/chart-tabs/small/fn-tesseract.vue'
 
 export type FnTabs = storages.settings['fn_tabs']
 
@@ -34,12 +35,13 @@ export const FN_TABS: FnTab[] = [
   { id: 6, file: 'fn-export', component: FnExport },
   { id: 7, file: 'fn-edit-tools', component: FnEditTools },
   { id: 8, file: 'fn-aimod', component: FnAimod },
-  { id: 9, file: 'fn-mma', component: FnMma }
+  { id: 9, file: 'fn-mma', component: FnMma },
+  { id: 10, file: 'fn-tesseract', component: FnTesseract },
 ]
 
 /** 默认排列，与加入本设置前的 chart-main 布局一致 */
 export const FN_TABS_DEFAULT: FnTabs = {
-  left: [1, 2, 3],
+  left: [1, 2, 3, 10],
   right: [4, 5, 6, 7, 8, 9]
 }
 
