@@ -430,6 +430,12 @@ import AHref from '@renderer/components/a-elements/a-href.vue'
       <div>调整了svc的内容，现在不再包含bg了。</div>
       <div>调整了rework的自动拆谱算法。现在会尽可能把bumper串拆成切。</div>
     </Build>
+    <build build="1.1.2" y="2026" m="10" d="21" >
+      <div>响应CVE号召，更新node至25.0.0</div>
+      <div>重构了音频系统。（Pr @CreeperI）</div>
+      <div>添加了转转转</div>
+      <div>添加了几个帮助文档的内容。</div>
+    </build>
   </div>
 </template>
 

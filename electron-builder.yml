@@ -24,6 +24,7 @@ files:
   - "!**/*.md"
   - "!**/*.map"
   - "!**/{LICENSE,LICENCE,COPYING,CHANGELOG,HISTORY,AUTHORS}*"
+  - "!docs/**"
 asarUnpack:
   - resources/**
 win:
@@ -49,11 +50,6 @@ nsis:
 
 mac:
   entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
   icon: build/icon.icns
 dmg:
@@ -70,7 +66,6 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: true
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: TerminalFlow
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

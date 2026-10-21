@@ -2,12 +2,15 @@
 import { ref } from 'vue'
 import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 
+const props = defineProps<{ id?: number }>()
+
 const H2P_ARTICLES: { id: number; title: string }[] = [
-  { id: 1, title: '导读' }
+  { id: 1, title: '导读' },
+  { id: 2, title: 'skin' }
 ]
 
 /** 当前显示的文章 id */
-const id = ref(1)
+const id = ref(props.id ?? 1)
 /** 正文滚动容器：换文章之后回到顶部 */
 const body = ref<HTMLElement | null>(null)
 
@@ -35,10 +38,62 @@ function show(next: number) {
       </nav>
 
       <!-- 右：正文，一篇一个 div -->
-      <div ref="body" class="h2p-body">
-        <div v-if="id === 1" class="h2p-article">
+      <div ref="body" class="h2p-body h2p-article">
+        <div v-if="id === 1">
           <h2 class="h2p-title">导读</h2>
           <p>这是一个操作说明。我不知道写什么在这里。所以就这样吧。</p>
+        </div>
+        <div v-if="id === 2">
+          <h2 class="h2p-title">skin</h2>
+          <p>
+            skin文件夹应当和程序文件在同一目录下。
+            启动时，应用会尝试读取所有需要的皮肤文件，并弹窗提示缺失文件。
+          </p>
+          <h4>文件列表：</h4>
+          <pre>
+/skin
+    1.png
+    1b.png
+    1h.png
+    1lh.png
+    1rh.png
+    2b.png
+    2l.png
+    2lh.png
+    2m.png
+    2mh.png
+    2r.png
+    2rh.png
+    2sl.png
+    2sm.png
+    2sr.png
+    3b.png
+    3l.png
+    3lh.png
+    3r.png
+    3rh.png
+    3sl.png
+    3sr.png
+    4.png
+    4b.png
+    4h.png
+    4s.png
+    hit.{mp3,ogg,wav,m4a}
+          </pre>
+          <p>其中，各个文件的用途：</p>
+          <p><code>数字</code>标识其贴图用于多宽的note。</p>
+          <p><code>l,h,m</code>标识其贴图用于左侧（右侧）的note。</p>
+          <p><code>s</code>字面意义，对应s</p>
+          <p><code>b</code>字面意义，对应b。不分左右。</p>
+          <p><code>h</code>对应ln面身。面头使用与（该处）等宽的note的同样的贴图。不分左右。</p>
+          <h3>hit</h3>
+          <p>打击音效。在默认皮肤包中不被提供。</p>
+          <p>可使用的后缀已经列出。根据Creeper的pr，使用wav应当是延迟最低的一个。</p>
+          <h2>其他说明</h2>
+          <p>
+            除了hit的后缀可变，其它图片文件的命名是定死的。
+            虽然windows好像会自动进行大小写转换（认定同一），但是sv不会这样子识别。
+          </p>
         </div>
       </div>
     </div>
@@ -46,6 +101,10 @@ function show(next: number) {
 </template>
 
 <style scoped>
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  border-bottom: 1px solid gray;
+}
 /* 分栏：左右各自滚动，正文那一侧允许选中文字（全局是 user-select: none） */
 .h2p {
   display: flex;
@@ -108,7 +167,7 @@ function show(next: number) {
   user-select: text;
 }
 
-.h2p-article {
+.h2p-body > div {
   text-align: left;
   line-height: 1.6;
   padding-right: 0.5rem;
@@ -129,7 +188,7 @@ function show(next: number) {
 }
 
 .h2p-article p {
-  margin: 0.35rem 0;
+  margin: 0.15rem 0;
 }
 
 .h2p-article ul {

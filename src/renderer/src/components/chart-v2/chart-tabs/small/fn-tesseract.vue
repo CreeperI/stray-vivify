@@ -225,9 +225,6 @@ onBeforeUnmount(() => {
     <div class="fn-tesseract-title">转转转</div>
 
     <div class="stage">
-      <!-- 四维：PixiJS 容器 -->
-      <div ref="hostRef" class="pixi-host"></div>
-
       <!-- 二维：纯 CSS -->
       <div class="demo demo-2d">
         <div class="plane-2d"></div>
@@ -244,6 +241,8 @@ onBeforeUnmount(() => {
           <div class="face-3d face-bottom"></div>
         </div>
       </div>
+      <!-- 四维：PixiJS 容器 -->
+      <div ref="hostRef" class="pixi-host"></div>
     </div>
   </div>
 </template>
@@ -259,7 +258,6 @@ onBeforeUnmount(() => {
   position: relative;
   width: 85%;
   height: var(--tesseract);
-  background: #0b0e14;
   overflow: hidden;
   display: flex;
   flex-direction: row;
