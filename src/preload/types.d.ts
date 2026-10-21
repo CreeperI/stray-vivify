@@ -554,6 +554,7 @@ export namespace storages {
     mouse_tracker: boolean
 
     hit_sound: boolean
+    music_volume: number
     hit_volume: number
 
     frame_time: boolean
