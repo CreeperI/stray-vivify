@@ -43,7 +43,9 @@ async function import_chart() {
 function open_proj(id: string) {
   if (state) return
   state = true
-  Chart.open_chart(id)
+  Chart.open_chart(id).catch(() => {
+    state = false
+  })
 }
 
 function try_delete(id: string) {

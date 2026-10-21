@@ -110,12 +110,12 @@ export class Chart extends StopClass {
   }
   backup_last = ref({ time: performance.now(), init: true })
 
-  constructor(id: string, blob_url: string, length: ms) {
+  constructor(id: string, buffer: AudioBuffer, length: ms) {
     super()
     this.id = id
     this.song = new Chart_song(this)
     this.diffs = [Chart_diff.createDiff()]
-    this.audio = new Chart_audio(this, blob_url, length)
+    this.audio = new Chart_audio(this, buffer, length)
     this.length_end = -1
     this.shown_timing = computed(() => [
       this.audio.refs.current_ms.value,
@@ -201,22 +201,18 @@ export class Chart extends StopClass {
     LoadSong.status.open_song = true
     const blob = await this.fetch_blob(id)
     LoadSong.status.fetch_blob = true
-    let length: number
-    let blob_path: string
+    let buffer: AudioBuffer
     try {
-      const buffer = await utils.decode_audio(blob, GlobalStat.audioContext)
-      length = buffer.duration * 1000
-      // 转成 WAV(PCM) 再播放：OGG 的 seek 很慢，拖动进度条跨度过大会卡 1~2s；
-      // WAV 未压缩，currentTime 定位即时。
-      blob_path = URL.createObjectURL(utils.encode_wav(buffer))
+      buffer = await utils.decode_audio(blob, GlobalStat.audioContext)
     } catch (e) {
-      // 解码失败时退回原始音频（旧的播放路径）
-      length = 10000
-      blob_path = URL.createObjectURL(blob)
+      notify.error('音频解码失败，无法打开该谱面。')
+      GlobalStat.route.change('start')
+      throw e
     }
+    const length = buffer.duration * 1000
     LoadSong.status.audio_length = true
     LoadSong.status.blob_path = true
-    const chart = new Chart(id, blob_path, length)
+    const chart = new Chart(id, buffer, length)
     if (file.data) {
       const data = this.parse_data(file.data)
       if (data.status == 'converted') {
@@ -395,7 +391,7 @@ export class Chart extends StopClass {
   }
 
   async save(do_notify = false) {
-    if (this.audio.ele) {
+    if (this.audio.buffer) {
       FrameRate.save.start()
       this.diff.validate_chart()
       await nextFrame()

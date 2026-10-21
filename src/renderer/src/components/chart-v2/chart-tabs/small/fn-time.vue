@@ -30,12 +30,19 @@ const show_beat_time = computed(
     />
     <label @click="writable_play_rate = 1">播放速度:{{ play_rate }}x</label>
     <a-range v-model="writable_play_rate" max="2" min="0.25" step="0.05" />
+    <label>音乐音量: {{ Storage.settings.music_volume }}</label>
+    <a-range
+      v-model="Storage.settings.music_volume"
+      max="100"
+      min="0"
+      step="1"
+    />
     <template v-if="Storage.settings.hit_sound">
       <label v-if="!chart.hit_sounder.hit_error">打击音量: {{ Storage.settings.hit_volume }}</label>
       <a-range
         v-if="!chart.hit_sounder.hit_error"
         v-model="Storage.settings.hit_volume"
-        max="100"
+        max="300"
         min="0"
         step="1"
       />
@@ -72,13 +79,16 @@ input {
 .fn-time > input:focus {
   border-bottom: 1px solid var(--grey);
 }
+
 .fn-time-hit-err {
   grid-column: span 2;
   text-align: center;
 }
+
 .fn-time-str1 {
   width: 9rch;
 }
+
 .fn-time-str2 {
   width: 7.2rch;
   font-size: 0.8em;

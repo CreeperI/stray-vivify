@@ -1,16 +1,48 @@
-import { computed, ref, Ref, WritableComputedRef } from 'vue'
+import { computed, ref, Ref, WritableComputedRef, watch } from 'vue'
 import { Chart } from '@renderer/core/chart/chart'
-import { FrameRate } from '@renderer/core/misc/frame-rates'
 import { EventHub } from '@renderer/core/misc/eventhub'
 import { Intervals } from '@renderer/core/misc/intervals'
 import { utils } from '@renderer/core/utils'
+import { GlobalStat } from '@renderer/core/globalStat'
+import { Storage } from '@renderer/core/storage'
 
 type ms = number
 type second = number
 
+/**
+ * 音乐音量增益节点（全局单例）。
+ * 所有 Chart_audio 的 source 都接到它上面，修改 music_volume 时统一更新。
+ * 用单例而非每个 Chart 一份，避免为每张打开的谱面留下一个常驻 gain + watch（会连带留住旧谱的 AudioBuffer）。
+ */
+let music_gain: GainNode | null = null
+function get_music_gain(): GainNode {
+  if (!music_gain) {
+    const ctx = GlobalStat.audioContext
+    music_gain = ctx.createGain()
+    music_gain.connect(ctx.destination)
+    watch(
+      () => Storage.settings.music_volume,
+      (v) => {
+        if (music_gain) music_gain.gain.value = (v ?? 100) / 100
+      },
+      { immediate: true }
+    )
+  }
+  return music_gain
+}
+
+
 export class Chart_audio {
   chart: Chart
-  ele: HTMLAudioElement
+  buffer: AudioBuffer
+  private readonly ctx: AudioContext
+  /** 正在播放的 source（时间 >= 0 时存在） */
+  private source: AudioBufferSourceNode | null = null
+  /** 本次播放的起始 buffer 偏移(ms) */
+  private base_offset: ms = 0
+  /** 本次播放开始时的 ctx.currentTime(s) */
+  private start_ctx_time = 0
+  private end_callbacks: (() => void)[] = []
   refs: {
     current_ms: Ref<ms>
     play_rate: Ref<number>
@@ -24,10 +56,11 @@ export class Chart_audio {
   ended: boolean
   length: ms
 
-  constructor(ch: Chart, url: string, length: number) {
+  constructor(ch: Chart, buffer: AudioBuffer, length: number) {
     this.chart = ch
+    this.buffer = buffer
+    this.ctx = GlobalStat.audioContext
     this.length = length
-    this.ele = new Audio(url)
     this._play_rate = 1
     this._current_time = 0
     this.last = 0
@@ -85,9 +118,15 @@ export class Chart_audio {
   }
 
   set play_rate(v: number) {
-    this._play_rate = v
     this.refs.play_rate.value = v
-    if (this.ele) this.ele.playbackRate = v
+    if (this.source) {
+      // 变速时先以「旧速率下的当前实际位置」为基准重新锚定，避免 live_time 用新速率回算整段造成偏差
+      const pos = this.live_time()
+      this.base_offset = pos
+      this.start_ctx_time = this.ctx.currentTime
+      this.source.playbackRate.setValueAtTime(v || 1, this.ctx.currentTime)
+    }
+    this._play_rate = v
   }
 
   _current_time: ms
@@ -96,8 +135,45 @@ export class Chart_audio {
     return this._current_time
   }
 
-  get $ele() {
-    return this.ele as HTMLAudioElement
+  /** 当前实际播放位置（source 播放中时按音频时钟计算） */
+  private live_time(): ms {
+    if (!this.source) return this._current_time
+    return this.base_offset + (this.ctx.currentTime - this.start_ctx_time) * this._play_rate * 1000
+  }
+
+  private stop_source() {
+    if (!this.source) return
+    const src = this.source
+    this.source = null
+    src.onended = null
+    try {
+      src.stop()
+    } catch {
+      /* 已经停止 */
+    }
+    src.disconnect()
+  }
+
+  private start_source(offset_ms: ms) {
+    this.stop_source()
+    const offset = Math.max(0, Math.min(offset_ms, this.length))
+    const src = this.ctx.createBufferSource()
+    src.buffer = this.buffer
+    src.playbackRate.value = this._play_rate || 1
+    src.connect(get_music_gain())
+    this.source = src
+    this.base_offset = offset
+    this.start_ctx_time = this.ctx.currentTime
+    src.onended = () => {
+      if (this.source !== src) return
+      // 自然播放到结尾
+      this.source = null
+      this._current_time = this.length
+      this.refs.current_ms.value = this._current_time
+      this.ended = true
+      this.end_callbacks.forEach((cb) => cb())
+    }
+    src.start(0, offset / 1000)
   }
 
   set_current_time(v: ms) {
@@ -105,70 +181,56 @@ export class Chart_audio {
     this.pause()
     this._current_time = v
     this.refs.current_ms.value = v
-    if (v < 0) this.from_negative = true
-    // 不在这里同步 seek 音频元素：滚轮/拖动进度条会高频调用此函数，而 OGG 等格式的
-    // ele.currentTime 赋值会阻塞主线程（且越靠后越慢），是滚动卡顿的主因。
-    // 真正的 seek 统一推迟到 set_and_play() 播放前执行（那里会再 set_ele_time）。
+    this.from_negative = v < 0
     EventHub.dispatch('audio-time-update')
   }
 
   set_and_play() {
-    if (this.current_time < 0) this.from_negative = true
-    this.set_ele_time(this.current_time)
-    if (!this.from_negative) this.ele?.play()
+    // AudioContext 可能因自动播放策略处于 suspended，播放前恢复（对打击音同样生效）
+    if (this.ctx.state !== 'running') void this.ctx.resume()
+    this.from_negative = this.current_time < 0
+    if (!this.from_negative) {
+      this.start_source(this.current_time)
+    }
     this.paused = false
     this.last = performance.now()
     this.chart.hit_sounder?.on_unpause()
     Intervals.pause()
   }
 
-  set_ele_time(v: ms) {
-    this.ele.currentTime = Math.max(v / 1000, 0)
-  }
-
-  on_can_play_through(cb: () => void, options?: AddEventListenerOptions) {
-    this.ele.addEventListener('canplaythrough', cb, options)
-  }
-
-  on_end(cb: () => void, options?: AddEventListenerOptions) {
-    this.ele.addEventListener('ended', cb, options)
-  }
-
-  load_url(url: string) {
-    this.ele = new Audio(url)
-  }
-  on_timeupdate() {
-    this.ele.addEventListener('timeupdate', () => {
-      if (this.paused) return
-      if (this.from_negative) return
-      this._current_time = this.$ele.currentTime * 1000
-      FrameRate.audio_sync.immediate()
-    })
+  on_end(cb: () => void) {
+    this.end_callbacks.push(cb)
   }
 
   pause() {
-    this.ele?.pause()
+    if (this.source) {
+      // 停止前记录精确位置
+      this._current_time = Math.min(this.length, Math.max(0, Math.round(this.live_time())))
+      this.refs.current_ms.value = this._current_time
+    }
+    this.stop_source()
     this.paused = true
     Intervals.resume()
   }
 
   play_pause() {
-    if (this.ele) {
-      if (this.paused) {
-        this.set_and_play()
-        this.ended = false
-      } else this.pause()
+    if (this.paused) {
+      this.set_and_play()
+      this.ended = false
+    } else {
+      this.pause()
     }
   }
 
   update() {
     if (this.paused) return
-    if (this.current_time <= 0) {
+    if (this.current_time <= 0 && !this.source) {
+      // 负时间倒计时（歌曲真正开始前）
       const now = performance.now()
       this.set_current_time_from_updater(this.current_time + (now - this.last) * this.play_rate)
-      this.last = performance.now()
+      this.last = now
     } else {
-      this.set_current_time_from_updater(this.$ele.currentTime * 1000)
+      this.set_current_time_from_updater(this.live_time())
     }
     if (this.from_negative && this.current_time >= 0) {
       this.from_negative = false
@@ -183,11 +245,9 @@ export class Chart_audio {
   }
 
   private set_current_time_from_updater(v: ms) {
-    v = Math.floor(Math.min(this.chart.audio.length, Math.max(-5000, v)))
+    v = Math.floor(Math.min(this.length, Math.max(-5000, v)))
     this._current_time = v
     this.refs.current_ms.value = v
-    if (v < 0) this.from_negative = true
-    if (this.paused) this.set_ele_time(v)
     EventHub.dispatch('audio-time-update')
   }
 }
