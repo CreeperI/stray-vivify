@@ -147,6 +147,8 @@ onUnmounted(() => Chart.current?.diff.force_fuck())
         <a-number-input v-model="r.settings.offset3" class="in" />
         <div>打击音音量</div>
         <a-number-input v-model="r.settings.hit_volume" class="in" max="100" min="0" step="1" />
+        <div>音乐音量</div>
+        <a-number-input v-model="r.settings.music_volume" class="in" max="100" min="0" step="1" />
 
         <setting-header msg="预览模式" />
 

@@ -73,6 +73,7 @@ const storage = ref<storages.storage_scheme>({
     beat_fn_time: false,
     bar_from_0: true,
     hit_volume: 100,
+    music_volume: 100,
     pooling: {
       ahead: 5000,
       interval: 2000
