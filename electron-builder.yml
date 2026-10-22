@@ -65,7 +65,5 @@ linux:
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: true
-publish:
-  provider: TerminalFlow
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

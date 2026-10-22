@@ -11,10 +11,18 @@ import { MczReader } from './mcz-reader'
 import { check_update, download_update, read_update_status } from './update'
 import { ChartType } from '../preload/chart-types'
 
+function time_str() {
+  const date = new Date()
+  return `[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}]`
+}
+
 export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {
   const handler = Handler(mainWindow)
   for (const key of Object.keys(handler)) {
-    ipcMain.handle(key, handler[key])
+    ipcMain.handle(key, (event, args) => {
+      console.log(time_str() + key)
+      return handler[key](event, args)
+    })
   }
   // console.log("loaded song handlers")
 }
