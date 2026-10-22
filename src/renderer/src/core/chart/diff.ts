@@ -441,7 +441,7 @@ export class Chart_diff extends StopClass {
     const path = this.density_path
     const data = this.density_data
     path.value = 'M 20 240'
-    const max = Math.max(...data.value)
+    const max = utils.reduce_max(toRaw(data.value))
     if (data.value.findIndex((v) => v > 0) == -1) return
     const dx = 300 / data.value.length
     const dt = 1500 / data.value.length
@@ -796,7 +796,8 @@ export class Chart_diff extends StopClass {
     for (let i = 0; i < d.length; i++) {
       d[i] = (d[i] / per_length) * 1000
     }
-    this.density_data.value = d
+    this.density_data.value = d.slice(0, max_count)
+    console.log(this.density_data.value)
     FrameRate.calc_density.end()
   }
 

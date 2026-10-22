@@ -156,7 +156,14 @@ export type Invoke = {
       fp: string
       id: string
     }
-    r: Promise<void>
+    r: Promise<boolean>
+  }
+  /* 拖入压缩包时用来判断它应该走 svc 还是 vsp 的导入流程 */
+  'detect-chart-pack': {
+    arg: {
+      fp: string
+    }
+    r: 'svc' | 'vsp' | 'invalid'
   }
   'remove-chart': {
     arg: {
@@ -211,7 +218,7 @@ export type Invoke = {
     r: void
   }
   'read-osz': {
-    arg: {}
+    arg: {      fp: string    }
     r:
       | {
           diff?: ChartTypeV2.diff[]
@@ -237,7 +244,7 @@ export type Invoke = {
     r: void
   }
   'read-mcz': {
-    arg: {}
+    arg: {      fp: string    }
     r:
       | {
           diff?: ChartTypeV2.diff[]

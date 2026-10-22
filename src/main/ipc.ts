@@ -142,6 +142,9 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'import-zip': function (_, { fp, id }) {
       return chart_manager.import_chart(fp, id)
     },
+    'detect-chart-pack': function (_, { fp }) {
+      return chart_manager.detect_chart_pack(fp)
+    },
     'remove-chart': function (_, { id }) {
       chart_manager.remove_chart(id)
     },
@@ -166,13 +169,9 @@ const Handler = (mw: Electron.BrowserWindow) => {
     'open-skin-folder': () => {
       shell.openPath(file_paths.skin)
     },
-    'read-osz': () => {
-      const fp = dialog.showOpenDialogSync({
-        properties: ['openFile'],
-        filters: [{ name: 'OSZ', extensions: ['osz'] }]
-      })
-      if (!fp) return
-      const osz = OszReader.create(fp[0])
+    'read-osz': (_, { fp }) => {
+      if (!fp || !existsSync(fp)) return
+      const osz = OszReader.create(fp)
       return {
         song: osz.get_song(),
         diff: osz.get_diffs(),
@@ -197,13 +196,9 @@ const Handler = (mw: Electron.BrowserWindow) => {
       OszReader.current = undefined
       console.log('osz closed')
     },
-    'read-mcz': () => {
-      const fp = dialog.showOpenDialogSync({
-        properties: ['openFile'],
-        filters: [{ name: 'MCZ', extensions: ['mcz'] }]
-      })
-      if (!fp) return
-      const mcz = MczReader.create(fp[0])
+    'read-mcz': (_, { fp }) => {
+      if (!fp || !existsSync(fp)) return
+      const mcz = MczReader.create(fp)
       return {
         song: mcz.get_song(),
         diff: mcz.get_diffs(),

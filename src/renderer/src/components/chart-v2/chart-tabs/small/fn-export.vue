@@ -20,7 +20,7 @@ const last_backup = chart.backup_last
     <a-button2 msg="备份" @click="backup" />
 
     <div v-if="!last_backup.init" class="last-backup">
-      最后备份： {{ utils.toLocalTime(last_backup.time)}}
+      最后备份： {{ utils.toLocalTime(last_backup.time) }}
     </div>
   </div>
 </template>

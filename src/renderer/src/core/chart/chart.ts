@@ -17,6 +17,13 @@ import { HitSoundSystem } from '@renderer/core/chart/hit-sound'
 import { LoadSong } from '@renderer/core/misc/load-song'
 import nextFrame = utils.nextFrame
 
+/** 取文件路径的扩展名，小写、不带点 */
+function file_ext(fp: string): string {
+  const name = fp.split(/[\\/]/).pop() ?? fp
+  const dot = name.lastIndexOf('.')
+  return dot < 0 ? '' : name.slice(dot + 1).toLowerCase()
+}
+
 function parse_old_diff(dif: ChartType.Diff): ChartTypeV2.diff {
   const new_diff = Chart_diff.createDiff()
   new_diff.timing = []
@@ -209,6 +216,7 @@ export class Chart extends StopClass {
       GlobalStat.route.change('start')
       throw e
     }
+    debugger
     const length = buffer.duration * 1000
     LoadSong.status.audio_length = true
     LoadSong.status.blob_path = true
@@ -514,10 +522,9 @@ export class Chart extends StopClass {
     this.playfield?.handle_keyup(key)
   }
 
-  async import_osz() {
-    const r = await Invoke('read-osz')
-    if (!r) return
-    console.log(r)
+  async import_osz(fp: string) {
+    const r = await Invoke('read-osz', { fp })
+    if (!r) return notify.error('读取osz失败……')
     modal.LoadOszModal.show({ diff: r.diff, song: r.song, pix: r.pix })
   }
 
@@ -528,9 +535,9 @@ export class Chart extends StopClass {
     })
   }
 
-  async import_mcz() {
-    const r = await Invoke('read-mcz')
-    if (!r) return
+  async import_mcz(fp: string) {
+    const r = await Invoke('read-mcz', { fp })
+    if (!r) return notify.error('读取mcz失败……')
     modal.LoadMczModal.show({
       diff: r.diff,
       song: r.song,
@@ -544,6 +551,28 @@ export class Chart extends StopClass {
       RefreshAll.refresh('song-cover')
       notify.success('曲绘一份！')
     })
+  }
+
+  async load_vsb_file(fp: string) {
+    const r = await Invoke('read-vsb', { fp })
+    if (!r) return notify.error('读取vsb失败……')
+    this.load_vsb(r)
+  }
+
+  async load_vsc_file(fp: string) {
+    const r = await Invoke('open-file-utf', { path: fp })
+    if (!r) return notify.error('读取vsc失败……')
+    this.load_vsc(r)
+  }
+
+  /** 拖进来的文件：按扩展名分派到对应的读取流程 */
+  async import_file(fp: string) {
+    const ext = file_ext(fp)
+    if (ext == 'vsb') return this.load_vsb_file(fp)
+    if (ext == 'vsc') return this.load_vsc_file(fp)
+    if (ext == 'osz') return this.import_osz(fp)
+    if (ext == 'mcz') return this.import_mcz(fp)
+    notify.error(`不认识的格式：${ext || '没有扩展名'}……`)
   }
   async write_png() {
     const svg = document.getElementById('chart-preview-svg')

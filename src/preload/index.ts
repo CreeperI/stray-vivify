@@ -1,8 +1,11 @@
-import { contextBridge } from 'electron'
+import { contextBridge, webUtils } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
 // Custom APIs for renderer
-export const api = {}
+// 只暴露拖拽导入要用到的这一个方法，其余功能依旧走 ipc
+export const api = {
+  get_path_for_file: (file: File): string => webUtils.getPathForFile(file)
+}
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise

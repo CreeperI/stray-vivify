@@ -472,8 +472,28 @@ export default class ChartManager {
     shell.openPath(path.join(this.charts_folder, id, fp))
   }
 
-  async import_chart(fp: string, id: string) {
-    if (!fs.existsSync(fp)) return
+  /**
+   * 判断一个压缩包应该按哪种格式导入：带 vs-chart.json / chart.json 的算 svc，
+   * 否则看有没有 info.json 当 vsp，都没有就是不认识的压缩包。
+   */
+  detect_chart_pack(fp: string): 'svc' | 'vsp' | 'invalid' {
+    if (!fp || !fs.existsSync(fp)) return 'invalid'
+    let names: string[]
+    try {
+      names = new AdmZip(fp)
+        .getEntries()
+        .filter((v) => !v.isDirectory)
+        .map((v) => path.basename(v.entryName).toLowerCase())
+    } catch {
+      return 'invalid'
+    }
+    if (names.includes('vs-chart.json') || names.includes('chart.json')) return 'svc'
+    if (names.includes('info.json')) return 'vsp'
+    return 'invalid'
+  }
+
+  async import_chart(fp: string, id: string): Promise<boolean> {
+    if (!fs.existsSync(fp)) return false
     const zip = new AdmZip(fp)
     const zip_entry = zip.getEntries()
     const json = zip_entry.find(
@@ -483,7 +503,7 @@ export default class ChartManager {
       return ['.mp3', '.wav', '.ogg', '.m4a'].includes(path.extname(v.entryName))
     })
     if (!json || !song) {
-      return
+      return false
     }
     const chart_data = JSON.parse(json.getData().toString('utf-8')) as ChartTypeV2.final
     try {
@@ -508,7 +528,10 @@ export default class ChartManager {
           path.extname(song.entryName),
           []
         )
-    } catch (e) {}
+    } catch (e) {
+      return false
+    }
+    return true
   }
 
   import_sprite(id: string) {

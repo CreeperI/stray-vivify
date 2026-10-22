@@ -4,32 +4,21 @@ import SimpleModal from '@renderer/components/modals/simple-modal.vue'
 import AButton2 from '@renderer/components/a-elements/a-button2.vue'
 import { Invoke } from '@renderer/core/ipc'
 import Hide from '@renderer/components/a-elements/hide.vue'
-import { notify } from '@renderer/core/misc/notify'
 import { modal } from '@renderer/core/misc/modal'
 import IexporterGml from '@renderer/components/modals/iexporter-gml.vue'
 
 const chart = Chart.$current
 
 async function read_vsb() {
-  const r1 = await Invoke('ask-file', { file: ['vsb文件', 'vsb'] })
-  if (!r1) {
-    return
-  }
-  const r2 = await Invoke('read-vsb', { fp: r1 })
-  if (!r2) {
-    notify.error('读取vsb失败……')
-    return
-  }
-  chart.load_vsb(r2)
+  const fp = await Invoke('ask-file', { file: ['vsb文件', 'vsb'] })
+  if (!fp) return
+  chart.load_vsb_file(fp)
 }
 
 async function read_vsc() {
-  const r1 = await Invoke('ask-file', { file: ['vsc文件', 'vsc'] })
-  if (!r1) return notify.error('读取vsc失败……')
-  const r2 = await Invoke('open-file-utf', { path: r1 })
-  if (!r2) return notify.error('读取vsc失败……')
-
-  chart.load_vsc(r2)
+  const fp = await Invoke('ask-file', { file: ['vsc文件', 'vsc'] })
+  if (!fp) return
+  chart.load_vsc_file(fp)
 }
 
 function write_vsc() {
@@ -44,12 +33,16 @@ function export_zip() {
   Chart.$current.export_chart('zip')
 }
 
-function import_osz() {
-  Chart.$current.import_osz()
+async function import_osz() {
+  const fp = await Invoke('ask-file', { file: ['OSZ', 'osz'] })
+  if (!fp) return
+  Chart.$current.import_osz(fp)
 }
 
-function import_mcz() {
-  Chart.$current.import_mcz()
+async function import_mcz() {
+  const fp = await Invoke('ask-file', { file: ['MCZ', 'mcz'] })
+  if (!fp) return
+  Chart.$current.import_mcz(fp)
 }
 
 function open_svg() {

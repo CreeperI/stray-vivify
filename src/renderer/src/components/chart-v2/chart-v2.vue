@@ -5,13 +5,39 @@ import ChartTiming from '@renderer/components/chart-v2/chart-tabs/chart-timing.v
 import { GlobalStat } from '@renderer/core/globalStat'
 import Preview from '@renderer/components/chart-v2/preview.vue'
 import Playfield from '@renderer/components/chart-v2/playfield.vue'
-import { onUnmounted } from 'vue'
+import { onUnmounted, ref } from 'vue'
 import ChartMain from '@renderer/components/chart-v2/chart-tabs/chart-main.vue'
 import { EventHub } from '@renderer/core/misc/eventhub'
 import { Chart } from '@renderer/core/chart/chart'
+import { notify } from '@renderer/core/misc/notify'
 
 const active = GlobalStat.refs.chart_tab
 active.value = 2
+
+const drag_depth = ref(0)
+/** dragenter/dragleave 在每个子元素上都会触发一次，用计数器判断是不是真的离开了 */
+function on_dragenter(e: DragEvent) {
+  if (!e.dataTransfer?.types.includes('Files')) return
+  drag_depth.value++
+  if (drag_depth.value == 1) notify.normal('松开鼠标以导入嗷')
+}
+
+function on_dragleave() {
+  drag_depth.value = Math.max(0, drag_depth.value - 1)
+}
+
+async function on_drop(e: DragEvent) {
+  drag_depth.value = 0
+  const files = Array.from(e.dataTransfer?.files ?? [])
+  for (const file of files) {
+    const fp = window.api.get_path_for_file(file)
+    if (!fp) {
+      notify.error('没能拿到文件路径（呜呜')
+      continue
+    }
+    await Chart.$current.import_file(fp)
+  }
+}
 
 function on_keydown(e: KeyboardEvent) {
   if (e.key != 'Tab') return
@@ -51,7 +77,15 @@ const chart_state = GlobalStat.chart_state
 </script>
 
 <template>
-  <div :data-cs="chart_state" class="chart-v2-wrapper" @wheel="fuck_wheel">
+  <div
+    :data-cs="chart_state"
+    class="chart-v2-wrapper"
+    @wheel="fuck_wheel"
+    @dragenter.prevent="on_dragenter"
+    @dragover.prevent
+    @dragleave="on_dragleave"
+    @drop.prevent="on_drop"
+  >
     <template v-if="chart_state == 0">
       <song-info v-if="active == 1" />
       <chart-main v-if="active == 2" />

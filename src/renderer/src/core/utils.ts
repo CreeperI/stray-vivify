@@ -343,6 +343,10 @@ export namespace utils {
     if (cond) return val
     return
   }
+
+  export function reduce_max(arr: number[]) {
+    return arr.reduce((a, b) => Math.max(a, b), -Infinity);
+  }
 }
 
 // @ts-expect-error

@@ -10,7 +10,7 @@ const data = chart.diff.density_data
 const path = chart.diff.density_path
 
 const dy = computed(() => {
-  const max = Math.max(...data.value)
+  const max = utils.reduce_max(data.value)
   return [0, 0.25, 0.5, 0.75, 1].map((v) => [240 - Math.floor(v * 230), v * max])
 })
 

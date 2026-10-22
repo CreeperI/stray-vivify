@@ -11,6 +11,7 @@ import { Storage } from '@renderer/core/storage'
 import AImg from '@renderer/components/a-elements/a-img.vue'
 import { utils } from '@renderer/core/utils'
 import { StartUpTips } from '@renderer/core/misc/startup-tips'
+import { notify } from '@renderer/core/misc/notify'
 
 const shown = ref(GlobalStat.all_chart)
 const search = ref('')
@@ -38,6 +39,71 @@ async function import_chart() {
   console.log(r)
   await GlobalStat.update_all_chart()
   shown.value = GlobalStat.all_chart
+}
+
+const drag_depth = ref(0)
+
+function on_dragenter(e: DragEvent) {
+  if (!e.dataTransfer?.types.includes('Files')) return
+  // dragenter 在每个子元素上都会再来一次，只在最开始提示一遍
+  drag_depth.value++
+  if (drag_depth.value == 1) notify.normal('松开鼠标以导入嗷')
+}
+
+function on_dragleave() {
+  if (drag_depth.value > 0) drag_depth.value--
+}
+
+async function on_drop(e: DragEvent) {
+  drag_depth.value = 0
+  const files = Array.from(e.dataTransfer?.files ?? [])
+  for (const file of files) {
+    await import_pack(file)
+  }
+}
+
+/** 拖进来的压缩包：先确定它是哪种格式，再走对应的导入流程 */
+async function import_pack(file: File) {
+  if (state) return
+  const fp = window.api.get_path_for_file(file)
+  if (!fp) return notify.error('没能拿到文件路径……')
+  const ext = (file.name.split('.').pop() ?? '').toLowerCase()
+
+  let kind: 'svc' | 'vsp' | 'osz' | 'mcz'
+  if (ext == 'osz') kind = 'osz'
+  else if (ext == 'mcz') kind = 'mcz'
+  else if (ext == 'vsp') kind = 'vsp'
+  else if (ext == 'svc' || ext == 'zip') {
+    const detected = await Invoke('detect-chart-pack', { fp })
+    if (detected == 'invalid') return notify.error('这个压缩包里没有可以导入的谱面……')
+    kind = detected
+  } else return notify.error(`不认识的格式：${ext || '没有扩展名'}……`)
+
+  state = true
+  try {
+    const id = (await modal.AskIdModal.show({ all: GlobalStat.all_chart.map((x) => x.id) })) as
+      undefined | string
+    if (!id) return
+
+    let err = false
+    if (kind == 'osz') {
+      if ((await Invoke('import-osz', { fp, id })) != 1) err = true
+    } else if (kind == 'mcz') {
+      if ((await Invoke('import-mcz', { fp, id })) != 1) err = true
+    } else if (kind == 'vsp') {
+      const r = await Invoke('import-vsp', { fp, id })
+      if (r.state == 'failed') err = true
+      else if (r.state == 'existed') err = true
+    } else if (!(await Invoke('import-zip', { fp, id }))) {
+      err = true
+    }
+
+    if (err) notify.error("导入失败，爆！")
+    await GlobalStat.update_all_chart()
+    shown.value = GlobalStat.all_chart
+  } finally {
+    state = false
+  }
 }
 
 function open_proj(id: string) {
@@ -105,7 +171,13 @@ function random_tip() {
 </script>
 
 <template>
-  <div class="chart-list-wrapper">
+  <div
+    class="chart-list-wrapper"
+    @dragenter.prevent="on_dragenter"
+    @dragover.prevent
+    @dragleave="on_dragleave"
+    @drop.prevent="on_drop"
+  >
     <div class="chart-list-left">
       <img
         v-if="useLogo"
