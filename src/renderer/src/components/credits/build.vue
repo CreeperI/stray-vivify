@@ -104,7 +104,7 @@ function toDate(y: string | number, m: string | number, d: string | number) {
 }
 div[data-is-current-version='true'] {
   box-shadow: 0 0 5px 2px white inset;
-  padding: 10px 0;
+  padding: 10px;
   border-radius: 10px;
 }
 </style>

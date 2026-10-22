@@ -13,7 +13,10 @@ import { ChartType } from '../preload/chart-types'
 
 function time_str() {
   const date = new Date()
-  return `[${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}]`
+  const h = date.getHours().toString().padStart(2, '0')
+  const m = date.getMinutes().toString().padStart(2, '0')
+  const s = date.getSeconds().toString().padStart(2, '0')
+  return `[${h}:${m}:${s}]`
 }
 
 export function load_ipc_handlers(mainWindow: Electron.BrowserWindow) {

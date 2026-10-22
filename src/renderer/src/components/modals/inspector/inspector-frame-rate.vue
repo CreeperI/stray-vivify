@@ -6,6 +6,8 @@ import WordHelper from '@renderer/components/miscellaneous/word-helper.vue'
 import { Storage } from '@renderer/core/storage'
 import { utils } from '@renderer/core/utils'
 import { MemoryUsage } from '@renderer/core/misc/inspector'
+import { onMounted, onUnmounted } from 'vue'
+import { Intervals } from '@renderer/core/misc/intervals'
 
 const _fps_r = FrameRate.fps.refs
 const frontend = MemoryUsage.frontend
@@ -17,6 +19,13 @@ function parse_size(size: number) {
   else if (size < 1024 * 1024) return `${(size / 1024).toFixed(2)}KB`
   else return `${(size / 1024 / 1024).toFixed(2)}MB`
 }
+function update_memory() {
+  MemoryUsage.update()
+}
+onMounted(() => {
+  Intervals.on(1000, update_memory)
+})
+onUnmounted(() => Intervals.off(1000, update_memory))
 </script>
 
 <template>
