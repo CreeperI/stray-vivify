@@ -1,5 +1,5 @@
 import AdmZip from 'adm-zip'
-import { basename, extname } from 'node:path'
+import { basename, extname, posix } from 'node:path'
 
 import { ChartTypeV2 } from '../preload/chart-types'
 import fs from 'fs'
@@ -344,6 +344,7 @@ export class OszReader {
   private zipEntries: AdmZip.IZipEntry[] = []
   private zip: AdmZip
   private images: [Buffer, string][] = []
+  private audioEntry: AdmZip.IZipEntry | undefined = undefined
 
   constructor(fp_of_osz: string) {
     this.zip = new AdmZip(fs.readFileSync(fp_of_osz))
@@ -392,7 +393,12 @@ export class OszReader {
    * Get audio file as buffer
    */
   public getAudioFile(): [string, Buffer] | null {
-    // Look for common audio file extensions
+    // the audio named by the first .osu file's [General] AudioFilename wins
+    if (this.audioEntry) {
+      return [extname(this.audioEntry.entryName), this.audioEntry.getData()]
+    }
+
+    // fall back to the first audio file we can find
     const audioExtensions = ['.mp3', '.ogg', '.wav']
 
     const audioEntry = this.zipEntries.find(
@@ -430,6 +436,7 @@ export class OszReader {
    */
   private parseBeatmaps(): void {
     let firstBeatmap: OsuBeatmap | null = null
+    let firstBeatmapDir = ''
 
     this.zipEntries.forEach((entry) => {
       if (entry.entryName.endsWith('.osu') && !entry.isDirectory) {
@@ -439,6 +446,7 @@ export class OszReader {
         // Store first beatmap for song info extraction
         if (!firstBeatmap) {
           firstBeatmap = beatmap
+          firstBeatmapDir = posix.dirname(entry.entryName.replace(/\\/g, '/'))
         }
 
         // Process all modes
@@ -452,7 +460,40 @@ export class OszReader {
     // Extract song info from first beatmap
     if (firstBeatmap) {
       this.songInfo = this.extractSongInfo(firstBeatmap)
+      this.audioEntry = this.findAudioEntry(firstBeatmap, firstBeatmapDir)
     }
+  }
+
+  /**
+   * Find the audio file named by `AudioFilename` of the first .osu file.
+   * The name is resolved relative to that .osu file first, then the archive
+   * root, and finally by basename anywhere in the archive (osu is lax about
+   * path case and on Windows separators).
+   */
+  private findAudioEntry(beatmap: OsuBeatmap, dir: string): AdmZip.IZipEntry | undefined {
+    const name = String(beatmap.general.AudioFilename ?? '').trim()
+    if (!name) return undefined
+
+    const clean = name.replace(/\\/g, '/').replace(/^\.\/+/, '')
+    if (!clean) return undefined
+
+    const normalize = (fp: string) =>
+      posix
+        .normalize(fp)
+        .replace(/^\.\/*/, '')
+        .replace(/^\/+/, '')
+    const candidates = [normalize(posix.join(dir, clean)), normalize(clean)]
+    const files = this.zipEntries.filter((e) => !e.isDirectory)
+
+    for (const candidate of candidates) {
+      const entry = files.find(
+        (e) => e.entryName.replace(/\\/g, '/').toLowerCase() === candidate.toLowerCase()
+      )
+      if (entry) return entry
+    }
+
+    const file = posix.basename(clean).toLowerCase()
+    return files.find((e) => posix.basename(e.entryName.replace(/\\/g, '/')).toLowerCase() === file)
   }
 
   /**
